@@ -1,0 +1,3 @@
+[submodule "analyzer"]
+	path = analyzer
+	url = https://github.com/raelize/TAoFI-Analyzer.git

@@ -1,0 +1,11 @@
+TAoFI-Students
+.DS_Store
+.venv
+.vscode
+.trunk
+pull-sync.sh
+__pycache__
+*.sqlite
+*.bin
+*.log
+*.org
