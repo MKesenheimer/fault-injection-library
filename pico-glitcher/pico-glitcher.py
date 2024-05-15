@@ -31,7 +31,7 @@ class Main():
         self.glitcher = DerivedGlitcher()
         self.glitcher.init(args)
 
-        self.database = Database(sys.argv)
+        self.database = Database(sys.argv, resume=self.args.resume)
 
         self.target = Serial(port=self.args.target, timeout=0.1)
         self.target.init()
@@ -70,7 +70,7 @@ class Main():
             response = self.target.read(len(expected))
 
             # block execution until glitch was sent
-            self.glitcher.block()
+            #self.glitcher.block()
 
             # classify response
             color = self.glitcher.classify(expected, response)
@@ -80,7 +80,8 @@ class Main():
 
             # monitor
             speed = self.glitcher.get_speed(self.start_time, experiment_id)
-            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t({speed})\t{length}\t{delay}\t{color}\t{response}", color))
+            experiment_base_id = self.database.get_base_experiments_count()
+            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{length}\t{delay}\t{color}\t{response_mem}", color))
 
             # increase experiment id
             experiment_id += 1
@@ -94,6 +95,7 @@ if __name__ == "__main__":
     parser.add_argument("--rpico",  required=False, help="rpico port", default="/dev/ttyACM1")
     parser.add_argument("--delay",  required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length",  required=True, nargs=2, help="length start and end", type=int)
+    parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     args = parser.parse_args()
 
     pico_glitcher = Main(args)

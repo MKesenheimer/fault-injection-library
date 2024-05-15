@@ -62,7 +62,7 @@ def bootloader_read_memory(ser, start, size):
     if check_ack(ser) == 0:
         return -6, b''
 
-    time.sleep(0.1)
+    time.sleep(0.01)
 
     # get memory
     mem = ser.read(size)

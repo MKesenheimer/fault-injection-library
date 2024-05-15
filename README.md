@@ -48,6 +48,7 @@ python ../analyzer/taofi-analyzer --directory databases
 
 TODO: Schematic
 
+
 ## Execute STM32 bootloader glitching via the Raspberry Pi Pico glitcher
 
 ```bash
@@ -59,3 +60,11 @@ python ../analyzer/taofi-analyzer --directory databases
 ```
 
 TODO: Schematic
+
+
+## Handy features
+
+One can resume inserting datapoints into the database of the most recent run by supplying the `resume` flag:
+```bash
+python pico-glitcher.py ... --resume
+```

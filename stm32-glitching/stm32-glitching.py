@@ -30,13 +30,7 @@ class Main:
     def __init__(self, args):
         self.args = args
 
-        logging.basicConfig(
-            filename="execution.log",
-            filemode="a",
-            format="%(asctime)s %(message)s",
-            level=logging.INFO,
-            force=True,
-        )
+        logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
 
         self.glitcher = DerivedGlitcher()
         self.glitcher.init(args)
@@ -47,16 +41,10 @@ class Main:
         # Update: Triggering on x11 in configuration 8n1 works good enough.
         self.glitcher.uart_trigger(0x11)
 
-        self.database = Database(sys.argv)
+        # set up the database
+        self.database = Database(sys.argv, resume=self.args.resume)
 
-        self.serial = serial.Serial(
-            port=self.args.target,
-            baudrate=115200,
-            timeout=0.25,
-            bytesize=8,
-            parity="E",
-            stopbits=1,
-        )
+        self.serial = serial.Serial(port=self.args.target, baudrate=115200, timeout=0.25, bytesize=8, parity="E", stopbits=1)
 
         self.start_time = int(time.time())
 
@@ -100,9 +88,7 @@ class Main:
             if response == 0:
                 start = 0x08000000
                 size = 0xFF
-                response, mem = bootloader_com.bootloader_read_memory(
-                    self.serial, start, size
-                )
+                response, mem = bootloader_com.bootloader_read_memory(self.serial, start, size)
 
             # block execution until glitch was sent
             # self.glitcher.block()
@@ -116,12 +102,8 @@ class Main:
 
             # monitor
             speed = self.glitcher.get_speed(self.start_time, experiment_id)
-            print(
-                self.glitcher.colorize(
-                    f"[+] Experiment {experiment_id}\t({speed})\t{length}\t{delay}\t{color}\t{response_mem}",
-                    color,
-                )
-            )
+            experiment_base_id = self.database.get_base_experiments_count()
+            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{length}\t{delay}\t{color}\t{response_mem}", color))
 
             # increase experiment id
             experiment_id += 1
@@ -132,6 +114,9 @@ class Main:
             else:
                 self.successive_fails = 0
             if self.successive_fails >= 20:
+                # delete the eroneous datapoints
+                for eid in range(experiment_id - 20, experiment_id):
+                    self.database.remove(eid)
                 break
             self.response_before = response
 
@@ -140,18 +125,11 @@ class Main:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--target", required=False, help="target port", default="/dev/ttyUSB1"
-    )
-    parser.add_argument(
-        "--rpico", required=False, help="rpico port", default="/dev/ttyACM1"
-    )
-    parser.add_argument(
-        "--delay", required=True, nargs=2, help="delay start and end", type=int
-    )
-    parser.add_argument(
-        "--length", required=True, nargs=2, help="length start and end", type=int
-    )
+    parser.add_argument("--target", required=False, help="target port", default="/dev/ttyUSB1")
+    parser.add_argument("--rpico", required=False, help="rpico port", default="/dev/ttyACM1")
+    parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
+    parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
+    parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     args = parser.parse_args()
 
     pico_glitcher = Main(args)

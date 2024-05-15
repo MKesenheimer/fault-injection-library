@@ -6,31 +6,59 @@ import sys
 import datetime
 from termcolor import colored
 import os
+import glob
 
 import pyboard
 
 class Database():
-    def __init__(self, argv):
-        script_name = os.path.basename(sys.argv[0])
-        self.dbname = f"{script_name}_%s.sqlite" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    def __init__(self, argv, dbname=None, resume=False):
         if not os.path.isdir('databases'):
             os.mkdir("databases")
+
+        if resume and dbname is None:
+            list_of_files = glob.glob('databases/*.sqlite')
+            latest_file = max(list_of_files, key=os.path.getctime)[10:]
+            print(f"[+] Resuming previous database {latest_file}")
+            self.dbname = latest_file
+        elif dbname is None:
+            script_name = os.path.basename(sys.argv[0])
+            self.dbname = f"{script_name}_%s.sqlite" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        else:
+            self.dbname = dbname
+
         self.con = sqlite3.connect("databases/" + self.dbname)
         self.cur = self.con.cursor()
         self.argv = argv
-        self.cur.execute("CREATE TABLE experiments(id integer, delay integer, length integer, color text, response blob)")
-        self.cur.execute("CREATE TABLE metadata (stime_seconds integer, argv blob)")
+        if not resume and dbname is None:
+            self.cur.execute("CREATE TABLE experiments(id integer, delay integer, length integer, color text, response blob)")
+            self.cur.execute("CREATE TABLE metadata (stime_seconds integer, argv blob)")
 
-    def insert(self,experiment_id, delay, length, color, response):
-        if experiment_id == 0:
+        self.base_row_count = self.get_number_of_experiments()
+        if resume or dbname is not None:
+            print(f"[+] Number of experiments in previous database: {self.base_row_count}")
+
+    def insert(self, experiment_id, delay, length, color, response):
+        if (experiment_id + self.base_row_count) == 0:
             s_argv = ' '.join(self.argv[1:])
             self.cur.execute("INSERT INTO metadata (stime_seconds,argv) VALUES (?,?)", [int(time.time()), s_argv])
-        self.cur.execute("INSERT INTO experiments (id,delay,length,color,response) VALUES (?,?,?,?,?)", [experiment_id, delay, length, color, response])
+        self.cur.execute("INSERT INTO experiments (id,delay,length,color,response) VALUES (?,?,?,?,?)", [experiment_id + self.base_row_count, delay, length, color, response])
         self.con.commit()
+
+    def remove(self, experiment_id):
+        self.cur.execute("DELETE FROM experiments WHERE id = (?);", [experiment_id + self.base_row_count])
+        self.con.commit()
+
+    def get_number_of_experiments(self):
+        self.cur.execute("SELECT count(id) FROM experiments")
+        result = self.cur.fetchone()
+        row_count = result[0]
+        return row_count
+
+    def get_base_experiments_count(self):
+        return self.base_row_count
 
     def close(self):
         self.con.close()
-
 
 class Database_New():
     def __init__(self, argv):
