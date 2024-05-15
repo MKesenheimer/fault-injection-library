@@ -13,7 +13,7 @@ class Database():
     def __init__(self, argv):
         script_name = os.path.basename(sys.argv[0])
         self.dbname = f"{script_name}_%s.sqlite" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        if os.path.isdir('databases') == False:
+        if not os.path.isdir('databases'):
             os.mkdir("databases")
         self.con = sqlite3.connect("databases/" + self.dbname)
         self.cur = self.con.cursor()
@@ -39,7 +39,7 @@ class Database_New():
         script_name = os.path.basename(self.argv[0])
         self.dbname = f"{script_name}_%s.sqlite" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         
-        if os.path.isdir('databases') == False:
+        if not os.path.isdir('databases'):
             os.mkdir("databases")
         
         self.con = None
@@ -52,9 +52,9 @@ class Database_New():
         self.cur = self.con.cursor()
 
     def close(self):
-        if self.cur != None:
+        if self.cur is not None:
             self.cur.close()
-        if self.con != None:
+        if self.con is not None:
             self.con.close()
 
     def init(self):
@@ -77,7 +77,7 @@ class DatabaseRCG():
     def __init__(self, argv):
         script_name = os.path.basename(sys.argv[0])
         self.dbname = f"{script_name}_%s.sqlite" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        if os.path.isdir('databases') == False:
+        if not os.path.isdir('databases'):
             os.mkdir("databases")
         self.con = sqlite3.connect("databases/" + self.dbname)
         self.cur = self.con.cursor()
@@ -131,10 +131,13 @@ class Serial():
     def empty_read_buffer(self):
         self.ser.reset_input_buffer()
 
-    def empty_read_buffer_v2(self,timeout=0.01):
+    def empty_read_buffer_v2(self, timeout=0.01):
         self.ser.timeout = timeout
         self.ser.read(8192)
         self.ser.timeout = self.timeout
+
+    def close(self):
+        self.ser.close()
 
 
 class MicroPythonScript():
@@ -154,38 +157,37 @@ class MicroPythonScript():
 # inherit functionality and overwrite some functions
 class PicoGlitcherInterface(MicroPythonScript):
     def set_trigger(self, trigger):
-        res = self.pyb.exec(f'mp.set_trigger("{trigger}")')
+        self.pyb.exec(f'mp.set_trigger("{trigger}")')
 
     def set_frequency(self, frequency):
-        res = self.pyb.exec(f'mp.set_frequency({frequency})')
+        self.pyb.exec(f'mp.set_frequency({frequency})')
 
     def set_baudrate(self, baud):
-        res = self.pyb.exec(f'mp.set_baudrate({baud})')
+        self.pyb.exec(f'mp.set_baudrate({baud})')
 
     def set_pattern_match(self, pattern):
-        res = self.pyb.exec(f'mp.set_pattern_match({pattern})')
+        self.pyb.exec(f'mp.set_pattern_match({pattern})')
 
     def power_cycle_target(self, power_cycle_time):
-        res = self.pyb.exec(f'mp.power_cycle_target({power_cycle_time})')
+        self.pyb.exec(f'mp.power_cycle_target({power_cycle_time})')
 
     def arm(self, delay, length):
-        res = self.pyb.exec(f'mp.arm({delay}, {length})')
+        self.pyb.exec(f'mp.arm({delay}, {length})')
 
     def reset_low(self):
-        res = self.pyb.exec(f'mp.reset_low()')
+        self.pyb.exec('mp.reset_low()')
 
     def reset_high(self):
-        res = self.pyb.exec(f'mp.reset_high()')
+        self.pyb.exec('mp.reset_high()')
 
     def reset(self, reset_time):
-        res = self.pyb.exec(f'mp.reset({reset_time})')
+        self.pyb.exec(f'mp.reset({reset_time})')
 
     def block(self):
-        res = self.pyb.exec(f'mp.block()')
+        self.pyb.exec('mp.block()')
 
     def get_sm2_output(self):
-        res = self.pyb.exec(f'mp.get_sm2_output()')
-        return res
+        return self.pyb.exec('mp.get_sm2_output()')
 
 
 class PicoGlitcher():
@@ -239,7 +241,7 @@ class PicoGlitcher():
         self.pico_glitcher.reset_high()
 
         response = target.read(4096)
-        for i in range(0, 5):
+        for _ in range(0, 5):
             if token in response:
                 break
             response += target.read(4096)

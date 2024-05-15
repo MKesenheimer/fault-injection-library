@@ -4,23 +4,21 @@ import time
 import sys
 import random
 import logging
-import serial
 
 # import custom libraries
 sys.path.insert(0, '../lib/')
-from FaultInjectionLib import PicoGlitcher, Database
-import bootloader_com
+from FaultInjectionLib import PicoGlitcher, Database, Serial
 
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(PicoGlitcher):
     def classify(self, expected, response):
         if response == expected:
             color = 'G'
-        elif response == 0:
+        elif b'Falling' in response:
             color = 'R'
-        elif response <= -1 and response >= -3:
+        elif b'Fatal exception' in response:
             color = 'M'
-        elif response <= -5 and response >= -6:
+        else:
             color = 'Y'
         return color
 
@@ -33,23 +31,15 @@ class Main():
         self.glitcher = DerivedGlitcher()
         self.glitcher.init(args)
 
-        # we want to trigger on x11 with the configuration 8e1
-        # since our statemachine understands only 8n1, 
-        # we can trigger on x22 with the configuration 9n1 instead
-        # Update: Triggering on x11 in configuration 8n1 works good enough.
-        self.glitcher.uart_trigger(0x11)
-
         self.database = Database(sys.argv)
 
-        self.serial = serial.Serial(port=self.args.target, baudrate=115200, timeout=0.25, bytesize=8, parity='E', stopbits=1)
+        self.target = Serial(port=self.args.target, timeout=0.1)
+        self.target.init()
 
         self.start_time = int(time.time())
 
-        self.successive_fails = 0
-        self.response_before = 0
-
     def __del__(self):
-        self.serial.close()
+        self.target.close()
 
     def run(self):
         # log execution
@@ -60,10 +50,13 @@ class Main():
         s_delay  = self.args.delay[0]
         e_delay  = self.args.delay[1]
 
-        expected = -4
+        expected = b'ets Jun  8 2016 00:22:57\r\n\r\nrst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)\r\nconfigsip: 0, SPIWP:0xee\r\nclk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00\r\nmode:DOUT, clock div:2\r\nload:0x40080400,len:16384\r\ncsum err:0xef!=0xff\r\nets_main.c 371 \r\n'
 
         experiment_id = 0
         while True:
+            # empty rx buffer
+            self.target.empty_read_buffer()
+
             # set up glitch parameters (in nano seconds) and arm glitcher
             length = random.randint(s_length, e_length)
             delay = random.randint(s_delay, e_delay)
@@ -73,48 +66,26 @@ class Main():
             self.glitcher.reset(0.01)
             time.sleep(0.01)
 
-            # setup bootloader communication
-            response = bootloader_com.bootloader_setup_memread(self.serial)
-            
-            # power cycle if unavailable
-            if response == -1:
-                self.glitcher.power_cycle_target()
-
-            # read memory of RDP is inactive
-            mem = b''
-            if response == 0:
-                start = 0x08000000
-                size  = 0xff
-                response, mem = bootloader_com.bootloader_read_memory(self.serial, start, size)
+            # send command and read response
+            response = self.target.read(len(expected))
 
             # block execution until glitch was sent
-            #self.glitcher.block()
+            self.glitcher.block()
 
             # classify response
             color = self.glitcher.classify(expected, response)
 
             # add to database
-            response_mem = str(response).encode("utf-8") + mem
-            #self.database.insert(experiment_id, delay, length, color, response_mem)
+            self.database.insert(experiment_id, delay, length, color, response)
 
             # monitor
             speed = self.glitcher.get_speed(self.start_time, experiment_id)
-            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t({speed})\t{length}\t{delay}\t{color}\t{response_mem}", color))
+            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t({speed})\t{length}\t{delay}\t{color}\t{response}", color))
 
             # increase experiment id
             experiment_id += 1
-
-            # exit if too many successive fails (including a successful memory read)
-            if response in (0, -1, -5, -6) and self.response_before in (0, -1, -5, -6):
-                self.successive_fails += 1
-            else:
-                self.successive_fails = 0
-            if self.successive_fails >= 20:
-                break
-            self.response_before = response
-
             
-        self.serial.close()
+        self.target.close()
 
 
 if __name__ == "__main__":
