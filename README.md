@@ -33,7 +33,7 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-## Install dependencies
+## Installing dependencies
 
 After these steps we have to install some requirements via pip.
 Make sure to have pip [installed](https://docs.python.org/3/library/ensurepip.html).
@@ -41,7 +41,7 @@ Make sure to have pip [installed](https://docs.python.org/3/library/ensurepip.ht
 pip install -r requirements.txt
 ```
 
-## Install micropython scripts on the Raspberry Pi Pico
+## Installing micropython scripts on the Raspberry Pi Pico
 
 Now we have to prepare the Raspberry Pi Pico.
 Add the [Micropython firmware](https://projects.raspberrypi.org/en/projects/getting-started-with-the-pico/3).
@@ -50,7 +50,7 @@ In general the following script can be used to upload Micropython scripts to the
 python lib/upload-micro-python.py --port /dev/<rpi-tty-port> <script.py>
 ```
 
-## Execute blink test
+## Executing blink test
 
 A simple example how the Micropython classes and functions are accessed on the Raspberry Pi Pico, the following "Hello World" program can be executed.
 This can also be the first check, if everything is set up correctly.
@@ -60,7 +60,7 @@ python ../lib/upload-micro-python.py --port /dev/<rpi-tty-port> --script mp_blin
 python test.py --rpico /dev/tty.usbmodem11101
 ```
 
-## Execute Raspberry Pi Pico glitcher example implementation
+## Executing Raspberry Pi Pico glitcher example implementation
 
 To carry out a fault injection attack with the Raspberry Pi Pico on another microcontroller, the following setup can be used.
 
@@ -89,7 +89,7 @@ This attack can be used, for example, to bypass the read-out protection (RDP) of
 See [the video by stacksmashing](https://www.youtube.com/watch?v=_E0PWQvW-14) for more details.
 
 
-## Execute STM32 bootloader glitching via the Raspberry Pi Pico glitcher
+## Executing STM32 bootloader glitching via the Raspberry Pi Pico glitcher
 
 A more advanced attack is, for example, a fault injection attack against the STM32 bootloader and bypassing the read-out protection of these chips.
 This attack has been first described by [SEC consult](https://sec-consult.com/blog/detail/secglitcher-part-1-reproducible-voltage-glitching-on-stm32-microcontrollers/) and uses the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/) for the injection controller.
@@ -114,11 +114,11 @@ Again, use the following command to analyze the collected datapoints:
 python ../analyzer/taofi-analyzer --directory databases
 ```
 
-If everything goes as expected, a successful experiment should look like this:
+If everything goes as expected, a successful run should look something like this:
 ![Bootloader glitching](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32-glitching/images/bootloader-glitching.png)
 
 
-## Handy features
+## Further handy features and notes
 
 One can resume inserting datapoints into the database of the most recent run by supplying the `resume` flag:
 ```bash
