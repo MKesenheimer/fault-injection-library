@@ -7,7 +7,7 @@ With the provided and easy to use functions and classes, fault injection project
 This library is based on [TAoFI-FaultLib](https://github.com/raelize/TAoFI-FaultLib).
 However, several new features have been implemented.
 For example, the original library was developed to work with the [ChipWhisperer-Husky](https://rtfm.newae.com/Capture/ChipWhisperer-Husky/) only.
-This library has been rewritten to work with hardware that consists of a common MOSFET, the [Raspberry Pi Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/) as the controlle and a few other cheap parts.
+This library has been rewritten to work with hardware that consists of a common MOSFET, the [Raspberry Pi Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/) as the controller and a few other cheap components.
 The Raspberry Pi Pico is not only cheap and available for the hobbyist, but also a very capable microcontroller.
 
 Furthermore, the database functionality has been expanded to a certain extent.
@@ -53,7 +53,7 @@ python lib/upload-micro-python.py --port /dev/<rpi-tty-port> <script.py>
 ## Executing blink test
 
 A simple example how the Micropython classes and functions are accessed on the Raspberry Pi Pico, the following "Hello World" program can be executed.
-This can also be the first check, if everything is set up correctly.
+This should also be the first check, if everything is set up correctly.
 ```bash
 cd blink
 python ../lib/upload-micro-python.py --port /dev/<rpi-tty-port> --script mp_blink.py
