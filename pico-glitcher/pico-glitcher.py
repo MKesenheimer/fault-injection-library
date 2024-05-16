@@ -1,3 +1,9 @@
+# Copyright (C) 2024 Dr. Matthias Kesenheimer - All Rights Reserved.
+# You may use, distribute and modify this code under the terms of the GPL3 license.
+#
+# You should have received a copy of the GPL3 license with this file.
+# If not, please write to: m.kesenheimer@gmx.net.
+
 #!/usr/bin/env python3
 import argparse
 import time
@@ -81,7 +87,7 @@ class Main():
             # monitor
             speed = self.glitcher.get_speed(self.start_time, experiment_id)
             experiment_base_id = self.database.get_base_experiments_count()
-            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{length}\t{delay}\t{color}\t{response_mem}", color))
+            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{length}\t{delay}\t{color}\t{response}", color))
 
             # increase experiment id
             experiment_id += 1

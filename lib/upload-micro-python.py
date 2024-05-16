@@ -1,8 +1,14 @@
+# Copyright (C) 2024 Dr. Matthias Kesenheimer - All Rights Reserved.
+# This file is based on TAoFI-FaultLib which is released under the GPL3 license.
+# Go to https://github.com/raelize/TAoFI-FaultLib/LICENSE for full license details.
+#
+# You should have received a copy of the GPL3 license with this file.
+# If not, please write to: m.kesenheimer@gmx.net.
+
 #!/usr/bin/env python3
 import argparse
 import subprocess
 import os
-import sys
 
 def main():
     parser = argparse.ArgumentParser(
@@ -20,7 +26,7 @@ def main():
             subprocess.call(["ampy", "-p", args.port, "rm", filename[1:]])
         print("[+] Done.")
     
-    if args.script != None:
+    if args.script is not None:
         filename = os.path.basename(args.script)
         if filename.encode() in ret:
             print("[+] Deleting old micro python script...")

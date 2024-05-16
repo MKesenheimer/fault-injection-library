@@ -1,23 +1,24 @@
+# Copyright (C) 2024 Dr. Matthias Kesenheimer - All Rights Reserved.
+# You may use, distribute and modify this code under the terms of the GPL3 license.
+#
+# You should have received a copy of the GPL3 license with this file.
+# If not, please write to: m.kesenheimer@gmx.net.
+
 #!/usr/bin/env python3
 import argparse
-import re
-import time
 import sys
-import random
-import os
-import logging
 
 # import custom libraries
-sys.path.insert(0, f'../FaultInjectionLib/')
-from FaultInjectionLib import *
+sys.path.insert(0, '../lib/')
+from FaultInjectionLib import MicroPythonScript
 
 # inherit functionality and overwrite some functions
 class DerivedMicroPythonScript(MicroPythonScript):
     def tick(self):
-        res = self.pyb.exec(f'mp.tick()')
+        self.pyb.exec('mp.tick()')
 
     def blink(self):
-        res = self.pyb.exec(f'mp.blink()')
+        self.pyb.exec('mp.blink()')
 
 class Main():
     def __init__(self, args):

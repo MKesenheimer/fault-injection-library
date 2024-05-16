@@ -1,3 +1,10 @@
+# Copyright (C) 2024 Dr. Matthias Kesenheimer - All Rights Reserved.
+# This file is based on TAoFI-FaultLib which is released under the GPL3 license.
+# Go to https://github.com/raelize/TAoFI-FaultLib/LICENSE for full license details.
+#
+# You should have received a copy of the GPL3 license with this file.
+# If not, please write to: m.kesenheimer@gmx.net.
+
 import sqlite3
 import time
 import serial
