@@ -89,7 +89,7 @@ This attack can be used, for example, to bypass the read-out protection (RDP) of
 See [the video by stacksmashing](https://www.youtube.com/watch?v=_E0PWQvW-14) for more details.
 
 
-## Executing STM32 bootloader glitching via the Raspberry Pi Pico glitcher
+## Attacking a STM32 bootloader via the Raspberry Pi Pico glitcher
 
 A more advanced attack is, for example, a fault injection attack against the STM32 bootloader and bypassing the read-out protection of these chips.
 This attack has been first described by [SEC consult](https://sec-consult.com/blog/detail/secglitcher-part-1-reproducible-voltage-glitching-on-stm32-microcontrollers/) and uses the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/) for the injection controller.
