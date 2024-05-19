@@ -132,7 +132,7 @@ As mentioned above, only a Raspberry Pi Pico and a few other components are requ
 However, in order to achieve the best results, a circuit board was developed that was adapted directly for the software. 
 
 The board consists of a Raspberry Pi Pico, two level shifters for in- and outputs with any voltage, and glitching transistors that can switch up to 66 amps.
-![Pico Glichter v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/pico-glitcher-v1%20v22.pdf)
+![Pico Glichter v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/pico-glitcher-v1.png)
 
 There are also several connection options for different voltage sources.
 The board can also be supplied with any external voltage via VCC_EXTERN.
