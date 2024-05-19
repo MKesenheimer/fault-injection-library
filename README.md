@@ -128,14 +128,14 @@ python pico-glitcher.py ... --resume
 
 ## Pico Glitcher v1
 
-As mentioned above, only a Raspberry Pi Pico and a few other components are required to use the software.
-However, in order to achieve the best results, a circuit board was developed that was adapted directly for the software. 
+As mentioned above, only a Raspberry Pi Pico and a few other components are required to use this software.
+However, in order to achieve the best results, a circuit board was developed that was adapted directly for the fault-injection-library. 
 
 The board consists of a Raspberry Pi Pico, two level shifters for in- and outputs with any voltage, and glitching transistors that can switch up to 66 amps.
 ![Pico Glichter v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/pico-glitcher-v1.png)
 
-There are also several connection options for different voltage sources.
-The board can also be supplied with any external voltage via VCC_EXTERN.
-The target is supplied with power via the VTARGET connection.
-This voltage source can be controlled via the software, i.e. the target can be completely disconnected from the power source via the software.
+There are several connection options for different voltage sources.
+The target board can also be supplied with any external voltage via `VCC_EXTERN`.
+To power the target, it is supplied with power via the `VTARGET` connection.
+The output of this voltage source can be controlled via the fault-injection-library, i.e. the target can be completely disconnected from power by executing the `power_cycle_target` command.
 This allows a cold start of the target to be carried out in the event of error states that cannot be eliminated by a reset.
