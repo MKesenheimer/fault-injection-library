@@ -126,7 +126,7 @@ python pico-glitcher.py ... --resume
 ```
 
 
-## Pico Glitcher v1
+## Pico Glitcher v1 hardware
 
 As mentioned above, only a Raspberry Pi Pico and a few other components are required to use this software.
 However, in order to achieve the best results, a circuit board was developed that was adapted directly for the fault-injection-library. 
