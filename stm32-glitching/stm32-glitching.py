@@ -89,7 +89,7 @@ class Main:
             if response == -1:
                 self.glitcher.power_cycle_target()
 
-            # read memory of RDP is inactive
+            # read memory if RDP is inactive
             mem = b""
             if response == 0:
                 start = 0x08000000
