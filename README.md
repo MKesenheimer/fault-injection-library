@@ -134,7 +134,7 @@ However, in order to achieve the best results, a circuit board was developed tha
 The board consists of a Raspberry Pi Pico, two level shifters for in- and outputs with any voltage, and glitching transistors that can switch up to 66 amps.
 ![Pico Glichter v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/pico-glitcher-v1.png)
 
-There are several connection options for different voltage sources.
+There are several connection options for different voltage sources, from 1.8V, 3.3V to 5V.
 The target board can also be supplied with any external voltage via `VCC_EXTERN`.
 To power the target, it is supplied with power via the `VTARGET` connection.
 The output of this voltage source can be controlled via the fault-injection-library, i.e. the target can be completely disconnected from power by executing the `power_cycle_target` command.
