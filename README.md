@@ -98,7 +98,8 @@ This attack has been first described by [SEC consult](https://sec-consult.com/bl
 However, to glitch these devices successully, no expensive hardware is necessary, as it is demonstrated with the following scripts.
 
 Connect the Raspberry Pi Pico and the STM32 target according to the following schematic:
-<TODO: Schematic>
+![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/example2_bb.png)
+Here, the trigger line is connected to the UART-TX line, since we want to trigger on a specifig UART word that is sent during the bootloader stage.
 
 Install the Raspberry Pi Pico Micropython scripts:
 ```bash
