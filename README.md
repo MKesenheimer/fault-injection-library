@@ -65,7 +65,7 @@ python test.py --rpico /dev/tty.usbmodem11101
 To carry out a fault injection attack with the Raspberry Pi Pico on another microcontroller, the following setup can be used.
 
 First, we connect the Raspberry Pi Pico and a target as follows:
-<TODO: Schematic>
+![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/example_bb.png)
 
 We install the corresponding Micropython script on the Raspberry Pi Pico:
 ```bash
