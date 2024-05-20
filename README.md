@@ -66,6 +66,8 @@ To carry out a fault injection attack with the Raspberry Pi Pico on another micr
 
 First, we connect the Raspberry Pi Pico and a target as follows:
 ![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/example_bb.png)
+Note that the trigger input is connected directly to the reset line.
+As the reset is released from the device, the trigger signal is sent.
 
 We install the corresponding Micropython script on the Raspberry Pi Pico:
 ```bash
