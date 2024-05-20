@@ -99,7 +99,11 @@ However, to glitch these devices successully, no expensive hardware is necessary
 
 Connect the Raspberry Pi Pico and the STM32 target according to the following schematic:
 ![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/example2_bb.png)
-Here, the trigger line is connected to the UART-TX line, since we want to trigger on a specifig UART word that is sent during the bootloader stage.
+Here, the trigger line is connected to the UART-TX line, since we want to trigger on a specific UART word that is sent during the bootloader stage.
+Furthermore, "Boot0" pin of the STM32 needs to be pulled high in order to activate the bootloader.
+This pin is exposed on the Nucleo header.
+In addition, due to the inherent limitations of the drawing program Fritzing, the glitching line was connected directly to 3.3V of the target in the schematics.
+In a real setup, however, the glitching line should be soldered as close as possible to the power supply of the STM32 and the capacitors should be removed nearby.
 
 Install the Raspberry Pi Pico Micropython scripts:
 ```bash
