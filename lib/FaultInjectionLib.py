@@ -490,3 +490,7 @@ class ProGlitcher(Glitcher):
         self.scope.decode_IO.decode_type = 'USART'
         self.scope.decode_IO.trigger_pattern = [pattern]
         #self.scope.io.hs2 = "clkgen"
+
+    def __del__(self):
+        print("[+] Disconnecting ChipWhisperer Pro")
+        self.scope.dis()
