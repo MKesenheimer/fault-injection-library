@@ -14,7 +14,7 @@ Furthermore, the database functionality has been expanded to a certain extent.
 With this implementation, e.g. one can add experiments to a previous measurement.
 
 More features are planned in the future.
-For example support for the [ChipWhisperer-Husky](https://rtfm.newae.com/Capture/ChipWhisperer-Husky/) and the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/) is added.
+For example support for the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/) is added.
 
 ## Cloning
 

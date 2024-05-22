@@ -9,7 +9,7 @@ import sqlite3
 import time
 import serial
 import sys
-#import chipwhisperer as cw
+import chipwhisperer as cw
 import datetime
 from termcolor import colored
 import os
@@ -225,7 +225,38 @@ class PicoGlitcherInterface(MicroPythonScript):
         return self.pyb.exec('mp.get_sm2_output()')
 
 
-class PicoGlitcher():
+class Glitcher():
+    def __init__(self):
+        pass
+
+    def classify(self, expected, response):
+        if response == expected:
+            color = 'G'
+        elif b'Falling' in response:
+            color = 'R'
+        elif b'Fatal exception' in response:
+            color = 'M'
+        else:
+            color = 'Y'
+        return color
+
+    def colorize(self, s, color):
+        colors = {
+            'G': 'green',
+            'Y': 'yellow',
+            'R': 'red',
+            'M': 'magenta',
+        }
+        return colored(s, colors[color])
+
+    def get_speed(self, start_time, number_of_experiments):
+        elapsed_time = int(time.time()) - start_time
+        if elapsed_time == 0:
+            return 'NA'
+        else:
+            return number_of_experiments // elapsed_time
+
+class PicoGlitcher(Glitcher):
     def __init__(self):
         self.pico_glitcher = None
 
@@ -243,17 +274,6 @@ class PicoGlitcher():
 
     def get_sm2_output(self):
         return self.pico_glitcher.get_sm2_output()
-
-    def classify(self, expected, response):
-        if response == expected:
-            color = 'G'
-        elif b'Falling' in response:
-            color = 'R'
-        elif b'Fatal exception' in response:
-            color = 'M'
-        else:
-            color = 'Y'
-        return color
 
     def reset(self, reset_time=0.2):
         self.pico_glitcher.reset_low()
@@ -285,23 +305,94 @@ class PicoGlitcher():
             for line in response.splitlines():
                 print('\t', line.decode())
 
-    def colorize(self, s, color):
-        colors = { 
-            'G': 'green', 
-            'Y': 'yellow', 
-            'R': 'red', 
-            'M': 'magenta',
-        }
-        return colored(s, colors[color])
-    
-    def get_speed(self, start_time, number_of_experiments):
-        elapsed_time = int(time.time()) - start_time
-        if elapsed_time == 0:
-            return 'NA'
-        else:
-            return number_of_experiments // elapsed_time
-
     def uart_trigger(self, pattern):
         self.pico_glitcher.set_trigger("uart")
         self.pico_glitcher.set_baudrate(115200)
         self.pico_glitcher.set_pattern_match(pattern)
+
+
+class HuskyGlitcher(Glitcher):
+    def __init__(self):
+        self.scope = None
+
+    def init(self):
+        self.scope = cw.scope()
+
+        self.scope.clock.adc_mul             = 1
+        self.scope.clock.clkgen_freq         = 200e6
+
+        self.scope.clock.clkgen_src          = 'system'
+        self.scope.adc.basic_mode            = "rising_edge"
+
+        self.scope.io.tio1                  = 'serial_rx'
+        self.scope.io.tio2                  = 'serial_tx'
+        self.scope.io.tio3                  = 'gpio_low'
+        self.scope.io.tio4                  = 'high_z'
+
+        self.scope.trigger.triggers          = 'tio4'
+
+        self.scope.io.hs2                    = "disabled"
+        self.scope.io.glitch_trig_mcx        = 'glitch'
+
+        self.scope.glitch.enabled            = True
+        self.scope.glitch.clk_src            = 'pll'
+
+        self.scope.io.glitch_hp              = True
+        self.scope.io.glitch_lp              = False
+
+        self.scope.glitch.output             = 'enable_only'
+        self.scope.glitch.trigger_src        = 'ext_single'
+
+        self.scope.glitch.num_glitches       = 1
+
+    def arm(self, delay, length):
+        self.scope.glitch.ext_offset        = delay // (int(1e9) // int(self.scope.clock.clkgen_freq))
+        self.scope.glitch.repeat            = length // (int(1e9) // int(self.scope.clock.clkgen_freq))
+        self.scope.arm()
+
+    def capture(self):
+        self.scope.capture()
+
+    def disable(self):
+        self.scope.glitch.enabled = False
+
+    def enable(self):
+        self.scope.glitch.enabled = True
+
+    def reset(self,reset_time=0.2):
+        self.scope.io.tio3 = 'gpio_low'
+        time.sleep(reset_time)
+        self.scope.io.tio3 = 'gpio_high'
+
+    def reset_and_eat_it_all(self,target,target_timeout=0.3):
+        self.scope.io.tio3 = 'gpio_low'
+        target.ser.timeout = target_timeout
+        target.read(4096)
+        target.ser.timeout = target.timeout
+        self.scope.io.tio3 = 'gpio_high'
+
+    def reset_wait(self, target, token, reset_time=0.2, debug=False):
+        self.scope.io.tio3 = 'gpio_low'
+        time.sleep(reset_time)
+        self.scope.io.tio3 = 'gpio_high'
+
+        response = target.read(4096)
+        for _ in range(0, 5):
+            if token in response:
+                break
+            response += target.read(4096)
+
+        if debug:
+            for line in response.splitlines():
+                print('\t', line.decode())
+
+    husky_reset_wait = reset_wait
+
+    def uart_trigger(self, pattern):
+        self.scope.io.hs2 = "clkgen"
+        self.scope.trigger.module = 'UART'
+        self.scope.trigger.triggers = 'tio1'
+        self.scope.UARTTrigger.enabled = True
+        self.scope.UARTTrigger.baud = 115200
+        self.scope.UARTTrigger.set_pattern_match(0, pattern)
+        self.scope.UARTTrigger.trigger_source = 0

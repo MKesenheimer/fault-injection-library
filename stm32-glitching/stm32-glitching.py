@@ -4,6 +4,12 @@
 # You should have received a copy of the GPL3 license with this file.
 # If not, please write to: m.kesenheimer@gmx.net.
 
+# programming
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x unlock 0; exit"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program read-out-protection-test-CW308_STM32L0.bin verify reset exit 0x08000000;"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; sleep 2000; reset run; shutdown"
+# -> power cycle the target!
+
 #!/usr/bin/env python3
 import argparse
 import logging
