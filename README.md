@@ -9,12 +9,10 @@ However, several new features have been implemented.
 For example, the original library was developed to work with the [ChipWhisperer-Husky](https://rtfm.newae.com/Capture/ChipWhisperer-Husky/) only.
 This library has been rewritten to work with hardware that consists of a common MOSFET, the [Raspberry Pi Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/) as the controller and a few other cheap components.
 The Raspberry Pi Pico is not only cheap and available for the hobbyist, but also a very capable microcontroller.
+Furthermore, this library supports the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/) as well.
 
-Furthermore, the database functionality has been expanded to a certain extent.
+The database functionality has been expanded to a certain extent, too.
 With this implementation, e.g. one can add experiments to a previous measurement.
-
-More features are planned in the future.
-For example support for the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/) is added.
 
 ## Cloning
 
@@ -113,7 +111,7 @@ python upload-micro-python.py --port /dev/<rpi-tty-port> --script mp_glitcher.py
 Next, change into `stm32-glitching` and execute the following script.
 ```bash
 cd stm32-glitching
-python stm32-glitching.py --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port> --delay 100_000 200_000 --length 100 150
+python pico-glitcher.py --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port> --delay 100_000 200_000 --length 100 150
 ```
 
 Again, use the following command to analyze the collected datapoints:

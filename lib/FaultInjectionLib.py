@@ -396,3 +396,97 @@ class HuskyGlitcher(Glitcher):
         self.scope.UARTTrigger.baud = 115200
         self.scope.UARTTrigger.set_pattern_match(0, pattern)
         self.scope.UARTTrigger.trigger_source = 0
+
+
+class ProGlitcher(Glitcher):
+    def __init__(self):
+        self.scope = None
+
+    def init(self):
+        self.scope = cw.scope()
+
+        try:
+            if not scope.connectStatus:
+                self.scope.con()
+        except NameError:
+            self.scope = cw.scope()
+        time.sleep(0.05)
+        self.scope.default_setup()
+
+        self.scope.clock.adc_src            = "clkgen_x1"
+        self.scope.clock.clkgen_freq        = 100e6
+
+        self.scope.adc.basic_mode           = "rising_edge"
+        self.scope.adc.samples              = 10000
+        self.scope.adc.offset               = 0
+
+        self.scope.trigger.triggers         = 'tio4'
+
+        self.scope.io.hs2                   = "disabled"
+
+        self.scope.io.glitch_hp             = True
+        self.scope.io.glitch_lp             = False
+
+        # Clock asynchronous glitching
+        self.scope.glitch.clk_src           = 'clkgen'
+        self.scope.glitch.output            = 'enable_only'
+        self.scope.glitch.trigger_src       = 'ext_single'
+
+
+    def arm(self, delay, length):
+        self.scope.glitch.ext_offset        = delay // (int(1e9) // int(self.scope.clock.clkgen_freq))
+        self.scope.glitch.repeat            = length // (int(1e9) // int(self.scope.clock.clkgen_freq))
+        self.scope.arm()
+
+    def capture(self):
+        self.scope.capture()
+
+    def power_cycle_target(self, power_cycle_time=0.2):
+        self.scope.io.target_pwr = False
+        time.sleep(power_cycle_time)
+        self.scope.io.target_pwr = True
+
+    def reset(self, reset_time=0.2):
+        self.scope.io.nrst = 'low'
+        time.sleep(reset_time)
+        self.scope.io.nrst = 'high_z'
+
+    def reset_and_eat_it_all(self, target, target_timeout=0.3):
+        self.scope.io.nrst = 'low'
+        target.ser.timeout = target_timeout
+        target.read(4096)
+        target.ser.timeout = target.timeout
+        self.scope.io.nrst = 'high_z'
+
+    def reset_wait(self, target, token, reset_time=0.2, debug=False):
+        self.scope.io.nrst = 'low'
+        time.sleep(reset_time)
+        self.scope.io.nrst = 'high_z'
+
+        response = target.read(4096)
+        for _ in range(0, 5):
+            if token in response:
+                break
+            response += target.read(4096)
+
+        if debug:
+            for line in response.splitlines():
+                print('\t', line.decode())
+
+    def uart_trigger(self, pattern):
+        # UART trigger:
+        # even parity problem
+        # see: https://sec-consult.com/blog/detail/secglitcher-part-1-reproducible-voltage-glitching-on-stm32-microcontrollers/
+        CODE_READ = 0x80
+        CODE_WRITE = 0xC0
+        ADDR_DECODECFG = 57
+        #ADDR_DECODEDATA = 58
+        data = self.scope.decode_IO.oa.sendMessage(CODE_READ, ADDR_DECODECFG, Validate=False, maxResp=8)
+        data[1] = data[1] | 0x01
+        self.scope.decode_IO.oa.sendMessage(CODE_WRITE, ADDR_DECODECFG, data)
+        self.scope.trigger.triggers = 'tio1'
+        self.scope.trigger.module = 'DECODEIO'
+        self.scope.decode_IO.rx_baud = 115200
+        self.scope.decode_IO.decode_type = 'USART'
+        self.scope.decode_IO.trigger_pattern = [pattern]
+        #self.scope.io.hs2 = "clkgen"
