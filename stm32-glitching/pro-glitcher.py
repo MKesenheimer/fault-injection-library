@@ -45,7 +45,7 @@ class Main:
         logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
 
         self.glitcher = DerivedGlitcher()
-        self.glitcher.init(args)
+        self.glitcher.init()
 
         # we want to trigger on x11 with the configuration 8e1
         # since our statemachine understands only 8n1,
@@ -138,16 +138,15 @@ class Main:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", required=False, help="target port", default="/dev/ttyUSB1")
-    parser.add_argument("--rpico", required=False, help="rpico port", default="/dev/ttyACM1")
     parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     args = parser.parse_args()
 
-    pico_glitcher = Main(args)
+    glitcher = Main(args)
 
     try:
-        pico_glitcher.run()
+        glitcher.run()
     except KeyboardInterrupt:
         print("\nExitting...")
         sys.exit(1)

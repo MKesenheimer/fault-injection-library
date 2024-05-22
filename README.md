@@ -18,7 +18,7 @@ With this implementation, e.g. one can add experiments to a previous measurement
 
 Set up the project by cloning it:
 ```bash
-git clone --recurse-submodules
+git clone --recurse-submodules https://github.com/MKesenheimer/fault-injection-library.git
 cd fault-injection-lib
 ```
 
