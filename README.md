@@ -113,6 +113,11 @@ Next, change into `stm32-glitching` and execute the following script.
 cd stm32-glitching
 python pico-glitcher.py --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port> --delay 100_000 200_000 --length 100 150
 ```
+Or make use of the ChipWhisperer Pro by executing:
+```bash
+cd stm32-glitching
+python pro-glitcher.py --target /dev/<target-tty-port> --delay 100_000 200_000 --length 100 150
+```
 
 Again, use the following command to analyze the collected datapoints:
 ```bash
