@@ -406,7 +406,7 @@ class ProGlitcher(Glitcher):
         self.scope = cw.scope()
 
         try:
-            if not scope.connectStatus:
+            if not self.scope.connectStatus:
                 self.scope.con()
         except NameError:
             self.scope = cw.scope()
