@@ -64,7 +64,8 @@ class Main:
         self.response_before = 0
 
     def __del__(self):
-        self.serial.close()
+        if self.serial is not None:
+            self.serial.close()
 
     def run(self):
         # log execution

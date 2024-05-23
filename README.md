@@ -12,7 +12,7 @@ The Raspberry Pi Pico is not only cheap and available for the hobbyist, but also
 Furthermore, this library supports the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/) as well.
 
 The database functionality has been expanded to a certain extent, too.
-With this implementation, e.g. one can add experiments to a previous measurement.
+With this implementation, e.g. one can add experiments to a previous measurement campaign.
 
 ## Cloning
 
