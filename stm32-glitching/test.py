@@ -21,7 +21,7 @@ while True:
 
     # setup bootloader communication
     response = bootloader_com.bootloader_setup_memread(ser)
-
+    print(response)
     # power cycle if unavailable
     if response == -1:
         glitcher.power_cycle_target()
