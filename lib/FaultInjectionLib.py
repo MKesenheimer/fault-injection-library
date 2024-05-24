@@ -404,14 +404,8 @@ class ProGlitcher(Glitcher):
 
     def init(self):
         self.scope = cw.scope()
-
-        try:
-            if not self.scope.connectStatus:
-                self.scope.con()
-        except NameError:
-            self.scope = cw.scope()
-        time.sleep(0.05)
-        self.scope.default_setup()
+        #time.sleep(0.05)
+        #self.scope.default_setup()
 
         self.scope.clock.adc_src            = "clkgen_x1"
         self.scope.clock.clkgen_freq        = 100e6
