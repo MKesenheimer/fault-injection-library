@@ -403,12 +403,13 @@ class ProGlitcher(Glitcher):
         self.scope = None
 
     def init(self):
-        self.scope = cw.scope()
+        try:
+            self.scope = cw.scope()
+        except:
+            print("[-] No ChipWhisperer found. Exiting.")
         #time.sleep(0.05)
         #self.scope.default_setup()
-        if self.scope is None:
-            print("[-] No ChipWhisperer found. Exiting.")
-
+        
         self.scope.clock.adc_src            = "clkgen_x1"
         self.scope.clock.clkgen_freq        = 100e6
 
