@@ -8,3 +8,6 @@ index f5dc0f4..0b9d1a3 100644
  if __name__ == "__main__":
 -    ser = serial.Serial(port="/dev/tty.usbserial-21101", baudrate=115200, timeout=0.25, bytesize=8, parity='E', stopbits=1)
 +    ser = serial.Serial(port="/dev/ttyUSB0", baudrate=115200, timeout=0.25, bytesize=8, parity='E', stopbits=1)
+
+     start = 0x08000000
+     size  = 0xff
