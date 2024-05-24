@@ -13,6 +13,7 @@ from FaultInjectionLib import Database, ProGlitcher
 
 glitcher = ProGlitcher()
 ser = serial.Serial(port="/dev/ttyUSB0", baudrate=115200, timeout=0.25, bytesize=8, parity='E', stopbits=1)
+glitcher.init()
 
 while True:
     # reset target
