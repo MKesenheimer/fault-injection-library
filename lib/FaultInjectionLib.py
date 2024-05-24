@@ -485,5 +485,6 @@ class ProGlitcher(Glitcher):
         #self.scope.io.hs2 = "clkgen"
 
     def __del__(self):
-        print("[+] Disconnecting ChipWhisperer Pro")
-        self.scope.dis()
+        if self.scope is not None:
+            print("[+] Disconnecting ChipWhisperer Pro")
+            self.scope.dis()
