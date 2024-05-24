@@ -423,7 +423,6 @@ class ProGlitcher(Glitcher):
         self.scope.trigger.triggers         = 'tio4'
 
         self.scope.io.hs2                   = "disabled"
-
         self.scope.io.glitch_hp             = True
         self.scope.io.glitch_lp             = False
 
