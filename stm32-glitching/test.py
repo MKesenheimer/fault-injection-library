@@ -17,12 +17,14 @@ glitcher.init()
 
 while True:
     # reset target
-    glitcher.reset(0.01)
-    time.sleep(0.01)
+    #glitcher.reset(0.01)
+    glitcher.power_cycle_target()
+    time.sleep(0.5)
 
     # setup bootloader communication
     response = bootloader_com.bootloader_setup_memread(ser)
     print(response)
+    
     # power cycle if unavailable
-    if response == -1:
-        glitcher.power_cycle_target()
+    #if response == -1:
+    #    glitcher.power_cycle_target()
