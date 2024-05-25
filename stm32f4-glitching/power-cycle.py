@@ -8,7 +8,6 @@ import serial
 
 # import custom libraries
 sys.path.insert(0, "../lib/")
-import bootloader_com
 from FaultInjectionLib import Database, ProGlitcher
 
 glitcher = ProGlitcher()
