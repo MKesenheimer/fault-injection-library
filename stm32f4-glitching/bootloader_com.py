@@ -11,12 +11,11 @@ from functools import reduce
 class BootloaderCom:
     NACK = b'\x1f'
     ACK  = b'\x79'
-
     verbose = False
 
     def check_ack(self, ser):
         s = ser.read(1)
-        if s != ACK:
+        if s != self.ACK:
             #print(s)
             return 0
         return 1
@@ -59,11 +58,11 @@ class BootloaderCom:
         ser.write(b'\x11\xee')
         # if rdp is activated, a nack is returned (x1f)
         if self.check_ack(ser) == 0:
-            if verbose:
+            if self.verbose:
                 print("RDP is active. Can not read memory.")
             return -4
         else:
-            if verbose:
+            if self.verbose:
                 print("RDP is not active. Memory read command available.")
         return 0
 
