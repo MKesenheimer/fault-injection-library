@@ -7,6 +7,7 @@
 import serial
 import time
 from functools import reduce
+import sys
 
 class BootloaderCom:
     NACK = b'\x1f'
@@ -35,6 +36,7 @@ class BootloaderCom:
         print(f"Chip ID: {id}")
         if self.check_ack(ser) == 0:
             return -3
+        return 0
 
     def setup_memread(self, ser):
         # read memory (x11: read memory, xee: crc)
@@ -73,23 +75,28 @@ class BootloaderCom:
         mem = ser.read(size)
         return 0, mem
 
+def close(serial):
+    sys.exit(1)
+    ser.close()
 
 if __name__ == "__main__":
     ser = serial.Serial(port="/dev/tty.usbserial-21101", baudrate=115200, timeout=0.25, bytesize=8, parity='E', stopbits=1)
 
     com = BootloaderCom()
-    com.init_get_id(ser)
+    ret = com.init_get_id(ser)
+    print(ret)
+    if ret != 0:
+        close()
+
+    ret = com.setup_memread(ser)
+    print(ret)
+    if ret != 0:
+        close()
 
     start = 0x08000000
     size  = 0xff
-
-    ret = com.setup_memread(ser)
+    ret, mem = com.read_memory(ser, start, size)
+    print(ret)
     if ret == 0:
-        ret, mem = com.read_memory(ser, start, size)
-        if ret == 0:
-            print(mem)
-        else:
-            print(ret)
-    else:
-        print(ret)
-    ser.close()
+        print(mem)
+    close()
