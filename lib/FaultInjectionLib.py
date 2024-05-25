@@ -215,6 +215,12 @@ class PicoGlitcherInterface(MicroPythonScript):
     def reset_high(self):
         self.pyb.exec('mp.reset_high()')
 
+    def power_low(self):
+        self.pyb.exec('mp.power_low()')
+
+    def power_high(self):
+        self.pyb.exec('mp.power_high()')
+
     def reset(self, reset_time):
         self.pyb.exec(f'mp.reset({reset_time})')
 
@@ -282,6 +288,13 @@ class PicoGlitcher(Glitcher):
 
     def power_cycle_target(self, power_cycle_time=0.2):
         self.pico_glitcher.power_cycle_target(power_cycle_time)
+
+    def power_cycle_reset(self, power_cycle_time=0.2):
+        self.pico_glitcher.power_low()
+        self.pico_glitcher.reset_low()
+        time.sleep(power_cycle_time)
+        self.pico_glitcher.reset_high()
+        self.pico_glitcher.power_high()
 
     def reset_and_eat_it_all(self, target, target_timeout=0.3):
         self.pico_glitcher.reset_low()
@@ -447,6 +460,13 @@ class ProGlitcher(Glitcher):
         self.scope.io.nrst = 'low'
         time.sleep(reset_time)
         self.scope.io.nrst = 'high_z'
+
+    def power_cycle_reset(self, power_cycle_time=0.2):
+        self.scope.io.target_pwr = False
+        self.scope.io.nrst = False
+        self.time.sleep(power_cycle_time)
+        self.scope.io.nrst = "high_z"
+        self.scope.io.target_pwr = True
 
     def reset_and_eat_it_all(self, target, target_timeout=0.3):
         self.scope.io.nrst = 'low'

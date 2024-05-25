@@ -139,6 +139,14 @@ class MicroPythonScript():
     def reset_high(self):
         self.pin_reset.high()
 
+    def power_low(self):
+        self.pin_led.low()
+        self.pin_power.low()
+
+    def power_high(self):
+        self.pin_led.high()
+        self.pin_power.high()
+
     def reset(self, reset_time=0.01):
         self.pin_reset.low()
         time.sleep(reset_time)

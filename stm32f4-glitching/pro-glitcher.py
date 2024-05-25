@@ -20,7 +20,7 @@ import serial
 
 # import custom libraries
 sys.path.insert(0, "../lib/")
-import BootloaderCom
+from BootloaderCom import BootloaderCom
 from FaultInjectionLib import Database, ProGlitcher
 
 
@@ -93,20 +93,21 @@ class Main:
             time.sleep(0.1)
             response = self.bootcom.init_get_id()
 
-            # setup bootloader communication
-            response = self.bootcom.setup_memread()
-
             # power cycle if unavailable
-            if response == -1:
+            if response != 0:
                 self.glitcher.power_cycle_target()
                 time.sleep(0.1)
+
+            # setup bootloader communication
+            if response == 0:
+                response = self.bootcom.setup_memread()
 
             # read memory if RDP is inactive
             mem = b""
             if response == 0:
                 start = 0x08000000
                 size = 0xFF
-                response, mem = bootloader_com.bootloader_read_memory(self.serial, start, size)
+                response, mem = self.bootcom.read_memory(self.serial, start, size)
 
             # block execution until glitch was sent
             # self.glitcher.block()
