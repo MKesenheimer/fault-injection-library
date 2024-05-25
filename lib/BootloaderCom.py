@@ -14,8 +14,9 @@ class BootloaderCom:
     ACK  = b'\x79'
     verbose = False
 
-    def __init__(self, serial):
-        self.ser = serial
+    def __init__(self, port):
+        print(f"[+] Opening serial port {port}.")
+        self.ser = serial.Serial(port=port, baudrate=115200, timeout=0.25, bytesize=8, parity="E", stopbits=1)
 
     def check_ack(self):
         s = self.ser.read(1)
@@ -93,9 +94,7 @@ class BootloaderCom:
         self.ser.close()
 
 if __name__ == "__main__":
-    ser = serial.Serial(port=sys.argv[1], baudrate=115200, timeout=0.25, bytesize=8, parity='E', stopbits=1)
-
-    com = BootloaderCom(ser)
+    com = BootloaderCom(port=sys.argv[1])
     ret = com.init_get_id()
     print(ret)
     if ret != 0:

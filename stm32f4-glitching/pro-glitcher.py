@@ -16,7 +16,6 @@ import logging
 import random
 import sys
 import time
-import serial
 
 # import custom libraries
 sys.path.insert(0, "../lib/")
@@ -54,18 +53,12 @@ class Main:
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume)
-
-        self.serial = serial.Serial(port=self.args.target, baudrate=115200, timeout=0.25, bytesize=8, parity="E", stopbits=1)
-        self.bootcom = BootloaderCom(self.serial)
+        self.bootcom = BootloaderCom(port=self.args.target)
 
         self.start_time = int(time.time())
 
         self.successive_fails = 0
         self.response_before = 0
-
-    def __del__(self):
-        if self.serial is not None:
-            self.serial.close()
 
     def run(self):
         # log execution
@@ -104,7 +97,7 @@ class Main:
             if response == 0:
                 start = 0x08000000
                 size = 0xFF
-                response, mem = self.bootcom.read_memory(self.serial, start, size)
+                response, mem = self.bootcom.read_memory(start, size)
 
             # classify response
             color = self.glitcher.classify(expected, response)
@@ -132,8 +125,6 @@ class Main:
                     self.database.remove(eid)
                 break
             self.response_before = response
-
-        self.serial.close()
 
 
 if __name__ == "__main__":
