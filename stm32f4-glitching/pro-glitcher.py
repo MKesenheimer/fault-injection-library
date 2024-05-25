@@ -37,6 +37,8 @@ class DerivedGlitcher(ProGlitcher):
             color = "Y"
         return color
 
+    def init_after_reset(self):
+        pass
 
 class Main:
     def __init__(self, args):
