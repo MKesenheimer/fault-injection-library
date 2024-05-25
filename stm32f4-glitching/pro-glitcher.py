@@ -95,7 +95,7 @@ class Main:
 
             # power cycle if unavailable
             if response != 0:
-                self.glitcher.power_cycle_target()
+                self.glitcher.power_cycle_reset()
                 time.sleep(0.1)
 
             # setup bootloader communication
@@ -108,9 +108,6 @@ class Main:
                 start = 0x08000000
                 size = 0xFF
                 response, mem = self.bootcom.read_memory(self.serial, start, size)
-
-            # block execution until glitch was sent
-            # self.glitcher.block()
 
             # classify response
             color = self.glitcher.classify(expected, response)

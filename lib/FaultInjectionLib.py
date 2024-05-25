@@ -464,7 +464,7 @@ class ProGlitcher(Glitcher):
     def power_cycle_reset(self, power_cycle_time=0.2):
         self.scope.io.target_pwr = False
         self.scope.io.nrst = False
-        self.time.sleep(power_cycle_time)
+        time.sleep(power_cycle_time)
         self.scope.io.nrst = "high_z"
         self.scope.io.target_pwr = True
 
