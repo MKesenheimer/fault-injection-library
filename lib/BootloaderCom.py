@@ -93,7 +93,7 @@ class BootloaderCom:
         self.ser.close()
 
 if __name__ == "__main__":
-    ser = serial.Serial(port="/dev/tty.usbserial-21101", baudrate=115200, timeout=0.25, bytesize=8, parity='E', stopbits=1)
+    ser = serial.Serial(port=sys.argv[1], baudrate=115200, timeout=0.25, bytesize=8, parity='E', stopbits=1)
 
     com = BootloaderCom(ser)
     ret = com.init_get_id()

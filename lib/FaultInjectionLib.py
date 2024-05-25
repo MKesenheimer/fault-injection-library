@@ -518,6 +518,6 @@ class ProGlitcher(Glitcher):
     def __del__(self):
         if self.scope is not None:
             print("[+] Disconnecting ChipWhisperer Pro")
-            self.scope.io.glitch_hp = False
-            self.scope.io.glitch_lp = False
+            #self.scope.io.glitch_hp = False
+            #self.scope.io.glitch_lp = False
             self.scope.dis()
