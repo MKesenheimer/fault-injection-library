@@ -26,7 +26,7 @@ class BootloaderCom:
 
     def init_get_id(self):
         # init bootloader
-        ser.write(b'\x7f')
+        self.ser.write(b'\x7f')
         if self.check_ack() == 0:
             return -1
 
