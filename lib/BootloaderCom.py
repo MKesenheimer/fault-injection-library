@@ -46,17 +46,13 @@ class BootloaderCom:
             return -3
         return 0
 
-    # to be defined elsewhere
-    def trigger_fct(pin_state):
-        pass
-
-    def setup_memread(self, hook=None):
+    def setup_memread(self, set_trigger_out=None):
         # read memory (x11: read memory, xee: crc)
-        if hook is not None:
-            hook(True)
+        if set_trigger_out is not None:
+            set_trigger_out(True)
         self.ser.write(b'\x11\xee')
-        if hook is not None:
-            hook(False)
+        if set_trigger_out is not None:
+            set_trigger_out(False)
 
         # if rdp is activated, a nack is returned (x1f)
         if self.check_ack() == 0:

@@ -97,7 +97,7 @@ class Main:
 
             # setup bootloader communication, this function triggers the glitch
             if response == 0:
-                response = self.bootcom.setup_memread(self.glitcher.set_trigger_out)
+                response = self.bootcom.setup_memread()
 
             # read memory if RDP is inactive
             mem = b""
