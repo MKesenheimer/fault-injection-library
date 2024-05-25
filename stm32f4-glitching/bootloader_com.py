@@ -37,23 +37,6 @@ class BootloaderCom:
             return -3
 
     def setup_memread(self, ser):
-        # init bootloader
-        ser.write(b'\x7f')
-        if self.check_ack(ser) == 0:
-            return -1
-
-        # read chip id if necessary
-        if 0:
-            # get chip id (x02: chip id, xfd: crc)
-            ser.write(b'\x02\xfd')
-            if self.check_ack(ser) == 0:
-                return -2
-            s = ser.read(3)
-            id = s[1:3]
-            print(f"Chip ID: {id}")
-            if self.check_ack(ser) == 0:
-                return -3
-
         # read memory (x11: read memory, xee: crc)
         ser.write(b'\x11\xee')
         # if rdp is activated, a nack is returned (x1f)
