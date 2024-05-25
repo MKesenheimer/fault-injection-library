@@ -37,9 +37,6 @@ class DerivedGlitcher(ProGlitcher):
             color = "Y"
         return color
 
-    def init_after_reset(self):
-        pass
-
 class Main:
     def __init__(self, args):
         self.args = args
@@ -100,7 +97,7 @@ class Main:
 
             # setup bootloader communication, this function triggers the glitch
             if response == 0:
-                response = self.bootcom.setup_memread()
+                response = self.bootcom.setup_memread(self.glitcher.set_trigger_out)
 
             # read memory if RDP is inactive
             mem = b""

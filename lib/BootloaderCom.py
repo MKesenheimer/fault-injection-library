@@ -53,10 +53,10 @@ class BootloaderCom:
     def setup_memread(self, hook=None):
         # read memory (x11: read memory, xee: crc)
         if hook is not None:
-            hook(true)
+            hook(True)
         self.ser.write(b'\x11\xee')
         if hook is not None:
-            hook(false)
+            hook(False)
 
         # if rdp is activated, a nack is returned (x1f)
         if self.check_ack() == 0:
