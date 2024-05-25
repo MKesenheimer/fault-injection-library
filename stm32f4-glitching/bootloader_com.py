@@ -14,14 +14,14 @@ class BootloaderCom:
 
     verbose = False
 
-    def check_ack(ser):
+    def check_ack(self, ser):
         s = ser.read(1)
         if s != ACK:
             #print(s)
             return 0
         return 1
 
-    def init_get_id(ser):
+    def init_get_id(self, ser):
         # init bootloader
         ser.write(b'\x7f')
         if check_ack(ser) == 0:
@@ -37,7 +37,7 @@ class BootloaderCom:
         if check_ack(ser) == 0:
             return -3
 
-    def setup_memread(ser):
+    def setup_memread(self, ser):
         # init bootloader
         ser.write(b'\x7f')
         if check_ack(ser) == 0:
@@ -67,7 +67,7 @@ class BootloaderCom:
                 print("RDP is not active. Memory read command available.")
         return 0
 
-    def read_memory(ser, start, size):
+    def read_memory(self, ser, start, size):
         # write memory address
         startb = start.to_bytes(4, 'big')
         crc = reduce(lambda x, y: x ^ y, startb, 0).to_bytes(1, 'big')
