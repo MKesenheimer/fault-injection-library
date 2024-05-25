@@ -89,14 +89,14 @@ class Main:
             self.glitcher.arm(delay, length)
 
             # reset target
-            self.glitcher.reset(0.05)
+            self.glitcher.reset(0.01)
             time.sleep(0.1)
             response = self.bootcom.init_get_id()
 
             # power cycle if unavailable
             if response != 0:
                 self.glitcher.power_cycle_reset()
-                time.sleep(0.1)
+                time.sleep(0.07)
 
             # setup bootloader communication
             if response == 0:
