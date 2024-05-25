@@ -20,7 +20,7 @@ import serial
 
 # import custom libraries
 sys.path.insert(0, "../lib/")
-import bootloader_com
+import BootloaderCom
 from FaultInjectionLib import Database, ProGlitcher
 
 
@@ -59,6 +59,7 @@ class Main:
         self.database = Database(sys.argv, resume=self.args.resume)
 
         self.serial = serial.Serial(port=self.args.target, baudrate=115200, timeout=0.25, bytesize=8, parity="E", stopbits=1)
+        self.bootcom = BootloaderCom()
 
         self.start_time = int(time.time())
 
