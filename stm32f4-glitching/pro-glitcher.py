@@ -80,13 +80,17 @@ class Main:
 
             # reset target
             self.glitcher.reset(0.01)
-            time.sleep(0.1)
+            time.sleep(0.14)
             response = self.bootcom.init_get_id()
 
             # power cycle if unavailable
             if response != 0:
                 self.glitcher.power_cycle_reset()
-                time.sleep(0.07)
+                time.sleep(0.06)
+
+            #self.glitcher.power_cycle_reset()
+            #time.sleep(0.06)
+            #response = self.bootcom.init_get_id()
 
             # setup bootloader communication, this function triggers the glitch
             if response == 0:
