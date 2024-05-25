@@ -431,6 +431,7 @@ class ProGlitcher(Glitcher):
         self.scope.adc.samples              = 10000
         self.scope.adc.offset               = 0
 
+        self.scope.io.tio1                  = 'high_z'
         self.scope.trigger.triggers         = 'tio4'
 
         self.scope.io.hs2                   = "disabled"
