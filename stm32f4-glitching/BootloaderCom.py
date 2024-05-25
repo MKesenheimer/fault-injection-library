@@ -12,7 +12,7 @@ import sys
 class BootloaderCom:
     NACK = b'\x1f'
     ACK  = b'\x79'
-    verbose = False
+    verbose = True
 
     def __init__(self, serial):
         self.ser = serial
@@ -30,20 +30,26 @@ class BootloaderCom:
         if self.check_ack() == 0:
             return -1
 
-        # get chip id (x02: chip id, xfd: crc)
+        # get chip id command (x02: chip id, xfd: crc)
         self.ser.write(b'\x02\xfd')
         if self.check_ack() == 0:
             return -2
+        
+        # read chip id
         s = self.ser.read(3)
         id = s[1:3]
-        print(f"Chip ID: {id}")
+
+        if self.verbose:
+            print(f"Chip ID: {id}")
+
         if self.check_ack() == 0:
             return -3
-        return 0
+        return 0, id
 
     def setup_memread(self):
         # read memory (x11: read memory, xee: crc)
         self.ser.write(b'\x11\xee')
+        
         # if rdp is activated, a nack is returned (x1f)
         if self.check_ack() == 0:
             if self.verbose:

@@ -59,7 +59,7 @@ class Main:
         self.database = Database(sys.argv, resume=self.args.resume)
 
         self.serial = serial.Serial(port=self.args.target, baudrate=115200, timeout=0.25, bytesize=8, parity="E", stopbits=1)
-        self.bootcom = BootloaderCom()
+        self.bootcom = BootloaderCom(self.serial)
 
         self.start_time = int(time.time())
 
@@ -91,9 +91,10 @@ class Main:
             # reset target
             self.glitcher.reset(0.05)
             time.sleep(0.1)
+            response = self.bootcom.init_get_id()
 
             # setup bootloader communication
-            response = bootloader_com.bootloader_setup_memread(self.serial)
+            response = self.bootcom.setup_memread()
 
             # power cycle if unavailable
             if response == -1:
