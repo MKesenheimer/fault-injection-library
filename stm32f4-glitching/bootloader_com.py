@@ -24,41 +24,41 @@ class BootloaderCom:
     def init_get_id(self, ser):
         # init bootloader
         ser.write(b'\x7f')
-        if check_ack(ser) == 0:
+        if self.check_ack(ser) == 0:
             return -1
 
         # get chip id (x02: chip id, xfd: crc)
         ser.write(b'\x02\xfd')
-        if check_ack(ser) == 0:
+        if self.check_ack(ser) == 0:
             return -2
         s = ser.read(3)
         id = s[1:3]
         print(f"Chip ID: {id}")
-        if check_ack(ser) == 0:
+        if self.check_ack(ser) == 0:
             return -3
 
     def setup_memread(self, ser):
         # init bootloader
         ser.write(b'\x7f')
-        if check_ack(ser) == 0:
+        if self.check_ack(ser) == 0:
             return -1
 
         # read chip id if necessary
         if 0:
             # get chip id (x02: chip id, xfd: crc)
             ser.write(b'\x02\xfd')
-            if check_ack(ser) == 0:
+            if self.check_ack(ser) == 0:
                 return -2
             s = ser.read(3)
             id = s[1:3]
             print(f"Chip ID: {id}")
-            if check_ack(ser) == 0:
+            if self.check_ack(ser) == 0:
                 return -3
 
         # read memory (x11: read memory, xee: crc)
         ser.write(b'\x11\xee')
         # if rdp is activated, a nack is returned (x1f)
-        if check_ack(ser) == 0:
+        if self.check_ack(ser) == 0:
             if verbose:
                 print("RDP is active. Can not read memory.")
             return -4
@@ -73,7 +73,7 @@ class BootloaderCom:
         crc = reduce(lambda x, y: x ^ y, startb, 0).to_bytes(1, 'big')
         ser.write(startb)
         ser.write(crc)
-        if check_ack(ser) == 0:
+        if self.check_ack(ser) == 0:
             return -5, b''
 
         # write bytes to read
@@ -82,7 +82,7 @@ class BootloaderCom:
         # write number of bytes to read
         ser.write(sizeb)
         ser.write(crc)
-        if check_ack(ser) == 0:
+        if self.check_ack(ser) == 0:
             return -6, b''
 
         time.sleep(0.01)
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     ser = serial.Serial(port="/dev/tty.usbserial-21101", baudrate=115200, timeout=0.25, bytesize=8, parity='E', stopbits=1)
 
     com = BootloaderCom()
-    com.init_get_id()
+    com.init_get_id(ser)
 
     start = 0x08000000
     size  = 0xff
