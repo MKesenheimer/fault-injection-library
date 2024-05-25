@@ -448,6 +448,13 @@ class ProGlitcher(Glitcher):
         else:
             self.scope.io.tio4 = 'gpio_low'
 
+    def reset_glitch(self, delay=0.005):
+        self.scope.io.glitch_hp = False
+        self.scope.io.glitch_lp = False
+        time.sleep(delay)
+        self.scope.io.glitch_hp = True
+        self.scope.io.glitch_lp = False
+
     def arm(self, delay, length):
         self.scope.glitch.ext_offset        = delay // (int(1e9) // int(self.scope.clock.clkgen_freq))
         self.scope.glitch.repeat            = length // (int(1e9) // int(self.scope.clock.clkgen_freq))

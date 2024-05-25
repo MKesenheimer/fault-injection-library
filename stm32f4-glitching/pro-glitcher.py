@@ -92,6 +92,9 @@ class Main:
             if response == 0:
                 response = self.bootcom.setup_memread(self.glitcher.set_trigger_out)
 
+            # reset the crowbar transistors
+            self.glitcher.reset_glitch()
+
             # read memory if RDP is inactive
             mem = b""
             if response == 0:
