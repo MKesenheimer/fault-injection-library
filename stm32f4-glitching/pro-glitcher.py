@@ -98,7 +98,7 @@ class Main:
                 self.glitcher.power_cycle_reset()
                 time.sleep(0.07)
 
-            # setup bootloader communication
+            # setup bootloader communication, this function triggers the glitch
             if response == 0:
                 response = self.bootcom.setup_memread()
 

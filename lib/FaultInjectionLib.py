@@ -432,6 +432,7 @@ class ProGlitcher(Glitcher):
         self.scope.adc.offset               = 0
 
         self.scope.io.tio1                  = 'high_z'
+        self.scope.io.tio4                  = 'gpio_low'
         self.scope.trigger.triggers         = 'tio4'
 
         self.scope.io.hs2                   = "disabled"
@@ -443,6 +444,11 @@ class ProGlitcher(Glitcher):
         self.scope.glitch.output            = 'enable_only'
         self.scope.glitch.trigger_src       = 'ext_single'
 
+    def set_trigger_out(self, pinstate):
+        if pinstate:
+            self.scope.io.tio4 = 'gpio_high'
+        else:
+            self.scope.io.tio4 = 'gpio_low'
 
     def arm(self, delay, length):
         self.scope.glitch.ext_offset        = delay // (int(1e9) // int(self.scope.clock.clkgen_freq))
