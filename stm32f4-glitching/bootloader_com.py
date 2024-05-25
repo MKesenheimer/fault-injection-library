@@ -76,8 +76,8 @@ class BootloaderCom:
         return 0, mem
 
 def close(serial):
+    serial.close()
     sys.exit(1)
-    ser.close()
 
 if __name__ == "__main__":
     ser = serial.Serial(port="/dev/tty.usbserial-21101", baudrate=115200, timeout=0.25, bytesize=8, parity='E', stopbits=1)
@@ -86,12 +86,12 @@ if __name__ == "__main__":
     ret = com.init_get_id(ser)
     print(ret)
     if ret != 0:
-        close()
+        close(ser)
 
     ret = com.setup_memread(ser)
     print(ret)
     if ret != 0:
-        close()
+        close(ser)
 
     start = 0x08000000
     size  = 0xff
@@ -99,4 +99,4 @@ if __name__ == "__main__":
     print(ret)
     if ret == 0:
         print(mem)
-    close()
+    close(ser)
