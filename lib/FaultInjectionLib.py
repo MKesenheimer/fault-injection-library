@@ -539,5 +539,4 @@ class ProGlitcher(Glitcher):
         self.uart_trigger(pattern)
 
     def __del__(self):
-        print("[+] Disconnecting ChipWhisperer Pro")
         self.disconnect()
