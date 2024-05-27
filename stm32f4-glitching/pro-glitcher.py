@@ -86,7 +86,7 @@ class Main:
             # power cycle if unavailable
             if response != 0:
                 self.glitcher.power_cycle_reset()
-                time.sleep(0.06)
+                time.sleep(0.2)
 
             #self.glitcher.power_cycle_reset()
             #time.sleep(0.06)
@@ -122,7 +122,7 @@ class Main:
             experiment_id += 1
 
             # exit if too many successive fails (including a successful memory read)
-            if response in (0, -1, -5, -6) and self.response_before in (0, -1, -5, -6):
+            if response in (0, -1, -3, -5, -6) and self.response_before in (0, -1, -3, -5, -6):
                 self.successive_fails += 1
             else:
                 self.successive_fails = 0
