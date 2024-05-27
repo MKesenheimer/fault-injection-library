@@ -520,9 +520,24 @@ class ProGlitcher(Glitcher):
         self.scope.decode_IO.trigger_pattern = [pattern]
         #self.scope.io.hs2 = "clkgen"
 
-    def __del__(self):
+    def disconnect(self):
         if self.scope is not None:
             print("[+] Disconnecting ChipWhisperer Pro")
             #self.scope.io.glitch_hp = False
             #self.scope.io.glitch_lp = False
             self.scope.dis()
+
+    def reconnect(self, disconnect_wait=0.5):
+        self.disconnect()
+        time.sleep(disconnect_wait)
+        self.init()
+
+    def reconnect_with_uart(self, pattern, disconnect_wait=0.5):
+        self.disconnect()
+        time.sleep(disconnect_wait)
+        self.init()
+        self.uart_trigger(pattern)
+
+    def __del__(self):
+        print("[+] Disconnecting ChipWhisperer Pro")
+        self.disconnect()
