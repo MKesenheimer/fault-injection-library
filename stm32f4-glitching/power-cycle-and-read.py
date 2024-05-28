@@ -17,7 +17,7 @@ def main():
         # reset target
         #glitcher.reset(0.01)
         glitcher.power_cycle_target()
-        time.sleep(0.5)
+        time.sleep(0.2)
 
         # setup bootloader communication
         response = bootcom.init_get_id()
