@@ -36,6 +36,7 @@ class DerivedGlitcher(ProGlitcher):
             color = "Y"
         return color
 
+
 class Main:
     def __init__(self, args):
         self.args = args
@@ -70,8 +71,8 @@ class Main:
         e_delay = self.args.delay[1]
 
         expected = -4
-
         experiment_id = 0
+        mem = b""
         while True:
             # set up glitch parameters (in nano seconds) and arm glitcher
             length = random.randint(s_length, e_length)
@@ -80,27 +81,32 @@ class Main:
 
             # reset target
             self.glitcher.reset(0.01)
-            time.sleep(0.14)
+            #t = random.uniform(0.001 * self.successive_fails, 0.01 * self.successive_fails)
+            #print(f"reset time = {t:.2f}")
+            #time.sleep(t)
+            time.sleep(0.05)
             response = self.bootcom.init_get_id()
-
-            # power cycle if unavailable
-            if response != 0:
-                self.glitcher.power_cycle_reset()
-                time.sleep(0.2)
 
             #self.glitcher.power_cycle_reset()
             #time.sleep(0.06)
             #response = self.bootcom.init_get_id()
 
+            # power cycle if failure
+            if response != 0:
+                self.glitcher.power_cycle_reset()
+                #t = random.uniform(0.001 * self.successive_fails, 0.01 * self.successive_fails)
+                #print(f"power cylce time = {t:.2f}")
+                #time.sleep(t)
+                time.sleep(0.1)
+                #self.glitcher.reconnect_with_uart(0x11, 1)
+
             # setup bootloader communication, this function triggers the glitch
             if response == 0:
                 response = self.bootcom.setup_memread(self.glitcher.set_trigger_out)
-
-            # reset the crowbar transistors
-            self.glitcher.reset_glitch()
+                # reset the crowbar transistors after glitch
+                self.glitcher.reset_glitch()
 
             # read memory if RDP is inactive
-            mem = b""
             if response == 0:
                 start = 0x08000000
                 size = 0xFF
@@ -125,8 +131,9 @@ class Main:
             if response in (0, -1, -3, -5, -6) and self.response_before in (0, -1, -3, -5, -6):
                 self.successive_fails += 1
             else:
-                self.successive_fails = 0
-            if self.successive_fails >= 20:
+                self.successive_fails -= 1
+
+            if self.successive_fails >= 200:
                 # delete the eroneous datapoints
                 for eid in range(experiment_id - 20, experiment_id):
                     self.database.remove(eid)
