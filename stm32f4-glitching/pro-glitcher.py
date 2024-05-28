@@ -118,8 +118,7 @@ class Main:
             if response in (0, -1, -3, -5, -6) and self.response_before in (0, -1, -3, -5, -6):
                 self.successive_fails += 1
             else:
-                self.successive_fails -= 1
-
+                self.successive_fails = 0
             if self.successive_fails >= 20:
                 # delete the eroneous datapoints
                 for eid in range(experiment_id - 20, experiment_id):
