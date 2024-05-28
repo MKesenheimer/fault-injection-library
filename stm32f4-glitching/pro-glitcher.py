@@ -80,25 +80,12 @@ class Main:
             self.glitcher.arm(delay, length)
 
             # reset target
-            self.glitcher.reset(0.01)
-            #t = random.uniform(0.001 * self.successive_fails, 0.01 * self.successive_fails)
-            #print(f"reset time = {t:.2f}")
-            #time.sleep(t)
-            time.sleep(0.05)
+            #glitcher.reset(0.01)
+            self.glitcher.power_cycle_target()
+            time.sleep(0.2)
+
+            # setup bootloader communication
             response = self.bootcom.init_get_id()
-
-            #self.glitcher.power_cycle_reset()
-            #time.sleep(0.06)
-            #response = self.bootcom.init_get_id()
-
-            # power cycle if failure
-            if response != 0:
-                self.glitcher.power_cycle_reset()
-                #t = random.uniform(0.001 * self.successive_fails, 0.01 * self.successive_fails)
-                #print(f"power cylce time = {t:.2f}")
-                #time.sleep(t)
-                time.sleep(0.1)
-                #self.glitcher.reconnect_with_uart(0x11, 1)
 
             # setup bootloader communication, this function triggers the glitch
             if response == 0:
@@ -133,7 +120,7 @@ class Main:
             else:
                 self.successive_fails -= 1
 
-            if self.successive_fails >= 200:
+            if self.successive_fails >= 20:
                 # delete the eroneous datapoints
                 for eid in range(experiment_id - 20, experiment_id):
                     self.database.remove(eid)
