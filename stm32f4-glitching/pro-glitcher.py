@@ -120,10 +120,16 @@ class Main:
             else:
                 self.successive_fails = 0
             if self.successive_fails >= 20:
-                # delete the eroneous datapoints
+                # delete the eroneous datapoints...
                 for eid in range(experiment_id - 20, experiment_id):
                     self.database.remove(eid)
-                break
+                # ... and try again
+                glitcher.power_cycle_target(1)
+                time.sleep(1)
+                glitcher.power_cycle_target(1)
+                time.sleep(1)
+                glitcher.power_cycle_target(1)
+                #break
             self.response_before = response
 
 
