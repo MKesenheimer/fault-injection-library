@@ -72,7 +72,6 @@ class Main:
 
         expected = -4
         experiment_id = 0
-        mem = b""
         while True:
             # set up glitch parameters (in nano seconds) and arm glitcher
             length = random.randint(s_length, e_length)
@@ -94,6 +93,7 @@ class Main:
                 self.glitcher.reset_glitch()
 
             # read memory if RDP is inactive
+            mem = b""
             if response == 0:
                 start = 0x08000000
                 size = 0xFF
@@ -114,7 +114,7 @@ class Main:
             # increase experiment id
             experiment_id += 1
 
-            # exit if too many successive fails (including a successful memory read)
+            # exit if too many successive fails (including a supposedly successful memory read)
             if response in (0, -1, -3, -5, -6) and self.response_before in (0, -1, -3, -5, -6):
                 self.successive_fails += 1
             else:
