@@ -25,6 +25,10 @@ class BootloaderCom:
             return 0
         return 1
 
+    def flush(self):
+        # read garbage and discard
+        self.ser.read(1024)
+
     def init_get_id(self):
         # init bootloader
         self.ser.write(b'\x7f')
