@@ -5,7 +5,7 @@ import sys
 sys.path.insert(0, "../lib/")
 from FaultInjectionLib import ProGlitcher
 
-print("[+] Initializing the ProGlitcher")
+print("[+] Initializing ProGlitcher")
 glitcher = ProGlitcher()
 glitcher.init()
 print("[+] Power cycling target.")

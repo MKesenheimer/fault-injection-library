@@ -9,6 +9,7 @@ from BootloaderCom import BootloaderCom
 from FaultInjectionLib import ProGlitcher
 
 def main():
+    print("[+] Initializing ProGlitcher")
     glitcher = ProGlitcher()
     glitcher.init()
     bootcom = BootloaderCom(port="/dev/ttyUSB0")
