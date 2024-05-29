@@ -124,11 +124,11 @@ class Main:
                 for eid in range(experiment_id - 20, experiment_id):
                     self.database.remove(eid)
                 # ... and try again
-                glitcher.power_cycle_target(1)
+                self.glitcher.power_cycle_target(1)
                 time.sleep(1)
-                glitcher.power_cycle_target(1)
+                self.glitcher.power_cycle_target(1)
                 time.sleep(1)
-                glitcher.power_cycle_target(1)
+                self.glitcher.power_cycle_target(1)
                 #break
             self.response_before = response
 
