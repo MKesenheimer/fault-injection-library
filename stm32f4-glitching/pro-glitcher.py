@@ -20,7 +20,7 @@ import time
 # import custom libraries
 sys.path.insert(0, "../lib/")
 from BootloaderCom import BootloaderCom
-from FaultInjectionLib import Database, ProGlitcher
+from FaultInjectionLib import Database, ProGlitcher, Helper
 
 
 # inherit functionality and overwrite some functions
@@ -30,9 +30,9 @@ class DerivedGlitcher(ProGlitcher):
             color = "G"
         elif response == 0:
             color = "R"
-        elif response <= -1 and response >= -3:
+        elif response > 0:
             color = "M"
-        elif response <= -5 and response >= -6:
+        else:
             color = "Y"
         return color
 
@@ -60,6 +60,12 @@ class Main:
 
         self.successive_fails = 0
         self.response_before = 0
+
+        # memory read settings
+        self.current_dump_addr = 0x08000000
+        self.current_dump_len = 0x200000
+        self.file_index = 0
+        self.dump_filename = f"{Helper.timestamp()}_memory_dump_{self.file_index}.bin"
 
     def run(self):
         # log execution
@@ -94,22 +100,46 @@ class Main:
 
             # read memory if RDP is inactive
             mem = b""
-            if response == 0:
-                start = 0x08000000
-                size = 0xFF
-                response, mem = self.bootcom.read_memory(start, size)
+            glitch_successes = 0
+            read_sucesses = 0
+            while response == 0:
+                len_to_dump = 0xFF if (self.current_dump_len // 0xFF) else self.current_dump_len % 0xFF
+                response, mem = self.bootcom.read_memory(self.current_dump_addr, len_to_dump)
+                # glitch successful, however memory read may still yield invalid results
+                glitch_successes += 1
+                if len(mem) == len_to_dump and mem != b"\x79" * len_to_dump:
+                    read_sucesses += 1
+                    with open(self.dump_filename, 'ab+') as f:
+                        f.write(mem)
+                    self.current_dump_len -= len_to_dump
+                    print(f"[+] Dumped 0x{len_to_dump:x} bytes from addr 0x{self.current_dump_addr:x}, {self.current_dump_len:x} bytes left")
+                    logging.info(f"Dumped 0x{len_to_dump:x} bytes from addr 0x{self.current_dump_addr:x}, {self.current_dump_len:x} bytes left")
+                    self.current_dump_addr += len_to_dump
+
+            # reset memory dump if current_dump_len reaches zero
+            if self.current_dump_len <= 0:
+                self.current_dump_addr = 0x08000000
+                self.current_dump_len = 0x400
+                self.file_index += 1
+                self.dump_filename = f"{Helper.timestamp()}_memory_dump_{self.file_index}.bin"
+
+            # "classify" successful glitches
+            if glitch_successes > 0:
+                response = glitch_successes
+            if read_sucesses > 0:
+                response = 0
 
             # classify response
             color = self.glitcher.classify(expected, response)
 
             # add to database
-            response_mem = str(response).encode("utf-8") + mem
-            self.database.insert(experiment_id, delay, length, color, response_mem)
+            response_str = str(response).encode("utf-8")
+            self.database.insert(experiment_id, delay, length, color, response_str)
 
             # monitor
             speed = self.glitcher.get_speed(self.start_time, experiment_id)
             experiment_base_id = self.database.get_base_experiments_count()
-            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{length}\t{delay}\t{color}\t{response_mem}", color))
+            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{length}\t{delay}\t{color}\t{response_str}", color))
 
             # increase experiment id
             experiment_id += 1
@@ -120,8 +150,8 @@ class Main:
             else:
                 self.successive_fails = 0
             if self.successive_fails >= 20:
-                # delete the eroneous datapoints...
-                for eid in range(experiment_id - 20, experiment_id):
+                # delete the eroneous datapoints, but not the first
+                for eid in range(experiment_id - 19, experiment_id):
                     self.database.remove(eid)
                 # ... and try again
                 self.glitcher.reconnect_with_uart(pattern=0x11, disconnect_wait=1)

@@ -540,3 +540,7 @@ class ProGlitcher(Glitcher):
 
     def __del__(self):
         self.disconnect()
+
+class Helper():
+    def timestamp():
+        return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
