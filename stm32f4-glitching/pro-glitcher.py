@@ -107,7 +107,8 @@ class Main:
                 response, mem = self.bootcom.read_memory(self.current_dump_addr, len_to_dump)
                 # glitch successful, however memory read may still yield invalid results
                 glitch_successes += 1
-                if len(mem) == len_to_dump and mem != b"\x79" * len_to_dump:
+                #if len(mem) == len_to_dump and mem != b"\x79" * len_to_dump:
+                if True: # DEBUG: write out everything, no matter what
                     read_sucesses += 1
                     with open(self.dump_filename, 'ab+') as f:
                         f.write(mem)

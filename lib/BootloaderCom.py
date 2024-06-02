@@ -8,6 +8,7 @@ import serial
 import time
 from functools import reduce
 import sys
+import random
 
 class BootloaderCom:
     NACK = b'\x1f'
@@ -87,10 +88,13 @@ class BootloaderCom:
         if self.check_ack() == 0:
             return -6, b''
 
-        time.sleep(0.01)
+        #time.sleep(0.01)
+        t = random.uniform(0.01, 0.5) # DEBUG
+        time.sleep(t)
 
-        # get memory
-        mem = self.ser.read(size)
+        # read memory
+        #mem = self.ser.read(size)
+        mem = self.ser.read(1024) # DEBUG
         return 0, mem
 
     def __del__(self):
