@@ -124,12 +124,14 @@ class BootloaderCom:
             # read memory if RDP is inactive
             mem = b""
             len_to_dump = 0xFF if (self.current_dump_len // 0xFF) else self.current_dump_len % 0xFF
+            # return -5 if error during writing memory address.
+            # return -6 if error during writing number of bytes to read.
             response, mem = self.read_memory(self.current_dump_addr, len_to_dump)
             last_response = response
             if response == 0:
                 # response successful, however, memory read may still yield invalid results
                 successes += 1
-                if response == 0 and len(mem) == (len_to_dump + 1) and mem != b"\x00" * (len_to_dump + 1):
+                if response == 0 and len(mem) >= len_to_dump and mem != b"\x00" * (len_to_dump + 1):
                     read_sucesses += 1
                     with open(dump_filename, 'ab+') as f:
                         f.write(mem)
