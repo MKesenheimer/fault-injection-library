@@ -15,9 +15,12 @@ class BootloaderCom:
     ACK  = b'\x79'
     verbose = False
 
-    def __init__(self, port):
+    def __init__(self, port, dump_address=0x08000000, dump_len=0x400):
         print(f"[+] Opening serial port {port}.")
         self.ser = serial.Serial(port=port, baudrate=115200, timeout=0.25, bytesize=8, parity="E", stopbits=1)
+        # memory read settings
+        self.current_dump_addr = dump_address
+        self.current_dump_len = dump_len
 
     def check_ack(self):
         s = self.ser.read(1)
@@ -96,6 +99,57 @@ class BootloaderCom:
         #mem = self.ser.read(size)
         mem = self.ser.read(1024) # DEBUG
         return 0, mem
+
+    # Dumps the whole memory to a file.
+    # Keeps track of the current address and dump length.
+    # response = -4: no successful read, last read yielded RDP active.
+    # response = -5: no successful read, error during writing memory address.
+    # response = -6: no successful read, error during writing number of bytes to read.
+    # response = -7: if at least one read attempt was successful, however, memory read yielded invalid results.
+    # response = 0: if at least one read was successful.
+    # response = 1: Memory dump complete.
+    def dump_memory_to_file(self, dump_filename):
+        successes = 0
+        read_sucesses = 0
+        response = 0
+        while True:
+            # setup bootloader communication, this function triggers the glitch
+            # returns -4 if RDP is active.
+            response = self.setup_memread()
+            if response != 0:
+                break
+
+            # read memory if RDP is inactive
+            mem = b""
+            len_to_dump = 0xFF if (self.current_dump_len // 0xFF) else self.current_dump_len % 0xFF
+            if len_to_dump <= 0:
+                print("[+] Dump finished.")
+                return 1
+
+            response, mem = self.read_memory(self.current_dump_addr, len_to_dump)
+            if response == 0:
+                # response successful, however, memory read may still yield invalid results
+                successes += 1
+                if response == 0 and len(mem) == (len_to_dump + 1) and mem != b"\x79" * len_to_dump:
+                    read_sucesses += 1
+                    with open(dump_filename, 'ab+') as f:
+                        f.write(mem)
+                    self.current_dump_len -= len(mem)
+                    print(f"[+] Dumped 0x{len(mem):x} bytes from addr 0x{self.current_dump_addr:x}, {self.current_dump_len:x} bytes left")
+                    self.current_dump_addr += len(mem)
+            else:
+                print("[-] Memory dump failed.")
+
+            if successes > 20 and read_sucesses == 0:
+                print("[-] Something went wrong. Break.")
+                break
+
+        if successes > 0:
+            response = -7
+        if read_sucesses > 0:
+            response = 0
+
+        return response
 
     def __del__(self):
         print("[+] Closing serial port.")
