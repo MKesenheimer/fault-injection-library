@@ -129,7 +129,7 @@ class BootloaderCom:
             if response == 0:
                 # response successful, however, memory read may still yield invalid results
                 successes += 1
-                if response == 0 and len(mem) == (len_to_dump + 1) and mem != b"\x79" * len_to_dump:
+                if response == 0 and len(mem) == (len_to_dump + 1) and mem != b"\x00" * (len_to_dump + 1):
                     read_sucesses += 1
                     with open(dump_filename, 'ab+') as f:
                         f.write(mem)
