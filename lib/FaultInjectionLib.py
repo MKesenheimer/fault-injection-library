@@ -268,7 +268,7 @@ class PicoGlitcher(Glitcher):
 
     def init(self, args):
         self.pico_glitcher = PicoGlitcherInterface()
-        self.pico_glitcher.init(args.rpico, 'mp_glitcher')
+        self.pico_glitcher.init(args.rpico, 'mpGlitcher')
         self.pico_glitcher.set_trigger("tio")
         self.pico_glitcher.set_frequency(200_000_000)
         

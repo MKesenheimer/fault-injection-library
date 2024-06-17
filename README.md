@@ -54,7 +54,7 @@ A simple example how the Micropython classes and functions are accessed on the R
 This should also be the first check, if everything is set up correctly.
 ```bash
 cd blink
-python ../lib/upload-micro-python.py --port /dev/<rpi-tty-port> --script mp_blink.py
+python ../lib/upload-micro-python.py --port /dev/<rpi-tty-port> --script mpBlink.py
 python test.py --rpico /dev/tty.usbmodem11101
 ```
 
@@ -70,7 +70,7 @@ As the reset is released from the device, the trigger signal is sent.
 We install the corresponding Micropython script on the Raspberry Pi Pico:
 ```bash
 cd lib
-python upload-micro-python.py --port /dev/<rpi-tty-port> --script mp_glitcher.py
+python upload-micro-python.py --port /dev/<rpi-tty-port> --script mpGlitcher.py
 ```
 Although the software is based on Micropython, using the PIO functions of the Raspberry Pi Pico, very precise switching operations can be made and triggered on external signals.
 
@@ -106,7 +106,7 @@ In a real setup, however, the glitching line should be soldered as close as poss
 Install the Raspberry Pi Pico Micropython scripts:
 ```bash
 cd lib
-python upload-micro-python.py --port /dev/<rpi-tty-port> --script mp_glitcher.py
+python upload-micro-python.py --port /dev/<rpi-tty-port> --script mpGlitcher.py
 ```
 Next, change into `stm32-glitching` and execute the following script.
 ```bash
@@ -147,6 +147,6 @@ The board consists of a Raspberry Pi Pico, two level shifters for in- and output
 There are several connection options for different voltage sources, from 1.8V, 3.3V to 5V.
 The Pico Glitcher v1 can also be supplied with any external voltage via `VCC_EXTERN`.
 To power the target board, it is supplied with power via the `VTARGET` connection.
-The output of this voltage source can be controlled via the fault-injection-library, i.e. the target can be completely disconnected from power by executing the `power_cycle_target` command.
+The output of this voltage source can be controlled via the fault-injection-library, i.e. the target can be completely disconnected from power by executing the `helper/power-cycle-target.py` command.
 This allows a cold start of the target to be carried out in the event of error states that cannot be eliminated by a reset.
 ![Pico Glitcher v1 layout](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/pico-glitcher-v1_brd.png)
