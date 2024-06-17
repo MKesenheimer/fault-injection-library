@@ -112,6 +112,8 @@ class BootloaderCom:
         successes = 0
         read_sucesses = 0
         response = 0
+        fails = 0
+        last_response = 0
         while True:
             # setup bootloader communication, this function triggers the glitch
             # returns -4 if RDP is active.
@@ -122,11 +124,8 @@ class BootloaderCom:
             # read memory if RDP is inactive
             mem = b""
             len_to_dump = 0xFF if (self.current_dump_len // 0xFF) else self.current_dump_len % 0xFF
-            if len_to_dump <= 0:
-                print("[+] Dump finished.")
-                return 1
-
             response, mem = self.read_memory(self.current_dump_addr, len_to_dump)
+            last_response = response
             if response == 0:
                 # response successful, however, memory read may still yield invalid results
                 successes += 1
@@ -138,12 +137,19 @@ class BootloaderCom:
                     print(f"[+] Dumped 0x{len(mem):x} bytes from addr 0x{self.current_dump_addr:x}, {self.current_dump_len:x} bytes left")
                     self.current_dump_addr += len(mem)
             else:
+                fails += 1
                 print("[-] Memory dump failed.")
+
+            if self.current_dump_len <= 0:
+                print("[+] Dump finished.")
+                return 1
 
             if successes > 20 and read_sucesses == 0:
                 print("[-] Something went wrong. Break.")
                 break
 
+        if fails > 0:
+            response = last_response
         if successes > 0:
             response = -7
         if read_sucesses > 0:
