@@ -26,16 +26,19 @@ def power_cycle_read():
     time.sleep(0.2)
 
     # setup bootloader communication
+    print("[+] Reading chip ID")
     response = bootcom.init_get_id()
     print(response)
 
     if response == 0:
+        print("[+] Setting up memory read")
         response = bootcom.setup_memread()
         print(response)
 
     if response == 0:
         start = 0x08000000
         size  = 0xff
+        print("[+] Reading memory")
         response, mem = bootcom.read_memory(start, size)
         print(response)
 
