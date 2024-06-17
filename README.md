@@ -54,7 +54,7 @@ A simple example how the Micropython classes and functions are accessed on the R
 This should also be the first check, if everything is set up correctly.
 ```bash
 cd blink
-python ../lib/upload-micro-python.py --port /dev/<rpi-tty-port> --script mpBlink.py
+python ../helper/upload-micro-python.py --port /dev/<rpi-tty-port> --script mpBlink.py
 python test.py --rpico /dev/tty.usbmodem11101
 ```
 
@@ -69,8 +69,8 @@ As the reset is released from the device, the trigger signal is sent.
 
 We install the corresponding Micropython script on the Raspberry Pi Pico:
 ```bash
-cd lib
-python upload-micro-python.py --port /dev/<rpi-tty-port> --script mpGlitcher.py
+python helper/upload-micro-python.py --port /dev/<rpi-tty-port> --delete-all
+python helper/upload-micro-python.py --port /dev/<rpi-tty-port> --script lib/mpGlitcher.py
 ```
 Although the software is based on Micropython, using the PIO functions of the Raspberry Pi Pico, very precise switching operations can be made and triggered on external signals.
 

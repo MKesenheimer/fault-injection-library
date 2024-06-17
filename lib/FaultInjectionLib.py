@@ -262,13 +262,14 @@ class Glitcher():
         else:
             return number_of_experiments // elapsed_time
 
+
 class PicoGlitcher(Glitcher):
     def __init__(self):
         self.pico_glitcher = None
 
-    def init(self, args):
+    def init(self, port):
         self.pico_glitcher = PicoGlitcherInterface()
-        self.pico_glitcher.init(args.rpico, 'mpGlitcher')
+        self.pico_glitcher.init(port, 'mpGlitcher')
         self.pico_glitcher.set_trigger("tio")
         self.pico_glitcher.set_frequency(200_000_000)
         
@@ -409,6 +410,27 @@ class HuskyGlitcher(Glitcher):
         self.scope.UARTTrigger.baud = 115200
         self.scope.UARTTrigger.set_pattern_match(0, pattern)
         self.scope.UARTTrigger.trigger_source = 0
+
+    def disconnect(self):
+        if self.scope is not None:
+            print("[+] Disconnecting ChipWhisperer Husky")
+            #self.scope.io.glitch_hp = False
+            #self.scope.io.glitch_lp = False
+            self.scope.dis()
+
+    def reconnect(self, disconnect_wait=0.5):
+        self.disconnect()
+        time.sleep(disconnect_wait)
+        self.init()
+
+    def reconnect_with_uart(self, pattern, disconnect_wait=0.5):
+        self.disconnect()
+        time.sleep(disconnect_wait)
+        self.init()
+        self.uart_trigger(pattern)
+
+    def __del__(self):
+        self.disconnect()
 
 
 class ProGlitcher(Glitcher):

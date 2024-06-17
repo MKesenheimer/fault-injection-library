@@ -22,7 +22,6 @@ sys.path.insert(0, "../lib/")
 from BootloaderCom import BootloaderCom
 from FaultInjectionLib import Database, ProGlitcher, Helper
 
-
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(ProGlitcher):
     def classify(self, expected, response):
@@ -35,7 +34,6 @@ class DerivedGlitcher(ProGlitcher):
         else:
             color = "Y"
         return color
-
 
 class Main:
     def __init__(self, args):
@@ -105,17 +103,18 @@ class Main:
             while response == 0:
                 len_to_dump = 0xFF if (self.current_dump_len // 0xFF) else self.current_dump_len % 0xFF
                 response, mem = self.bootcom.read_memory(self.current_dump_addr, len_to_dump)
-                # glitch successful, however memory read may still yield invalid results
-                glitch_successes += 1
-                #if len(mem) == len_to_dump and mem != b"\x79" * len_to_dump:
-                if True: # DEBUG: write out everything, no matter what
-                    read_sucesses += 1
-                    with open(self.dump_filename, 'ab+') as f:
-                        f.write(mem)
-                    self.current_dump_len -= len_to_dump
-                    print(f"[+] Dumped 0x{len_to_dump:x} bytes from addr 0x{self.current_dump_addr:x}, {self.current_dump_len:x} bytes left")
-                    logging.info(f"Dumped 0x{len_to_dump:x} bytes from addr 0x{self.current_dump_addr:x}, {self.current_dump_len:x} bytes left")
-                    self.current_dump_addr += len_to_dump
+                if response == 0:
+                    # glitch successful, however memory read may still yield invalid results
+                    glitch_successes += 1
+                    len_to_dump = len(mem) # DEBUG: write out everything, no matter what
+                    if len(mem) == len_to_dump and mem != b"\x79" * len_to_dump:
+                        read_sucesses += 1
+                        with open(self.dump_filename, 'ab+') as f:
+                            f.write(mem)
+                        self.current_dump_len -= len_to_dump
+                        print(f"[+] Dumped 0x{len_to_dump:x} bytes from addr 0x{self.current_dump_addr:x}, {self.current_dump_len:x} bytes left")
+                        logging.info(f"Dumped 0x{len_to_dump:x} bytes from addr 0x{self.current_dump_addr:x}, {self.current_dump_len:x} bytes left")
+                        self.current_dump_addr += len_to_dump
 
             # reset memory dump if current_dump_len reaches zero
             if self.current_dump_len <= 0:
