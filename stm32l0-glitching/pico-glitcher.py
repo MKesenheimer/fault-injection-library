@@ -90,6 +90,9 @@ class Main:
             if response == 0:
                 response = self.bootcom.dump_memory_to_file(self.dump_filename)
 
+            # block until glitch
+            self.glitcher.block(timeout=2)
+
             # classify response
             color = self.glitcher.classify(expected, response)
 

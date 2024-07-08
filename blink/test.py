@@ -7,6 +7,7 @@
 #!/usr/bin/env python3
 import argparse
 import sys
+import time
 
 # import custom libraries
 sys.path.insert(0, '../lib/')
@@ -17,19 +18,57 @@ class DerivedMicroPythonScript(MicroPythonScript):
     def tick(self):
         self.pyb.exec('mp.tick()')
 
-    def blink(self):
-        self.pyb.exec('mp.blink()')
+    def enable_vtarget(self):
+        self.pyb.exec('mp.enable_vtarget()')
+
+    def disable_vtarget(self):
+        self.pyb.exec('mp.disable_vtarget()')
+
+    def enable_glitch(self):
+        self.pyb.exec('mp.enable_glitch()')
+
+    def disable_glitch(self):
+        self.pyb.exec('mp.disable_glitch()')
+
+    def enable_hpglitch(self):
+        self.pyb.exec('mp.enable_hpglitch()')
+
+    def disable_hpglitch(self):
+        self.pyb.exec('mp.disable_hpglitch()')
+
+    def enable_lpglitch(self):
+        self.pyb.exec('mp.enable_lpglitch()')
+
+    def disable_lpglitch(self):
+        self.pyb.exec('mp.disable_lpglitch()')
+
+    def reset_target(self):
+        self.pyb.exec('mp.reset_target()')
+
+    def release_reset(self):
+        self.pyb.exec('mp.release_reset()')
 
 class Main():
     def __init__(self, args):
         self.args = args
         self.micropython = DerivedMicroPythonScript()
-        self.micropython.init(self.args.rpico, 'mp_blink')
+        self.micropython.init(self.args.rpico, 'mpBlink')
 
     def run(self):
-        # call micropython function
-        self.micropython.tick()
-        #self.micropython.blink()
+        while True:
+            self.micropython.tick()
+            self.micropython.disable_vtarget()
+            self.micropython.disable_glitch()
+            self.micropython.disable_hpglitch()
+            self.micropython.disable_lpglitch()
+            self.micropython.reset_target()
+            time.sleep(0.5)
+            self.micropython.enable_vtarget()
+            self.micropython.enable_glitch()
+            self.micropython.enable_hpglitch()
+            self.micropython.enable_lpglitch()
+            self.micropython.release_reset()
+            time.sleep(0.5)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

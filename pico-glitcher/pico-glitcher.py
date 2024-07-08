@@ -35,8 +35,9 @@ class Main():
         logging.basicConfig(filename='execution.log', filemode='a', format='%(asctime)s %(message)s', level=logging.INFO, force=True)
 
         self.glitcher = DerivedGlitcher()
-        self.glitcher.init(args)
+        self.glitcher.init(port=args.rpico)
 
+        # set up the database
         self.database = Database(sys.argv, resume=self.args.resume)
 
         self.target = Serial(port=self.args.target, timeout=0.1)
@@ -45,7 +46,10 @@ class Main():
         self.start_time = int(time.time())
 
     def __del__(self):
-        self.target.close()
+        try:
+            self.target.close()
+        except:
+            pass
 
     def run(self):
         # log execution
@@ -76,7 +80,7 @@ class Main():
             response = self.target.read(len(expected))
 
             # block execution until glitch was sent
-            #self.glitcher.block()
+            self.glitcher.block()
 
             # classify response
             color = self.glitcher.classify(expected, response)

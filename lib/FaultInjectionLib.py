@@ -7,6 +7,7 @@
 
 import sqlite3
 import time
+import signal
 import serial
 import sys
 import chipwhisperer as cw
@@ -102,8 +103,8 @@ class Database_New():
         self.open()
         if experiment_id == 0:
             s_argv = ' '.join(self.argv[1:])
-            self.cur.execute("INSERT INTO metadata (stime_seconds,argv) VALUES (?,?)", [int(time.time()), s_argv])
-        self.cur.execute("INSERT INTO experiments (id,delay,length,color,response) VALUES (?,?,?,?,?)", [experiment_id, delay, length, color, response])
+            self.cur.execute("INSERT INTO metadata (stime_seconds, argv) VALUES (?, ?)", [int(time.time()), s_argv])
+        self.cur.execute("INSERT INTO experiments (id, delay, length, color, response) VALUES (?,?,?,?,?)", [experiment_id, delay, length, color, response])
         self.con.commit()
         self.close()
 
@@ -123,8 +124,8 @@ class DatabaseRCG():
     def insert(self,experiment_id, clock, delay, length, color, response):
         if experiment_id == 0:
             s_argv = ' '.join(self.argv[1:])
-            self.cur.execute("INSERT INTO metadata (stime_seconds,argv) VALUES (?,?)", [int(time.time()), s_argv])
-        self.cur.execute("INSERT INTO experiments (id,clock,delay,length,color,response) VALUES (?,?,?,?,?,?)", [experiment_id, clock,delay, length, color, response])
+            self.cur.execute("INSERT INTO metadata (stime_seconds, argv) VALUES (?, ?)", [int(time.time()), s_argv])
+        self.cur.execute("INSERT INTO experiments (id, clock, delay, length, color, response) VALUES (?, ?, ?, ?, ?, ?)", [experiment_id, clock,delay, length, color, response])
         self.con.commit()
 
     def close(self):
@@ -209,20 +210,26 @@ class PicoGlitcherInterface(MicroPythonScript):
     def arm(self, delay, length):
         self.pyb.exec(f'mp.arm({delay}, {length})')
 
-    def reset_low(self):
-        self.pyb.exec('mp.reset_low()')
+    def reset_target(self):
+        self.pyb.exec('mp.reset_target()')
 
-    def reset_high(self):
-        self.pyb.exec('mp.reset_high()')
+    def release_reset(self):
+        self.pyb.exec('mp.release_reset()')
 
-    def power_low(self):
-        self.pyb.exec('mp.power_low()')
+    def disable_vtarget(self):
+        self.pyb.exec('mp.disable_vtarget()')
 
-    def power_high(self):
-        self.pyb.exec('mp.power_high()')
+    def enable_vtarget(self):
+        self.pyb.exec('mp.enable_vtarget()')
 
     def reset(self, reset_time):
         self.pyb.exec(f'mp.reset({reset_time})')
+
+    def deactivate_sm(self):
+        self.pyb.exec('mp.deactivate_sm1()')
+
+    def restart_sm(self):
+        self.pyb.exec('mp.restart_sm1()')
 
     def block(self):
         self.pyb.exec('mp.block()')
@@ -276,38 +283,49 @@ class PicoGlitcher(Glitcher):
     def arm(self, delay, length):
         self.pico_glitcher.arm(delay, length)
 
-    def block(self):
-        self.pico_glitcher.block()
+    def __timeout_handler(self, num, stack):
+        self.pico_glitcher.deactivate_sm()
+        #self.pico_glitcher.arm(100_500, 1)
+        self.pico_glitcher.restart_sm()
+        raise Exception("timeout")
+
+    def block(self, timeout=10):
+        signal.signal(signal.SIGALRM, self.__timeout_handler)
+        signal.alarm(timeout)
+        try:
+            self.pico_glitcher.block()
+        except Exception as e:
+            print(f"[+] Timeout received {e}. Continuing.")
+        finally:
+            signal.alarm(0)
 
     def get_sm2_output(self):
         return self.pico_glitcher.get_sm2_output()
 
     def reset(self, reset_time=0.2):
-        self.pico_glitcher.reset_low()
-        time.sleep(reset_time)
-        self.pico_glitcher.reset_high()
+        self.pico_glitcher.reset(reset_time)
 
     def power_cycle_target(self, power_cycle_time=0.2):
         self.pico_glitcher.power_cycle_target(power_cycle_time)
 
     def power_cycle_reset(self, power_cycle_time=0.2):
-        self.pico_glitcher.power_low()
-        self.pico_glitcher.reset_low()
+        self.pico_glitcher.disable_vtarget()
+        self.pico_glitcher.reset_target()
         time.sleep(power_cycle_time)
-        self.pico_glitcher.reset_high()
-        self.pico_glitcher.power_high()
+        self.pico_glitcher.release_reset()
+        self.pico_glitcher.enable_vtarget()
 
     def reset_and_eat_it_all(self, target, target_timeout=0.3):
-        self.pico_glitcher.reset_low()
+        self.pico_glitcher.reset_target()
         target.ser.timeout = target_timeout
         target.read(4096)
         target.ser.timeout = target.timeout
-        self.pico_glitcher.reset_high()
+        self.pico_glitcher.release_reset()
 
     def reset_wait(self, target, token, reset_time=0.2, debug=False):
-        self.pico_glitcher.reset_low()
+        self.pico_glitcher.reset_target()
         time.sleep(reset_time)
-        self.pico_glitcher.reset_high()
+        self.pico_glitcher.release_reset()
 
         response = target.read(4096)
         for _ in range(0, 5):
