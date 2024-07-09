@@ -5,14 +5,11 @@
 # If not, please write to: m.kesenheimer@gmx.net.
 
 import machine
-import utime
 from rp2 import asm_pio, PIO, StateMachine
-from machine import UART, Pin
+from machine import Pin
 import time
 
-# PDND specific
-pdnd_out_base = 9
-pdnd_in_base = 1
+# number of bits for UART
 BITS = 8
 
 @asm_pio(set_init=(PIO.OUT_LOW))
@@ -25,8 +22,8 @@ def glitch_tio_trigger():
     mov(y, osr)
 
     # wait for rising on trigger pin
-    wait(0, gpio, 18)
-    wait(1, gpio, 18)
+    wait(0, gpio, 15)
+    wait(1, gpio, 15)
 
     # wait delay
     label("delay_loop")
@@ -103,15 +100,29 @@ class MicroPythonScript():
         self.trigger = None
         self.baudrate = 115200
         self.set_frequency(200_000_000)
-        # This pin can be used to additionally power-cycle the target.
-        # Meaning, that before every glitch this pin is pulled to GND.
-        self.pin_power = Pin(1 + pdnd_out_base, Pin.OUT, Pin.PULL_UP)
-        self.pin_led = Pin("LED", Pin.OUT)
-        # trigger and glitch pins
-        self.pin_trigger = Pin(18, Pin.IN, Pin.PULL_DOWN)
-        self.pin_glitch = Pin(19, Pin.OUT, Pin.PULL_DOWN)
-        # reset pin
-        self.pin_reset = Pin(0 + pdnd_out_base, Pin.OUT, Pin.PULL_UP)
+        # LED
+        self.led = Pin("LED", Pin.OUT)
+        self.led.low()
+        # VTARGET_OC (active low, overcurrent response)
+        self.pin_vtarget_oc = Pin(21, Pin.OUT, Pin.PULL_UP)
+        self.pin_vtarget_oc.high()
+        # VTARGET_EN (active low)
+        self.pin_power = Pin(20, Pin.OUT, Pin.PULL_UP)
+        self.pin_power.high()
+        # RESET
+        self.pin_reset = Pin(0, Pin.OUT, Pin.PULL_UP)
+        self.pin_reset.low()
+        # GLITCH_EN
+        self.pin_glitch_en = Pin(1, Pin.OUT, Pin.PULL_DOWN)
+        self.pin_glitch_en.low()
+        # TRIGGER
+        self.pin_trigger = Pin(15, Pin.IN, Pin.PULL_DOWN)
+        # HP_GLITCH
+        self.pin_hpglitch = Pin(16, Pin.OUT, Pin.PULL_DOWN)
+        self.pin_hpglitch.low()
+        # LP_GLITCH
+        self.pin_lpglitch = Pin(17, Pin.OUT, Pin.PULL_DOWN)
+        self.pin_lpglitch.low()
 
     def set_frequency(self, frequency=200_000_000):
         machine.freq(frequency)
@@ -126,12 +137,17 @@ class MicroPythonScript():
     def set_pattern_match(self, pattern):
         self.pattern = pattern
 
-    def power_cycle_target(self, power_cycle_time=0.2):
-        self.pin_led.low()
+    def enable_vtarget(self):
         self.pin_power.low()
-        time.sleep(power_cycle_time)
-        self.pin_led.high()
+
+    def disable_vtarget(self):
         self.pin_power.high()
+
+    def power_cycle_target(self, power_cycle_time=0.2):
+        self.disable_vtarget()
+        time.sleep(power_cycle_time)
+        self.enable_vtarget()
+        self.pin_glitch_en.low()
 
     def reset_low(self):
         self.pin_reset.low()
@@ -139,34 +155,36 @@ class MicroPythonScript():
     def reset_high(self):
         self.pin_reset.high()
 
-    def power_low(self):
-        self.pin_led.low()
-        self.pin_power.low()
+    def reset_target(self):
+        self.pin_reset.low()
 
-    def power_high(self):
-        self.pin_led.high()
-        self.pin_power.high()
+    def release_reset(self):
+        self.pin_reset.high()
 
     def reset(self, reset_time=0.01):
-        self.pin_reset.low()
+        self.reset_target()
         time.sleep(reset_time)
-        self.pin_reset.high()
+        self.release_reset()
+        self.pin_glitch_en.low()
 
     def arm(self, delay, length):
-        self.pin_reset.high()
-        self.pin_led.high()
-        self.pin_power.high()
-        self.pin_glitch.low()
+        self.release_reset()
+        self.pin_glitch_en.high()
+        self.enable_vtarget()
+        self.pin_hpglitch.low()
+        self.pin_lpglitch.low()
 
         if self.trigger == "tio":
-            self.sm1 = StateMachine(1, glitch_tio_trigger, freq=self.frequency, set_base=self.pin_glitch)
+            # TODO: je nachdem ob hp oder lp glitch: set_base setzen
+            self.sm1 = StateMachine(1, glitch_tio_trigger, freq=self.frequency, set_base=self.pin_hpglitch)
             self.sm1.active(1)
             # push delay and length into the fifo of the statemachine
             self.sm1.put(delay // (1_000_000_000 // self.frequency))
             self.sm1.put(length // (1_000_000_000 // self.frequency))
         
         elif self.trigger == "uart":
-            self.sm1 = StateMachine(1, glitch_uart_trigger, freq=self.frequency, set_base=self.pin_glitch)
+            # TODO: je nachdem ob hp oder lp glitch: set_base setzen
+            self.sm1 = StateMachine(1, glitch_uart_trigger, freq=self.frequency, set_base=self.pin_hpglitch)
             self.sm1.active(1)
             # push delay and length into the fifo of the statemachine
             self.sm1.put(delay // (1_000_000_000 // self.frequency))
@@ -178,14 +196,19 @@ class MicroPythonScript():
             pattern = self.pattern << (32 - BITS)
             self.sm2.put(pattern)
 
+    def deactivate_sm1(self):
+        self.sm1.active(0)
+
+    def restart_sm1(self):
+        self.sm1.restart()
 
     def block(self):
-        if self.sm1 != None:
+        if self.sm1 is not None:
             # wait until statemachine execution is finished
-            res = self.sm1.get()
+            self.sm1.get()
 
     def get_sm2_output(self):
-        if self.sm1 != None:
+        if self.sm2 is not None:
             # pull the output of statemachine 2
             res = self.sm2.get()
-            print(x)
+            print(res)

@@ -268,7 +268,7 @@ class PicoGlitcher(Glitcher):
 
     def init(self, args):
         self.pico_glitcher = PicoGlitcherInterface()
-        self.pico_glitcher.init(args.rpico, 'mp_glitcher')
+        self.pico_glitcher.init(args.rpico, 'mpGlitcher')
         self.pico_glitcher.set_trigger("tio")
         self.pico_glitcher.set_frequency(200_000_000)
         
@@ -282,9 +282,7 @@ class PicoGlitcher(Glitcher):
         return self.pico_glitcher.get_sm2_output()
 
     def reset(self, reset_time=0.2):
-        self.pico_glitcher.reset_low()
-        time.sleep(reset_time)
-        self.pico_glitcher.reset_high()
+        self.pico_glitcher.reset(reset_time)
 
     def power_cycle_target(self, power_cycle_time=0.2):
         self.pico_glitcher.power_cycle_target(power_cycle_time)

@@ -104,7 +104,7 @@ class Main:
                 response, mem = bootloader_com.bootloader_read_memory(self.serial, start, size)
 
             # block execution until glitch was sent
-            # self.glitcher.block()
+            self.glitcher.block()
 
             # classify response
             color = self.glitcher.classify(expected, response)
