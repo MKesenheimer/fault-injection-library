@@ -72,6 +72,10 @@ class Main():
             delay = random.randint(s_delay, e_delay)
             self.glitcher.arm(delay, length)
 
+            # power cycle
+            #self.glitcher.power_cycle_target(0.5)
+            #time.sleep(0.05)
+
             # reset target
             self.glitcher.reset(0.01)
             time.sleep(0.01)

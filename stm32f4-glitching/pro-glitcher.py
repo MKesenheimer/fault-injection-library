@@ -29,7 +29,7 @@ class DerivedGlitcher(ProGlitcher):
             color = "G"
         elif response >= 0:
             color = "R"
-        elif response == -7:
+        elif response == -8:
             color = "M"
         else:
             color = "Y"
@@ -106,7 +106,7 @@ class Main:
             experiment_id += 1
 
             # exit if too many successive fails (including a supposedly successful memory read)
-            if response in (0, -1, -3, -5, -6, -7) and self.response_before in (0, -1, -3, -5, -6, -7):
+            if response in (0, -1, -3, -5, -6, -7, -8) and self.response_before in (0, -1, -3, -5, -6, -7, -8):
                 self.successive_fails += 1
             else:
                 self.successive_fails = 0

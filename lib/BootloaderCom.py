@@ -24,10 +24,11 @@ class BootloaderCom:
 
     def check_ack(self):
         s = self.ser.read(1)
-        if s != self.ACK:
-            #print(s)
+        if s == self.NACK:
+            return 1
+        elif s == self.ACK:
             return 0
-        return 1
+        return -1
 
     def flush(self):
         # read garbage and discard
@@ -36,12 +37,12 @@ class BootloaderCom:
     def init_get_id(self):
         # init bootloader
         self.ser.write(b'\x7f')
-        if self.check_ack() == 0:
+        if self.check_ack():
             return -1
 
         # get chip id command (x02: chip id, xfd: crc)
         self.ser.write(b'\x02\xfd')
-        if self.check_ack() == 0:
+        if self.check_ack():
             return -2
         
         # read chip id
@@ -49,9 +50,9 @@ class BootloaderCom:
         id = s[1:3]
 
         if self.verbose:
-            print(f"Chip ID: {id}")
+            print(f"[+] Chip ID: {id}")
 
-        if self.check_ack() == 0:
+        if self.check_ack():
             return -3
         return 0
 
@@ -64,14 +65,18 @@ class BootloaderCom:
             set_trigger_out(False)
 
         # if rdp is activated, a nack is returned (x1f)
-        if self.check_ack() == 0:
+        if self.check_ack() == 1:
             if self.verbose:
-                print("RDP is active. Can not read memory.")
+                print("[-] RDP is active. Can not read memory.")
             return -4
-        else:
+        elif self.check_ack() == 0:
             if self.verbose:
-                print("RDP is not active. Memory read command available.")
-        return 0
+                print("[+] RDP is not active. Memory read command available.")
+            return 0
+        elif self.check_ack() == -1:
+            if self.verbose:
+                print("[-] Warning: Neither ACK nor NACK received.")
+        return -5
 
     def read_memory(self, start, size):
         # write memory address
@@ -79,8 +84,8 @@ class BootloaderCom:
         crc = reduce(lambda x, y: x ^ y, startb, 0).to_bytes(1, 'big')
         self.ser.write(startb)
         self.ser.write(crc)
-        if self.check_ack() == 0:
-            return -5, b''
+        if self.check_ack():
+            return -6, b''
 
         # write bytes to read
         sizeb = size.to_bytes(1, 'big')
@@ -88,8 +93,8 @@ class BootloaderCom:
         # write number of bytes to read
         self.ser.write(sizeb)
         self.ser.write(crc)
-        if self.check_ack() == 0:
-            return -6, b''
+        if self.check_ack():
+            return -7, b''
 
         #time.sleep(0.01)
         t = random.uniform(0.01, 0.5) # DEBUG
@@ -102,10 +107,11 @@ class BootloaderCom:
 
     # Dumps the whole memory to a file.
     # Keeps track of the current address and dump length.
-    # response = -4: no successful read, last read yielded RDP active.
-    # response = -5: no successful read, error during writing memory address.
-    # response = -6: no successful read, error during writing number of bytes to read.
-    # response = -7: if at least one read attempt was successful, however, memory read yielded invalid results.
+    # response = -4: memory read unsuccessful, last read yielded RDP active.
+    # response = -5:
+    # response = -6: memory read unsuccessful, error during writing memory address.
+    # response = -7: memory read unsuccessful, error during writing number of bytes to read.
+    # response = -8: if at least one read attempt was successful, however, memory read yielded invalid results.
     # response = 0: if at least one read was successful.
     # response = 1: Memory dump complete.
     def dump_memory_to_file(self, dump_filename):
@@ -117,21 +123,26 @@ class BootloaderCom:
         while True:
             # setup bootloader communication, this function triggers the glitch
             # returns -4 if RDP is active.
+            # returns -5 if neither ACK nor NACK was received
             response = self.setup_memread()
+            if self.verbose:
+                print(f"[+] Command setup_memread response: {response}")
             if response != 0:
                 break
 
             # read memory if RDP is inactive
             mem = b""
             len_to_dump = 0xFF if (self.current_dump_len // 0xFF) else self.current_dump_len % 0xFF
-            # return -5 if error during writing memory address.
-            # return -6 if error during writing number of bytes to read.
+            # return -6 if error during writing memory address.
+            # return -7 if error during writing number of bytes to read.
             response, mem = self.read_memory(self.current_dump_addr, len_to_dump)
+            if self.verbose:
+                print(f"[+] Command read_memory response: {response}")
             last_response = response
             if response == 0:
                 # response successful, however, memory read may still yield invalid results
                 successes += 1
-                if len(mem) == len_to_dump and mem != b"\x00" * (len_to_dump + 1):
+                if len(mem) == (len_to_dump + 1) and mem != b"\x00" * (len_to_dump + 1):
                     read_sucesses += 1
                     with open(dump_filename, 'ab+') as f:
                         f.write(mem)
@@ -153,7 +164,7 @@ class BootloaderCom:
         if fails > 0:
             response = last_response
         if successes > 0:
-            response = -7
+            response = -8
         if read_sucesses > 0:
             response = 0
 

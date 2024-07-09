@@ -27,16 +27,18 @@ class Main:
     def run(self):
         while True:
             # reset target
+            self.glitcher.power_cycle_target()
             self.glitcher.reset(0.01)
-            #self.glitcher.power_cycle_target()
             time.sleep(0.01)
 
             # setup bootloader communication
             response = self.bootcom.init_get_id()
+            print(f"[+] Command get_id response: {response}")
 
             if response == 0:
-                # dump memory, this function triggers the glitch
+                # dump memory
                 response = self.bootcom.dump_memory_to_file(self.dump_filename)
+                print(f"[+] Command dump_memory response: {response}")
 
             if response == 1:
                 # Dump finished
