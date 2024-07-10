@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright (C) 2024 Dr. Matthias Kesenheimer - All Rights Reserved.
 # You may use, distribute and modify this code under the terms of the GPL3 license.
 #
@@ -5,10 +6,40 @@
 # If not, please write to: m.kesenheimer@gmx.net.
 
 import serial
-import time
 from functools import reduce
 import sys
-import random
+from GlitchState import ErrorType, OKType, ExpectedType, SuccessType
+
+class _Expected(ExpectedType):
+    default = 0
+    rdp_active = 1
+
+class _Error(ErrorType):
+    default = 0
+    nack = 1
+    no_response = 2
+    bootloader_not_available = 3
+    bootloader_error = 4
+    id_error = 5
+
+class _OK(OKType):
+    default = 0
+    ack = 1
+    bootloader_ok = 2
+    rdp_inactive = 3
+    dump_ok = 4
+    dump_error = 5
+    dump_finished = 6
+
+class _Success(SuccessType):
+    default = 0
+    dump_successful = 1
+
+class GlitchState():
+    Error = _Error
+    OK = _OK
+    Expected = _Expected
+    Success = _Success
 
 class BootloaderCom:
     NACK = b'\x1f'
@@ -17,7 +48,7 @@ class BootloaderCom:
 
     def __init__(self, port, dump_address=0x08000000, dump_len=0x400):
         print(f"[+] Opening serial port {port}.")
-        self.ser = serial.Serial(port=port, baudrate=115200, timeout=0.25, bytesize=8, parity="E", stopbits=1)
+        self.ser = serial.Serial(port=port, baudrate=115200, timeout=0.1, bytesize=8, parity="E", stopbits=1)
         # memory read settings
         self.current_dump_addr = dump_address
         self.current_dump_len = dump_len
@@ -25,10 +56,10 @@ class BootloaderCom:
     def check_ack(self):
         s = self.ser.read(1)
         if s == self.NACK:
-            return 1
+            return GlitchState.Error.nack
         elif s == self.ACK:
-            return 0
-        return -1
+            return GlitchState.OK.ack
+        return GlitchState.Error.no_response
 
     def flush(self):
         # read garbage and discard
@@ -37,55 +68,51 @@ class BootloaderCom:
     def init_get_id(self):
         # init bootloader
         self.ser.write(b'\x7f')
-        if self.check_ack():
-            return -1
+        if issubclass(type(self.check_ack()), ErrorType):
+            return GlitchState.Error.bootloader_not_available
 
         # get chip id command (x02: chip id, xfd: crc)
         self.ser.write(b'\x02\xfd')
-        if self.check_ack():
-            return -2
+        if issubclass(type(self.check_ack()), ErrorType):
+            return GlitchState.Error.id_error
         
         # read chip id
         s = self.ser.read(3)
-        id = s[1:3]
+        chipid = s[1:3]
 
         if self.verbose:
-            print(f"[+] Chip ID: {id}")
+            print(f"[+] Chip ID: {chipid}")
+        return GlitchState.OK.default
 
-        if self.check_ack():
-            return -3
-        return 0
+    # returns "bootloader_ok" if bootloader setup was successful (expected)
+    # returns "bootloader_error" else
+    def init_bootloader(self):
+        # init bootloader
+        self.ser.write(b'\x7f')
+        s = self.ser.read(1)
+        if s == self.ACK:
+            return GlitchState.OK.bootloader_ok
+        return GlitchState.Error.bootloader_error
 
-    def setup_memread(self, set_trigger_out=None):
+    # returns "rdp_active" if RDP is active (expected)
+    # returns "rdp_inactive" if glitch was successful
+    def setup_memread(self):
         # read memory (x11: read memory, xee: crc)
-        if set_trigger_out is not None:
-            set_trigger_out(True)
         self.ser.write(b'\x11\xee')
-        if set_trigger_out is not None:
-            set_trigger_out(False)
+        s = self.ser.read(1)
+        if s == self.ACK:
+            return GlitchState.OK.rdp_inactive
+        return GlitchState.Expected.rdp_active
 
-        # if rdp is activated, a nack is returned (x1f)
-        if self.check_ack() == 1:
-            if self.verbose:
-                print("[-] RDP is active. Can not read memory.")
-            return -4
-        elif self.check_ack() == 0:
-            if self.verbose:
-                print("[+] RDP is not active. Memory read command available.")
-            return 0
-        elif self.check_ack() == -1:
-            if self.verbose:
-                print("[-] Warning: Neither ACK nor NACK received.")
-        return -5
-
+    # returns "dump_ok" if glitch and memory read was successful
+    # returns "dump_error" if glitch was successful, however memory read yielded erroneous results
     def read_memory(self, start, size):
         # write memory address
         startb = start.to_bytes(4, 'big')
         crc = reduce(lambda x, y: x ^ y, startb, 0).to_bytes(1, 'big')
         self.ser.write(startb)
         self.ser.write(crc)
-        if self.check_ack():
-            return -6, b''
+        self.ser.read(1)
 
         # write bytes to read
         sizeb = size.to_bytes(1, 'big')
@@ -93,82 +120,42 @@ class BootloaderCom:
         # write number of bytes to read
         self.ser.write(sizeb)
         self.ser.write(crc)
-        if self.check_ack():
-            return -7, b''
-
-        #time.sleep(0.01)
-        t = random.uniform(0.01, 0.5) # DEBUG
-        time.sleep(t)
+        self.ser.read(1)
 
         # read memory
-        #mem = self.ser.read(size)
-        mem = self.ser.read(1024) # DEBUG
-        return 0, mem
+        mem = self.ser.read(size)
 
-    # Dumps the whole memory to a file.
-    # Keeps track of the current address and dump length.
-    # response = -4: memory read unsuccessful, last read yielded RDP active.
-    # response = -5:
-    # response = -6: memory read unsuccessful, error during writing memory address.
-    # response = -7: memory read unsuccessful, error during writing number of bytes to read.
-    # response = -8: if at least one read attempt was successful, however, memory read yielded invalid results.
-    # response = 0: if at least one read was successful.
-    # response = 1: Memory dump complete.
+        print(f"[+] Length of memory dump: {len(mem)}")
+        print(f"[+] Content: {mem}")
+        response = GlitchState.OK.default
+        if len(mem) == 255 and mem != b"\x00" * 255:
+            response = GlitchState.OK.dump_ok
+        else:
+            response = GlitchState.OK.dump_error
+        return response, mem
+
+    # returns "error" if memory read was erroneous
+    # returns "dump_successful" if one dump was successful
+    # returns "dump_finished" if entire memory was dummped
     def dump_memory_to_file(self, dump_filename):
-        successes = 0
-        read_sucesses = 0
-        response = 0
-        fails = 0
-        last_response = 0
-        while True:
-            # setup bootloader communication, this function triggers the glitch
-            # returns -4 if RDP is active.
-            # returns -5 if neither ACK nor NACK was received
-            response = self.setup_memread()
-            if self.verbose:
-                print(f"[+] Command setup_memread response: {response}")
-            if response != 0:
-                break
+        # read memory if RDP is inactive
+        len_to_dump = 0xFF if (self.current_dump_len // 0xFF) else self.current_dump_len % 0xFF
+        response, mem = self.read_memory(self.current_dump_addr, len_to_dump)
 
-            # read memory if RDP is inactive
-            mem = b""
-            len_to_dump = 0xFF if (self.current_dump_len // 0xFF) else self.current_dump_len % 0xFF
-            # return -6 if error during writing memory address.
-            # return -7 if error during writing number of bytes to read.
-            response, mem = self.read_memory(self.current_dump_addr, len_to_dump)
-            if self.verbose:
-                print(f"[+] Command read_memory response: {response}")
-            last_response = response
-            if response == 0:
-                # response successful, however, memory read may still yield invalid results
-                successes += 1
-                if len(mem) == (len_to_dump + 1) and mem != b"\x00" * (len_to_dump + 1):
-                    read_sucesses += 1
-                    with open(dump_filename, 'ab+') as f:
-                        f.write(mem)
-                    self.current_dump_len -= len(mem)
-                    print(f"[+] Dumped 0x{len(mem):x} bytes from addr 0x{self.current_dump_addr:x}, {self.current_dump_len:x} bytes left")
-                    self.current_dump_addr += len(mem)
-            else:
-                fails += 1
-                print("[-] Memory dump failed.")
+        if issubclass(type(response), ErrorType):
+            return response
 
-            if self.current_dump_len <= 0:
-                print("[+] Dump finished.")
-                return 1
+        # write memory dump to file
+        with open(dump_filename, 'ab+') as f:
+            f.write(mem)
+        self.current_dump_len -= len(mem)
+        print(f"[+] Dumped 0x{len(mem):x} bytes from addr 0x{self.current_dump_addr:x}, {self.current_dump_len:x} bytes left")
+        self.current_dump_addr += len(mem)
 
-            if successes > 20 and read_sucesses == 0:
-                print("[-] Something went wrong. Break.")
-                break
-
-        if fails > 0:
-            response = last_response
-        if successes > 0:
-            response = -8
-        if read_sucesses > 0:
-            response = 0
-
-        return response
+        if self.current_dump_len <= 0:
+            print("[+] Dump finished.")
+            return GlitchState.OK.dump_finished
+        return GlitchState.Success.dump_successful
 
     def __del__(self):
         print("[+] Closing serial port.")

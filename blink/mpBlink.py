@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright (C) 2024 Dr. Matthias Kesenheimer - All Rights Reserved.
 # You may use, distribute and modify this code under the terms of the GPL3 license.
 #

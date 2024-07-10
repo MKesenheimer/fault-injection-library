@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright (C) 2024 Dr. Matthias Kesenheimer - All Rights Reserved.
 # This file is based on TAoFI-FaultLib which is released under the GPL3 license.
 # Go to https://github.com/raelize/TAoFI-FaultLib/LICENSE for full license details.
@@ -15,8 +16,8 @@ import datetime
 from termcolor import colored
 import os
 import glob
-
 import pyboard
+from GlitchState import ErrorType, OKType, ExpectedType, SuccessType
 
 class Database():
     def __init__(self, argv, dbname=None, resume=False):
@@ -242,14 +243,14 @@ class Glitcher():
     def __init__(self):
         pass
 
-    def classify(self, expected, response):
-        if response == expected:
+    def classify(self, state):
+        if issubclass(type(state), ExpectedType):
             color = 'G'
-        elif b'Falling' in response:
+        elif issubclass(type(state), SuccessType):
             color = 'R'
-        elif b'Fatal exception' in response:
+        elif issubclass(type(state), OKType):
             color = 'M'
-        else:
+        elif issubclass(type(state), ErrorType):
             color = 'Y'
         return color
 

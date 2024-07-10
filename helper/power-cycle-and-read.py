@@ -1,55 +1,83 @@
 #!/usr/bin/env python3
+# Copyright (C) 2024 Dr. Matthias Kesenheimer - All Rights Reserved.
+# You may use, distribute and modify this code under the terms of the GPL3 license.
+#
+# You should have received a copy of the GPL3 license with this file.
+# If not, please write to: m.kesenheimer@gmx.net.
+
+import argparse
 import sys
 import time
 
 # import custom libraries
 sys.path.insert(0, "../lib/")
-from BootloaderCom import BootloaderCom
-from FaultInjectionLib import ProGlitcher
+from BootloaderCom import BootloaderCom, GlitchState
+from FaultInjectionLib import ProGlitcher, PicoGlitcher, Helper
+from GlitchState import OKType
 
-def init(port="/dev/ttyUSB0"):
-    print("[+] Initializing ProGlitcher")
-    global glitcher
-    glitcher = ProGlitcher()
-    glitcher.init()
-    global bootcom
-    bootcom = BootloaderCom(port=port)
+class Main:
+    def __init__(self, args):
+        self.args = args
 
-def power_cycle_read():
-    print("[+] Power cycling target")
-    global glitcher
-    global bootcom
+        if self.args.rpico == "":
+            print("[+] Initializing ProGlitcher")
+            self.glitcher = ProGlitcher()
+            self.glitcher.init()
+        else:
+            print("[+] Initializing PicoGlitcher")
+            self.glitcher = PicoGlitcher()
+            self.glitcher.init(port=args.rpico)
 
-    # reset target
-    #glitcher.reset(0.01)
-    glitcher.power_cycle_target()
-    time.sleep(0.2)
+        self.bootcom = BootloaderCom(port=self.args.target)
+        self.dump_filename = f"{Helper.timestamp()}_memory_dump.bin"
 
-    # setup bootloader communication
-    print("[+] Reading chip ID")
-    response = bootcom.init_get_id()
-    print(response)
+    def run(self):
+        while True:
+            print("[+] Power cycling target")
+            # reset target
+            self.glitcher.power_cycle_target()
+            self.glitcher.reset(0.01)
+            time.sleep(0.2)
 
-    if response == 0:
-        print("[+] Setting up memory read")
-        response = bootcom.setup_memread()
-        print(response)
+            # setup bootloader communication
+            print("[+] Initializing bootloader")
+            response = self.bootcom.init_bootloader()
 
-    if response == 0:
-        start = 0x08000000
-        size  = 0xff
-        print("[+] Reading memory")
-        response, mem = bootcom.read_memory(start, size)
-        print(response)
+            if issubclass(type(response), OKType):
+                print("[+] Setting up memory read")
+                response = self.bootcom.setup_memread()
+                print(f"[+] Command setup_memread response: {response}")
 
-    if response == 0:
-        print(mem)
+            if issubclass(type(response), OKType):
+                if self.args.dump:
+                    # dump memory
+                    response = self.bootcom.dump_memory_to_file(self.dump_filename)
+                    print(f"[+] Command dump_memory_to_file response: {response}")
+
+                    # Dump finished
+                    if response == GlitchState.OK.dump_finished:
+                        break
+                else:
+                    start = 0x08000000
+                    size  = 0xff
+                    print("[+] Reading memory")
+                    response, mem = self.bootcom.read_memory(start, size)
+                    print(f"[+] Command read_memory response: {response}")
+                    print(mem)
+                    break
+
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--target", required=False, help="target port", default="/dev/ttyUSB1")
+    parser.add_argument("--rpico", required=False, help="rpico port", default="")
+    parser.add_argument("--dump", required=False, action='store_true')
+    args = parser.parse_args()
+
+    main = Main(args)
+
     try:
-        init(port=sys.argv[1])
-        while True:
-            power_cycle_read()
+        main.run()
     except KeyboardInterrupt:
         print("\nExitting...")
         sys.exit(1)

