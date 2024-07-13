@@ -119,8 +119,13 @@ class Main:
                     response_str = str(response).encode("utf-8")
                     self.database.insert(experiment_id, delay, length, color, response_str)
 
-                    # exit
-                    break
+                    # ... and try again
+                self.glitcher.reconnect_with_uart(pattern=0x11, disconnect_wait=1)
+                self.glitcher.power_cycle_target(1)
+                time.sleep(1)
+                self.bootcom.flush()
+                self.successive_fails = 0
+                #break
 
             # increase experiment id
             experiment_id += 1
