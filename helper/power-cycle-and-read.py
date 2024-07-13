@@ -42,6 +42,7 @@ class Main:
             # setup bootloader communication
             print("[+] Initializing bootloader")
             response = self.bootcom.init_bootloader()
+            print(f"[+] Command init_bootloader response: {response}")
 
             if issubclass(type(response), OKType):
                 print("[+] Setting up memory read")
