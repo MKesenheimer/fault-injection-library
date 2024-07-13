@@ -42,7 +42,9 @@ class Database():
             self.cur.execute("CREATE TABLE experiments(id integer, delay integer, length integer, color text, response blob)")
             self.cur.execute("CREATE TABLE metadata (stime_seconds integer, argv blob)")
 
-        self.base_row_count = self.get_number_of_experiments()
+        self.base_row_count = self.get_latest_experiment_id()
+        if self.base_row_count is None:
+            self.base_row_count = 0
         if resume or dbname is not None:
             print(f"[+] Number of experiments in previous database: {self.base_row_count}")
 
@@ -53,8 +55,17 @@ class Database():
         self.cur.execute("INSERT INTO experiments (id,delay,length,color,response) VALUES (?,?,?,?,?)", [experiment_id + self.base_row_count, delay, length, color, response])
         self.con.commit()
 
+    def get_parameters_of_experiment(self, experiment_id):
+        self.cur.execute("SELECT * FROM experiments WHERE id = (?);", [experiment_id + self.base_row_count])
+        self.con.commit()
+        return next(self.cur, [None])
+
     def remove(self, experiment_id):
         self.cur.execute("DELETE FROM experiments WHERE id = (?);", [experiment_id + self.base_row_count])
+        self.con.commit()
+
+    def cleanup(self, color):
+        self.cur.execute("DELETE FROM experiments WHERE color = (?);", [color])
         self.con.commit()
 
     def get_number_of_experiments(self):
@@ -63,71 +74,13 @@ class Database():
         row_count = result[0]
         return row_count
 
+    def get_latest_experiment_id(self):
+        self.cur.execute("SELECT * FROM experiments WHERE id=(SELECT max(id) FROM experiments);")
+        self.con.commit()
+        return next(self.cur, [None])[0]
+
     def get_base_experiments_count(self):
         return self.base_row_count
-
-    def close(self):
-        self.con.close()
-
-class Database_New():
-    def __init__(self, argv):
-        self.argv = argv
-
-        script_name = os.path.basename(self.argv[0])
-        self.dbname = f"{script_name}_%s.sqlite" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        
-        if not os.path.isdir('databases'):
-            os.mkdir("databases")
-        
-        self.con = None
-        self.cur = None
-        self.init()
-
-    def open(self):
-        database_path = os.path.join('database/',self.dbname)
-        self.con = sqlite3.connect(database_path, timeout=10)
-        self.cur = self.con.cursor()
-
-    def close(self):
-        if self.cur is not None:
-            self.cur.close()
-        if self.con is not None:
-            self.con.close()
-
-    def init(self):
-        self.open()
-        self.cur.execute("CREATE TABLE experiments(id integer, delay integer, length integer, color text, response blob)")
-        self.cur.execute("CREATE TABLE metadata (stime_seconds integer, argv blob)")        
-        self.close()
-
-    def insert(self,experiment_id, delay, length, color, response):
-        self.open()
-        if experiment_id == 0:
-            s_argv = ' '.join(self.argv[1:])
-            self.cur.execute("INSERT INTO metadata (stime_seconds, argv) VALUES (?, ?)", [int(time.time()), s_argv])
-        self.cur.execute("INSERT INTO experiments (id, delay, length, color, response) VALUES (?,?,?,?,?)", [experiment_id, delay, length, color, response])
-        self.con.commit()
-        self.close()
-
-
-class DatabaseRCG():
-    def __init__(self, argv):
-        script_name = os.path.basename(sys.argv[0])
-        self.dbname = f"{script_name}_%s.sqlite" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        if not os.path.isdir('databases'):
-            os.mkdir("databases")
-        self.con = sqlite3.connect("databases/" + self.dbname)
-        self.cur = self.con.cursor()
-        self.argv = argv
-        self.cur.execute("CREATE TABLE experiments(id integer, clock integer, delay integer, length integer, color text, response blob)")
-        self.cur.execute("CREATE TABLE metadata (stime_seconds integer, argv blob)")
-
-    def insert(self,experiment_id, clock, delay, length, color, response):
-        if experiment_id == 0:
-            s_argv = ' '.join(self.argv[1:])
-            self.cur.execute("INSERT INTO metadata (stime_seconds, argv) VALUES (?, ?)", [int(time.time()), s_argv])
-        self.cur.execute("INSERT INTO experiments (id, clock, delay, length, color, response) VALUES (?, ?, ?, ?, ?, ?)", [experiment_id, clock,delay, length, color, response])
-        self.con.commit()
 
     def close(self):
         self.con.close()

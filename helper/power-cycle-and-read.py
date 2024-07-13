@@ -55,7 +55,7 @@ class Main:
                     print(f"[+] Command dump_memory_to_file response: {response}")
 
                     # Dump finished
-                    if response == GlitchState.OK.dump_finished:
+                    if response == GlitchState.Success.dump_finished:
                         break
                 else:
                     start = 0x08000000

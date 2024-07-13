@@ -99,7 +99,7 @@ class MicroPythonScript():
         self.frequency = None
         self.trigger = None
         self.baudrate = 115200
-        self.set_frequency(200_000_000)
+        self.set_frequency(270_000_000) # overclocking supposedly works
         # LED
         self.led = Pin("LED", Pin.OUT)
         self.led.low()

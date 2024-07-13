@@ -7,6 +7,7 @@
 
 import argparse
 import sys
+import time
 
 # import custom libraries
 sys.path.insert(0, "../lib/")
@@ -31,7 +32,8 @@ class Main:
         print("[+] Power cycling target")
         # power cycle target
         self.glitcher.power_cycle_target(1)
-
+        self.glitcher.reset(0.01)
+        time.sleep(0.2)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

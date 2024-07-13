@@ -117,7 +117,7 @@ class Main:
             self.response_before = response
 
             # Dump finished
-            if response == GlitchState.OK.dump_finished:
+            if response == GlitchState.Success.dump_finished:
                 break
 
 if __name__ == "__main__":

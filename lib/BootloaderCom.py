@@ -21,19 +21,20 @@ class _Error(ErrorType):
     bootloader_not_available = 3
     bootloader_error = 4
     id_error = 5
+    flash_reset = 6
 
 class _OK(OKType):
     default = 0
     ack = 1
     bootloader_ok = 2
     rdp_inactive = 3
-    dump_ok = 4
-    dump_error = 5
-    dump_finished = 6
+    dump_error = 4
 
 class _Success(SuccessType):
     default = 0
-    dump_successful = 1
+    dump_ok = 1
+    dump_successful = 2
+    dump_finished = 3
 
 class GlitchState():
     Error = _Error
@@ -105,7 +106,7 @@ class BootloaderCom:
         return GlitchState.Expected.rdp_active
 
     # returns "dump_ok" if glitch and memory read was successful
-    # returns "dump_error" if glitch was successful, however memory read yielded erroneous results
+    # returns "dump_error" if glitch was successful, however memory read yielded eroneous results
     def read_memory(self, start, size):
         # write memory address
         startb = start.to_bytes(4, 'big')
@@ -129,12 +130,12 @@ class BootloaderCom:
         print(f"[+] Content: {mem}")
         response = GlitchState.OK.default
         if len(mem) == 255 and mem != b"\x00" * 255:
-            response = GlitchState.OK.dump_ok
+            response = GlitchState.Success.dump_ok
         else:
             response = GlitchState.OK.dump_error
         return response, mem
 
-    # returns "error" if memory read was erroneous
+    # returns "error" if memory read was eroneous
     # returns "dump_successful" if one dump was successful
     # returns "dump_finished" if entire memory was dummped
     def dump_memory_to_file(self, dump_filename):
@@ -154,7 +155,7 @@ class BootloaderCom:
 
         if self.current_dump_len <= 0:
             print("[+] Dump finished.")
-            return GlitchState.OK.dump_finished
+            return GlitchState.Success.dump_finished
         return GlitchState.Success.dump_successful
 
     def __del__(self):
