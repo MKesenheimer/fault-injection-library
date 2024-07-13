@@ -5,11 +5,10 @@
 # You should have received a copy of the GPL3 license with this file.
 # If not, please write to: m.kesenheimer@gmx.net.
 
-
 # programming
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x unlock 0; exit"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program read-out-protection-test-CW308_STM32L0.bin verify reset exit 0x08000000;"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; sleep 2000; reset run; shutdown"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; sleep 1000; reset run; shutdown"
 # -> power cycle the target!
 
 import argparse
@@ -44,7 +43,8 @@ class Main:
 
         self.start_time = int(time.time())
         self.successive_fails = 0
-        self.response_before = 0
+        self.fail_gate_open = False
+        self.fail_gate_close = 0
 
         # memory read settings
         self.bootcom = BootloaderCom(port=self.args.target, dump_address=0x08000000, dump_len=0x400)
@@ -96,26 +96,34 @@ class Main:
             experiment_base_id = self.database.get_base_experiments_count()
             print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{length}\t{delay}\t{color}\t{response_str}", color))
 
+            # exit if too many successive fails (including a supposedly successful memory read)
+            # open fail gate, if error occured and everything was ok previously
+            if not issubclass(type(response), ExpectedType) and not self.fail_gate_open:
+                self.fail_gate_open = True
+                self.fail_gate_close = experiment_id + 30
+                self.successive_fails = 0
+            # if fail gate open and error occured, increase the fail count
+            if not issubclass(type(response), ExpectedType) and self.fail_gate_open:
+                self.successive_fails += 1
+            # close fail gate after 30 more experiments and check result
+            if  experiment_id >= self.fail_gate_close and self.fail_gate_open:
+                self.fail_gate_open = False
+                if self.successive_fails >= 10:
+                    # delete the eroneous datapoints, but not the first
+                    for eid in range(experiment_id - 29, experiment_id):
+                        self.database.remove(eid)
+                    # get parameters of first erroneous experiment and store in database with extra classification
+                    _, delay, length, _, _ = self.database.get_parameters_of_experiment(experiment_id - 30)
+                    response = GlitchState.Error.flash_reset
+                    color = self.glitcher.classify(response)
+                    response_str = str(response).encode("utf-8")
+                    self.database.insert(experiment_id, delay, length, color, response_str)
+
+                    # exit
+                    break
+
             # increase experiment id
             experiment_id += 1
-
-            # exit if too many successive fails (including a supposedly successful memory read)
-            if not issubclass(type(response), ExpectedType) and not issubclass(type(self.response_before), ExpectedType):
-                self.successive_fails += 1
-            else:
-                self.successive_fails = 0
-            if self.successive_fails >= 20:
-                # delete the eroneous datapoints, but not the first
-                for eid in range(experiment_id - 19, experiment_id):
-                    self.database.remove(eid)
-                # ... and try again
-                self.glitcher.reconnect_with_uart(pattern=0x11, disconnect_wait=1)
-                self.glitcher.power_cycle_target(1)
-                time.sleep(1)
-                self.bootcom.flush()
-                self.successive_fails = 0
-                #break
-            self.response_before = response
 
             # Dump finished
             if response == GlitchState.Success.dump_finished:

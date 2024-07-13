@@ -50,7 +50,7 @@ class Main:
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume)
         # if number of experiments get too large, remove the expected results
-        self.database.cleanup("G")
+        #self.database.cleanup("G")
         #self.database.cleanup("R")
         #experiment_id = self.database.get_latest_experiment_id()
         #print(experiment_id)
@@ -90,8 +90,9 @@ class Main:
             time.sleep(0.01)
 
             # setup bootloader communication
-            self.bootcom.init_bootloader()
-            response = self.bootcom.setup_memread()
+            response = self.bootcom.init_bootloader()
+            if issubclass(type(response), OKType):
+                response = self.bootcom.setup_memread()
 
             # dump memory, this function triggers the glitch
             mem = b''
