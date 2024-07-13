@@ -72,8 +72,9 @@ class Main:
             time.sleep(0.2)
 
             # setup bootloader communication
-            self.bootcom.init_bootloader()
-            response = self.bootcom.setup_memread()
+            response = self.bootcom.init_bootloader()
+            if issubclass(type(response), OKType):
+                response = self.bootcom.setup_memread()
 
             # dump memory, this function triggers the glitch
             mem = b''
