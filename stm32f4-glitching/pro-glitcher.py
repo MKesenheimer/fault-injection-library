@@ -16,12 +16,21 @@ import logging
 import random
 import sys
 import time
+import subprocess
 
 # import custom libraries
 sys.path.insert(0, "../lib/")
 from BootloaderCom import BootloaderCom, GlitchState
 from GlitchState import OKType, ExpectedType
 from FaultInjectionLib import Database, ProGlitcher, Helper
+
+def program_target():
+    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32l0.cfg', '-c', 'init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;'], text=True, capture_output=True)
+    print(result.stdout)
+    print(result.stderr)
+    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32l0.cfg', '-c', 'init; halt; stm32l0x lock 0; sleep 1000; reset run; shutdown;'], text=True, capture_output=True)
+    print(result.stdout)
+    print(result.stderr)
 
 class Main:
     def __init__(self, args):
@@ -47,7 +56,7 @@ class Main:
         self.fail_gate_close = 0
 
         # memory read settings
-        self.bootcom = BootloaderCom(port=self.args.target, dump_address=0x08000000, dump_len=0x400)
+        self.bootcom = BootloaderCom(port=self.args.target, dump_address=0x08000000, dump_len=0x2000)
         self.dump_filename = f"{Helper.timestamp()}_memory_dump.bin"
 
     def run(self):

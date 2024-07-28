@@ -20,7 +20,8 @@ import pyboard
 from GlitchState import ErrorType, OKType, ExpectedType, SuccessType
 
 class Database():
-    def __init__(self, argv, dbname=None, resume=False):
+    def __init__(self, argv, dbname=None, resume=False, nostore=False):
+        self.nostore = nostore
         if not os.path.isdir('databases'):
             os.mkdir("databases")
 
@@ -49,11 +50,12 @@ class Database():
             print(f"[+] Number of experiments in previous database: {self.base_row_count}")
 
     def insert(self, experiment_id, delay, length, color, response):
-        if (experiment_id + self.base_row_count) == 0:
-            s_argv = ' '.join(self.argv[1:])
-            self.cur.execute("INSERT INTO metadata (stime_seconds,argv) VALUES (?,?)", [int(time.time()), s_argv])
-        self.cur.execute("INSERT INTO experiments (id,delay,length,color,response) VALUES (?,?,?,?,?)", [experiment_id + self.base_row_count, delay, length, color, response])
-        self.con.commit()
+        if not self.nostore:
+            if (experiment_id + self.base_row_count) == 0:
+                s_argv = ' '.join(self.argv[1:])
+                self.cur.execute("INSERT INTO metadata (stime_seconds,argv) VALUES (?,?)", [int(time.time()), s_argv])
+            self.cur.execute("INSERT INTO experiments (id,delay,length,color,response) VALUES (?,?,?,?,?)", [experiment_id + self.base_row_count, delay, length, color, response])
+            self.con.commit()
 
     def get_parameters_of_experiment(self, experiment_id):
         self.cur.execute("SELECT * FROM experiments WHERE id = (?);", [experiment_id + self.base_row_count])
@@ -66,6 +68,7 @@ class Database():
 
     def cleanup(self, color):
         self.cur.execute("DELETE FROM experiments WHERE color = (?);", [color])
+        #self.cur.execute("DELETE FROM experiments WHERE length >= (?);", [color])
         self.con.commit()
 
     def get_number_of_experiments(self):
@@ -412,8 +415,9 @@ class ProGlitcher(Glitcher):
     def init(self):
         try:
             self.scope = cw.scope()
-        except:
+        except Exception as e:
             print("[-] No ChipWhisperer found. Exiting.")
+            print(f"[-] Exception: {e}")
             sys.exit(1)
 
         self.scope.clock.adc_src            = "clkgen_x1"

@@ -11,6 +11,10 @@
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; sleep 1000; reset run; shutdown"
 # -> power cycle the target!
 
+# SQL Queries:
+# Show only successes and flash-resets:
+# color = 'R' or response LIKE '_Error.flash_reset'
+
 import argparse
 import logging
 import random
@@ -48,10 +52,9 @@ class Main:
         self.glitcher.uart_trigger(0x11)
 
         # set up the database
-        self.database = Database(sys.argv, resume=self.args.resume)
+        self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
         # if number of experiments get too large, remove the expected results
         #self.database.cleanup("G")
-        #self.database.cleanup("R")
         #experiment_id = self.database.get_latest_experiment_id()
         #print(experiment_id)
         #for i in range(0, 806):
@@ -65,7 +68,7 @@ class Main:
         self.fail_gate_close = 0
 
         # memory read settings
-        self.bootcom = BootloaderCom(port=self.args.target, dump_address=0x08000000, dump_len=0x400)
+        self.bootcom = BootloaderCom(port=self.args.target, dump_address=0x08000000, dump_len=0x2000)
         self.dump_filename = f"{Helper.timestamp()}_memory_dump.bin"
 
     def run(self):
@@ -97,8 +100,9 @@ class Main:
             # dump memory, this function triggers the glitch
             mem = b''
             if issubclass(type(response), OKType):
-                #response = self.bootcom.dump_memory_to_file(self.dump_filename)
-                start = 0x08000000
+                #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
+                #start = 0x08000000
+                start = 0x08000000 - 0*0xFF
                 size = 0xFF
                 response, mem = self.bootcom.read_memory(start, size)
                 # block until glitch
@@ -162,6 +166,7 @@ if __name__ == "__main__":
     parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
+    parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
     args = parser.parse_args()
 
     main = Main(args)

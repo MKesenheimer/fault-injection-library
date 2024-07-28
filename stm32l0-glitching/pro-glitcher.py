@@ -7,21 +7,34 @@
 
 # programming
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x unlock 0; exit"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program read-out-protection-test-CW308_STM32L0.bin verify reset exit 0x08000000;"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; sleep 2000; reset run; shutdown"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; sleep 1000; reset run; shutdown"
 # -> power cycle the target!
+
+# SQL Queries:
+# Show only successes and flash-resets:
+# color = 'R' or response LIKE '_Error.flash_reset'
 
 import argparse
 import logging
 import random
 import sys
 import time
+import subprocess
 
 # import custom libraries
 sys.path.insert(0, "../lib/")
 from BootloaderCom import BootloaderCom, GlitchState
 from GlitchState import OKType, ExpectedType
 from FaultInjectionLib import Database, ProGlitcher, Helper
+
+def program_target():
+    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32l0.cfg', '-c', 'init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;'], text=True, capture_output=True)
+    print(result.stdout)
+    print(result.stderr)
+    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32l0.cfg', '-c', 'init; halt; stm32l0x lock 0; sleep 1000; reset run; shutdown;'], text=True, capture_output=True)
+    print(result.stdout)
+    print(result.stderr)
 
 class Main:
     def __init__(self, args):
@@ -39,14 +52,23 @@ class Main:
         self.glitcher.uart_trigger(0x11)
 
         # set up the database
-        self.database = Database(sys.argv, resume=self.args.resume)
+        self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
+        # if number of experiments get too large, remove the expected results
+        #self.database.cleanup("G")
+        #experiment_id = self.database.get_latest_experiment_id()
+        #print(experiment_id)
+        #for i in range(0, 806):
+        #    eid = self.database.get_latest_experiment_id()
+        #    print(eid)
+        #    self.database.remove(eid)
 
         self.start_time = int(time.time())
         self.successive_fails = 0
-        self.response_before = 0
+        self.fail_gate_open = False
+        self.fail_gate_close = 0
 
         # memory read settings
-        self.bootcom = BootloaderCom(port=self.args.target, dump_address=0x08000000, dump_len=0x400)
+        self.bootcom = BootloaderCom(port=self.args.target, dump_address=0x08000000, dump_len=0x2000)
         self.dump_filename = f"{Helper.timestamp()}_memory_dump.bin"
 
     def run(self):
@@ -71,17 +93,21 @@ class Main:
             time.sleep(0.01)
 
             # setup bootloader communication
-            self.bootcom.init_bootloader()
-            response = self.bootcom.setup_memread()
+            response = self.bootcom.init_bootloader()
+            if issubclass(type(response), OKType):
+                response = self.bootcom.setup_memread()
 
             # dump memory, this function triggers the glitch
             mem = b''
             if issubclass(type(response), OKType):
-                #response = self.bootcom.dump_memory_to_file(self.dump_filename)
-                start = 0x08000000
+                #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
+                #start = 0x08000000
+                start = 0x08000000 - 0*0xFF
                 size = 0xFF
                 response, mem = self.bootcom.read_memory(start, size)
 
+            # reset crowbar transistors
+            self.glitcher.reset_glitch()
 
             # classify response
             color = self.glitcher.classify(response)
@@ -95,26 +121,40 @@ class Main:
             experiment_base_id = self.database.get_base_experiments_count()
             print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{length}\t{delay}\t{color}\t{response_str}", color))
 
+            # exit if too many successive fails (including a supposedly successful memory read)
+            # open fail gate, if error occured and everything was ok previously
+            if not issubclass(type(response), ExpectedType) and not self.fail_gate_open:
+                self.fail_gate_open = True
+                self.fail_gate_close = experiment_id + 30
+                self.successive_fails = 0
+            # if fail gate open and error occured, increase the fail count
+            if not issubclass(type(response), ExpectedType) and self.fail_gate_open:
+                self.successive_fails += 1
+            # close fail gate after 30 more experiments and check result
+            if  experiment_id >= self.fail_gate_close and self.fail_gate_open:
+                self.fail_gate_open = False
+                if self.successive_fails >= 10:
+                    # delete the eroneous datapoints, but not the first
+                    for eid in range(experiment_id - 29, experiment_id):
+                        self.database.remove(eid)
+                    # get parameters of first erroneous experiment and store in database with extra classification
+                    _, delay, length, _, _ = self.database.get_parameters_of_experiment(experiment_id - 30)
+                    response = GlitchState.Error.flash_reset
+                    color = self.glitcher.classify(response)
+                    response_str = str(response).encode("utf-8")
+                    self.database.insert(experiment_id, delay, length, color, response_str)
+
+                    # then reprogram target and try again
+                    self.glitcher.power_cycle_target(1)
+                    time.sleep(1)
+                    self.bootcom.flush()
+                    self.successive_fails = 0
+                    # reprogram the target
+                    program_target()
+                    self.glitcher.power_cycle_target(1)
+
             # increase experiment id
             experiment_id += 1
-
-            # exit if too many successive fails (including a supposedly successful memory read)
-            if not issubclass(type(response), ExpectedType) and not issubclass(type(self.response_before), ExpectedType):
-                self.successive_fails += 1
-            else:
-                self.successive_fails = 0
-            if self.successive_fails >= 20:
-                # delete the eroneous datapoints, but not the first
-                for eid in range(experiment_id - 19, experiment_id):
-                    self.database.remove(eid)
-                # ... and try again
-                self.glitcher.reconnect_with_uart(pattern=0x11, disconnect_wait=1)
-                self.glitcher.power_cycle_target(1)
-                time.sleep(1)
-                self.bootcom.flush()
-                self.successive_fails = 0
-                #break
-            self.response_before = response
 
             # Dump finished
             if response == GlitchState.Success.dump_finished:
@@ -126,6 +166,7 @@ if __name__ == "__main__":
     parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
+    parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
     args = parser.parse_args()
 
     main = Main(args)

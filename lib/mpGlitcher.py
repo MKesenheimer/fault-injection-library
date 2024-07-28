@@ -99,7 +99,7 @@ class MicroPythonScript():
         self.frequency = None
         self.trigger = None
         self.baudrate = 115200
-        self.set_frequency(270_000_000) # overclocking supposedly works
+        self.set_frequency(200_000_000) # overclocking supposedly works, script runs also with 270_000_000
         # LED
         self.led = Pin("LED", Pin.OUT)
         self.led.low()
@@ -170,7 +170,7 @@ class MicroPythonScript():
 
         if self.trigger == "tio":
             # TODO: je nachdem ob hp oder lp glitch: set_base setzen
-            self.sm1 = StateMachine(1, glitch_tio_trigger, freq=self.frequency, set_base=self.pin_hpglitch)
+            self.sm1 = StateMachine(1, glitch_tio_trigger, freq=self.frequency, set_base=self.pin_lpglitch)
             self.sm1.active(1)
             # push delay and length into the fifo of the statemachine
             self.sm1.put(delay // (1_000_000_000 // self.frequency))
@@ -178,7 +178,7 @@ class MicroPythonScript():
         
         elif self.trigger == "uart":
             # TODO: je nachdem ob hp oder lp glitch: set_base setzen
-            self.sm1 = StateMachine(1, glitch_uart_trigger, freq=self.frequency, set_base=self.pin_hpglitch)
+            self.sm1 = StateMachine(1, glitch_uart_trigger, freq=self.frequency, set_base=self.pin_lpglitch)
             self.sm1.active(1)
             # push delay and length into the fifo of the statemachine
             self.sm1.put(delay // (1_000_000_000 // self.frequency))

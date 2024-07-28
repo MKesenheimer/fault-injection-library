@@ -143,8 +143,8 @@ class BootloaderCom:
         len_to_dump = 0xFF if (self.current_dump_len // 0xFF) else self.current_dump_len % 0xFF
         response, mem = self.read_memory(self.current_dump_addr, len_to_dump)
 
-        if issubclass(type(response), ErrorType):
-            return response
+        if issubclass(type(response), ErrorType) or response == GlitchState.OK.dump_error:
+            return response, mem
 
         # write memory dump to file
         with open(dump_filename, 'ab+') as f:
@@ -155,8 +155,8 @@ class BootloaderCom:
 
         if self.current_dump_len <= 0:
             print("[+] Dump finished.")
-            return GlitchState.Success.dump_finished
-        return GlitchState.Success.dump_successful
+            return GlitchState.Success.dump_finished, mem
+        return GlitchState.Success.dump_successful, mem
 
     def __del__(self):
         print("[+] Closing serial port.")
