@@ -13,7 +13,7 @@
 
 # SQL Queries:
 # Show only successes and flash-resets:
-# color = 'R' or response LIKE '_Error.flash_reset'
+# color = 'R' or response LIKE '_Warning.flash_reset'
 
 import argparse
 import logging
@@ -40,7 +40,7 @@ class Main:
     def __init__(self, args):
         self.args = args
 
-        logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
+        logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level = logging.INFO, force=True)
 
         self.glitcher = ProGlitcher()
         self.glitcher.init()
@@ -139,7 +139,7 @@ class Main:
                         self.database.remove(eid)
                     # get parameters of first erroneous experiment and store in database with extra classification
                     _, delay, length, _, _ = self.database.get_parameters_of_experiment(experiment_id - 30)
-                    response = GlitchState.Error.flash_reset
+                    response = GlitchState.Warning.flash_reset
                     color = self.glitcher.classify(response)
                     response_str = str(response).encode("utf-8")
                     self.database.insert(experiment_id, delay, length, color, response_str)

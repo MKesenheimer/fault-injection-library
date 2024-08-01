@@ -11,6 +11,9 @@ from enum import Enum
 class ErrorType(Enum):
     pass
 
+class WarningType(Enum):
+    pass
+
 class OKType(Enum):
     pass
 
@@ -25,6 +28,9 @@ class _Expected(ExpectedType):
     default = 0
 
 class _Error(ErrorType):
+    default = 0
+
+class _Warning(WarningType):
     default = 0
 
 class _OK(OKType):

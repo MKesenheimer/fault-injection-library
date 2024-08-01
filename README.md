@@ -39,6 +39,12 @@ Make sure to have pip [installed](https://docs.python.org/3/library/ensurepip.ht
 pip install -r requirements.txt
 ```
 
+If you use the rk6006 power supply and want to power-cycle the target via software (recommended):
+```bash
+cd rd6006
+python setup.py install
+```
+
 ## Installing micropython scripts on the Raspberry Pi Pico
 
 Now we have to prepare the Raspberry Pi Pico.

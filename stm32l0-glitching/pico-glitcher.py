@@ -13,7 +13,7 @@
 
 # SQL Queries:
 # Show only successes and flash-resets:
-# color = 'R' or response LIKE '_Error.flash_reset'
+# color = 'R' or response LIKE '_Warning.flash_reset'
 
 import argparse
 import logging
@@ -26,7 +26,7 @@ import subprocess
 sys.path.insert(0, "../lib/")
 from BootloaderCom import BootloaderCom, GlitchState
 from GlitchState import OKType, ExpectedType
-from FaultInjectionLib import Database, PicoGlitcher, Helper
+from FaultInjectionLib import Database, PicoGlitcher, Helper, ExternalPowerSupply
 
 def program_target():
     result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32l0.cfg', '-c', 'init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;'], text=True, capture_output=True)
@@ -40,8 +40,15 @@ class Main:
     def __init__(self, args):
         self.args = args
 
-        logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
+        # logging
+        logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level = logging.INFO, force=True)
 
+        # rk6006 power supply
+        #self.powersupply = ExternalPowerSupply(port=args.power)
+        #self.powersupply.set_voltage(3.3)
+        #print(self.powersupply.status())
+
+        # glitcher
         self.glitcher = PicoGlitcher()
         self.glitcher.init(port=args.rpico)
 
@@ -89,7 +96,7 @@ class Main:
 
             # reset target
             self.glitcher.reset(0.01)
-            #self.glitcher.power_cycle_target()
+            #self.powersupply.power_cycle_target()
             time.sleep(0.01)
 
             # setup bootloader communication
@@ -138,19 +145,21 @@ class Main:
                         self.database.remove(eid)
                     # get parameters of first erroneous experiment and store in database with extra classification
                     _, delay, length, _, _ = self.database.get_parameters_of_experiment(experiment_id - 30)
-                    response = GlitchState.Error.flash_reset
+                    response = GlitchState.Warning.flash_reset
                     color = self.glitcher.classify(response)
                     response_str = str(response).encode("utf-8")
                     self.database.insert(experiment_id, delay, length, color, response_str)
 
                     # then reprogram target and try again
                     self.glitcher.power_cycle_target(1)
+                    #self.powersupply.power_cycle_target(1)
                     time.sleep(1)
                     self.bootcom.flush()
                     self.successive_fails = 0
                     # reprogram the target
                     program_target()
                     self.glitcher.power_cycle_target(1)
+                    #self.powersupply.power_cycle_target(1)
 
             # increase experiment id
             experiment_id += 1
@@ -162,7 +171,8 @@ class Main:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", required=False, help="target port", default="/dev/ttyUSB1")
-    parser.add_argument("--rpico", required=False, help="rpico port", default="/dev/ttyACM1")
+    parser.add_argument("--rpico", required=False, help="rpico port", default="/dev/ttyUSB2")
+    parser.add_argument("--power", required=False, help="rk6006 port", default="/dev/ttyUSB3")
     parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")

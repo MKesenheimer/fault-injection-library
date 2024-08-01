@@ -17,7 +17,8 @@ from termcolor import colored
 import os
 import glob
 import pyboard
-from GlitchState import ErrorType, OKType, ExpectedType, SuccessType
+from GlitchState import ErrorType, WarningType, OKType, ExpectedType, SuccessType
+from rd6006 import RD6006
 
 class Database():
     def __init__(self, argv, dbname=None, resume=False, nostore=False):
@@ -208,6 +209,8 @@ class Glitcher():
             color = 'M'
         elif issubclass(type(state), ErrorType):
             color = 'Y'
+        elif issubclass(type(state), WarningType):
+            color = 'C'
         return color
 
     def colorize(self, s, color):
@@ -216,6 +219,7 @@ class Glitcher():
             'Y': 'yellow',
             'R': 'red',
             'M': 'magenta',
+            'C': 'cyan',
         }
         return colored(s, colors[color])
 
@@ -542,3 +546,20 @@ class ProGlitcher(Glitcher):
 class Helper():
     def timestamp():
         return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+class ExternalPowerSupply:
+    def __init__(self, port):
+        self.port = port
+        self.r = RD6006(self.port)
+
+    def status(self):
+        return self.r.status()
+
+    def set_voltage(self, voltage):
+        self.r.voltage = voltage
+        self.r.enable = True
+
+    def power_cycle_target(self, power_cycle_time=0.2):
+        self.r.enable = False
+        time.sleep(power_cycle_time)
+        self.r.enable = True

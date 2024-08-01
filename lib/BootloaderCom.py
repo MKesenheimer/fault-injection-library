@@ -8,7 +8,7 @@
 import serial
 from functools import reduce
 import sys
-from GlitchState import ErrorType, OKType, ExpectedType, SuccessType
+from GlitchState import ErrorType, WarningType, OKType, ExpectedType, SuccessType
 
 class _Expected(ExpectedType):
     default = 0
@@ -21,7 +21,10 @@ class _Error(ErrorType):
     bootloader_not_available = 3
     bootloader_error = 4
     id_error = 5
-    flash_reset = 6
+
+class _Warning(WarningType):
+    default = 0
+    flash_reset = 1
 
 class _OK(OKType):
     default = 0
@@ -38,6 +41,7 @@ class _Success(SuccessType):
 
 class GlitchState():
     Error = _Error
+    Warning = _Warning
     OK = _OK
     Expected = _Expected
     Success = _Success

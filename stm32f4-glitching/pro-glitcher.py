@@ -123,7 +123,7 @@ class Main:
                         self.database.remove(eid)
                     # get parameters of first erroneous experiment and store in database with extra classification
                     _, delay, length, _, _ = self.database.get_parameters_of_experiment(experiment_id - 30)
-                    response = GlitchState.Error.flash_reset
+                    response = GlitchState.Warning.flash_reset
                     color = self.glitcher.classify(response)
                     response_str = str(response).encode("utf-8")
                     self.database.insert(experiment_id, delay, length, color, response_str)
