@@ -172,6 +172,7 @@ class Main:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", required=False, help="target port", default="/dev/ttyUSB1")
+    parser.add_argument("--power", required=False, help="rk6006 port", default="/dev/ttyUSB2")
     parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
