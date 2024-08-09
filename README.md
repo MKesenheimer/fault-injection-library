@@ -141,6 +141,11 @@ One can resume inserting datapoints into the database of the most recent run by 
 python pico-glitcher.py ... --resume
 ```
 
+If the datapoints should not be inserted into the database, the flag `no-store` can be used instead:
+```bash
+python pico-glitcher.py ... --no-store
+```
+The flags `resume` and `no-store` can be combined.
 
 ## Pico Glitcher v1 hardware
 
@@ -156,3 +161,6 @@ To power the target board, it is supplied with power via the `VTARGET` connectio
 The output of this voltage source can be controlled via the fault-injection-library, i.e. the target can be completely disconnected from power by executing the `helper/power-cycle-target.py` command.
 This allows a cold start of the target to be carried out in the event of error states that cannot be eliminated by a reset.
 ![Pico Glitcher v1 layout](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/pico-glitcher-v1_brd.png)
+
+The assembled board is shown in the following figure:
+![Assembled Pico Glitcher v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/finished.JPG)
