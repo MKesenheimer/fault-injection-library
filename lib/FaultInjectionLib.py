@@ -18,7 +18,12 @@ import os
 import glob
 import pyboard
 from GlitchState import ErrorType, WarningType, OKType, ExpectedType, SuccessType
-from rd6006 import RD6006
+try:
+    from rd6006 import RD6006
+    rd6006_available = True
+except Exception as _:
+    print("[-] Library RD6006 not installed. External Powersupply not available.")
+    rd6006_available = False
 
 class Database():
     def __init__(self, argv, dbname=None, resume=False, nostore=False):
@@ -196,6 +201,30 @@ class PicoGlitcherInterface(MicroPythonScript):
         return self.pyb.exec('mp.get_sm2_output()')
 
 
+class ExternalPowerSupply:
+    def __init__(self, port):
+        self.port = port
+        self.r = RD6006(self.port)
+
+    def status(self):
+        return self.r.status()
+
+    def set_voltage(self, voltage):
+        self.r.voltage = voltage
+        self.r.enable = True
+
+    def enable_vtarget(self):
+        self.r.enable = True
+
+    def disable_vtarget(self):
+        self.r.enable = False
+
+    def power_cycle_target(self, power_cycle_time=0.2):
+        self.r.enable = False
+        time.sleep(power_cycle_time)
+        self.r.enable = True
+
+
 class Glitcher():
     def __init__(self):
         pass
@@ -235,11 +264,17 @@ class PicoGlitcher(Glitcher):
     def __init__(self):
         self.pico_glitcher = None
 
-    def init(self, port):
+    def init(self, port, ext_power=None, ext_power_voltage=3.3):
         self.pico_glitcher = PicoGlitcherInterface()
         self.pico_glitcher.init(port, 'mpGlitcher')
         self.pico_glitcher.set_trigger("tio")
         self.pico_glitcher.set_frequency(200_000_000)
+        if rd6006_available and ext_power is not None:
+            self.power_supply = ExternalPowerSupply(port=ext_power)
+            self.power_supply.set_voltage(ext_power_voltage)
+            print(self.power_supply.status())
+        else:
+            self.power_supply = None
         
     def arm(self, delay, length):
         self.pico_glitcher.arm(delay, length)
@@ -267,14 +302,24 @@ class PicoGlitcher(Glitcher):
         self.pico_glitcher.reset(reset_time)
 
     def power_cycle_target(self, power_cycle_time=0.2):
-        self.pico_glitcher.power_cycle_target(power_cycle_time)
+        if self.power_supply is not None:
+            self.power_supply.power_cycle_target(power_cycle_time)
+        else:
+            self.pico_glitcher.power_cycle_target(power_cycle_time)
 
     def power_cycle_reset(self, power_cycle_time=0.2):
-        self.pico_glitcher.disable_vtarget()
-        self.pico_glitcher.reset_target()
-        time.sleep(power_cycle_time)
-        self.pico_glitcher.release_reset()
-        self.pico_glitcher.enable_vtarget()
+        if self.power_supply is not None:
+            self.power_supply.disable_vtarget()
+            self.pico_glitcher.reset_target()
+            time.sleep(power_cycle_time)
+            self.pico_glitcher.release_reset()
+            self.power_supply.enable_vtarget()
+        else:
+            self.pico_glitcher.disable_vtarget()
+            self.pico_glitcher.reset_target()
+            time.sleep(power_cycle_time)
+            self.pico_glitcher.release_reset()
+            self.pico_glitcher.enable_vtarget()
 
     def reset_and_eat_it_all(self, target, target_timeout=0.3):
         self.pico_glitcher.reset_target()
@@ -287,7 +332,6 @@ class PicoGlitcher(Glitcher):
         self.pico_glitcher.reset_target()
         time.sleep(reset_time)
         self.pico_glitcher.release_reset()
-
         response = target.read(4096)
         for _ in range(0, 5):
             if token in response:
@@ -308,35 +352,32 @@ class HuskyGlitcher(Glitcher):
     def __init__(self):
         self.scope = None
 
-    def init(self):
+    def init(self, ext_power=None, ext_power_voltage=3.3):
         self.scope = cw.scope()
-
         self.scope.clock.adc_mul             = 1
         self.scope.clock.clkgen_freq         = 200e6
-
         self.scope.clock.clkgen_src          = 'system'
         self.scope.adc.basic_mode            = "rising_edge"
-
         self.scope.io.tio1                  = 'serial_rx'
         self.scope.io.tio2                  = 'serial_tx'
         self.scope.io.tio3                  = 'gpio_low'
         self.scope.io.tio4                  = 'high_z'
-
         self.scope.trigger.triggers          = 'tio4'
-
         self.scope.io.hs2                    = "disabled"
         self.scope.io.glitch_trig_mcx        = 'glitch'
-
         self.scope.glitch.enabled            = True
         self.scope.glitch.clk_src            = 'pll'
-
         self.scope.io.glitch_hp              = True
         self.scope.io.glitch_lp              = False
-
         self.scope.glitch.output             = 'enable_only'
         self.scope.glitch.trigger_src        = 'ext_single'
-
         self.scope.glitch.num_glitches       = 1
+        if rd6006_available and ext_power is not None:
+            self.power_supply = ExternalPowerSupply(port=ext_power)
+            self.power_supply.set_voltage(ext_power_voltage)
+            print(self.power_supply.status())
+        else:
+            self.power_supply = None
 
     def arm(self, delay, length):
         self.scope.glitch.ext_offset        = delay // (int(1e9) // int(self.scope.clock.clkgen_freq))
@@ -368,18 +409,32 @@ class HuskyGlitcher(Glitcher):
         self.scope.io.tio3 = 'gpio_low'
         time.sleep(reset_time)
         self.scope.io.tio3 = 'gpio_high'
-
         response = target.read(4096)
         for _ in range(0, 5):
             if token in response:
                 break
             response += target.read(4096)
-
         if debug:
             for line in response.splitlines():
                 print('\t', line.decode())
 
     husky_reset_wait = reset_wait
+
+    def power_cycle_target(self, power_cycle_time=0.2):
+        if self.power_supply is not None:
+            self.power_supply.power_cycle_target(power_cycle_time)
+        else:
+            print("[-] External power supply not available.")
+
+    def power_cycle_reset(self, power_cycle_time=0.2):
+        if self.power_supply is not None:
+            self.power_supply.disable_vtarget()
+            self.scope.io.tio3 = 'gpio_low'
+            time.sleep(power_cycle_time)
+            self.scope.io.tio3 = 'gpio_high'
+            self.power_supply.enable_vtarget()
+        else:
+            print("[-] External power supply not available.")
 
     def uart_trigger(self, pattern):
         self.scope.io.hs2 = "clkgen"
@@ -416,33 +471,34 @@ class ProGlitcher(Glitcher):
     def __init__(self):
         self.scope = None
 
-    def init(self):
+    def init(self, ext_power=None, ext_power_voltage=3.3):
         try:
             self.scope = cw.scope()
         except Exception as e:
             print("[-] No ChipWhisperer found. Exiting.")
             print(f"[-] Exception: {e}")
             sys.exit(1)
-
         self.scope.clock.adc_src            = "clkgen_x1"
         self.scope.clock.clkgen_freq        = 100e6
-
         self.scope.adc.basic_mode           = "rising_edge"
         self.scope.adc.samples              = 10000
         self.scope.adc.offset               = 0
-
         self.scope.io.tio1                  = 'high_z'
         self.scope.io.tio4                  = 'gpio_low'
         self.scope.trigger.triggers         = 'tio4'
-
         self.scope.io.hs2                   = "disabled"
         self.scope.io.glitch_hp             = True
         self.scope.io.glitch_lp             = False
-
         # Clock asynchronous glitching
         self.scope.glitch.clk_src           = 'clkgen'
         self.scope.glitch.output            = 'enable_only'
         self.scope.glitch.trigger_src       = 'ext_single'
+        if rd6006_available and ext_power is not None:
+            self.power_supply = ExternalPowerSupply(port=ext_power)
+            self.power_supply.set_voltage(ext_power_voltage)
+            print(self.power_supply.status())
+        else:
+            self.power_supply = None
 
     def set_trigger_out(self, pinstate):
         if pinstate:
@@ -451,6 +507,7 @@ class ProGlitcher(Glitcher):
             self.scope.io.tio4 = 'gpio_low'
 
     def reset_glitch(self, delay=0.005):
+        # TODO: control hp and lp externally
         self.scope.io.glitch_hp = False
         self.scope.io.glitch_lp = False
         time.sleep(delay)
@@ -466,9 +523,12 @@ class ProGlitcher(Glitcher):
         self.scope.capture()
 
     def power_cycle_target(self, power_cycle_time=0.2):
-        self.scope.io.target_pwr = False
-        time.sleep(power_cycle_time)
-        self.scope.io.target_pwr = True
+        if self.power_supply is not None:
+            self.power_supply.power_cycle_target(power_cycle_time)
+        else:
+            self.scope.io.target_pwr = False
+            time.sleep(power_cycle_time)
+            self.scope.io.target_pwr = True
 
     def reset(self, reset_time=0.2):
         self.scope.io.nrst = 'low'
@@ -476,11 +536,18 @@ class ProGlitcher(Glitcher):
         self.scope.io.nrst = 'high_z'
 
     def power_cycle_reset(self, power_cycle_time=0.2):
-        self.scope.io.target_pwr = False
-        self.scope.io.nrst = False
-        time.sleep(power_cycle_time)
-        self.scope.io.nrst = "high_z"
-        self.scope.io.target_pwr = True
+        if self.power_supply is not None:
+            self.power_supply.disable_vtarget()
+            self.scope.io.nrst = False
+            time.sleep(power_cycle_time)
+            self.scope.io.nrst = "high_z"
+            self.power_supply.enable_vtarget()
+        else:
+            self.scope.io.target_pwr = False
+            self.scope.io.nrst = False
+            time.sleep(power_cycle_time)
+            self.scope.io.nrst = "high_z"
+            self.scope.io.target_pwr = True
 
     def reset_and_eat_it_all(self, target, target_timeout=0.3):
         self.scope.io.nrst = 'low'
@@ -546,20 +613,3 @@ class ProGlitcher(Glitcher):
 class Helper():
     def timestamp():
         return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-
-class ExternalPowerSupply:
-    def __init__(self, port):
-        self.port = port
-        self.r = RD6006(self.port)
-
-    def status(self):
-        return self.r.status()
-
-    def set_voltage(self, voltage):
-        self.r.voltage = voltage
-        self.r.enable = True
-
-    def power_cycle_target(self, power_cycle_time=0.2):
-        self.r.enable = False
-        time.sleep(power_cycle_time)
-        self.r.enable = True

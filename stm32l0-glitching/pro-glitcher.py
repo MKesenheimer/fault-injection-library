@@ -26,7 +26,7 @@ import subprocess
 sys.path.insert(0, "../lib/")
 from BootloaderCom import BootloaderCom, GlitchState
 from GlitchState import OKType, ExpectedType
-from FaultInjectionLib import Database, ProGlitcher, Helper, ExternalPowerSupply
+from FaultInjectionLib import Database, ProGlitcher, Helper
 
 def program_target():
     result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32l0.cfg', '-c', 'init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;'], text=True, capture_output=True)
@@ -43,14 +43,10 @@ class Main:
         # logging
         logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level = logging.INFO, force=True)
 
-        # rk6006 power supply
-        self.powersupply = ExternalPowerSupply(port=args.power)
-        self.powersupply.set_voltage(3.3)
-        print(self.powersupply.status())
-
         # glitcher
         self.glitcher = ProGlitcher()
-        self.glitcher.init()
+        # if argument args.power is not provided, the internal power-cycling capabilities of the pro-glitcher will be used. In this case ext_power_voltage is not used.
+        self.glitcher.init(ext_power=args.power, ext_power_voltage=3.3)
 
         # we want to trigger on x11 with the configuration 8e1
         # since our statemachine understands only 8n1,
@@ -150,17 +146,14 @@ class Main:
                     color = self.glitcher.classify(response)
                     response_str = str(response).encode("utf-8")
                     self.database.insert(experiment_id, delay, length, color, response_str)
-
                     # then reprogram target and try again
-                    #self.glitcher.power_cycle_target(1)
-                    self.powersupply.power_cycle_target(1)
+                    self.glitcher.power_cycle_target(1)
                     time.sleep(1)
                     self.bootcom.flush()
                     self.successive_fails = 0
                     # reprogram the target
                     program_target()
-                    #self.glitcher.power_cycle_target(1)
-                    self.powersupply.power_cycle_target(1)
+                    self.glitcher.power_cycle_target(1)
 
             # increase experiment id
             experiment_id += 1
@@ -172,7 +165,7 @@ class Main:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", required=False, help="target port", default="/dev/ttyUSB1")
-    parser.add_argument("--power", required=False, help="rk6006 port", default="/dev/ttyUSB2")
+    parser.add_argument("--power", required=False, help="rk6006 port", default=None)
     parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")

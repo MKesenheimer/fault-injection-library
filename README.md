@@ -39,11 +39,14 @@ Make sure to have pip [installed](https://docs.python.org/3/library/ensurepip.ht
 pip install -r requirements.txt
 ```
 
-If you use the rk6006 power supply and want to power-cycle the target via software (recommended):
+If you use the rk6006 power supply and want to power-cycle the target via software, install the rd6006 library (supplied as submodule):
 ```bash
 cd rd6006
 python setup.py install
 ```
+
+However, usage of the rk6006 power supply is optional.
+The Pico Glitcher is also capable of power-cycling the target via software.
 
 ## Installing micropython scripts on the Raspberry Pi Pico
 
@@ -162,5 +165,5 @@ The output of this voltage source can be controlled via the fault-injection-libr
 This allows a cold start of the target to be carried out in the event of error states that cannot be eliminated by a reset.
 ![Pico Glitcher v1 layout](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/pico-glitcher-v1_brd.png)
 
-The assembled board is shown in the following figure:
+The assembled and fully functional board is shown in the following figure:
 ![Assembled Pico Glitcher v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/finished.JPG)
