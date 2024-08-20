@@ -26,7 +26,7 @@ import subprocess
 sys.path.insert(0, "../lib/")
 from BootloaderCom import BootloaderCom, GlitchState
 from GlitchState import OKType, ExpectedType
-from FaultInjectionLib import Database, ProGlitcher, Helper
+from FaultInjectionLib import Database, PicoGlitcher, Helper
 
 def program_target():
     result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32l0.cfg', '-c', 'init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;'], text=True, capture_output=True)
@@ -44,9 +44,9 @@ class Main:
         logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
 
         # glitcher
-        self.glitcher = ProGlitcher()
+        self.glitcher = PicoGlitcher()
         # if argument args.power is not provided, the internal power-cycling capabilities of the pro-glitcher will be used. In this case ext_power_voltage is not used.
-        self.glitcher.init(ext_power=args.power, ext_power_voltage=3.3)
+        self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
 
         # we want to trigger on x11 with the configuration 8e1
         # since our statemachine understands only 8n1,
@@ -109,8 +109,8 @@ class Main:
                 size = 0xFF
                 response, mem = self.bootcom.read_memory(start, size)
 
-            # reset crowbar transistors
-            self.glitcher.reset_glitch()
+            # block until glitch
+            self.glitcher.block(timeout=2)
 
             # classify response
             color = self.glitcher.classify(response)
@@ -165,6 +165,7 @@ class Main:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", required=False, help="target port", default="/dev/ttyUSB1")
+    parser.add_argument("--rpico", required=False, help="rpico port", default="/dev/ttyUSB2")
     parser.add_argument("--power", required=False, help="rk6006 port", default=None)
     parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)

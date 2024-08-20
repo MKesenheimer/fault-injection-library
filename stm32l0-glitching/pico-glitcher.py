@@ -41,7 +41,7 @@ class Main:
         self.args = args
 
         # logging
-        logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level = logging.INFO, force=True)
+        logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
 
         # glitcher
         self.glitcher = PicoGlitcher()
