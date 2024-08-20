@@ -45,7 +45,7 @@ class Main:
 
         # glitcher
         self.glitcher = PicoGlitcher()
-        # if argument args.power is not provided, the internal power-cycling capabilities of the pro-glitcher will be used. In this case ext_power_voltage is not used.
+        # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
 
         # we want to trigger on x11 with the configuration 8e1
@@ -124,6 +124,7 @@ class Main:
             experiment_base_id = self.database.get_base_experiments_count()
             print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{length}\t{delay}\t{color}\t{response_str}", color))
 
+            # error handling
             # exit if too many successive fails (including a supposedly successful memory read)
             # open fail gate, if error occured and everything was ok previously
             if not issubclass(type(response), ExpectedType) and not self.fail_gate_open:
