@@ -101,6 +101,10 @@ class Main:
             if issubclass(type(response), OKType):
                 response = self.bootcom.setup_memread()
 
+            # TODO: test the new position of the block function (originally it was after "dump memory")
+            # block until glitch
+            self.glitcher.block(timeout=2)
+
             # dump memory
             mem = b''
             if issubclass(type(response), OKType):
@@ -109,8 +113,6 @@ class Main:
                 start = 0x08000000 - 0*0xFF
                 size = 0xFF
                 response, mem = self.bootcom.read_memory(start, size)
-                # block until glitch
-                self.glitcher.block(timeout=2)
 
             # classify response
             color = self.glitcher.classify(response)
