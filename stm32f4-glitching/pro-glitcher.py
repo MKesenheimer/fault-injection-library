@@ -97,10 +97,13 @@ class Main:
 
             # setup bootloader communication
             response = self.bootcom.init_bootloader()
+            # setup memory read; this function triggers the glitch
             if issubclass(type(response), OKType):
                 response = self.bootcom.setup_memread()
 
-            # dump memory, this function triggers the glitch
+            # TODO: block execution?
+
+            # dump memory
             mem = b''
             if issubclass(type(response), OKType):
                 #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
