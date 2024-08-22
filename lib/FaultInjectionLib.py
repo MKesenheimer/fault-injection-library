@@ -387,6 +387,11 @@ class HuskyGlitcher(Glitcher):
     def capture(self):
         self.scope.capture()
 
+    def block(self):
+        # blocks until scope triggered (or times out),
+        # then disarms scope and copies data back.
+        self.scope.capture()
+
     def disable(self):
         self.scope.glitch.enabled = False
 
@@ -520,6 +525,11 @@ class ProGlitcher(Glitcher):
         self.scope.arm()
 
     def capture(self):
+        self.scope.capture()
+
+    def block(self):
+        # blocks until scope triggered (or times out),
+        # then disarms scope and copies data back.
         self.scope.capture()
 
     def power_cycle_target(self, power_cycle_time=0.2):
