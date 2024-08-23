@@ -102,7 +102,7 @@ class Main:
                 response = self.bootcom.setup_memread()
 
             # block until glitch
-            self.glitcher.block(timeout=2)
+            self.glitcher.block(timeout=1)
 
             # dump memory
             mem = b''
