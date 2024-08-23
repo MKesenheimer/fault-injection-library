@@ -101,8 +101,12 @@ class Main:
             if issubclass(type(response), OKType):
                 response = self.bootcom.setup_memread()
 
-            # TODO: block execution?
-            #self.glitcher.block()
+            # block until glitch
+            try:
+                self.glitcher.block(timeout=1)
+            except Exception as _:
+                print("[-] Timeout received in block(). Continuing.")
+                response = GlitchState.Warning.timeout
 
             # dump memory
             mem = b''

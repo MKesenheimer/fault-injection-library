@@ -25,6 +25,7 @@ class _Error(ErrorType):
 class _Warning(WarningType):
     default = 0
     flash_reset = 1
+    timeout = 2
 
 class _OK(OKType):
     default = 0

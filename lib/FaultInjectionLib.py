@@ -8,7 +8,6 @@
 
 import sqlite3
 import time
-import signal
 import serial
 import sys
 import chipwhisperer as cw
@@ -22,7 +21,7 @@ try:
     from rd6006 import RD6006
     rd6006_available = True
 except Exception as _:
-    print("[-] Library RD6006 not installed. External Powersupply not available.")
+    print("[-] Library RD6006 not installed. Functions to control the external power supply not available.")
     rd6006_available = False
 
 class Database():
@@ -274,10 +273,7 @@ class PicoGlitcher(Glitcher):
         self.pico_glitcher.arm(delay, length)
 
     def block(self, timeout=1):
-        try:
-            self.pico_glitcher.block(timeout)
-        except Exception as _:
-            print("[-] Timeout received in block(). Continuing.")
+        self.pico_glitcher.block(timeout)
 
     def get_sm2_output(self):
         return self.pico_glitcher.get_sm2_output()
@@ -374,7 +370,8 @@ class HuskyGlitcher(Glitcher):
     def block(self):
         # blocks until scope triggered (or times out),
         # then disarms scope and copies data back.
-        self.scope.capture()
+        if self.scope.capture():
+            raise Exception("Function execution timed out!")
 
     def disable(self):
         self.scope.glitch.enabled = False
@@ -514,7 +511,8 @@ class ProGlitcher(Glitcher):
     def block(self):
         # blocks until scope triggered (or times out),
         # then disarms scope and copies data back.
-        self.scope.capture()
+        if self.scope.capture():
+            raise Exception("Function execution timed out!")
 
     def power_cycle_target(self, power_cycle_time=0.2):
         if self.power_supply is not None:

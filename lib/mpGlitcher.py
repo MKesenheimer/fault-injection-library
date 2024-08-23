@@ -12,9 +12,6 @@ import time
 # number of bits for UART
 BITS = 8
 
-class TimeoutException(Exception):
-    pass
-
 @asm_pio(set_init=(PIO.OUT_LOW))
 def glitch_tio_trigger():
     # block until delay received
@@ -200,7 +197,7 @@ class MicroPythonScript():
                 if self.sm1.rx_fifo() > 0:
                     break
             if time.time() - start_time >= timeout:
-                raise TimeoutException("Function execution timed out!")
+                raise Exception("Function execution timed out!")
 
     def get_sm2_output(self):
         if self.sm2 is not None:

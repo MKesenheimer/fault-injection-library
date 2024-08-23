@@ -40,7 +40,8 @@ class _Success(SuccessType):
     default = 0
 
 class GlitchState():
-    Error = _Error
-    OK = _OK
     Expected = _Expected
+    Error = _Error
+    Warning = _Warning
+    OK = _OK
     Success = _Success

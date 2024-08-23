@@ -102,7 +102,11 @@ class Main:
                 response = self.bootcom.setup_memread()
 
             # block until glitch
-            self.glitcher.block(timeout=1)
+            try:
+                self.glitcher.block(timeout=1)
+            except Exception as _:
+                print("[-] Timeout received in block(). Continuing.")
+                response = GlitchState.Warning.timeout
 
             # dump memory
             mem = b''
