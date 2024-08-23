@@ -367,7 +367,8 @@ class HuskyGlitcher(Glitcher):
     def capture(self):
         self.scope.capture()
 
-    def block(self):
+    def block(self, timeout=1):
+        # TODO: set the timeout of scope.capture
         # blocks until scope triggered (or times out),
         # then disarms scope and copies data back.
         if self.scope.capture():
@@ -508,7 +509,8 @@ class ProGlitcher(Glitcher):
     def capture(self):
         self.scope.capture()
 
-    def block(self):
+    def block(self, timeout=1):
+        # TODO: set the timeout of scope.capture
         # blocks until scope triggered (or times out),
         # then disarms scope and copies data back.
         if self.scope.capture():
