@@ -106,6 +106,8 @@ class Main:
                 self.glitcher.block(timeout=2)
             except Exception as _:
                 print("[-] Timeout received in block(). Continuing.")
+                self.glitcher.power_cycle_target()
+                time.sleep(0.2)
                 response = GlitchState.Warning.timeout
 
             # dump memory
