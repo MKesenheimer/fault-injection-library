@@ -91,7 +91,7 @@ class Main:
             self.glitcher.arm(delay, length)
 
             # reset target
-            #glitcher.reset(0.01)
+            self.glitcher.reset(0.01)
             self.glitcher.power_cycle_target()
             time.sleep(0.2)
 
@@ -101,7 +101,6 @@ class Main:
             if issubclass(type(response), OKType):
                 response = self.bootcom.setup_memread()
 
-            # TODO: test the new position of the block function (originally it was after "dump memory")
             # block until glitch
             self.glitcher.block(timeout=2)
 
@@ -149,14 +148,8 @@ class Main:
                     color = self.glitcher.classify(response)
                     response_str = str(response).encode("utf-8")
                     self.database.insert(experiment_id, delay, length, color, response_str)
-                    # then reprogram target and try again
-                    self.glitcher.power_cycle_target(1)
-                    time.sleep(1)
-                    self.bootcom.flush()
-                    self.successive_fails = 0
-                    # reprogram the target
-                    program_target()
-                    self.glitcher.power_cycle_target(1)
+                    # stop the script
+                    break
 
             # increase experiment id
             experiment_id += 1

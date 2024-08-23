@@ -101,7 +101,6 @@ class Main:
             if issubclass(type(response), OKType):
                 response = self.bootcom.setup_memread()
 
-            # TODO: test the new position of the block function (originally it was after "dump memory")
             # block until glitch
             self.glitcher.block(timeout=2)
 

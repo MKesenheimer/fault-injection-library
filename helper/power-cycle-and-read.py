@@ -65,7 +65,7 @@ class Main:
                     response, mem = self.bootcom.read_memory(start, size)
                     print(f"[+] Command read_memory response: {response}")
                     print(mem)
-                    break
+                    #break
 
 
 if __name__ == "__main__":

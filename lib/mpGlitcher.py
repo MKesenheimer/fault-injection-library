@@ -12,6 +12,9 @@ import time
 # number of bits for UART
 BITS = 8
 
+class TimeoutException(Exception):
+    pass
+
 @asm_pio(set_init=(PIO.OUT_LOW))
 def glitch_tio_trigger():
     # block until delay received
@@ -29,13 +32,13 @@ def glitch_tio_trigger():
     label("delay_loop")
     jmp(x_dec, "delay_loop")
 
-    # emit glitch
+    # emit glitch at base pin
     set(pins, 0b1)
     label("length_loop")       
     jmp(y_dec, "length_loop")
     set(pins, 0b0)
 
-    # tell execution finished
+    # tell execution finished (fills the sm's fifo buffer)
     push(block)
 
 @asm_pio(set_init=(PIO.OUT_LOW))
@@ -54,13 +57,13 @@ def glitch_uart_trigger():
     label("delay_loop")       
     jmp(x_dec, "delay_loop")
 
-    # emit glitch
+    # emit glitch at base pin
     set(pins, 0b1)
     label("length_loop")       
     jmp(y_dec, "length_loop")
     set(pins, 0b0)
 
-    # tell execution finished
+    # tell execution finished (fills the sm's fifo buffer)
     push(block)
 
 @asm_pio(in_shiftdir = PIO.SHIFT_RIGHT)
@@ -170,7 +173,7 @@ class MicroPythonScript():
 
         if self.trigger == "tio":
             # TODO: je nachdem ob hp oder lp glitch: set_base setzen
-            self.sm1 = StateMachine(1, glitch_tio_trigger, freq=self.frequency, set_base=self.pin_lpglitch)
+            self.sm1 = StateMachine(1, glitch_tio_trigger, freq=self.frequency, set_base=self.pin_hpglitch)
             self.sm1.active(1)
             # push delay and length into the fifo of the statemachine
             self.sm1.put(delay // (1_000_000_000 // self.frequency))
@@ -178,7 +181,7 @@ class MicroPythonScript():
         
         elif self.trigger == "uart":
             # TODO: je nachdem ob hp oder lp glitch: set_base setzen
-            self.sm1 = StateMachine(1, glitch_uart_trigger, freq=self.frequency, set_base=self.pin_lpglitch)
+            self.sm1 = StateMachine(1, glitch_uart_trigger, freq=self.frequency, set_base=self.pin_hpglitch)
             self.sm1.active(1)
             # push delay and length into the fifo of the statemachine
             self.sm1.put(delay // (1_000_000_000 // self.frequency))
@@ -190,16 +193,14 @@ class MicroPythonScript():
             pattern = self.pattern << (32 - BITS)
             self.sm2.put(pattern)
 
-    def deactivate_sm1(self):
-        self.sm1.active(0)
-
-    def restart_sm1(self):
-        self.sm1.restart()
-
-    def block(self):
+    def block(self, timeout):
         if self.sm1 is not None:
-            # wait until statemachine execution is finished
-            self.sm1.get()
+            start_time = time.time()
+            while time.time() - start_time < timeout:
+                if self.sm1.rx_fifo() > 0:
+                    break
+            if time.time() - start_time >= timeout:
+                raise TimeoutException("Function execution timed out!")
 
     def get_sm2_output(self):
         if self.sm2 is not None:

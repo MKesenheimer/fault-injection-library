@@ -91,7 +91,7 @@ class Main:
             self.glitcher.arm(delay, length)
 
             # reset target
-            #glitcher.reset(0.01)
+            #self.glitcher.reset(0.01)
             self.glitcher.power_cycle_target()
             time.sleep(0.2)
 
@@ -102,6 +102,7 @@ class Main:
                 response = self.bootcom.setup_memread()
 
             # TODO: block execution?
+            #self.glitcher.block()
 
             # dump memory
             mem = b''

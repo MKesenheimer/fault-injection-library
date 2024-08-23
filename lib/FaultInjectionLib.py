@@ -188,14 +188,8 @@ class PicoGlitcherInterface(MicroPythonScript):
     def reset(self, reset_time):
         self.pyb.exec(f'mp.reset({reset_time})')
 
-    def deactivate_sm(self):
-        self.pyb.exec('mp.deactivate_sm1()')
-
-    def restart_sm(self):
-        self.pyb.exec('mp.restart_sm1()')
-
-    def block(self):
-        self.pyb.exec('mp.block()')
+    def block(self, timeout):
+        return self.pyb.exec(f'mp.block({timeout})')
 
     def get_sm2_output(self):
         return self.pyb.exec('mp.get_sm2_output()')
@@ -279,21 +273,11 @@ class PicoGlitcher(Glitcher):
     def arm(self, delay, length):
         self.pico_glitcher.arm(delay, length)
 
-    def __timeout_handler(self, num, stack):
-        self.pico_glitcher.deactivate_sm()
-        #self.pico_glitcher.arm(100_500, 1)
-        self.pico_glitcher.restart_sm()
-        raise Exception("timeout")
-
-    def block(self, timeout=10):
-        signal.signal(signal.SIGALRM, self.__timeout_handler)
-        signal.alarm(timeout)
+    def block(self, timeout=1):
         try:
-            self.pico_glitcher.block()
-        except Exception as e:
-            print(f"[+] Timeout received {e}. Continuing.")
-        finally:
-            signal.alarm(0)
+            self.pico_glitcher.block(timeout)
+        except Exception as _:
+            print("[-] Timeout received in block(). Continuing.")
 
     def get_sm2_output(self):
         return self.pico_glitcher.get_sm2_output()
