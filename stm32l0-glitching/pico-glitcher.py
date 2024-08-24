@@ -58,12 +58,6 @@ class Main:
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
         # if number of experiments get too large, remove the expected results
         #self.database.cleanup("G")
-        #experiment_id = self.database.get_latest_experiment_id()
-        #print(experiment_id)
-        #for i in range(0, 806):
-        #    eid = self.database.get_latest_experiment_id()
-        #    print(eid)
-        #    self.database.remove(eid)
 
         self.start_time = int(time.time())
         self.successive_fails = 0

@@ -58,12 +58,6 @@ class Main:
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
         # if number of experiments get too large, remove the expected results
         #self.database.cleanup("G")
-        #experiment_id = self.database.get_latest_experiment_id()
-        #print(experiment_id)
-        #for i in range(0, 806):
-        #    eid = self.database.get_latest_experiment_id()
-        #    print(eid)
-        #    self.database.remove(eid)
 
         self.start_time = int(time.time())
         self.successive_fails = 0
@@ -93,7 +87,7 @@ class Main:
             # reset target
             self.glitcher.reset(0.01)
             self.glitcher.power_cycle_target()
-            time.sleep(0.2)
+            time.sleep(0.15)
 
             # setup bootloader communication
             response = self.bootcom.init_bootloader()
@@ -103,10 +97,10 @@ class Main:
 
             # block until glitch
             try:
-                self.glitcher.block(timeout=2)
+                self.glitcher.block(timeout=1)
             except Exception as _:
                 print("[-] Timeout received in block(). Continuing.")
-                self.glitcher.power_cycle_target()
+                self.glitcher.power_cycle_target(power_cycle_time=1)
                 time.sleep(0.2)
                 response = GlitchState.Warning.timeout
 
