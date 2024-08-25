@@ -108,20 +108,21 @@ class BootloaderCom:
         self.ser.write(b'\x11\xee')
         s = self.ser.read(1)
 
-        # write memory address
-        self.ser.write(b'\x08\x00\x00\x00\x08')
-        self.ser.read(1)
-        # write number of bytes to read
-        self.ser.write(b'\xff\x00')
-        self.ser.read(1)
+        if s == self.ACK:
+            # write memory address
+            self.ser.write(b'\x08\x00\x00\x00\x08')
+            self.ser.read(1)
+            # write number of bytes to read
+            self.ser.write(b'\xff\x00')
+            self.ser.read(1)
 
-        # read memory
-        mem = self.ser.read(255)
+            # read memory
+            mem = self.ser.read(255)
 
-        if mem != b'\x1f' and mem != b'\x79':
-            print(f"[+] Length of memory dump: {len(mem)}")
-            print(f"[+] Content: {mem}")
-            return GlitchState.Success.dump_ok
+            if mem != b'\x1f' and mem != b'\x79':
+                print(f"[+] Length of memory dump: {len(mem)}")
+                print(f"[+] Content: {mem}")
+                return GlitchState.Success.dump_ok
 
         if s == self.ACK:
             return GlitchState.OK.rdp_inactive
