@@ -126,10 +126,10 @@ class BootloaderCom:
         # write number of bytes to read
         self.ser.write(sizeb)
         self.ser.write(crc)
-        self.ser.read(1)
+        #self.ser.read(1)
 
         # read memory
-        mem = self.ser.read(size)
+        mem = self.ser.read(size + 1)
 
         print(f"[+] Length of memory dump: {len(mem)}")
         print(f"[+] Content: {mem}")
