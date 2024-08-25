@@ -131,7 +131,41 @@ class BootloaderCom:
 
         # read memory
         mem = self.ser.read(size)
-        time.sleep(1)
+
+        print(f"[+] Length of memory dump: {len(mem)}")
+        print(f"[+] Content: {mem}")
+        response = GlitchState.OK.default
+        if len(mem) == 255 and mem != b"\x00" * 255:
+            response = GlitchState.Success.dump_ok
+        else:
+            response = GlitchState.OK.dump_error
+        return response, mem
+
+    # returns "dump_ok" if glitch and memory read was successful
+    # returns "dump_error" if glitch was successful, however memory read yielded eroneous results
+    def read_memory_fast(self, start, size):
+        # write memory address
+        startb = start.to_bytes(4, 'big')
+        crc = reduce(lambda x, y: x ^ y, startb, 0).to_bytes(1, 'big')
+        print(startb)
+        print(crc)
+        self.ser.write(startb)
+        self.ser.write(crc)
+        self.ser.read(1)
+
+        # write bytes to read
+        sizeb = size.to_bytes(1, 'big')
+        crc = reduce(lambda x, y: x ^ y, sizeb, 0xff).to_bytes(1, 'big')
+        # write number of bytes to read
+        self.ser.write(sizeb)
+        self.ser.write(crc)
+        print(sizeb)
+        print(crc)
+        self.ser.read(1)
+
+        # read memory
+        mem = self.ser.read(size)
+        exit(-1)
 
         print(f"[+] Length of memory dump: {len(mem)}")
         print(f"[+] Content: {mem}")

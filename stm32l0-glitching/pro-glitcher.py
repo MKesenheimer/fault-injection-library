@@ -111,7 +111,7 @@ class Main:
                 #start = 0x08000000
                 start = 0x08000000 - 0*0xFF
                 size = 0xFF
-                response, mem = self.bootcom.read_memory(start, size)
+                response, mem = self.bootcom.read_memory_fast(start, size)
                 time.sleep(1)
                 if mem != b'':
                     time.sleep(4)
