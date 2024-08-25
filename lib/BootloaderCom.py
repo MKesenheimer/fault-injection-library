@@ -122,6 +122,7 @@ class BootloaderCom:
             if mem != b'\x1f' and mem != b'\x79':
                 print(f"[+] Length of memory dump: {len(mem)}")
                 print(f"[+] Content: {mem}")
+                time.sleep(5)
                 return GlitchState.Success.dump_ok
 
         if s == self.ACK:
