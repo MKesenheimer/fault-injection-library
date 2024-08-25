@@ -118,7 +118,7 @@ class BootloaderCom:
         # read memory
         mem = self.ser.read(255)
 
-        if mem != b'':
+        if mem != b'\x1f' and mem != b'\x79':
             print(f"[+] Length of memory dump: {len(mem)}")
             print(f"[+] Content: {mem}")
             return GlitchState.Success.dump_ok
