@@ -54,7 +54,7 @@ class BootloaderCom:
 
     def __init__(self, port, dump_address=0x08000000, dump_len=0x400):
         print(f"[+] Opening serial port {port}.")
-        self.ser = serial.Serial(port=port, baudrate=115200, timeout=0, bytesize=8, parity="E", stopbits=1)
+        self.ser = serial.Serial(port=port, baudrate=115200, timeout=None, bytesize=8, parity="E", stopbits=1)
         # memory read settings
         self.current_dump_addr = dump_address
         self.current_dump_len = dump_len
