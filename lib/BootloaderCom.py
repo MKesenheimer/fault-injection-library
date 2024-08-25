@@ -116,7 +116,7 @@ class BootloaderCom:
         self.ser.read(1)
 
         # read memory
-        mem = self.ser.read(size)
+        mem = self.ser.read(255)
 
         if mem != b'':
             print(f"[+] Length of memory dump: {len(mem)}")
