@@ -96,25 +96,25 @@ class Main:
                 response = self.bootcom.setup_memread()
 
             # block until glitch
-            #try:
-            #    self.glitcher.block(timeout=1)
-            #except Exception as _:
-            #    print("[-] Timeout received in block(). Continuing.")
-            #    self.glitcher.power_cycle_target()
-            #    time.sleep(0.2)
-            #    response = GlitchState.Warning.timeout
+            try:
+                self.glitcher.block(timeout=1)
+            except Exception as _:
+                print("[-] Timeout received in block(). Continuing.")
+                self.glitcher.power_cycle_target()
+                time.sleep(0.2)
+                response = GlitchState.Warning.timeout
 
-            # dump memory
-            mem = b''
-            if issubclass(type(response), OKType):
-                #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
-                #start = 0x08000000
-                start = 0x08000000 - 0*0xFF
-                size = 0xFF
-                response, mem = self.bootcom.read_memory_fast(start, size)
-                time.sleep(1)
-                if mem != b'':
-                    time.sleep(4)
+            ## dump memory
+            #mem = b''
+            #if issubclass(type(response), OKType):
+            #    #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
+            #    #start = 0x08000000
+            #    start = 0x08000000 - 0*0xFF
+            #    size = 0xFF
+            #    response, mem = self.bootcom.read_memory_fast(start, size)
+            #    time.sleep(1)
+            #    if mem != b'':
+            #        time.sleep(4)
 
             # reset crowbar transistors
             self.glitcher.reset_glitch()
