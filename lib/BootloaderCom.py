@@ -9,6 +9,7 @@ import serial
 from functools import reduce
 import sys
 from GlitchState import ErrorType, WarningType, OKType, ExpectedType, SuccessType
+import time
 
 class _Expected(ExpectedType):
     default = 0
@@ -130,6 +131,7 @@ class BootloaderCom:
 
         # read memory
         mem = self.ser.read(size)
+        time.sleep(1)
 
         print(f"[+] Length of memory dump: {len(mem)}")
         print(f"[+] Content: {mem}")
