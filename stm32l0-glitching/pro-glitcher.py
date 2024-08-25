@@ -105,7 +105,7 @@ class Main:
                 response = GlitchState.Warning.timeout
 
             ## dump memory
-            #mem = b''
+            mem = b''
             #if issubclass(type(response), OKType):
             #    #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
             #    #start = 0x08000000
