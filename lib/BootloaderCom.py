@@ -113,7 +113,7 @@ class BootloaderCom:
             self.ser.write(b'\x08\x00\x00\x00\x08')
             self.ser.read(1)
             # write number of bytes to read
-            self.ser.write(b'\x10\xef')
+            self.ser.write(b'\xff\x00')
             self.ser.read(1)
 
             # read memory
