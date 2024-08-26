@@ -159,7 +159,7 @@ class BootloaderCom:
             # read memory
             mem = self.ser.read(255)
 
-            if mem != b'\x1f' and mem != b'\x79':
+            if mem != b'\x1f' and mem != b'\x79' and mem != b'':
                 print(f"[+] Length of memory dump: {len(mem)}")
                 print(f"[+] Content: {mem}")
                 time.sleep(5)
