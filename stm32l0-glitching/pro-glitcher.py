@@ -93,7 +93,7 @@ class Main:
             response = self.bootcom.init_bootloader()
             # setup memory read; this function triggers the glitch
             if issubclass(type(response), OKType):
-                response = self.bootcom.setup_memread()
+                response = self.bootcom.setup_memread_fast()
 
             # block until glitch
             try:

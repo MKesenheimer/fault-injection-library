@@ -55,7 +55,7 @@ class BootloaderCom:
 
     def __init__(self, port, dump_address=0x08000000, dump_len=0x400):
         print(f"[+] Opening serial port {port}.")
-        self.ser = serial.Serial(port=port, baudrate=115200, timeout=0.1, bytesize=8, parity="E", stopbits=1)
+        self.ser = serial.Serial(port=port, baudrate=115200, timeout=0.5, bytesize=8, parity="E", stopbits=1)
         # memory read settings
         self.current_dump_addr = dump_address
         self.current_dump_len = dump_len
@@ -107,27 +107,8 @@ class BootloaderCom:
         # read memory (x11: read memory, xee: crc)
         self.ser.write(b'\x11\xee')
         s = self.ser.read(1)
-
-        if s == self.ACK:
-            # write memory address
-            self.ser.write(b'\x08\x00\x00\x00\x08')
-            self.ser.read(1)
-            # write number of bytes to read
-            self.ser.write(b'\xff\x00')
-            self.ser.read(1)
-
-            # read memory
-            mem = self.ser.read(255)
-
-            if mem != b'\x1f' and mem != b'\x79':
-                print(f"[+] Length of memory dump: {len(mem)}")
-                print(f"[+] Content: {mem}")
-                time.sleep(5)
-                return GlitchState.Success.dump_ok
-
         if s == self.ACK:
             return GlitchState.OK.rdp_inactive
-
         return GlitchState.Expected.rdp_active
 
     # returns "dump_ok" if glitch and memory read was successful
@@ -159,6 +140,35 @@ class BootloaderCom:
         else:
             response = GlitchState.OK.dump_error
         return response, mem
+
+    # returns "rdp_active" if RDP is active (expected)
+    # returns "rdp_inactive" if glitch was successful
+    def setup_memread_fast(self):
+        # read memory (x11: read memory, xee: crc)
+        self.ser.write(b'\x11\xee')
+        s = self.ser.read(1)
+
+        if s == self.ACK:
+            # write memory address
+            self.ser.write(b'\x08\x00\x00\x00\x08')
+            self.ser.read(1)
+            # write number of bytes to read
+            self.ser.write(b'\xff\x00')
+            self.ser.read(1)
+
+            # read memory
+            mem = self.ser.read(255)
+
+            if mem != b'\x1f' and mem != b'\x79':
+                print(f"[+] Length of memory dump: {len(mem)}")
+                print(f"[+] Content: {mem}")
+                time.sleep(5)
+                return GlitchState.Success.dump_ok
+
+        if s == self.ACK:
+            return GlitchState.OK.rdp_inactive
+
+        return GlitchState.Expected.rdp_active
 
     # returns "dump_ok" if glitch and memory read was successful
     # returns "dump_error" if glitch was successful, however memory read yielded eroneous results
