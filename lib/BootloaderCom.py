@@ -164,6 +164,8 @@ class BootloaderCom:
                 print(f"[+] Content: {mem}")
                 time.sleep(5)
                 return GlitchState.Success.dump_ok
+            else:
+                return GlitchState.OK.dump_error
 
         if s == self.ACK:
             return GlitchState.OK.rdp_inactive
