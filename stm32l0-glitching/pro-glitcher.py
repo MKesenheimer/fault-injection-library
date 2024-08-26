@@ -92,9 +92,8 @@ class Main:
             # setup bootloader communication
             response = self.bootcom.init_bootloader()
             # setup memory read; this function triggers the glitch
-            mem = b''
             if issubclass(type(response), OKType):
-                response, mem = self.bootcom.setup_memread_fast()
+                response = self.bootcom.setup_memread_fast()
 
             # block until glitch
             try:
@@ -106,15 +105,16 @@ class Main:
                 response = GlitchState.Warning.timeout
 
             # dump memory
-            #if issubclass(type(response), OKType):
-            #    #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
-            #    #start = 0x08000000
-            #    start = 0x08000000 - 0*0xFF
-            #    size = 0xFF
-            #    response, mem = self.bootcom.read_memory_fast(start, size)
-            #    time.sleep(1)
-            #    if mem != b'':
-            #        time.sleep(4)
+            if issubclass(type(response), OKType):
+                #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
+                #start = 0x08000000
+                start = 0x08000000 - 0*0xFF
+                size = 0xFF
+                response, mem = self.bootcom.read_memory_fast(start, size)
+                # DEBUG (to easily find the glitch with a logic analyzer)
+                time.sleep(1)
+                if mem != b'\x1f' and mem != b'\x79' and mem != b'':
+                    time.sleep(4)
 
             # reset crowbar transistors
             self.glitcher.reset_glitch()

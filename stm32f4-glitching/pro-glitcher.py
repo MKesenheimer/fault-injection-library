@@ -6,9 +6,9 @@
 # If not, please write to: m.kesenheimer@gmx.net.
 
 # programming
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x unlock 0; exit"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; sleep 1000; reset run; shutdown"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; halt; stm32f4x unlock 0; exit"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; halt; program GPIO_IOToggle.elf verify reset exit;"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; halt; stm32f4x lock 0; sleep 1000; reset run; shutdown"
 # -> power cycle the target!
 
 # SQL Queries:
@@ -29,10 +29,10 @@ from GlitchState import OKType, ExpectedType
 from FaultInjectionLib import Database, ProGlitcher, Helper
 
 def program_target():
-    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32l0.cfg', '-c', 'init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;'], text=True, capture_output=True)
+    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32f4x.cfg', '-c', 'init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;'], text=True, capture_output=True)
     print(result.stdout)
     print(result.stderr)
-    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32l0.cfg', '-c', 'init; halt; stm32l0x lock 0; sleep 1000; reset run; shutdown;'], text=True, capture_output=True)
+    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32f4x.cfg', '-c', 'init; halt; stm32f4x lock 0; sleep 1000; reset run; shutdown;'], text=True, capture_output=True)
     print(result.stdout)
     print(result.stderr)
 
