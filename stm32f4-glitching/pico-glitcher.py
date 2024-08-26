@@ -114,9 +114,9 @@ class Main:
                 size = 0xFF
                 response, mem = self.bootcom.read_memory(start, size)
                 # DEBUG (to easily find the glitch with a logic analyzer)
-                time.sleep(1)
-                if mem != b'\x1f' and mem != b'\x79' and mem != b'':
-                    time.sleep(4)
+                #time.sleep(1)
+                #if mem != b'\x1f' and mem != b'\x79' and mem != b'':
+                #    time.sleep(4)
 
             # classify response
             color = self.glitcher.classify(response)
