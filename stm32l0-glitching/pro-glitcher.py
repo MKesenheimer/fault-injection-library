@@ -92,8 +92,9 @@ class Main:
             # setup bootloader communication
             response = self.bootcom.init_bootloader()
             # setup memory read; this function triggers the glitch
+            mem = b''
             if issubclass(type(response), OKType):
-                response = self.bootcom.setup_memread_fast()
+                response, mem = self.bootcom.setup_memread_fast()
 
             # block until glitch
             try:
@@ -105,7 +106,6 @@ class Main:
                 response = GlitchState.Warning.timeout
 
             # dump memory
-            mem = b''
             #if issubclass(type(response), OKType):
             #    #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
             #    #start = 0x08000000

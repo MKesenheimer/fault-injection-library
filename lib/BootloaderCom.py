@@ -148,6 +148,7 @@ class BootloaderCom:
         self.ser.write(b'\x11\xee')
         s = self.ser.read(1)
 
+        mem = b''
         if s == self.ACK:
             # write memory address
             self.ser.write(b'\x08\x00\x00\x00\x08')
@@ -163,14 +164,15 @@ class BootloaderCom:
                 print(f"[+] Length of memory dump: {len(mem)}")
                 print(f"[+] Content: {mem}")
                 time.sleep(5)
-                return GlitchState.Success.dump_ok
+                return GlitchState.Success.dump_ok, mem
             else:
-                return GlitchState.OK.dump_error
+                time.sleep(1)
+                return GlitchState.OK.dump_error, mem
 
         if s == self.ACK:
-            return GlitchState.OK.rdp_inactive
+            return GlitchState.OK.rdp_inactive, mem
 
-        return GlitchState.Expected.rdp_active
+        return GlitchState.Expected.rdp_active, mem
 
     # returns "dump_ok" if glitch and memory read was successful
     # returns "dump_error" if glitch was successful, however memory read yielded eroneous results
