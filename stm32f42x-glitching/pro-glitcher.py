@@ -100,7 +100,7 @@ class Main:
                 self.glitcher.block(timeout=1)
             except Exception as _:
                 print("[-] Timeout received in block(). Continuing.")
-                self.glitcher.power_cycle_target()
+                self.glitcher.power_cycle_target(power_cycle_time=1)
                 time.sleep(0.2)
                 response = GlitchState.Warning.timeout
 
@@ -112,6 +112,10 @@ class Main:
                 start = 0x08000000 - 0*0xFF
                 size = 0xFF
                 response, mem = self.bootcom.read_memory(start, size)
+                # DEBUG (to easily find the glitch with a logic analyzer)
+                #time.sleep(1)
+                #if mem != b'\x1f' and mem != b'\x79' and mem != b'':
+                #    time.sleep(4)
 
             # reset crowbar transistors
             self.glitcher.reset_glitch()

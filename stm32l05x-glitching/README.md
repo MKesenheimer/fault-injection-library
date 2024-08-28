@@ -26,3 +26,7 @@ python pro-glitcher.py --target /dev/<target-tty-port> --power /dev/<rd6006-tty-
 ## TODO
 - [ ] Screenshot of oscilloscope
 - [ ] Try to dump the bootloader and reverse engineer it.
+- [ ] Add the Mouser/JLCPCB parts list to the resources.
+- [ ] Add Toed as contributor
+- [ ] Document PCB development on hackaday.io, hackster.io, instructables.com, deralchemist.wordpress.com
+- [ ] Document results

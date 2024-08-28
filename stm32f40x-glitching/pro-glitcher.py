@@ -6,9 +6,9 @@
 # If not, please write to: m.kesenheimer@gmx.net.
 
 # programming
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x unlock 0; exit"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; sleep 1000; reset run; shutdown"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; halt; stm32f4x unlock 0; exit"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; halt; program GPIO_IOToggle.elf verify reset exit;"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; halt; stm32f4x lock 0; sleep 1000; reset run; shutdown"
 # -> power cycle the target!
 
 # SQL Queries:
@@ -26,13 +26,13 @@ import subprocess
 sys.path.insert(0, "../lib/")
 from BootloaderCom import BootloaderCom, GlitchState
 from GlitchState import OKType, ExpectedType
-from FaultInjectionLib import Database, PicoGlitcher, Helper
+from FaultInjectionLib import Database, ProGlitcher, Helper
 
 def program_target():
-    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32l0.cfg', '-c', 'init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;'], text=True, capture_output=True)
+    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32f4x.cfg', '-c', 'init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;'], text=True, capture_output=True)
     print(result.stdout)
     print(result.stderr)
-    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32l0.cfg', '-c', 'init; halt; stm32l0x lock 0; sleep 1000; reset run; shutdown;'], text=True, capture_output=True)
+    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32f4x.cfg', '-c', 'init; halt; stm32f4x lock 0; sleep 1000; reset run; shutdown;'], text=True, capture_output=True)
     print(result.stdout)
     print(result.stderr)
 
@@ -44,9 +44,9 @@ class Main:
         logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
 
         # glitcher
-        self.glitcher = PicoGlitcher()
-        # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
-        self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
+        self.glitcher = ProGlitcher()
+        # if argument args.power is not provided, the internal power-cycling capabilities of the pro-glitcher will be used. In this case, ext_power_voltage is not used.
+        self.glitcher.init(ext_power=args.power, ext_power_voltage=3.3)
 
         # we want to trigger on x11 with the configuration 8e1
         # since our statemachine understands only 8n1,
@@ -85,9 +85,9 @@ class Main:
             self.glitcher.arm(delay, length)
 
             # reset target
-            self.glitcher.reset(0.01)
-            #self.glitcher.power_cycle_target()
-            time.sleep(0.01)
+            #self.glitcher.reset(0.01)
+            self.glitcher.power_cycle_target()
+            time.sleep(0.2)
 
             # setup bootloader communication
             response = self.bootcom.init_bootloader()
@@ -100,7 +100,7 @@ class Main:
                 self.glitcher.block(timeout=1)
             except Exception as _:
                 print("[-] Timeout received in block(). Continuing.")
-                self.glitcher.power_cycle_target()
+                self.glitcher.power_cycle_target(power_cycle_time=1)
                 time.sleep(0.2)
                 response = GlitchState.Warning.timeout
 
@@ -112,6 +112,13 @@ class Main:
                 start = 0x08000000 - 0*0xFF
                 size = 0xFF
                 response, mem = self.bootcom.read_memory(start, size)
+                # DEBUG (to easily find the glitch with a logic analyzer)
+                #time.sleep(1)
+                #if mem != b'\x1f' and mem != b'\x79' and mem != b'':
+                #    time.sleep(4)
+
+            # reset crowbar transistors
+            self.glitcher.reset_glitch()
 
             # classify response
             color = self.glitcher.classify(response)
@@ -167,7 +174,6 @@ class Main:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", required=False, help="target port", default="/dev/ttyUSB1")
-    parser.add_argument("--rpico", required=False, help="rpico port", default="/dev/ttyUSB2")
     parser.add_argument("--power", required=False, help="rk6006 port", default=None)
     parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)

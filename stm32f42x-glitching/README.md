@@ -26,3 +26,4 @@ python pro-glitcher.py --target /dev/<target-tty-port> --delay 90_500 91_500 --l
 - [ ] STM32F4 glitching with new development board (STM black pill STM32F401CCU6), see [STM32F401CCU6 glitching](https://jerinsunny.github.io/stm32_vglitch/)
 - [ ] Screenshot of oscilloscope
 - [ ] Dump and reverse engineering of Bootloader
+- [ ] Document results
