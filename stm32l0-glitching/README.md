@@ -1,6 +1,6 @@
 # Notes
 
-![](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l0-glitching/images/picoglitcher-bootloader-glitching.png)
+![](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l0-glitching/images/cw-pro-bootloader-glitching.png)
 
 ![](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l0-glitching/images/1-init-bootloader.png)
 
