@@ -12,16 +12,16 @@ python pro-glitcher.py --target /dev/<target-tty-port> --power /dev/<rd6006-tty-
 - Bootloader (address 0x1FF00000) can not be dumped as the memory (even in RDP0) is protected.
 - [AN2606 Application note STM32 microcontroller system memory boot mode](https://www.st.com/resource/en/application_note/an2606-stm32-microcontroller-system-memory-boot-mode-stmicroelectronics.pdf)
 
-![Glitch insertion point](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l0-glitching/images/power_supply_scheme.png)
+![Glitch insertion point](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l05x-glitching/images/power_supply_scheme.png)
 [AN4488 Application note](https://www.st.com/resource/en/datasheet/stm32l052c6.pdf)
 
-![](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l0-glitching/images/cw-pro-bootloader-glitching.png)
+![](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l05x-glitching/images/cw-pro-bootloader-glitching.png)
 
-![](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l0-glitching/images/1-init-bootloader.png)
+![](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l05x-glitching/images/1-init-bootloader.png)
 
-![](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l0-glitching/images/2-memread-cmd.png)
+![](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l05x-glitching/images/2-memread-cmd.png)
 
-![](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l0-glitching/images/4-number-of-bytes-cmd.png)
+![](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l05x-glitching/images/4-number-of-bytes-cmd.png)
 
 ## TODO
 - [ ] Screenshot of oscilloscope
