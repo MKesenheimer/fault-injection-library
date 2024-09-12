@@ -171,7 +171,6 @@ class MicroPythonScript():
     def arm(self, delay, length):
         self.release_reset()
         self.pin_glitch_en.high()
-        self.enable_vtarget()
         self.pin_hpglitch.low()
         self.pin_lpglitch.low()
 

@@ -274,6 +274,7 @@ class PicoGlitcher(Glitcher):
             self.power_supply.set_voltage(ext_power_voltage)
             print(self.power_supply.status())
         else:
+            self.pico_glitcher.enable_vtarget()
             self.power_supply = None
         
     def arm(self, delay, length):
