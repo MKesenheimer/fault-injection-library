@@ -263,6 +263,7 @@ class PicoGlitcher(Glitcher):
         self.pico_glitcher.set_trigger("tio")
         self.pico_glitcher.set_frequency(200_000_000)
         if rd6006_available and ext_power is not None:
+            self.pico_glitcher.disable_vtarget()
             self.power_supply = ExternalPowerSupply(port=ext_power)
             self.power_supply.set_voltage(ext_power_voltage)
             print(self.power_supply.status())
