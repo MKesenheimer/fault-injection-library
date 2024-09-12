@@ -193,6 +193,11 @@ class PicoGlitcherInterface(MicroPythonScript):
     def get_sm2_output(self):
         return self.pyb.exec('mp.get_sm2_output()')
 
+    def set_lpglitch(self):
+        self.pyb.exec('mp.set_lpglitch()')
+
+    def set_hpglitch(self):
+        self.pyb.exec('mp.set_hpglitch()')
 
 class ExternalPowerSupply:
     def __init__(self, port):
@@ -262,6 +267,7 @@ class PicoGlitcher(Glitcher):
         self.pico_glitcher.init(port, 'mpGlitcher')
         self.pico_glitcher.set_trigger("tio")
         self.pico_glitcher.set_frequency(200_000_000)
+        self.pico_glitcher.set_lpglitch()
         if rd6006_available and ext_power is not None:
             self.pico_glitcher.disable_vtarget()
             self.power_supply = ExternalPowerSupply(port=ext_power)

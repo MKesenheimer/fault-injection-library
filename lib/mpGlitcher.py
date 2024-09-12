@@ -122,6 +122,8 @@ class MicroPythonScript():
         # LP_GLITCH
         self.pin_lpglitch = Pin(17, Pin.OUT, Pin.PULL_DOWN)
         self.pin_lpglitch.low()
+        # which glitching transistor to use. Default: lpglitch
+        self.pin_glitch = self.pin_lpglitch
 
     def set_frequency(self, frequency=200_000_000):
         machine.freq(frequency)
@@ -160,6 +162,12 @@ class MicroPythonScript():
         self.release_reset()
         self.pin_glitch_en.low()
 
+    def set_lpglitch(self):
+        self.pin_glitch = self.pin_lpglitch
+
+    def set_hpglitch(self):
+        self.pin_glitch = self.pin_hpglitch
+
     def arm(self, delay, length):
         self.release_reset()
         self.pin_glitch_en.high()
@@ -168,16 +176,14 @@ class MicroPythonScript():
         self.pin_lpglitch.low()
 
         if self.trigger == "tio":
-            # TODO: je nachdem ob hp oder lp glitch: set_base setzen
-            self.sm1 = StateMachine(1, glitch_tio_trigger, freq=self.frequency, set_base=self.pin_hpglitch)
+            self.sm1 = StateMachine(1, glitch_tio_trigger, freq=self.frequency, set_base=self.pin_glitch)
             self.sm1.active(1)
             # push delay and length into the fifo of the statemachine
             self.sm1.put(delay // (1_000_000_000 // self.frequency))
             self.sm1.put(length // (1_000_000_000 // self.frequency))
         
         elif self.trigger == "uart":
-            # TODO: je nachdem ob hp oder lp glitch: set_base setzen
-            self.sm1 = StateMachine(1, glitch_uart_trigger, freq=self.frequency, set_base=self.pin_hpglitch)
+            self.sm1 = StateMachine(1, glitch_uart_trigger, freq=self.frequency, set_base=self.pin_glitch)
             self.sm1.active(1)
             # push delay and length into the fifo of the statemachine
             self.sm1.put(delay // (1_000_000_000 // self.frequency))
