@@ -46,7 +46,7 @@ class DerivedGlitcher(PicoGlitcher):
             color = 'R'
         return color
 
-class Main:
+class Main():
     def __init__(self, args):
         self.args = args
 
@@ -83,8 +83,11 @@ class Main:
             delay = random.randint(s_delay, e_delay)
             self.glitcher.arm(delay, length)
 
-            # power cycle and reset target
+            # power cycle target
             self.glitcher.power_cycle_target(0.03)
+
+            # reset target
+            #self.glitcher.reset(0.01)
 
             # block until glitch
             try:
@@ -96,7 +99,7 @@ class Main:
                 self.glitcher.power_cycle_target(power_cycle_time=1)
                 time.sleep(0.2)
                 response = b'Timeout'
-                
+
             # classify response
             color = self.glitcher.classify(response)
 
@@ -117,7 +120,7 @@ class Main:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rpico", required=False, help="rpico port", default="/dev/ttyUSB2")
+    parser.add_argument("--rpico", required=False, help="rpico port", default="/dev/ttyACM0")
     parser.add_argument("--power", required=False, help="rk6006 port", default=None)
     parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)

@@ -5,15 +5,21 @@
 # You should have received a copy of the GPL3 license with this file.
 # If not, please write to: m.kesenheimer@gmx.net.
 
+# SQL Queries:
+# Show only successes and flash-resets:
+# color = 'R' or response LIKE '_Warning.flash_reset'
+
+
 import argparse
-import time
-import sys
-import random
 import logging
+import random
+import sys
+import time
+import subprocess
 
 # import custom libraries
-sys.path.insert(0, '../lib/')
-from FaultInjectionLib import PicoGlitcher, Database, Serial
+sys.path.insert(0, "../lib/")
+from FaultInjectionLib import Database, PicoGlitcher, Serial
 
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(PicoGlitcher):
@@ -32,33 +38,36 @@ class Main():
     def __init__(self, args):
         self.args = args
 
-        logging.basicConfig(filename='execution.log', filemode='a', format='%(asctime)s %(message)s', level=logging.INFO, force=True)
+        # logging
+        logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
 
+        # glitcher
         self.glitcher = DerivedGlitcher()
-        self.glitcher.init(port=args.rpico)
+        # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
+        self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
+        # choose rising edge trigger with dead time of 0.03 seconds after power down
+        # note that you still have to physically connect the trigger input with vtarget
+        self.glitcher.rising_edge_trigger(0.03, "power")
+        # choose crowbar transistor
+        self.glitcher.set_lpglitch()
 
         # set up the database
-        self.database = Database(sys.argv, resume=self.args.resume)
+        self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
 
+        # set up serial communication with the device under test
         self.target = Serial(port=self.args.target, timeout=0.1)
         self.target.init()
 
         self.start_time = int(time.time())
 
-    def __del__(self):
-        try:
-            self.target.close()
-        except:
-            pass
-
     def run(self):
         # log execution
-        logging.info(' '.join(sys.argv))
+        logging.info(" ".join(sys.argv))
 
         s_length = self.args.length[0]
         e_length = self.args.length[1]
-        s_delay  = self.args.delay[0]
-        e_delay  = self.args.delay[1]
+        s_delay = self.args.delay[0]
+        e_delay = self.args.delay[1]
 
         expected = b'ets Jun  8 2016 00:22:57\r\n\r\nrst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)\r\nconfigsip: 0, SPIWP:0xee\r\nclk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00\r\nmode:DOUT, clock div:2\r\nload:0x40080400,len:16384\r\ncsum err:0xef!=0xff\r\nets_main.c 371 \r\n'
 
@@ -72,19 +81,22 @@ class Main():
             delay = random.randint(s_delay, e_delay)
             self.glitcher.arm(delay, length)
 
-            # power cycle
-            #self.glitcher.power_cycle_target(0.5)
-            #time.sleep(0.05)
+            # power cycle target
+            #self.glitcher.power_cycle_target(0.03)
 
             # reset target
             self.glitcher.reset(0.01)
-            time.sleep(0.01)
 
-            # send command and read response
-            response = self.target.read(len(expected))
-
-            # block execution until glitch was sent
-            self.glitcher.block()
+            # block until glitch
+            try:
+                self.glitcher.block(timeout=1)
+                # send command and read response
+                response = self.target.read(len(expected))
+            except Exception as _:
+                print("[-] Timeout received in block(). Continuing.")
+                self.glitcher.power_cycle_target(power_cycle_time=1)
+                time.sleep(0.2)
+                response = b'Timeout'
 
             # classify response
             color = self.glitcher.classify(expected, response)
@@ -99,23 +111,26 @@ class Main():
 
             # increase experiment id
             experiment_id += 1
-            
-        self.target.close()
 
+            # Dump finished
+            #if color == 'R':
+            #    break
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--rpico", required=False, help="rpico port", default="/dev/ttyACM0")
     parser.add_argument("--target", required=False, help="target port", default="/dev/ttyUSB1")
-    parser.add_argument("--rpico",  required=False, help="rpico port", default="/dev/ttyACM1")
-    parser.add_argument("--delay",  required=True, nargs=2, help="delay start and end", type=int)
-    parser.add_argument("--length",  required=True, nargs=2, help="length start and end", type=int)
+    parser.add_argument("--power", required=False, help="rk6006 port", default=None)
+    parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
+    parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
+    parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
     args = parser.parse_args()
 
-    pico_glitcher = Main(args)
+    main = Main(args)
 
     try:
-        pico_glitcher.run()
+        main.run()
     except KeyboardInterrupt:
-        print('\nExitting...')
+        print("\nExitting...")
         sys.exit(1)

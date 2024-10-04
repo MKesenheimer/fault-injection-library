@@ -83,9 +83,9 @@ python helper/upload-micro-python.py --port /dev/<rpi-tty-port> --script lib/mpG
 ```
 Although the software is based on Micropython, using the PIO functions of the Raspberry Pi Pico, very precise switching operations can be made and triggered on external signals.
 
-Next, we switch to the directory `pico-glitcher` and execute the script which controls our attack.
+Next, we switch to the directory `example` and execute the script which controls our attack.
 ```bash
-cd ../pico-glitcher
+cd example
 python pico-glitcher.py --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port> --delay 1_000 2_000 --length 100 150
 ```
 The script resets the target, arms the pico glitcher, waits for the external trigger (reset high) and emits a glitch of a given length after a certain delay.
