@@ -119,12 +119,12 @@ python upload-micro-python.py --port /dev/<rpi-tty-port> --script mpGlitcher.py
 ```
 Next, change into `stm32-glitching` and execute the following script.
 ```bash
-cd stm32-glitching
+cd projects/stm32-glitching
 python pico-glitcher.py --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port> --delay 100_000 200_000 --length 100 150
 ```
 Or make use of the ChipWhisperer Pro by executing:
 ```bash
-cd stm32-glitching
+cd stm32f42x-glitching
 python pro-glitcher.py --target /dev/<target-tty-port> --delay 100_000 200_000 --length 100 150
 ```
 
