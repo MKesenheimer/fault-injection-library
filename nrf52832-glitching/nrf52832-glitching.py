@@ -5,12 +5,6 @@
 # You should have received a copy of the GPL3 license with this file.
 # If not, please write to: m.kesenheimer@gmx.net.
 
-# programming
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; halt; stm32f4x unlock 0; exit"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; halt; program GPIO_IOToggle.elf verify reset exit;"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; halt; stm32f4x lock 0; sleep 1000; reset run; shutdown"
-# -> power cycle the target!
-
 # SQL Queries:
 # Show only successes and flash-resets:
 # color = 'R' or response LIKE '_Warning.flash_reset'
@@ -24,17 +18,15 @@ import subprocess
 
 # import custom libraries
 sys.path.insert(0, "../lib/")
-from BootloaderCom import BootloaderCom, GlitchState
-from GlitchState import OKType, ExpectedType
-from FaultInjectionLib import Database, PicoGlitcher, Helper
+from FaultInjectionLib import Database, PicoGlitcher
 
 def test_jtag():
     subout = subprocess.run(['openocd',
                           '-f', 'interface/jlink.cfg',
                           '-c', 'transport select swd', 
                           '-f', 'testnrf.cfg', 
-                          #'-c', 'init;dump_image nrf52_dumped.bin 0x0 0x80000; exit'],
-                          '-c', 'init; exit'],
+                          '-c', 'init;dump_image nrf52_dumped.bin 0x0 0x80000; exit'],
+                          #'-c', 'init; exit'],
                           check=False, capture_output=True)
     response = subout.stdout + subout.stderr
     return response
@@ -73,11 +65,7 @@ class Main:
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
-
         self.start_time = int(time.time())
-        self.successive_fails = 0
-        self.fail_gate_open = False
-        self.fail_gate_close = 0
 
     def run(self):
         # log execution
@@ -123,8 +111,8 @@ class Main:
             # increase experiment id
             experiment_id += 1
 
-            # Dump finished, TODO
-            #if response == GlitchState.Success.dump_finished:
+            # Dump finished
+            #if color == 'R':
             #    break
 
 if __name__ == "__main__":
