@@ -117,14 +117,14 @@ Install the Raspberry Pi Pico Micropython scripts:
 cd lib
 python upload-micro-python.py --port /dev/<rpi-tty-port> --script mpGlitcher.py
 ```
-Next, change into `stm32-glitching` and execute the following script.
+Next, change into `projects/stm32f42x-glitching` and execute the following script.
 ```bash
-cd projects/stm32-glitching
+cd projects/stm32f42x-glitching
 python pico-glitcher.py --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port> --delay 100_000 200_000 --length 100 150
 ```
 Or make use of the ChipWhisperer Pro by executing:
 ```bash
-cd stm32f42x-glitching
+cd projects/stm32f42x-glitching
 python pro-glitcher.py --target /dev/<target-tty-port> --delay 100_000 200_000 --length 100 150
 ```
 
@@ -136,6 +136,7 @@ python ../analyzer/taofi-analyzer --directory databases
 If everything goes as expected, a successful run should look something like this:
 ![Bootloader glitching](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f42x-glitching/images/cw-pro-bootloader-glitching.png)
 
+Refer to the README at `projects/stm32f42x-glitching` for more details.
 
 ## Further handy features and notes
 
