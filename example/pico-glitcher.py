@@ -15,7 +15,6 @@ import logging
 import random
 import sys
 import time
-import subprocess
 
 # import custom libraries
 sys.path.insert(0, "../lib/")
@@ -46,8 +45,8 @@ class Main():
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
         # choose rising edge trigger with dead time of 0.03 seconds after power down
-        # note that you still have to physically connect the trigger input with vtarget
-        self.glitcher.rising_edge_trigger(0.03, "power")
+        # note that you still have to physically connect the trigger input with the reset line
+        self.glitcher.rising_edge_trigger(0.005, "reset")
         # choose crowbar transistor
         self.glitcher.set_lpglitch()
 
