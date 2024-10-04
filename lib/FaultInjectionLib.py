@@ -199,6 +199,9 @@ class PicoGlitcherInterface(MicroPythonScript):
     def set_hpglitch(self):
         self.pyb.exec('mp.set_hpglitch()')
 
+    def set_dead_zone(self, dead_time, pin):
+        self.pyb.exec(f'mp.set_dead_zone({dead_time}, "{pin}")')
+
 class ExternalPowerSupply:
     def __init__(self, port):
         self.port = port
@@ -247,6 +250,7 @@ class Glitcher():
             'R': 'red',
             'M': 'magenta',
             'C': 'cyan',
+            'B': 'blue',
         }
         return colored(s, colors[color])
 
@@ -266,8 +270,9 @@ class PicoGlitcher(Glitcher):
         self.pico_glitcher = PicoGlitcherInterface()
         self.pico_glitcher.init(port, 'mpGlitcher')
         self.pico_glitcher.set_trigger("tio")
+        self.pico_glitcher.set_dead_zone(0.03, "power")
         self.pico_glitcher.set_frequency(200_000_000)
-        self.pico_glitcher.set_lpglitch()
+        self.pico_glitcher.set_hpglitch()
         if rd6006_available and ext_power is not None:
             self.pico_glitcher.disable_vtarget()
             self.power_supply = ExternalPowerSupply(port=ext_power)
@@ -276,7 +281,7 @@ class PicoGlitcher(Glitcher):
         else:
             self.pico_glitcher.enable_vtarget()
             self.power_supply = None
-        
+
     def arm(self, delay, length):
         self.pico_glitcher.arm(delay, length)
 
@@ -329,6 +334,16 @@ class PicoGlitcher(Glitcher):
         if debug:
             for line in response.splitlines():
                 print('\t', line.decode())
+
+    def set_lpglitch(self):
+        self.pico_glitcher.set_lpglitch()
+
+    def set_hpglitch(self):
+        self.pico_glitcher.set_hpglitch()
+
+    def rising_edge_trigger(self, dead_time, pin):
+        self.pico_glitcher.set_trigger("tio")
+        self.pico_glitcher.set_dead_zone(dead_time, pin)
 
     def uart_trigger(self, pattern):
         self.pico_glitcher.set_trigger("uart")

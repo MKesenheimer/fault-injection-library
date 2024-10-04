@@ -12,7 +12,7 @@ import time
 # number of bits for UART
 BITS = 8
 
-@asm_pio(set_init=(PIO.OUT_LOW))
+@asm_pio(set_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
 def glitch_tio_trigger():
     # block until delay received
     pull(block)
@@ -21,8 +21,13 @@ def glitch_tio_trigger():
     pull(block)
     mov(y, osr)
 
-    # wait for rising on trigger pin
-    wait(0, gpio, 15)
+    # wait for irq in block_condition state machine
+    wait(1, irq, 7)
+
+    # wait for rising edge on trigger pin
+    #wait(0, gpio, 18) # Trigger 1 (without level shifter)
+    #wait(1, gpio, 18)
+    wait(0, gpio, 15) # Trigger 2 (with level shifter)
     wait(1, gpio, 15)
 
     # wait delay
@@ -38,6 +43,23 @@ def glitch_tio_trigger():
     # tell execution finished (fills the sm's fifo buffer)
     push(block)
 
+@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
+def block_condition():
+    # block until dead time received
+    pull(block)
+    mov(x, osr)
+
+    # TODO: make this arbitrary, i.e. decide if pin should be 0 or 1
+    # wait for condition
+    wait(0, pin, 0)
+
+    # wait dead time
+    label("delay_loop")
+    jmp(x_dec, "delay_loop")
+
+    # tell execution finished (fills the sm's fifo buffer)
+    irq(block, 7)
+
 @asm_pio(set_init=(PIO.OUT_LOW))
 def glitch_uart_trigger():
     # block until delay received
@@ -51,7 +73,7 @@ def glitch_uart_trigger():
     wait(1, irq, 7)
 
     # wait delay
-    label("delay_loop")       
+    label("delay_loop")
     jmp(x_dec, "delay_loop")
 
     # emit glitch at base pin
@@ -63,7 +85,7 @@ def glitch_uart_trigger():
     # tell execution finished (fills the sm's fifo buffer)
     push(block)
 
-@asm_pio(in_shiftdir = PIO.SHIFT_RIGHT)
+@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
 def uart_trigger(BITS=BITS):
     # block until pattern received
     pull(block)
@@ -124,6 +146,9 @@ class MicroPythonScript():
         self.pin_lpglitch.low()
         # which glitching transistor to use. Default: lpglitch
         self.pin_glitch = self.pin_lpglitch
+        # standard dead zone after power down
+        self.dead_time = 0.05
+        self.pin_condition = self.pin_power
 
     def set_frequency(self, frequency=200_000_000):
         machine.freq(frequency)
@@ -168,6 +193,13 @@ class MicroPythonScript():
     def set_hpglitch(self):
         self.pin_glitch = self.pin_hpglitch
 
+    def set_dead_zone(self, dead_time=0.05, pin="power"):
+        if pin == "power":
+            self.pin_condition = self.pin_power
+        elif pin == "reset":
+            self.pin_condition = self.pin_reset
+        self.dead_time = dead_time
+
     def arm(self, delay, length):
         self.release_reset()
         self.pin_glitch_en.high()
@@ -175,19 +207,28 @@ class MicroPythonScript():
         self.pin_lpglitch.low()
 
         if self.trigger == "tio":
+            # state machine that emits the glitch if the trigger condition is met
             self.sm1 = StateMachine(1, glitch_tio_trigger, freq=self.frequency, set_base=self.pin_glitch)
             self.sm1.active(1)
-            # push delay and length into the fifo of the statemachine
-            self.sm1.put(delay // (1_000_000_000 // self.frequency))
-            self.sm1.put(length // (1_000_000_000 // self.frequency))
-        
-        elif self.trigger == "uart":
-            self.sm1 = StateMachine(1, glitch_uart_trigger, freq=self.frequency, set_base=self.pin_glitch)
-            self.sm1.active(1)
-            # push delay and length into the fifo of the statemachine
+            # push delay and length (in nano seconds) into the fifo of the statemachine
             self.sm1.put(delay // (1_000_000_000 // self.frequency))
             self.sm1.put(length // (1_000_000_000 // self.frequency))
 
+            # state machine that blocks for a specific time after a certain condition (dead time)
+            self.sm2 = StateMachine(2, block_condition, freq=self.frequency, in_base=self.pin_condition)
+            self.sm2.active(1)
+            # push dead time (in seconds) into the fifo of the statemachine
+            self.sm2.put(int(self.dead_time * self.frequency))
+        
+        elif self.trigger == "uart":
+            # state machine that emits the glitch if the trigger condition is met
+            self.sm1 = StateMachine(1, glitch_uart_trigger, freq=self.frequency, set_base=self.pin_glitch)
+            self.sm1.active(1)
+            # push delay and length (in nano seconds) into the fifo of the statemachine
+            self.sm1.put(delay // (1_000_000_000 // self.frequency))
+            self.sm1.put(length // (1_000_000_000 // self.frequency))
+
+            # state machine that checks the trigger condition
             self.sm2 = StateMachine(2, uart_trigger, freq=self.baudrate * 8, in_base=self.pin_trigger)
             self.sm2.active(1)
             # push pattern into the fifo of the statemachine
