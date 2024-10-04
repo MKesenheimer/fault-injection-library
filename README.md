@@ -134,7 +134,7 @@ python ../analyzer/taofi-analyzer --directory databases
 ```
 
 If everything goes as expected, a successful run should look something like this:
-![Bootloader glitching](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l05x-glitching/images/picoglitcher-bootloader-glitching.png)
+![Bootloader glitching](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f42x-glitching/images/cw-pro-bootloader-glitching.png)
 
 
 ## Further handy features and notes
