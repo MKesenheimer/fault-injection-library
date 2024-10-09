@@ -50,6 +50,7 @@ def block_condition():
     mov(x, osr)
 
     # TODO: make this arbitrary, i.e. decide if pin should be 0 or 1
+    # TODO: vtarget_en and reset are active low pins -> change condition accordingly
     # wait for condition
     wait(0, pin, 0)
 
