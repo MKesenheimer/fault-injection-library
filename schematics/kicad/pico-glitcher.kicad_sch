@@ -5,6 +5,175 @@
 	(uuid "bcbe9e08-2481-468a-b94c-492931ceb6ea")
 	(paper "User" 325.831 274.218)
 	(lib_symbols
+		(symbol "Device:LED"
+			(pin_numbers hide)
+			(pin_names
+				(offset 1.016) hide)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "D"
+				(at 0 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "LED"
+				(at 0 -2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Light emitting diode"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "LED diode"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "LED* LED_SMD:* LED_THT:*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "LED_0_1"
+				(polyline
+					(pts
+						(xy -1.27 -1.27) (xy -1.27 1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.27 0) (xy 1.27 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 -1.27) (xy 1.27 1.27) (xy -1.27 0) (xy 1.27 -1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -3.048 -0.762) (xy -4.572 -2.286) (xy -3.81 -2.286) (xy -4.572 -2.286) (xy -4.572 -1.524)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.778 -0.762) (xy -3.302 -2.286) (xy -2.54 -2.286) (xy -3.302 -2.286) (xy -3.302 -1.524)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "LED_1_1"
+				(pin passive line
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "K"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
 		(symbol "pico-glitcher:+3V3"
 			(power)
 			(exclude_from_sim no)
@@ -2045,210 +2214,6 @@
 						)
 					)
 					(number "1"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-			)
-		)
-		(symbol "pico-glitcher:LED0603"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "D"
-				(at -3.429 -4.572 90)
-				(effects
-					(font
-						(size 1.778 1.778)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Value" ""
-				(at 1.905 -4.572 90)
-				(effects
-					(font
-						(size 1.778 1.778)
-					)
-					(justify left top)
-				)
-			)
-			(property "Footprint" "pico-glitcher:LED-0603"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "LED (Generic)\n\nStandard schematic elements and footprints for 5mm, 3mm, 1206, and 0603 sized LEDs. Generic LEDs with no color specified."
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_locked" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "LED0603_1_0"
-				(polyline
-					(pts
-						(xy -2.032 -0.762) (xy -3.429 -2.159)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.905 -1.905) (xy -3.302 -3.302)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 -2.54) (xy -1.27 -2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 -2.54) (xy -1.27 0)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 -2.54) (xy 0 -2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 0) (xy -1.27 0)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 0) (xy 0 -2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -3.048 -1.27) (xy -3.429 -2.159) (xy -2.54 -1.778)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(polyline
-					(pts
-						(xy -2.921 -2.413) (xy -3.302 -3.302) (xy -2.413 -2.921)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(pin passive line
-					(at 0 2.54 270)
-					(length 2.54)
-					(name "A"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "A"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 0 -5.08 90)
-					(length 2.54)
-					(name "C"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "C"
 						(effects
 							(font
 								(size 0 0)
@@ -7607,7 +7572,7 @@
 	)
 	(wire
 		(pts
-			(xy 259.08 246.38) (xy 259.08 243.84)
+			(xy 265.43 224.79) (xy 265.43 222.25)
 		)
 		(stroke
 			(width 0.1524)
@@ -7667,7 +7632,7 @@
 	)
 	(wire
 		(pts
-			(xy 228.6 246.38) (xy 228.6 243.84)
+			(xy 234.95 224.79) (xy 234.95 222.25)
 		)
 		(stroke
 			(width 0.1524)
@@ -7754,6 +7719,16 @@
 			(type solid)
 		)
 		(uuid "1f0f5b09-8114-441a-adc7-19c75834258e")
+	)
+	(wire
+		(pts
+			(xy 275.59 212.09) (xy 275.59 214.63)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "20132011-2336-44e1-ba64-fc4c19af44f1")
 	)
 	(wire
 		(pts
@@ -8257,16 +8232,6 @@
 	)
 	(wire
 		(pts
-			(xy 269.24 236.22) (xy 269.24 233.68)
-		)
-		(stroke
-			(width 0.1524)
-			(type solid)
-		)
-		(uuid "4bbecb54-5068-4875-8f4b-1fe4ee637127")
-	)
-	(wire
-		(pts
 			(xy 167.64 106.68) (xy 154.94 106.68)
 		)
 		(stroke
@@ -8617,7 +8582,7 @@
 	)
 	(wire
 		(pts
-			(xy 248.92 236.22) (xy 248.92 233.68)
+			(xy 255.27 214.63) (xy 255.27 212.09)
 		)
 		(stroke
 			(width 0.1524)
@@ -8837,7 +8802,7 @@
 	)
 	(wire
 		(pts
-			(xy 228.6 223.52) (xy 228.6 215.9)
+			(xy 234.95 201.93) (xy 234.95 194.31)
 		)
 		(stroke
 			(width 0.1524)
@@ -8897,7 +8862,7 @@
 	)
 	(wire
 		(pts
-			(xy 238.76 246.38) (xy 238.76 243.84)
+			(xy 245.11 224.79) (xy 245.11 222.25)
 		)
 		(stroke
 			(width 0.1524)
@@ -9107,7 +9072,7 @@
 	)
 	(wire
 		(pts
-			(xy 259.08 236.22) (xy 259.08 233.68)
+			(xy 265.43 214.63) (xy 265.43 212.09)
 		)
 		(stroke
 			(width 0.1524)
@@ -9177,7 +9142,7 @@
 	)
 	(wire
 		(pts
-			(xy 238.76 223.52) (xy 238.76 215.9)
+			(xy 245.11 201.93) (xy 245.11 194.31)
 		)
 		(stroke
 			(width 0.1524)
@@ -9247,7 +9212,7 @@
 	)
 	(wire
 		(pts
-			(xy 248.92 246.38) (xy 248.92 243.84)
+			(xy 255.27 224.79) (xy 255.27 222.25)
 		)
 		(stroke
 			(width 0.1524)
@@ -9797,7 +9762,7 @@
 	)
 	(wire
 		(pts
-			(xy 269.24 243.84) (xy 269.24 246.38)
+			(xy 275.59 222.25) (xy 275.59 224.79)
 		)
 		(stroke
 			(width 0.1524)
@@ -9857,7 +9822,7 @@
 	)
 	(wire
 		(pts
-			(xy 228.6 236.22) (xy 228.6 233.68)
+			(xy 234.95 214.63) (xy 234.95 212.09)
 		)
 		(stroke
 			(width 0.1524)
@@ -9957,7 +9922,7 @@
 	)
 	(wire
 		(pts
-			(xy 238.76 236.22) (xy 238.76 233.68)
+			(xy 245.11 214.63) (xy 245.11 212.09)
 		)
 		(stroke
 			(width 0.1524)
@@ -10337,7 +10302,7 @@
 	)
 	(wire
 		(pts
-			(xy 269.24 223.52) (xy 269.24 215.9)
+			(xy 275.59 201.93) (xy 275.59 194.31)
 		)
 		(stroke
 			(width 0.1524)
@@ -10507,7 +10472,7 @@
 	)
 	(wire
 		(pts
-			(xy 259.08 223.52) (xy 259.08 215.9)
+			(xy 265.43 201.93) (xy 265.43 194.31)
 		)
 		(stroke
 			(width 0.1524)
@@ -10697,7 +10662,7 @@
 	)
 	(wire
 		(pts
-			(xy 248.92 223.52) (xy 248.92 215.9)
+			(xy 255.27 201.93) (xy 255.27 194.31)
 		)
 		(stroke
 			(width 0.1524)
@@ -10921,7 +10886,7 @@
 		(uuid "57788d47-75d2-44a2-8a20-3fff4637aa79")
 	)
 	(label "GP1"
-		(at 228.6 215.9 90)
+		(at 234.95 194.31 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -10943,7 +10908,7 @@
 		(uuid "5e148d10-e4f0-4910-85c6-f678602515cb")
 	)
 	(label "GP15"
-		(at 259.08 217.17 90)
+		(at 265.43 195.58 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -11020,7 +10985,7 @@
 		(uuid "8832bec5-d075-447b-aab6-99ecfd6506c3")
 	)
 	(label "VTARGET"
-		(at 269.24 217.17 90)
+		(at 275.59 195.58 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -11053,7 +11018,7 @@
 		(uuid "971b7f5d-fca6-4ab8-a51b-8ff943345e72")
 	)
 	(label "HPGLITCH2"
-		(at 248.92 215.9 90)
+		(at 255.27 194.31 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -11163,7 +11128,7 @@
 		(uuid "b6ccb531-9db2-47ab-bf90-ecdf4cfce113")
 	)
 	(label "LPGLITCH2"
-		(at 238.76 217.17 90)
+		(at 245.11 195.58 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -11362,7 +11327,7 @@
 	)
 	(symbol
 		(lib_id "pico-glitcher:GND")
-		(at 248.92 248.92 0)
+		(at 255.27 227.33 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -11370,7 +11335,7 @@
 		(dnp no)
 		(uuid "03d61a7e-f5d0-4cce-a15a-a1c33070a0ef")
 		(property "Reference" "#GND026"
-			(at 248.92 248.92 0)
+			(at 255.27 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11379,7 +11344,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 248.92 254 0)
+			(at 255.27 232.41 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -11388,7 +11353,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 248.92 248.92 0)
+			(at 255.27 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11397,7 +11362,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 248.92 248.92 0)
+			(at 255.27 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11406,7 +11371,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 248.92 248.92 0)
+			(at 255.27 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11698,7 +11663,7 @@
 	)
 	(symbol
 		(lib_id "pico-glitcher:GND")
-		(at 269.24 248.92 0)
+		(at 275.59 227.33 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -11706,7 +11671,7 @@
 		(dnp no)
 		(uuid "110043fc-6dfa-4bba-a5ee-0c8c59e1c5ef")
 		(property "Reference" "#GND025"
-			(at 269.24 248.92 0)
+			(at 275.59 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11715,7 +11680,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 269.24 254 0)
+			(at 275.59 232.41 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -11724,7 +11689,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 269.24 248.92 0)
+			(at 275.59 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11733,7 +11698,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 269.24 248.92 0)
+			(at 275.59 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11742,7 +11707,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 269.24 248.92 0)
+			(at 275.59 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12160,7 +12125,7 @@
 	)
 	(symbol
 		(lib_id "pico-glitcher:GND")
-		(at 259.08 248.92 0)
+		(at 265.43 227.33 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12168,7 +12133,7 @@
 		(dnp no)
 		(uuid "271abd53-8ae5-4615-8af7-897b7a142d29")
 		(property "Reference" "#GND024"
-			(at 259.08 248.92 0)
+			(at 265.43 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12177,7 +12142,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 259.08 254 0)
+			(at 265.43 232.41 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -12186,7 +12151,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 259.08 248.92 0)
+			(at 265.43 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12195,7 +12160,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 259.08 248.92 0)
+			(at 265.43 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12204,7 +12169,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 259.08 248.92 0)
+			(at 265.43 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12361,7 +12326,7 @@
 	)
 	(symbol
 		(lib_id "pico-glitcher:GND")
-		(at 228.6 248.92 0)
+		(at 234.95 227.33 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12369,7 +12334,7 @@
 		(dnp no)
 		(uuid "27fc2766-b1d9-426a-ae1e-0149757f2f84")
 		(property "Reference" "#GND022"
-			(at 228.6 248.92 0)
+			(at 234.95 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12378,7 +12343,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 228.6 254 0)
+			(at 234.95 232.41 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -12387,7 +12352,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 228.6 248.92 0)
+			(at 234.95 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12396,7 +12361,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 228.6 248.92 0)
+			(at 234.95 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12405,7 +12370,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 228.6 248.92 0)
+			(at 234.95 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12711,8 +12676,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:LED0603")
-		(at 238.76 238.76 0)
+		(lib_id "Device:LED")
+		(at 245.11 218.44 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12720,7 +12685,16 @@
 		(dnp no)
 		(uuid "2e7a790c-15fb-4899-93dd-92c7c6dcb217")
 		(property "Reference" "D1"
-			(at 235.331 243.332 90)
+			(at 243.332 218.186 0)
+			(effects
+				(font
+					(size 1.778 1.778)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Value" "LED_RED_LPGLITCH"
+			(at 248.92 220.218 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -12728,17 +12702,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "LED_RED_LPGLITCH"
-			(at 240.665 243.332 90)
-			(effects
-				(font
-					(size 1.778 1.778)
-				)
-				(justify left top)
-			)
-		)
-		(property "Footprint" "pico-glitcher:LED-0603"
-			(at 238.76 238.76 0)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 245.11 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12746,8 +12711,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 238.76 238.76 0)
+		(property "Datasheet" "~"
+			(at 245.11 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12755,8 +12720,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 238.76 238.76 0)
+		(property "Description" "Light emitting diode"
+			(at 245.11 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12764,10 +12729,10 @@
 				(hide yes)
 			)
 		)
-		(pin "A"
+		(pin "2"
 			(uuid "38d29ab9-8196-4db0-ba94-7390dee3145d")
 		)
-		(pin "C"
+		(pin "1"
 			(uuid "99cf6aa7-1fc8-4944-9e83-5beeebbc5c4a")
 		)
 		(instances
@@ -12846,8 +12811,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:LED0603")
-		(at 248.92 238.76 0)
+		(lib_id "Device:LED")
+		(at 255.27 218.44 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12855,7 +12820,16 @@
 		(dnp no)
 		(uuid "2f16d665-9888-48d3-90bb-8252aca7e84b")
 		(property "Reference" "D5"
-			(at 245.491 243.332 90)
+			(at 253.492 218.44 0)
+			(effects
+				(font
+					(size 1.778 1.778)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Value" "LED_RED_HPGLITCH"
+			(at 259.08 220.218 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -12863,17 +12837,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "LED_RED_HPGLITCH"
-			(at 250.825 243.332 90)
-			(effects
-				(font
-					(size 1.778 1.778)
-				)
-				(justify left top)
-			)
-		)
-		(property "Footprint" "pico-glitcher:LED-0603"
-			(at 248.92 238.76 0)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 255.27 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12881,8 +12846,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 248.92 238.76 0)
+		(property "Datasheet" "~"
+			(at 255.27 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12890,8 +12855,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 248.92 238.76 0)
+		(property "Description" "Light emitting diode"
+			(at 255.27 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12899,10 +12864,10 @@
 				(hide yes)
 			)
 		)
-		(pin "A"
+		(pin "2"
 			(uuid "96806e47-8a89-42d7-8f45-2e34d1be4cd1")
 		)
-		(pin "C"
+		(pin "1"
 			(uuid "5d222cf9-2ddd-44f8-adba-99c72ed1ee55")
 		)
 		(instances
@@ -13675,7 +13640,7 @@
 	)
 	(symbol
 		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 228.6 228.6 90)
+		(at 234.95 207.01 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13683,7 +13648,7 @@
 		(dnp no)
 		(uuid "44350e3f-d010-4ece-bb3a-6ecb894e9900")
 		(property "Reference" "R6"
-			(at 227.1014 232.41 0)
+			(at 233.4514 210.82 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -13692,7 +13657,7 @@
 			)
 		)
 		(property "Value" "150"
-			(at 226.822 227.33 0)
+			(at 233.172 205.74 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -13701,7 +13666,7 @@
 			)
 		)
 		(property "Footprint" "pico-glitcher:0603-RES"
-			(at 228.6 228.6 0)
+			(at 234.95 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13710,7 +13675,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 228.6 228.6 0)
+			(at 234.95 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13719,7 +13684,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 228.6 228.6 0)
+			(at 234.95 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13819,8 +13784,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:LED0603")
-		(at 228.6 238.76 0)
+		(lib_id "Device:LED")
+		(at 234.95 218.44 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13828,7 +13793,16 @@
 		(dnp no)
 		(uuid "46aca599-eb5e-4aa1-878f-12e17127daf1")
 		(property "Reference" "D2"
-			(at 225.171 243.332 90)
+			(at 233.172 218.44 0)
+			(effects
+				(font
+					(size 1.778 1.778)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Value" "LED_BLUE_GLITCH_EN"
+			(at 238.76 220.472 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -13836,17 +13810,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "LED_BLUE_GLITCH_EN"
-			(at 230.505 243.332 90)
-			(effects
-				(font
-					(size 1.778 1.778)
-				)
-				(justify left top)
-			)
-		)
-		(property "Footprint" "pico-glitcher:LED-0603"
-			(at 228.6 238.76 0)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 234.95 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13854,8 +13819,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 228.6 238.76 0)
+		(property "Datasheet" "~"
+			(at 234.95 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13863,8 +13828,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 228.6 238.76 0)
+		(property "Description" "Light emitting diode"
+			(at 234.95 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13872,10 +13837,10 @@
 				(hide yes)
 			)
 		)
-		(pin "A"
+		(pin "2"
 			(uuid "96eecc78-ab0f-4663-9835-8460d7ccd06d")
 		)
-		(pin "C"
+		(pin "1"
 			(uuid "4b741bc5-b436-42ab-89a6-f682327ebaa4")
 		)
 		(instances
@@ -13955,7 +13920,7 @@
 	)
 	(symbol
 		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 238.76 228.6 90)
+		(at 245.11 207.01 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13963,7 +13928,7 @@
 		(dnp no)
 		(uuid "4ad67d5c-fb51-40ff-81cf-d1a266e24d7d")
 		(property "Reference" "R7"
-			(at 237.2614 232.41 0)
+			(at 243.6114 210.82 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -13972,7 +13937,7 @@
 			)
 		)
 		(property "Value" "150"
-			(at 236.982 227.33 0)
+			(at 243.332 205.74 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -13981,7 +13946,7 @@
 			)
 		)
 		(property "Footprint" "pico-glitcher:0603-RES"
-			(at 238.76 228.6 0)
+			(at 245.11 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13990,7 +13955,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 238.76 228.6 0)
+			(at 245.11 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13999,7 +13964,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 238.76 228.6 0)
+			(at 245.11 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15735,8 +15700,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:LED0603")
-		(at 259.08 238.76 0)
+		(lib_id "Device:LED")
+		(at 265.43 218.44 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -15744,7 +15709,16 @@
 		(dnp no)
 		(uuid "8235ccb8-70a6-4856-8ce2-b499fec0a565")
 		(property "Reference" "D3"
-			(at 255.651 243.332 90)
+			(at 263.652 218.44 0)
+			(effects
+				(font
+					(size 1.778 1.778)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Value" "LED_BLUE_TRIGGER2"
+			(at 269.24 220.218 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -15752,17 +15726,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "LED_BLUE_TRIGGER2"
-			(at 260.985 243.332 90)
-			(effects
-				(font
-					(size 1.778 1.778)
-				)
-				(justify left top)
-			)
-		)
-		(property "Footprint" "pico-glitcher:LED-0603"
-			(at 259.08 238.76 0)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 265.43 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15770,8 +15735,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 259.08 238.76 0)
+		(property "Datasheet" "~"
+			(at 265.43 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15779,8 +15744,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 259.08 238.76 0)
+		(property "Description" "Light emitting diode"
+			(at 265.43 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15788,10 +15753,10 @@
 				(hide yes)
 			)
 		)
-		(pin "A"
+		(pin "1"
 			(uuid "d7d1e90a-e5fd-4924-8716-2ce52dc7edfe")
 		)
-		(pin "C"
+		(pin "2"
 			(uuid "b1bafacb-d168-40b3-9c22-98816879c04d")
 		)
 		(instances
@@ -16585,7 +16550,7 @@
 	)
 	(symbol
 		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 259.08 228.6 90)
+		(at 265.43 207.01 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -16593,7 +16558,7 @@
 		(dnp no)
 		(uuid "a16a18a4-b06f-4bb1-91b5-beff995bbf11")
 		(property "Reference" "R8"
-			(at 257.5814 232.41 0)
+			(at 263.9314 210.82 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -16602,7 +16567,7 @@
 			)
 		)
 		(property "Value" "150"
-			(at 257.302 227.33 0)
+			(at 263.652 205.74 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -16611,7 +16576,7 @@
 			)
 		)
 		(property "Footprint" "pico-glitcher:0603-RES"
-			(at 259.08 228.6 0)
+			(at 265.43 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16620,7 +16585,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 259.08 228.6 0)
+			(at 265.43 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16629,7 +16594,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 259.08 228.6 0)
+			(at 265.43 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16720,7 +16685,7 @@
 	)
 	(symbol
 		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 269.24 228.6 90)
+		(at 275.59 207.01 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -16728,7 +16693,7 @@
 		(dnp no)
 		(uuid "ab657ca9-60e9-4f8e-901b-c7fb889683b9")
 		(property "Reference" "R9"
-			(at 267.7414 232.41 0)
+			(at 274.0914 210.82 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -16737,7 +16702,7 @@
 			)
 		)
 		(property "Value" "220"
-			(at 267.462 227.33 0)
+			(at 273.812 205.74 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -16746,7 +16711,7 @@
 			)
 		)
 		(property "Footprint" "pico-glitcher:0603-RES"
-			(at 269.24 228.6 0)
+			(at 275.59 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16755,7 +16720,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 269.24 228.6 0)
+			(at 275.59 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16764,7 +16729,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 269.24 228.6 0)
+			(at 275.59 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17055,8 +17020,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:LED0603")
-		(at 269.24 238.76 0)
+		(lib_id "Device:LED")
+		(at 275.59 218.44 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -17064,7 +17029,16 @@
 		(dnp no)
 		(uuid "b23f7bb3-8ed0-4d5b-a85e-25311d4f86ad")
 		(property "Reference" "D4"
-			(at 265.811 243.332 90)
+			(at 273.812 218.44 0)
+			(effects
+				(font
+					(size 1.778 1.778)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Value" "LED_RED_TARGET_POWER"
+			(at 279.4 220.218 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -17072,17 +17046,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "LED_RED_TARGET_POWER"
-			(at 271.145 243.332 90)
-			(effects
-				(font
-					(size 1.778 1.778)
-				)
-				(justify left top)
-			)
-		)
-		(property "Footprint" "pico-glitcher:LED-0603"
-			(at 269.24 238.76 0)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
+			(at 275.59 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17090,8 +17055,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 269.24 238.76 0)
+		(property "Datasheet" "~"
+			(at 275.59 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17099,8 +17064,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 269.24 238.76 0)
+		(property "Description" "Light emitting diode"
+			(at 275.59 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17108,10 +17073,10 @@
 				(hide yes)
 			)
 		)
-		(pin "A"
+		(pin "2"
 			(uuid "03d72db6-27b0-4754-9ece-6c72123c8764")
 		)
-		(pin "C"
+		(pin "1"
 			(uuid "2014d1ff-55c8-4abb-8c53-f4233baff8e2")
 		)
 		(instances
@@ -18607,7 +18572,7 @@
 	)
 	(symbol
 		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 248.92 228.6 90)
+		(at 255.27 207.01 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -18615,7 +18580,7 @@
 		(dnp no)
 		(uuid "d64226eb-b03b-4c3f-bda4-3c45646be645")
 		(property "Reference" "R10"
-			(at 247.4214 232.41 0)
+			(at 253.7714 210.82 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -18624,7 +18589,7 @@
 			)
 		)
 		(property "Value" "150"
-			(at 247.142 227.33 0)
+			(at 253.492 205.74 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -18633,7 +18598,7 @@
 			)
 		)
 		(property "Footprint" "pico-glitcher:0603-RES"
-			(at 248.92 228.6 0)
+			(at 255.27 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18642,7 +18607,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 248.92 228.6 0)
+			(at 255.27 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18651,7 +18616,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 248.92 228.6 0)
+			(at 255.27 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18835,7 +18800,7 @@
 	)
 	(symbol
 		(lib_id "pico-glitcher:GND")
-		(at 238.76 248.92 0)
+		(at 245.11 227.33 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -18843,7 +18808,7 @@
 		(dnp no)
 		(uuid "d7cc3221-5434-41e0-b423-457c8cdd92c5")
 		(property "Reference" "#GND023"
-			(at 238.76 248.92 0)
+			(at 245.11 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18852,7 +18817,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 238.76 254 0)
+			(at 245.11 232.41 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -18861,7 +18826,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 238.76 248.92 0)
+			(at 245.11 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18870,7 +18835,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 238.76 248.92 0)
+			(at 245.11 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18879,7 +18844,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 238.76 248.92 0)
+			(at 245.11 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
