@@ -14044,7 +14044,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:SOT23-5L"
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5"
 			(at 48.26 40.64 0)
 			(effects
 				(font
@@ -19262,7 +19262,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:SOT23"
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
 			(at 48.26 162.56 0)
 			(effects
 				(font
