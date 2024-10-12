@@ -1,4 +1,4 @@
-23872759346739999
+23867573116242078
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -96739,27 +96739,6 @@ Varistor VF
 0
 2
 2
-pico-glitcher
-1X01
-
-
-0
-1
-1
-pico-glitcher
-1X02
-Plated Through Hole{return}{return}Specifications:{return}{return}• Pin count:2{return}• Pin pitch:0.1"{return}{return}Example device(s):{return}{return}• CONN_02
-
-0
-2
-2
-pico-glitcher
-2X8
-
-
-0
-16
-16
 pico-glitcher
 742C083103JP
 
