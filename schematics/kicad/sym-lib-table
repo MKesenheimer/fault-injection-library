@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 0)
+  (lib (name "pico-glitcher-eagle-import")(type "KiCad")(uri "${KIPRJMOD}/pico-glitcher-eagle-import.kicad_sym")(options "")(descr ""))
+)
