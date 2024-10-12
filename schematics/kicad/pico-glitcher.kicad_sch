@@ -5,6 +5,125 @@
 	(uuid "bcbe9e08-2481-468a-b94c-492931ceb6ea")
 	(paper "User" 325.831 274.218)
 	(lib_symbols
+		(symbol "Connector:Conn_01x01_Pin"
+			(pin_names
+				(offset 1.016) hide)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "J"
+				(at 0 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x01_Pin"
+				(at 0 -2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x01, script generated"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "Conn_01x01_Pin_1_1"
+				(polyline
+					(pts
+						(xy 1.27 0) (xy 0.8636 0)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 0.8636 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
 		(symbol "Connector:Conn_01x03_Pin"
 			(pin_names
 				(offset 1.016) hide)
@@ -2319,144 +2438,6 @@
 					(at 0 2.54 270)
 					(length 2.54)
 					(name "GND"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-			)
-		)
-		(symbol "pico-glitcher:M01PTH"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "JP"
-				(at -2.54 3.302 0)
-				(effects
-					(font
-						(size 1.778 1.5113)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Value" ""
-				(at -2.54 -5.08 0)
-				(effects
-					(font
-						(size 1.778 1.5113)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Footprint" "pico-glitcher:1X01"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "Header 1 Standard 1-pin 0.1\" header. Use with straight break away headers (SKU : PRT-00116), right angle break away headers (PRT-00553), swiss pins (PRT-00743), machine pins (PRT-00117), and female headers (PRT-00115)."
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_locked" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "M01PTH_1_0"
-				(polyline
-					(pts
-						(xy -2.54 2.54) (xy -2.54 -2.54)
-					)
-					(stroke
-						(width 0.4064)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -2.54 2.54) (xy 3.81 2.54)
-					)
-					(stroke
-						(width 0.4064)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 0) (xy 2.54 0)
-					)
-					(stroke
-						(width 0.6096)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 3.81 -2.54) (xy -2.54 -2.54)
-					)
-					(stroke
-						(width 0.4064)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 3.81 -2.54) (xy 3.81 2.54)
-					)
-					(stroke
-						(width 0.4064)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin passive line
-					(at 7.62 0 180)
-					(length 5.08)
-					(name "1"
 						(effects
 							(font
 								(size 0 0)
@@ -6865,12 +6846,6 @@
 		(uuid "552e6163-4028-416c-8788-2304153a5ea0")
 	)
 	(junction
-		(at 246.38 88.9)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "5a57b592-8d5f-43ce-abe8-f3b31849fe50")
-	)
-	(junction
 		(at 182.88 185.42)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -6935,6 +6910,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "7408e3ad-50dd-4431-a19a-9ade1a126479")
+	)
+	(junction
+		(at 246.38 88.9)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "7448d749-c4cb-4dd1-bfb2-944d3bed9536")
 	)
 	(junction
 		(at 132.08 43.18)
@@ -7356,7 +7337,7 @@
 	)
 	(wire
 		(pts
-			(xy 99.06 116.84) (xy 99.06 114.3)
+			(xy 97.79 113.03) (xy 97.79 116.84)
 		)
 		(stroke
 			(width 0.1524)
@@ -7366,7 +7347,7 @@
 	)
 	(wire
 		(pts
-			(xy 124.46 124.46) (xy 124.46 114.3)
+			(xy 124.46 111.76) (xy 124.46 124.46)
 		)
 		(stroke
 			(width 0.1524)
@@ -7616,6 +7597,16 @@
 	)
 	(wire
 		(pts
+			(xy 93.98 147.32) (xy 93.98 149.86)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1dc58c5d-f034-42a5-a142-9b5c008cdd17")
+	)
+	(wire
+		(pts
 			(xy 215.9 185.42) (xy 218.44 185.42)
 		)
 		(stroke
@@ -7723,6 +7714,26 @@
 			(type solid)
 		)
 		(uuid "24ea844c-6c18-4218-b1bb-dbb848dfc108")
+	)
+	(wire
+		(pts
+			(xy 182.88 220.98) (xy 182.88 223.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2521a1a3-1144-41b6-b585-7c57c9ad0977")
+	)
+	(wire
+		(pts
+			(xy 185.42 220.98) (xy 185.42 223.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "259a1e89-ede2-4656-92e4-d72106d86bfe")
 	)
 	(wire
 		(pts
@@ -7966,6 +7977,16 @@
 	)
 	(wire
 		(pts
+			(xy 251.46 149.86) (xy 254 149.86)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3a162f22-98de-4238-b75a-b0d419fd4f75")
+	)
+	(wire
+		(pts
 			(xy 182.88 99.06) (xy 185.42 99.06)
 		)
 		(stroke
@@ -8023,6 +8044,16 @@
 			(type solid)
 		)
 		(uuid "411b5e2f-45bc-44ff-a7e5-f0f5871b842e")
+	)
+	(wire
+		(pts
+			(xy 281.94 165.1) (xy 281.94 167.64)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4147ae74-caab-4435-8a63-0f412c222f8e")
 	)
 	(wire
 		(pts
@@ -8736,6 +8767,16 @@
 	)
 	(wire
 		(pts
+			(xy 177.8 40.64) (xy 177.8 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "769467dc-3cbe-4a89-a7d2-15fd571d688f")
+	)
+	(wire
+		(pts
 			(xy 33.02 99.06) (xy 27.94 99.06)
 		)
 		(stroke
@@ -8786,6 +8827,16 @@
 	)
 	(wire
 		(pts
+			(xy 111.76 111.76) (xy 111.76 114.3)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "78e17e77-4357-4dc1-93c1-02214cbf4a31")
+	)
+	(wire
+		(pts
 			(xy 33.02 91.44) (xy 27.94 91.44)
 		)
 		(stroke
@@ -8803,6 +8854,16 @@
 			(type solid)
 		)
 		(uuid "794f7719-21a2-424b-b242-e15f914e94c5")
+	)
+	(wire
+		(pts
+			(xy 93.98 45.72) (xy 96.52 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "79747f5b-6e18-482c-98e6-4056a6ea4879")
 	)
 	(wire
 		(pts
@@ -9036,7 +9097,7 @@
 	)
 	(wire
 		(pts
-			(xy 73.66 116.84) (xy 99.06 116.84)
+			(xy 73.66 116.84) (xy 97.79 116.84)
 		)
 		(stroke
 			(width 0.1524)
@@ -9053,6 +9114,16 @@
 			(type solid)
 		)
 		(uuid "8855075e-ff0d-4eb0-806a-21b31c21c08d")
+	)
+	(wire
+		(pts
+			(xy 231.14 40.64) (xy 231.14 43.18)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "89ce3581-e40b-4df1-9293-5aa74f724b8a")
 	)
 	(wire
 		(pts
@@ -9186,6 +9257,16 @@
 	)
 	(wire
 		(pts
+			(xy 119.38 175.26) (xy 119.38 177.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "93001396-e29d-4acb-8042-d091ea1d3759")
+	)
+	(wire
+		(pts
 			(xy 269.24 177.8) (xy 269.24 144.78)
 		)
 		(stroke
@@ -9313,6 +9394,16 @@
 			(type default)
 		)
 		(uuid "a1844922-24ae-4c37-9343-c011e7dee718")
+	)
+	(wire
+		(pts
+			(xy 203.2 40.64) (xy 203.2 43.18)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "a1956587-332b-4cdc-a702-386ca4ff19d0")
 	)
 	(wire
 		(pts
@@ -9463,6 +9554,16 @@
 			(type solid)
 		)
 		(uuid "a905d0ba-2013-4162-b094-2e25b82b5764")
+	)
+	(wire
+		(pts
+			(xy 170.18 220.98) (xy 170.18 223.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a93cc5b1-3fb3-4590-be68-a4ea21cfe774")
 	)
 	(wire
 		(pts
@@ -9916,16 +10017,6 @@
 	)
 	(wire
 		(pts
-			(xy 246.38 116.84) (xy 246.38 111.76)
-		)
-		(stroke
-			(width 0.1524)
-			(type solid)
-		)
-		(uuid "ca1602ab-7b97-4072-93be-3c1b66afe06f")
-	)
-	(wire
-		(pts
 			(xy 245.11 214.63) (xy 245.11 212.09)
 		)
 		(stroke
@@ -9943,6 +10034,16 @@
 			(type solid)
 		)
 		(uuid "cadec174-3f29-4ef3-a41d-8e0ffc871337")
+	)
+	(wire
+		(pts
+			(xy 137.16 111.76) (xy 137.16 114.3)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cb57882a-937b-45ce-88d9-fe95a236241b")
 	)
 	(wire
 		(pts
@@ -10336,6 +10437,16 @@
 	)
 	(wire
 		(pts
+			(xy 281.94 180.34) (xy 281.94 182.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e035eae5-d6e1-42cf-aab2-5a9b8ca2f288")
+	)
+	(wire
+		(pts
 			(xy 228.6 134.62) (xy 228.6 132.08)
 		)
 		(stroke
@@ -10473,6 +10584,16 @@
 			(type solid)
 		)
 		(uuid "e8bee44d-f959-4806-ad67-f7b08f9508aa")
+	)
+	(wire
+		(pts
+			(xy 180.34 220.98) (xy 180.34 223.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ea37204f-58ea-49c4-a636-faabfb2f816a")
 	)
 	(wire
 		(pts
@@ -10646,6 +10767,16 @@
 	)
 	(wire
 		(pts
+			(xy 144.78 40.64) (xy 144.78 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f7a0dd6e-5ad3-46b5-967b-b3bc26064446")
+	)
+	(wire
+		(pts
 			(xy 21.59 165.1) (xy 17.78 165.1)
 		)
 		(stroke
@@ -10653,6 +10784,16 @@
 			(type solid)
 		)
 		(uuid "f8371066-8d85-4ee1-91ac-2330ec4aeab8")
+	)
+	(wire
+		(pts
+			(xy 246.38 81.28) (xy 246.38 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f88fc349-5027-4bd4-916e-aac6fa732111")
 	)
 	(wire
 		(pts
@@ -10733,6 +10874,16 @@
 			(type solid)
 		)
 		(uuid "fe87d326-3e48-422f-b195-e8d76f34c8c4")
+	)
+	(wire
+		(pts
+			(xy 246.38 111.76) (xy 246.38 119.38)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "feab7327-7a04-48ef-8360-52ef0bdec4d7")
 	)
 	(wire
 		(pts
@@ -11522,7 +11673,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 281.94 160.02 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -11548,7 +11699,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 281.94 160.02 0)
 			(effects
 				(font
@@ -11557,7 +11708,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 281.94 160.02 0)
 			(effects
 				(font
@@ -11566,7 +11717,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 281.94 160.02 0)
 			(effects
 				(font
@@ -12456,7 +12607,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 246.38 124.46 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12482,7 +12633,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 246.38 124.46 0)
 			(effects
 				(font
@@ -12491,7 +12642,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 246.38 124.46 0)
 			(effects
 				(font
@@ -12500,7 +12651,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 246.38 124.46 0)
 			(effects
 				(font
@@ -13080,7 +13231,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 144.78 35.56 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13106,7 +13257,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 144.78 35.56 0)
 			(effects
 				(font
@@ -13115,7 +13266,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 144.78 35.56 0)
 			(effects
 				(font
@@ -13124,7 +13275,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 144.78 35.56 0)
 			(effects
 				(font
@@ -13431,7 +13582,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 124.46 106.68 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13457,7 +13608,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 124.46 106.68 0)
 			(effects
 				(font
@@ -13466,7 +13617,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 124.46 106.68 0)
 			(effects
 				(font
@@ -13475,7 +13626,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 124.46 106.68 0)
 			(effects
 				(font
@@ -14326,8 +14477,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
-		(at 99.06 106.68 270)
+		(lib_id "Connector:Conn_01x01_Pin")
+		(at 97.79 107.95 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -14335,7 +14486,7 @@
 		(dnp no)
 		(uuid "5859b71c-69e8-4b41-8fba-f1139f16b288")
 		(property "Reference" "X_GLITCH1"
-			(at 102.362 104.14 0)
+			(at 101.092 105.41 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -14344,7 +14495,7 @@
 			)
 		)
 		(property "Value" "PINHDR_1X1"
-			(at 93.98 104.14 0)
+			(at 92.71 105.41 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -14352,8 +14503,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
-			(at 99.06 106.68 0)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
+			(at 97.79 107.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14361,8 +14512,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 99.06 106.68 0)
+		(property "Datasheet" "~"
+			(at 97.79 107.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14370,8 +14521,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 99.06 106.68 0)
+		(property "Description" "Generic connector, single row, 01x01, script generated"
+			(at 97.79 107.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14479,7 +14630,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 246.38 149.86 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14505,7 +14656,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 246.38 149.86 0)
 			(effects
 				(font
@@ -14514,7 +14665,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 246.38 149.86 0)
 			(effects
 				(font
@@ -14523,7 +14674,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 246.38 149.86 0)
 			(effects
 				(font
@@ -15089,7 +15240,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 203.2 35.56 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15115,7 +15266,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 203.2 35.56 0)
 			(effects
 				(font
@@ -15124,7 +15275,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 203.2 35.56 0)
 			(effects
 				(font
@@ -15133,7 +15284,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 203.2 35.56 0)
 			(effects
 				(font
@@ -16056,7 +16207,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 281.94 175.26 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16082,7 +16233,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 281.94 175.26 0)
 			(effects
 				(font
@@ -16091,7 +16242,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 281.94 175.26 0)
 			(effects
 				(font
@@ -16100,7 +16251,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 281.94 175.26 0)
 			(effects
 				(font
@@ -16479,7 +16630,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 137.16 106.68 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16505,7 +16656,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 137.16 106.68 0)
 			(effects
 				(font
@@ -16514,7 +16665,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 137.16 106.68 0)
 			(effects
 				(font
@@ -16523,7 +16674,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 137.16 106.68 0)
 			(effects
 				(font
@@ -17019,8 +17170,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
-		(at 246.38 81.28 270)
+		(lib_id "Connector:Conn_01x01_Pin")
+		(at 246.38 76.2 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -17028,7 +17179,7 @@
 		(dnp no)
 		(uuid "b20c7c60-50e5-464f-b340-1df4f6ac7e4e")
 		(property "Reference" "TP_TRIGGER2"
-			(at 249.682 78.74 0)
+			(at 249.682 73.66 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -17037,7 +17188,7 @@
 			)
 		)
 		(property "Value" "PINHDR_1X1"
-			(at 241.3 78.74 0)
+			(at 241.3 73.66 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -17045,8 +17196,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
-			(at 246.38 81.28 0)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
+			(at 246.38 76.2 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17054,8 +17205,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 246.38 81.28 0)
+		(property "Datasheet" "~"
+			(at 246.38 76.2 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17063,8 +17214,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 246.38 81.28 0)
+		(property "Description" "Generic connector, single row, 01x01, script generated"
+			(at 246.38 76.2 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17220,7 +17371,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 93.98 142.24 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17246,7 +17397,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 93.98 142.24 0)
 			(effects
 				(font
@@ -17255,7 +17406,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 93.98 142.24 0)
 			(effects
 				(font
@@ -17264,7 +17415,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 93.98 142.24 0)
 			(effects
 				(font
@@ -17640,7 +17791,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 231.14 35.56 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17666,7 +17817,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 231.14 35.56 0)
 			(effects
 				(font
@@ -17675,7 +17826,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 231.14 35.56 0)
 			(effects
 				(font
@@ -17684,7 +17835,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 231.14 35.56 0)
 			(effects
 				(font
@@ -17928,7 +18079,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 119.38 170.18 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17954,7 +18105,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 119.38 170.18 0)
 			(effects
 				(font
@@ -17963,7 +18114,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 119.38 170.18 0)
 			(effects
 				(font
@@ -17972,7 +18123,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 119.38 170.18 0)
 			(effects
 				(font
@@ -18360,7 +18511,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 111.76 106.68 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18386,7 +18537,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 111.76 106.68 0)
 			(effects
 				(font
@@ -18395,7 +18546,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 111.76 106.68 0)
 			(effects
 				(font
@@ -18404,7 +18555,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 111.76 106.68 0)
 			(effects
 				(font
@@ -19390,7 +19541,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 177.8 35.56 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -19416,7 +19567,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 177.8 35.56 0)
 			(effects
 				(font
@@ -19425,7 +19576,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 177.8 35.56 0)
 			(effects
 				(font
@@ -19434,7 +19585,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 177.8 35.56 0)
 			(effects
 				(font
@@ -19594,7 +19745,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 170.18 215.9 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -19620,7 +19771,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 170.18 215.9 0)
 			(effects
 				(font
@@ -19629,7 +19780,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 170.18 215.9 0)
 			(effects
 				(font
@@ -19638,7 +19789,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 170.18 215.9 0)
 			(effects
 				(font
@@ -19879,7 +20030,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:M01PTH")
+		(lib_id "Connector:Conn_01x01_Pin")
 		(at 88.9 45.72 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -19905,7 +20056,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X01"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
 			(at 88.9 45.72 0)
 			(effects
 				(font
@@ -19914,7 +20065,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 88.9 45.72 0)
 			(effects
 				(font
@@ -19923,7 +20074,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x01, script generated"
 			(at 88.9 45.72 0)
 			(effects
 				(font
