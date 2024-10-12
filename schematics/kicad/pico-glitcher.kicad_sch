@@ -1456,686 +1456,6 @@
 				)
 			)
 		)
-		(symbol "NH245-SN74LVC8T245_1"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" ""
-				(at 2.54 -17.78 0)
-				(effects
-					(font
-						(size 1.778 1.5113)
-					)
-					(justify left bottom)
-					(hide yes)
-				)
-			)
-			(property "Value" ""
-				(at -12.7 -17.78 0)
-				(effects
-					(font
-						(size 1.778 1.5113)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Footprint" "pico-glitcher:TSSOP24"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_locked" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "NH245-SN74LVC8T245_1_1_0"
-				(polyline
-					(pts
-						(xy -10.16 -15.24) (xy 10.16 -15.24)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -10.16 15.24) (xy -10.16 -15.24)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 10.16 -15.24) (xy 10.16 15.24)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 10.16 15.24) (xy -10.16 15.24)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin bidirectional line
-					(at -2.54 20.32 270)
-					(length 5.08)
-					(name "VCCA"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -15.24 -12.7 0)
-					(length 5.08)
-					(name "A8"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "10"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -2.54 -20.32 90)
-					(length 5.08)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "11"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 0 -20.32 90)
-					(length 5.08)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "12"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 2.54 -20.32 90)
-					(length 5.08)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "12"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 2.54 -20.32 90)
-					(length 5.08)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "13"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 2.54 -20.32 90)
-					(length 5.08)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "13"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 15.24 -12.7 180)
-					(length 5.08)
-					(name "B8"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "14"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 15.24 -10.16 180)
-					(length 5.08)
-					(name "B7"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "15"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 15.24 -7.62 180)
-					(length 5.08)
-					(name "B6"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "16"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 15.24 -5.08 180)
-					(length 5.08)
-					(name "B5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "17"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 15.24 -2.54 180)
-					(length 5.08)
-					(name "B4"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "18"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 15.24 0 180)
-					(length 5.08)
-					(name "B3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "19"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -15.24 12.7 0)
-					(length 5.08)
-					(name "DIR"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 15.24 2.54 180)
-					(length 5.08)
-					(name "B2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "20"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 15.24 5.08 180)
-					(length 5.08)
-					(name "B1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "21"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -15.24 10.16 0)
-					(length 5.08)
-					(name "/OE"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "22"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 2.54 20.32 270)
-					(length 5.08)
-					(name "VCCB"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "23"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 2.54 20.32 270)
-					(length 5.08)
-					(name "VCCB"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "24"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -15.24 5.08 0)
-					(length 5.08)
-					(name "A1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -15.24 2.54 0)
-					(length 5.08)
-					(name "A2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "4"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -15.24 0 0)
-					(length 5.08)
-					(name "A3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -15.24 -2.54 0)
-					(length 5.08)
-					(name "A4"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "6"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -15.24 -5.08 0)
-					(length 5.08)
-					(name "A5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "7"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -15.24 -7.62 0)
-					(length 5.08)
-					(name "A6"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "8"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -15.24 -10.16 0)
-					(length 5.08)
-					(name "A7"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "9"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-		)
-		(symbol "pico-glitcher:+3V3"
-			(power)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "#+3V3"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Value" ""
-				(at -2.54 -5.08 90)
-				(effects
-					(font
-						(size 1.778 1.5113)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "SUPPLY SYMBOL"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_locked" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "+3V3_1_0"
-				(polyline
-					(pts
-						(xy 0 0) (xy -1.27 -1.905)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 -1.905) (xy 0 0)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin power_in line
-					(at 0 -2.54 90)
-					(length 2.54)
-					(name "+3V3"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-			)
-		)
 		(symbol "pico-glitcher:22UF-POLAR-PANASONIC_C-35V-20%"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -3223,148 +2543,6 @@
 						)
 					)
 					(number "5"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-			)
-		)
-		(symbol "pico-glitcher:CAP-0805"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "C"
-				(at 1.524 2.921 0)
-				(effects
-					(font
-						(size 1.778 1.778)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Value" ""
-				(at 1.524 -2.159 0)
-				(effects
-					(font
-						(size 1.778 1.778)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Footprint" "pico-glitcher:0805"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_locked" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "CAP-0805_1_0"
-				(rectangle
-					(start -2.032 0.508)
-					(end 2.032 1.016)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(rectangle
-					(start -2.032 1.524)
-					(end 2.032 2.032)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 0) (xy 0 0.508)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 2.54) (xy 0 2.032)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin passive line
-					(at 0 5.08 270)
-					(length 2.54)
-					(name "1"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 0 -2.54 90)
-					(length 2.54)
-					(name "2"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "2"
 						(effects
 							(font
 								(size 0 0)
@@ -6943,6 +6121,126 @@
 						)
 					)
 					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
+		(symbol "power:+3V3"
+			(power)
+			(pin_numbers hide)
+			(pin_names
+				(offset 0) hide)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "#PWR"
+				(at 0 -3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Value" "+3V3"
+				(at 0 3.556 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Power symbol creates a global label with name \"+3V3\""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "global power"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "+3V3_0_1"
+				(polyline
+					(pts
+						(xy -0.762 1.27) (xy 0 2.54)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 0) (xy 0 2.54)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 2.54) (xy 0.762 1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "+3V3_1_1"
+				(pin power_in line
+					(at 0 0 90)
+					(length 0)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -12662,8 +11960,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:+3V3")
-		(at 83.82 83.82 0)
+		(lib_id "power:+3V3")
+		(at 83.82 86.36 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12671,7 +11969,7 @@
 		(dnp no)
 		(uuid "14e6651d-a5b8-410d-9c9f-0187e62cdcc6")
 		(property "Reference" "#+3V01"
-			(at 83.82 83.82 0)
+			(at 83.82 86.36 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12680,7 +11978,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 81.28 87.63 90)
+			(at 81.28 90.17 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -12689,7 +11987,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 83.82 83.82 0)
+			(at 83.82 86.36 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12698,7 +11996,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 83.82 83.82 0)
+			(at 83.82 86.36 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12706,8 +12004,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 83.82 83.82 0)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 83.82 86.36 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13058,8 +12356,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:CAP-0805")
-		(at 73.66 45.72 0)
+		(lib_id "Device:C")
+		(at 73.66 44.45 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13067,7 +12365,7 @@
 		(dnp no)
 		(uuid "27257e90-80e2-47ab-99c4-08970c00cc3e")
 		(property "Reference" "C2"
-			(at 75.184 42.799 0)
+			(at 73.66 43.18 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -13076,7 +12374,7 @@
 			)
 		)
 		(property "Value" "2.2u"
-			(at 75.184 47.879 0)
+			(at 73.66 48.26 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -13084,8 +12382,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0805"
-			(at 73.66 45.72 0)
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+			(at 74.6252 48.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13093,8 +12391,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 73.66 45.72 0)
+		(property "Datasheet" "~"
+			(at 73.66 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13102,8 +12400,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 73.66 45.72 0)
+		(property "Description" "Unpolarized capacitor"
+			(at 73.66 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13435,7 +12733,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "N-Channel MOSFET IRF9410 and NDS8434 are common, SOIC-8 parts."
 			(at 58.42 200.66 0)
 			(effects
 				(font
@@ -13993,7 +13291,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "22µF polarized capacitors\n\nA capacitor is a passive two-terminal electrical component used to store electrical energy temporarily in an electric field."
 			(at 185.42 233.68 0)
 			(effects
 				(font
@@ -14044,7 +13342,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5"
+		(property "Footprint" "pico-glitcher:SOT23-5L"
 			(at 48.26 40.64 0)
 			(effects
 				(font
@@ -15239,7 +14537,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "RES ARRAY 4 RES 10K OHM 1206   https://www.ctscorp.com/wp-content/uploads/74x.pdf  Manufacturer's datasheet"
 			(at 175.26 106.68 0)
 			(effects
 				(font
@@ -15441,7 +14739,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:BU-SMA"
+		(property "Footprint" "pico-glitcher:BU-SMA-V"
 			(at 101.6 154.94 0)
 			(effects
 				(font
@@ -15459,7 +14757,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "FEMALE SMA CONNECTOR\n\nRadiall\n\ndistributor RS 112-3794"
 			(at 101.6 154.94 0)
 			(effects
 				(font
@@ -15826,8 +15124,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:+3V3")
-		(at 157.48 35.56 0)
+		(lib_id "power:+3V3")
+		(at 157.48 38.1 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -15835,7 +15133,7 @@
 		(dnp no)
 		(uuid "6bfbed47-59fc-48f0-bf03-e3d199c08bc0")
 		(property "Reference" "#+3V07"
-			(at 157.48 35.56 0)
+			(at 157.48 38.1 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15844,7 +15142,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 154.94 40.64 90)
+			(at 154.94 43.18 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -15853,7 +15151,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 157.48 35.56 0)
+			(at 157.48 38.1 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15862,7 +15160,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 157.48 35.56 0)
+			(at 157.48 38.1 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15870,8 +15168,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 157.48 35.56 0)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 157.48 38.1 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16121,7 +15419,7 @@
 		(dnp no)
 		(uuid "73b98b52-2365-4cca-b7dc-3a44579e9c8e")
 		(property "Reference" "C1"
-			(at 67.564 41.529 0)
+			(at 62.23 43.18 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -16129,8 +15427,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "0.01uF"
-			(at 67.564 46.609 0)
+		(property "Value" "10nF"
+			(at 58.42 48.26 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -16371,8 +15669,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:+3V3")
-		(at 81.28 25.4 0)
+		(lib_id "power:+3V3")
+		(at 81.28 27.94 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -16380,7 +15678,7 @@
 		(dnp no)
 		(uuid "76097383-ac52-4ac8-aa2b-ea54ab6b4ba6")
 		(property "Reference" "#+3V03"
-			(at 81.28 25.4 0)
+			(at 81.28 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16389,7 +15687,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 78.74 30.48 90)
+			(at 80.01 27.94 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -16398,7 +15696,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 81.28 25.4 0)
+			(at 81.28 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16407,7 +15705,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 81.28 25.4 0)
+			(at 81.28 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16415,8 +15713,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 81.28 25.4 0)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 81.28 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16817,7 +16115,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "RES ARRAY 4 RES 10K OHM 1206   https://www.ctscorp.com/wp-content/uploads/74x.pdf  Manufacturer's datasheet"
 			(at 223.52 121.92 0)
 			(effects
 				(font
@@ -17039,7 +16337,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "RES ARRAY 4 RES 10K OHM 1206   https://www.ctscorp.com/wp-content/uploads/74x.pdf  Manufacturer's datasheet"
 			(at 226.06 170.18 0)
 			(effects
 				(font
@@ -17622,6 +16920,7 @@
 		)
 	)
 	(symbol
+		(lib_name "pico-glitcher:NH245-SN74LVC8T245")
 		(lib_id "pico-glitcher:NH245-SN74LVC8T245")
 		(at 200.66 172.72 0)
 		(unit 1)
@@ -18162,8 +17461,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:+3V3")
-		(at 198.12 66.04 0)
+		(lib_id "power:+3V3")
+		(at 198.12 68.58 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -18171,7 +17470,7 @@
 		(dnp no)
 		(uuid "b77a40d0-372f-41fb-b804-8000766f4fab")
 		(property "Reference" "#+3V06"
-			(at 198.12 66.04 0)
+			(at 198.12 68.58 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18180,7 +17479,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 199.39 66.04 90)
+			(at 199.39 64.77 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -18189,7 +17488,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 198.12 66.04 0)
+			(at 198.12 68.58 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18198,7 +17497,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 198.12 66.04 0)
+			(at 198.12 68.58 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18206,8 +17505,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 198.12 66.04 0)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 198.12 68.58 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18228,8 +17527,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:+3V3")
-		(at 198.12 139.7 0)
+		(lib_id "power:+3V3")
+		(at 198.12 142.24 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -18237,7 +17536,7 @@
 		(dnp no)
 		(uuid "bb2fe814-f79b-46ef-b5bd-55eaa3f5c5b4")
 		(property "Reference" "#+3V04"
-			(at 198.12 139.7 0)
+			(at 198.12 142.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18246,7 +17545,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 198.12 139.7 90)
+			(at 199.39 139.7 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -18255,7 +17554,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 198.12 139.7 0)
+			(at 198.12 142.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18264,7 +17563,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 198.12 139.7 0)
+			(at 198.12 142.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18272,8 +17571,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 198.12 139.7 0)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 198.12 142.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18407,7 +17706,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "RES ARRAY 4 RES 10K OHM 1206   https://www.ctscorp.com/wp-content/uploads/74x.pdf  Manufacturer's datasheet"
 			(at 236.22 121.92 0)
 			(effects
 				(font
@@ -18629,7 +17928,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "RES ARRAY 4 RES 10K OHM 1206   https://www.ctscorp.com/wp-content/uploads/74x.pdf  Manufacturer's datasheet"
 			(at 165.1 195.58 0)
 			(effects
 				(font
@@ -18848,7 +18147,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "RES ARRAY 4 RES 10K OHM 1206   https://www.ctscorp.com/wp-content/uploads/74x.pdf  Manufacturer's datasheet"
 			(at 175.26 96.52 0)
 			(effects
 				(font
@@ -19104,8 +18403,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:+3V3")
-		(at 25.4 27.94 0)
+		(lib_id "power:+3V3")
+		(at 25.4 30.48 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -19113,7 +18412,7 @@
 		(dnp no)
 		(uuid "d1ead798-f986-4ecf-ae1a-badea9cafc59")
 		(property "Reference" "#+3V02"
-			(at 25.4 27.94 0)
+			(at 25.4 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19122,7 +18421,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 22.86 33.02 90)
+			(at 22.86 35.56 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -19131,7 +18430,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 25.4 27.94 0)
+			(at 25.4 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19140,7 +18439,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 25.4 27.94 0)
+			(at 25.4 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19148,8 +18447,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 25.4 27.94 0)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 25.4 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19262,7 +18561,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
+		(property "Footprint" "pico-glitcher:SOT23"
 			(at 48.26 162.56 0)
 			(effects
 				(font
@@ -19280,7 +18579,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "N-Channel MOSFET - Generic"
 			(at 48.26 162.56 0)
 			(effects
 				(font
@@ -19631,7 +18930,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "RES ARRAY 4 RES 10K OHM 1206   https://www.ctscorp.com/wp-content/uploads/74x.pdf  Manufacturer's datasheet"
 			(at 226.06 180.34 0)
 			(effects
 				(font
@@ -19809,8 +19108,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:+3V3")
-		(at 180.34 142.24 0)
+		(lib_id "power:+3V3")
+		(at 180.34 144.78 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -19818,7 +19117,7 @@
 		(dnp no)
 		(uuid "d8c9681c-a055-40aa-a0c1-ea5dab6f9cec")
 		(property "Reference" "#+3V05"
-			(at 180.34 142.24 0)
+			(at 180.34 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19827,7 +19126,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 177.8 147.32 90)
+			(at 181.61 140.97 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -19836,7 +19135,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 180.34 142.24 0)
+			(at 180.34 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19845,7 +19144,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 180.34 142.24 0)
+			(at 180.34 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19853,8 +19152,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 180.34 142.24 0)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 180.34 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19902,7 +19201,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:BU-SMA"
+		(property "Footprint" "pico-glitcher:BU-SMA-V"
 			(at 127 182.88 0)
 			(effects
 				(font
@@ -19920,7 +19219,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "FEMALE SMA CONNECTOR\n\nRadiall\n\ndistributor RS 112-3794"
 			(at 127 182.88 0)
 			(effects
 				(font
@@ -20065,7 +19364,7 @@
 		)
 	)
 	(symbol
-		(lib_name "NH245-SN74LVC8T245_1")
+		(lib_name "pico-glitcher:NH245-SN74LVC8T245")
 		(lib_id "pico-glitcher:NH245-SN74LVC8T245")
 		(at 200.66 99.06 0)
 		(unit 1)
@@ -20296,7 +19595,7 @@
 				(font
 					(size 1.778 1.5113)
 				)
-				(justify left bottom)
+				(justify right bottom)
 			)
 		)
 		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical"
@@ -20521,7 +19820,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "RES ARRAY 4 RES 10K OHM 1206   https://www.ctscorp.com/wp-content/uploads/74x.pdf  Manufacturer's datasheet"
 			(at 177.8 195.58 0)
 			(effects
 				(font
