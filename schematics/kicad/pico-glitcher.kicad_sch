@@ -5,7 +5,7 @@
 	(uuid "bcbe9e08-2481-468a-b94c-492931ceb6ea")
 	(paper "User" 325.831 274.218)
 	(lib_symbols
-		(symbol "pico-glitcher-eagle-import:+3V3"
+		(symbol "pico-glitcher:+3V3"
 			(power)
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -108,7 +108,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:+5V"
+		(symbol "pico-glitcher:+5V"
 			(power)
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -211,7 +211,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:0.1UF-0603-25V-10%-X7R-WE"
+		(symbol "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -353,7 +353,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:10KOHM1/10W1%(0603)0603"
+		(symbol "pico-glitcher:10KOHM1/10W1%(0603)0603"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -557,7 +557,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:22UF-POLAR-PANASONIC_C-35V-20%"
+		(symbol "pico-glitcher:22UF-POLAR-PANASONIC_C-35V-20%"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -723,7 +723,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:742C083103JP"
+		(symbol "pico-glitcher:742C083103JP"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -1407,7 +1407,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:BU-SMA-V"
+		(symbol "pico-glitcher:BU-SMA-V"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -1653,7 +1653,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:CAP-0805"
+		(symbol "pico-glitcher:CAP-0805"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -1795,7 +1795,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:CONN_02"
+		(symbol "pico-glitcher:CONN_02"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -1963,7 +1963,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:GND"
+		(symbol "pico-glitcher:GND"
 			(power)
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -2054,7 +2054,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:LED0603"
+		(symbol "pico-glitcher:LED0603"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -2258,7 +2258,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:M01PTH"
+		(symbol "pico-glitcher:M01PTH"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -2396,7 +2396,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:M03PTH"
+		(symbol "pico-glitcher:M03PTH"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -2594,7 +2594,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:M08X2"
+		(symbol "pico-glitcher:M08X2"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -3183,7 +3183,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:MOSFET-NCHANNEL-SOIC8"
+		(symbol "pico-glitcher:MOSFET-NCHANNEL-SOIC8"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -3941,7 +3941,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:NH245-SN74LVC8T245"
+		(symbol "pico-glitcher:NH245-SN74LVC8T245"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -4482,7 +4482,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:NMOSFETSOT23-GSD"
+		(symbol "pico-glitcher:NMOSFETSOT23-GSD"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -4990,7 +4990,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:RPI_PICO-SMD"
+		(symbol "pico-glitcher:RPI_PICO-SMD"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -5871,7 +5871,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:SWITCH-MOMENTARY-2"
+		(symbol "pico-glitcher:SWITCH-MOMENTARY-2"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -6013,7 +6013,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:SWITCH-SP3T"
+		(symbol "pico-glitcher:SWITCH-SP3T"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -6273,7 +6273,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:TPS2041"
+		(symbol "pico-glitcher:TPS2041"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -6527,7 +6527,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:TPS769XX"
+		(symbol "pico-glitcher:TPS769XX"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -6725,7 +6725,7 @@
 				)
 			)
 		)
-		(symbol "pico-glitcher-eagle-import:VCC"
+		(symbol "pico-glitcher:VCC"
 			(power)
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -11361,7 +11361,7 @@
 		(uuid "ffebc5d6-a976-47ca-87eb-8c386d3baad9")
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 248.92 248.92 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -11427,7 +11427,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:VCC")
+		(lib_id "pico-glitcher:VCC")
 		(at 99.06 20.32 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -11493,7 +11493,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 281.94 160.02 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -11559,7 +11559,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M03PTH")
+		(lib_id "pico-glitcher:M03PTH")
 		(at 259.08 81.28 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -11631,7 +11631,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 175.26 210.82 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -11697,7 +11697,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 269.24 248.92 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -11763,7 +11763,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 185.42 149.86 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -11829,7 +11829,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:+3V3")
+		(lib_id "pico-glitcher:+3V3")
 		(at 83.82 83.82 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -11895,7 +11895,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 185.42 76.2 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -11961,7 +11961,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 200.66 200.66 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12027,7 +12027,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 177.8 162.56 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12093,7 +12093,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 43.18 190.5 180)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12159,7 +12159,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 259.08 248.92 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12225,7 +12225,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:CAP-0805")
+		(lib_id "pico-glitcher:CAP-0805")
 		(at 73.66 45.72 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12294,7 +12294,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:VCC")
+		(lib_id "pico-glitcher:VCC")
 		(at 116.84 220.98 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12360,7 +12360,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 228.6 248.92 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12426,7 +12426,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 246.38 124.46 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12492,7 +12492,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:+5V")
+		(lib_id "pico-glitcher:+5V")
 		(at 83.82 71.12 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12558,7 +12558,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:MOSFET-NCHANNEL-SOIC8")
+		(lib_id "pico-glitcher:MOSFET-NCHANNEL-SOIC8")
 		(at 58.42 200.66 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12645,7 +12645,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 215.9 149.86 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12711,7 +12711,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:LED0603")
+		(lib_id "pico-glitcher:LED0603")
 		(at 238.76 238.76 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12780,7 +12780,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 91.44 96.52 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12846,7 +12846,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:LED0603")
+		(lib_id "pico-glitcher:LED0603")
 		(at 248.92 238.76 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12915,7 +12915,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:0.1UF-0603-25V-10%-X7R-WE")
+		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
 		(at 208.28 71.12 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12984,7 +12984,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 177.8 81.28 180)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13050,7 +13050,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 144.78 35.56 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13116,7 +13116,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:22UF-POLAR-PANASONIC_C-35V-20%")
+		(lib_id "pico-glitcher:22UF-POLAR-PANASONIC_C-35V-20%")
 		(at 185.42 233.68 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13185,7 +13185,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:TPS769XX")
+		(lib_id "pico-glitcher:TPS769XX")
 		(at 48.26 40.64 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13263,7 +13263,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 215.9 76.2 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13329,7 +13329,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M03PTH")
+		(lib_id "pico-glitcher:M03PTH")
 		(at 297.18 175.26 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13401,7 +13401,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 124.46 106.68 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13467,7 +13467,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:0.1UF-0603-25V-10%-X7R-WE")
+		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
 		(at 190.5 71.12 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13536,7 +13536,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:0.1UF-0603-25V-10%-X7R-WE")
+		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
 		(at 124.46 220.98 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13605,7 +13605,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:0.1UF-0603-25V-10%-X7R-WE")
+		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
 		(at 208.28 144.78 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13674,7 +13674,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:10KOHM1/10W1%(0603)0603")
+		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
 		(at 228.6 228.6 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13743,7 +13743,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:SWITCH-SP3T")
+		(lib_id "pico-glitcher:SWITCH-SP3T")
 		(at 91.44 30.48 0)
 		(mirror y)
 		(unit 1)
@@ -13819,7 +13819,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:LED0603")
+		(lib_id "pico-glitcher:LED0603")
 		(at 228.6 238.76 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13888,7 +13888,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 228.6 137.16 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13954,7 +13954,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:10KOHM1/10W1%(0603)0603")
+		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
 		(at 238.76 228.6 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14023,7 +14023,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 93.98 165.1 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14089,7 +14089,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M03PTH")
+		(lib_id "pico-glitcher:M03PTH")
 		(at 297.18 160.02 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14161,7 +14161,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:10KOHM1/10W1%(0603)0603")
+		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
 		(at 25.4 205.74 180)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14230,7 +14230,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 200.66 127 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14296,7 +14296,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 99.06 106.68 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14362,7 +14362,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:742C083103JP")
+		(lib_id "pico-glitcher:742C083103JP")
 		(at 175.26 106.68 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14449,7 +14449,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 246.38 149.86 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14515,7 +14515,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 30.48 53.34 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14581,7 +14581,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:BU-SMA-V")
+		(lib_id "pico-glitcher:BU-SMA-V")
 		(at 101.6 154.94 0)
 		(mirror y)
 		(unit 1)
@@ -14660,7 +14660,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 134.62 218.44 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14726,7 +14726,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:VCC")
+		(lib_id "pico-glitcher:VCC")
 		(at 88.9 86.36 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14792,7 +14792,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 73.66 53.34 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14858,7 +14858,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:SWITCH-MOMENTARY-2")
+		(lib_id "pico-glitcher:SWITCH-MOMENTARY-2")
 		(at 81.28 104.14 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14927,7 +14927,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 38.1 226.06 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -14993,7 +14993,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:+3V3")
+		(lib_id "pico-glitcher:+3V3")
 		(at 157.48 35.56 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15059,7 +15059,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 203.2 35.56 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15125,7 +15125,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:TPS2041")
+		(lib_id "pico-glitcher:TPS2041")
 		(at 147.32 228.6 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15212,7 +15212,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:+5V")
+		(lib_id "pico-glitcher:+5V")
 		(at 124.46 35.56 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15278,7 +15278,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:0.1UF-0603-25V-10%-X7R-WE")
+		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
 		(at 66.04 45.72 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15347,7 +15347,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:RPI_PICO-SMD")
+		(lib_id "pico-glitcher:RPI_PICO-SMD")
 		(at 53.34 104.14 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15537,7 +15537,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:+3V3")
+		(lib_id "pico-glitcher:+3V3")
 		(at 81.28 25.4 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15603,7 +15603,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:VCC")
+		(lib_id "pico-glitcher:VCC")
 		(at 203.2 139.7 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15669,7 +15669,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 147.32 246.38 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15735,7 +15735,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:LED0603")
+		(lib_id "pico-glitcher:LED0603")
 		(at 259.08 238.76 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15804,7 +15804,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 50.8 175.26 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15870,7 +15870,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:CONN_02")
+		(lib_id "pico-glitcher:CONN_02")
 		(at 109.22 27.94 180)
 		(unit 1)
 		(exclude_from_sim no)
@@ -15939,7 +15939,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:742C083103JP")
+		(lib_id "pico-glitcher:742C083103JP")
 		(at 223.52 121.92 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16026,7 +16026,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 281.94 175.26 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16092,7 +16092,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:10KOHM1/10W1%(0603)0603")
+		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
 		(at 124.46 231.14 180)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16161,7 +16161,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:742C083103JP")
+		(lib_id "pico-glitcher:742C083103JP")
 		(at 226.06 170.18 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16248,7 +16248,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:+5V")
+		(lib_id "pico-glitcher:+5V")
 		(at 83.82 22.86 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16314,7 +16314,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:0.1UF-0603-25V-10%-X7R-WE")
+		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
 		(at 170.18 236.22 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16383,7 +16383,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:VCC")
+		(lib_id "pico-glitcher:VCC")
 		(at 203.2 66.04 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16449,7 +16449,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 137.16 106.68 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16515,7 +16515,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:0.1UF-0603-25V-10%-X7R-WE")
+		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
 		(at 25.4 45.72 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16584,7 +16584,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:10KOHM1/10W1%(0603)0603")
+		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
 		(at 259.08 228.6 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16653,7 +16653,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 53.34 142.24 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16719,7 +16719,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:10KOHM1/10W1%(0603)0603")
+		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
 		(at 269.24 228.6 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16788,7 +16788,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:NH245-SN74LVC8T245")
+		(lib_id "pico-glitcher:NH245-SN74LVC8T245")
 		(at 200.66 172.72 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16923,7 +16923,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 119.38 193.04 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -16989,7 +16989,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 246.38 81.28 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17055,7 +17055,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:LED0603")
+		(lib_id "pico-glitcher:LED0603")
 		(at 269.24 238.76 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17124,7 +17124,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 66.04 53.34 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17190,7 +17190,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 93.98 142.24 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17256,7 +17256,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 185.42 246.38 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17322,7 +17322,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:+3V3")
+		(lib_id "pico-glitcher:+3V3")
 		(at 198.12 66.04 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17388,7 +17388,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:+3V3")
+		(lib_id "pico-glitcher:+3V3")
 		(at 198.12 139.7 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17454,7 +17454,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:10KOHM1/10W1%(0603)0603")
+		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
 		(at 25.4 165.1 180)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17523,7 +17523,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:742C083103JP")
+		(lib_id "pico-glitcher:742C083103JP")
 		(at 236.22 121.92 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17610,7 +17610,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 231.14 35.56 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17676,7 +17676,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:10KOHM1/10W1%(0603)0603")
+		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
 		(at 38.1 172.72 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17745,7 +17745,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:742C083103JP")
+		(lib_id "pico-glitcher:742C083103JP")
 		(at 165.1 195.58 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17832,7 +17832,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 170.18 246.38 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17898,7 +17898,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 119.38 170.18 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -17964,7 +17964,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:742C083103JP")
+		(lib_id "pico-glitcher:742C083103JP")
 		(at 175.26 96.52 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18051,7 +18051,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:10KOHM1/10W1%(0603)0603")
+		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
 		(at 180.34 152.4 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18120,7 +18120,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M03PTH")
+		(lib_id "pico-glitcher:M03PTH")
 		(at 132.08 35.56 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18192,7 +18192,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M03PTH")
+		(lib_id "pico-glitcher:M03PTH")
 		(at 218.44 35.56 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18264,7 +18264,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:+3V3")
+		(lib_id "pico-glitcher:+3V3")
 		(at 25.4 27.94 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18330,7 +18330,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 111.76 106.68 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18396,7 +18396,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:NMOSFETSOT23-GSD")
+		(lib_id "pico-glitcher:NMOSFETSOT23-GSD")
 		(at 48.26 162.56 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18468,7 +18468,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 38.1 182.88 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18534,7 +18534,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M03PTH")
+		(lib_id "pico-glitcher:M03PTH")
 		(at 193.04 35.56 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18606,7 +18606,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:10KOHM1/10W1%(0603)0603")
+		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
 		(at 248.92 228.6 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18675,7 +18675,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M03PTH")
+		(lib_id "pico-glitcher:M03PTH")
 		(at 182.88 215.9 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18747,7 +18747,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:742C083103JP")
+		(lib_id "pico-glitcher:742C083103JP")
 		(at 226.06 180.34 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18834,7 +18834,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 238.76 248.92 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18900,7 +18900,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:10KOHM1/10W1%(0603)0603")
+		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
 		(at 38.1 215.9 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -18969,7 +18969,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:+3V3")
+		(lib_id "pico-glitcher:+3V3")
 		(at 180.34 142.24 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -19035,7 +19035,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:BU-SMA-V")
+		(lib_id "pico-glitcher:BU-SMA-V")
 		(at 127 182.88 0)
 		(mirror y)
 		(unit 1)
@@ -19114,7 +19114,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M08X2")
+		(lib_id "pico-glitcher:M08X2")
 		(at 269.24 137.16 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -19225,7 +19225,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:NH245-SN74LVC8T245")
+		(lib_id "pico-glitcher:NH245-SN74LVC8T245")
 		(at 200.66 99.06 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -19360,7 +19360,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 177.8 35.56 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -19426,7 +19426,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M03PTH")
+		(lib_id "pico-glitcher:M03PTH")
 		(at 165.1 35.56 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -19498,7 +19498,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 25.4 53.34 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -19564,7 +19564,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 170.18 215.9 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -19630,7 +19630,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:742C083103JP")
+		(lib_id "pico-glitcher:742C083103JP")
 		(at 177.8 195.58 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -19717,7 +19717,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:GND")
+		(lib_id "pico-glitcher:GND")
 		(at 226.06 48.26 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -19783,7 +19783,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:VCC")
+		(lib_id "pico-glitcher:VCC")
 		(at 104.14 38.1 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -19849,7 +19849,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:M01PTH")
+		(lib_id "pico-glitcher:M01PTH")
 		(at 88.9 45.72 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -19915,7 +19915,7 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher-eagle-import:0.1UF-0603-25V-10%-X7R-WE")
+		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
 		(at 190.5 144.78 270)
 		(unit 1)
 		(exclude_from_sim no)
