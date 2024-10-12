@@ -124,6 +124,166 @@
 				)
 			)
 		)
+		(symbol "Connector:Conn_01x02_Pin"
+			(pin_names
+				(offset 1.016) hide)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "J"
+				(at 0 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x02_Pin"
+				(at 0 -5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x02, script generated"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "Conn_01x02_Pin_1_1"
+				(polyline
+					(pts
+						(xy 1.27 -2.54) (xy 0.8636 -2.54)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy 0.8636 0)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 0.8636 -2.413)
+					(end 0 -2.667)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 0.8636 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 -2.54 180)
+					(length 3.81)
+					(name "Pin_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
 		(symbol "Connector:Conn_01x03_Pin"
 			(pin_names
 				(offset 1.016) hide)
@@ -2189,174 +2349,6 @@
 						(effects
 							(font
 								(size 0 0)
-							)
-						)
-					)
-				)
-			)
-		)
-		(symbol "pico-glitcher:CONN_02"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "J"
-				(at -2.54 5.588 0)
-				(effects
-					(font
-						(size 1.778 1.778)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Value" ""
-				(at -2.54 -4.826 0)
-				(effects
-					(font
-						(size 1.778 1.778)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Footprint" "pico-glitcher:1X02"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "Multi connection point. Often used as Generic Header-pin footprint for 0.1 inch spaced/style header connections\n\nOn any of the 0.1 inch spaced packages, you can populate with these:\n\n• https://www.sparkfun.com/products/116  Break Away Headers - Straight (PRT-00116)\n• https://www.sparkfun.com/products/553  Break Away Male Headers - Right Angle (PRT-00553)\n• https://www.sparkfun.com/products/115  Female Headers (PRT-00115)\n• https://www.sparkfun.com/products/117  Break Away Headers - Machine Pin (PRT-00117)\n• https://www.sparkfun.com/products/743  Break Away Female Headers - Swiss Machine Pin (PRT-00743)\n\nFor SCREWTERMINALS and SPRING TERMINALS visit here:\n\n• https://www.sparkfun.com/search/results?term=Screw+Terminals  Screw Terimnals on SparkFun.com (5mm/3.5mm/2.54mm spacing)\n\nThis device is also useful as a general connection point to wire up your design to another part of your project. Our various solder wires solder well into these plated through hole pads.\n\n• https://www.sparkfun.com/products/11375  Hook-Up Wire - Assortment (Stranded, 22 AWG) (PRT-11375)\n• https://www.sparkfun.com/products/11367  Hook-Up Wire - Assortment (Solid Core, 22 AWG) (PRT-11367)\n• https://www.sparkfun.com/categories/141  View the entire wire category on our website here\n\nSpecial notes:   Molex polarized connector foot print use with: PRT-08233 with associated crimp pins and housings.\n\n2.54_SCREWTERM for use with  PRT-10571.\n\n3.5mm Screw Terminal footprints for  PRT-08084\n\n5mm Screw Terminal footprints for use with PRT-08432"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_locked" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "CONN_02_1_0"
-				(polyline
-					(pts
-						(xy -2.54 5.08) (xy -2.54 -2.54)
-					)
-					(stroke
-						(width 0.4064)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -2.54 5.08) (xy 3.81 5.08)
-					)
-					(stroke
-						(width 0.4064)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 0) (xy 2.54 0)
-					)
-					(stroke
-						(width 0.6096)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 2.54) (xy 2.54 2.54)
-					)
-					(stroke
-						(width 0.6096)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 3.81 -2.54) (xy -2.54 -2.54)
-					)
-					(stroke
-						(width 0.4064)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 3.81 -2.54) (xy 3.81 5.08)
-					)
-					(stroke
-						(width 0.4064)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin passive line
-					(at 7.62 0 180)
-					(length 5.08)
-					(name "1"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 2.54 180)
-					(length 5.08)
-					(name "2"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
 							)
 						)
 					)
@@ -16051,8 +16043,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:CONN_02")
-		(at 109.22 27.94 180)
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 106.68 30.48 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -16060,25 +16052,25 @@
 		(dnp no)
 		(uuid "8a724212-e029-4ad1-bf57-f08a18e5177b")
 		(property "Reference" "JMP_VCC_INTERN0"
-			(at 111.76 33.528 0)
+			(at 107.95 30.48 0)
 			(effects
 				(font
 					(size 1.778 1.778)
 				)
-				(justify left bottom)
+				(justify right)
 			)
 		)
 		(property "Value" "JMP_VCC_INTERN"
-			(at 121.92 23.114 0)
+			(at 107.95 27.94 0)
 			(effects
 				(font
 					(size 1.778 1.778)
 				)
-				(justify left bottom)
+				(justify right)
 			)
 		)
-		(property "Footprint" "pico-glitcher:1X02"
-			(at 109.22 27.94 0)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 106.68 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16086,8 +16078,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 109.22 27.94 0)
+		(property "Datasheet" "~"
+			(at 106.68 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16095,8 +16087,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 109.22 27.94 0)
+		(property "Description" "Generic connector, single row, 01x02, script generated"
+			(at 106.68 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)

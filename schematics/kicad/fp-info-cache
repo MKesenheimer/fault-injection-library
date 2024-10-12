@@ -1,4 +1,4 @@
-23879674195224462
+23872759346739999
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -96754,33 +96754,12 @@ Plated Through Hole{return}{return}Specifications:{return}{return}• Pin count:
 2
 2
 pico-glitcher
-1X03
-
-
-0
-3
-3
-pico-glitcher
 2X8
 
 
 0
 16
 16
-pico-glitcher
-0603
-Generic 1608 (0603) package{return}{return}0.2mm courtyard excess rounded to nearest 0.05mm.
-
-0
-2
-2
-pico-glitcher
-0603-RES
-
-
-0
-2
-2
 pico-glitcher
 742C083103JP
 
@@ -96802,13 +96781,6 @@ FEMALE SMA CONNECTOR{return}{return}Radiall{return}{return}distributor RS 112-37
 0
 5
 5
-pico-glitcher
-LED-0603
-LED 0603 SMT{return}{return}0603, surface mount.{return}{return}Specifications:{return}{return}• Pin count: 2{return}• Pin pitch:0.075inch{return}• Area: 0.06" x 0.03"{return}{return}Example device(s):{return}{return}• LED - BLUE
-
-0
-2
-2
 pico-glitcher
 PANASONIC_C
 Panasonic Aluminium Electrolytic Capacitor VS-Serie Package E
