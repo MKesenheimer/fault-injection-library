@@ -174,6 +174,127 @@
 				)
 			)
 		)
+		(symbol "Device:R"
+			(pin_numbers hide)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "R"
+				(at 2.032 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "R"
+				(at 0 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Resistor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "R res resistor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "R_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "R_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "R_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
 		(symbol "pico-glitcher:+3V3"
 			(power)
 			(exclude_from_sim no)
@@ -504,210 +625,6 @@
 				)
 				(pin passive line
 					(at 0 -2.54 90)
-					(length 2.54)
-					(name "2"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-			)
-		)
-		(symbol "pico-glitcher:10KOHM1/10W1%(0603)0603"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "R"
-				(at -3.81 1.4986 0)
-				(effects
-					(font
-						(size 1.778 1.5113)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Value" ""
-				(at -3.81 -3.302 0)
-				(effects
-					(font
-						(size 1.778 1.5113)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Footprint" "pico-glitcher:0603-RES"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "RES-00824"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_locked" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "10KOHM1/10W1%(0603)0603_1_0"
-				(polyline
-					(pts
-						(xy -2.54 0) (xy -2.159 1.016)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -2.159 1.016) (xy -1.524 -1.016)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.524 -1.016) (xy -0.889 1.016)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.889 1.016) (xy -0.254 -1.016)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.254 -1.016) (xy 0.381 1.016)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.381 1.016) (xy 1.016 -1.016)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.016 -1.016) (xy 1.651 1.016)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.651 1.016) (xy 2.286 -1.016)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 2.286 -1.016) (xy 2.54 0)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin passive line
-					(at -5.08 0 0)
-					(length 2.54)
-					(name "1"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 5.08 0 180)
 					(length 2.54)
 					(name "2"
 						(effects
@@ -7592,7 +7509,7 @@
 	)
 	(wire
 		(pts
-			(xy 38.1 210.82) (xy 38.1 205.74)
+			(xy 38.1 212.09) (xy 38.1 205.74)
 		)
 		(stroke
 			(width 0.1524)
@@ -7892,7 +7809,7 @@
 	)
 	(wire
 		(pts
-			(xy 38.1 167.64) (xy 38.1 165.1)
+			(xy 38.1 170.18) (xy 38.1 165.1)
 		)
 		(stroke
 			(width 0.1524)
@@ -8172,7 +8089,7 @@
 	)
 	(wire
 		(pts
-			(xy 38.1 223.52) (xy 38.1 220.98)
+			(xy 38.1 223.52) (xy 38.1 219.71)
 		)
 		(stroke
 			(width 0.1524)
@@ -8462,7 +8379,7 @@
 	)
 	(wire
 		(pts
-			(xy 30.48 165.1) (xy 38.1 165.1)
+			(xy 29.21 165.1) (xy 38.1 165.1)
 		)
 		(stroke
 			(width 0.1524)
@@ -8652,7 +8569,7 @@
 	)
 	(wire
 		(pts
-			(xy 180.34 144.78) (xy 180.34 147.32)
+			(xy 180.34 144.78) (xy 180.34 148.59)
 		)
 		(stroke
 			(width 0.1524)
@@ -8802,7 +8719,7 @@
 	)
 	(wire
 		(pts
-			(xy 234.95 201.93) (xy 234.95 194.31)
+			(xy 234.95 204.47) (xy 234.95 194.31)
 		)
 		(stroke
 			(width 0.1524)
@@ -9142,7 +9059,7 @@
 	)
 	(wire
 		(pts
-			(xy 245.11 201.93) (xy 245.11 194.31)
+			(xy 245.11 204.47) (xy 245.11 194.31)
 		)
 		(stroke
 			(width 0.1524)
@@ -10102,7 +10019,7 @@
 	)
 	(wire
 		(pts
-			(xy 20.32 205.74) (xy 17.78 205.74)
+			(xy 22.86 205.74) (xy 17.78 205.74)
 		)
 		(stroke
 			(width 0.1524)
@@ -10172,7 +10089,7 @@
 	)
 	(wire
 		(pts
-			(xy 180.34 160.02) (xy 180.34 157.48)
+			(xy 180.34 160.02) (xy 180.34 156.21)
 		)
 		(stroke
 			(width 0.1524)
@@ -10302,7 +10219,7 @@
 	)
 	(wire
 		(pts
-			(xy 275.59 201.93) (xy 275.59 194.31)
+			(xy 275.59 204.47) (xy 275.59 194.31)
 		)
 		(stroke
 			(width 0.1524)
@@ -10352,7 +10269,7 @@
 	)
 	(wire
 		(pts
-			(xy 119.38 231.14) (xy 116.84 231.14)
+			(xy 121.92 231.14) (xy 116.84 231.14)
 		)
 		(stroke
 			(width 0.1524)
@@ -10472,7 +10389,7 @@
 	)
 	(wire
 		(pts
-			(xy 265.43 201.93) (xy 265.43 194.31)
+			(xy 265.43 204.47) (xy 265.43 194.31)
 		)
 		(stroke
 			(width 0.1524)
@@ -10582,7 +10499,7 @@
 	)
 	(wire
 		(pts
-			(xy 20.32 165.1) (xy 17.78 165.1)
+			(xy 21.59 165.1) (xy 17.78 165.1)
 		)
 		(stroke
 			(width 0.1524)
@@ -10662,7 +10579,7 @@
 	)
 	(wire
 		(pts
-			(xy 255.27 201.93) (xy 255.27 194.31)
+			(xy 255.27 204.47) (xy 255.27 194.31)
 		)
 		(stroke
 			(width 0.1524)
@@ -10897,7 +10814,7 @@
 		(uuid "5c4297e8-a0c9-41e2-a18d-de7dc13be7d2")
 	)
 	(label "HPGLITCH2"
-		(at 17.78 205.74 0)
+		(at 16.51 205.74 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -11282,7 +11199,7 @@
 		(uuid "e8e7d4cf-b0c0-491f-879a-068f39c63e7f")
 	)
 	(label "LPGLITCH2"
-		(at 17.78 165.1 0)
+		(at 17.78 165.1 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13639,8 +13556,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 234.95 207.01 90)
+		(lib_id "Device:R")
+		(at 234.95 208.28 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13648,16 +13565,16 @@
 		(dnp no)
 		(uuid "44350e3f-d010-4ece-bb3a-6ecb894e9900")
 		(property "Reference" "R6"
-			(at 233.4514 210.82 0)
+			(at 233.68 209.55 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
 				)
-				(justify left bottom)
+				(justify right bottom)
 			)
 		)
 		(property "Value" "150"
-			(at 233.172 205.74 0)
+			(at 233.68 207.01 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -13665,8 +13582,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603-RES"
-			(at 234.95 207.01 0)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 233.172 208.28 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13674,8 +13591,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 234.95 207.01 0)
+		(property "Datasheet" "~"
+			(at 234.95 208.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13683,8 +13600,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 234.95 207.01 0)
+		(property "Description" "Resistor"
+			(at 234.95 208.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13919,8 +13836,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 245.11 207.01 90)
+		(lib_id "Device:R")
+		(at 245.11 208.28 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13928,16 +13845,16 @@
 		(dnp no)
 		(uuid "4ad67d5c-fb51-40ff-81cf-d1a266e24d7d")
 		(property "Reference" "R7"
-			(at 243.6114 210.82 0)
+			(at 243.84 209.55 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
 				)
-				(justify left bottom)
+				(justify right bottom)
 			)
 		)
 		(property "Value" "150"
-			(at 243.332 205.74 0)
+			(at 243.84 207.01 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -13945,8 +13862,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603-RES"
-			(at 245.11 207.01 0)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 243.332 208.28 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13954,8 +13871,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 245.11 207.01 0)
+		(property "Datasheet" "~"
+			(at 245.11 208.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13963,8 +13880,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 245.11 207.01 0)
+		(property "Description" "Resistor"
+			(at 245.11 208.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14126,8 +14043,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 25.4 205.74 180)
+		(lib_id "Device:R")
+		(at 26.67 205.74 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -14135,7 +14052,7 @@
 		(dnp no)
 		(uuid "513e288a-2f67-4235-a6eb-88bba81fe391")
 		(property "Reference" "R4"
-			(at 29.21 207.2386 0)
+			(at 25.1714 209.55 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -14144,7 +14061,7 @@
 			)
 		)
 		(property "Value" "1R"
-			(at 29.21 202.438 0)
+			(at 29.972 209.55 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -14152,8 +14069,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603-RES"
-			(at 25.4 205.74 0)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 26.67 207.518 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14161,8 +14078,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 25.4 205.74 0)
+		(property "Datasheet" "~"
+			(at 26.67 205.74 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14170,8 +14087,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 25.4 205.74 0)
+		(property "Description" "Resistor"
+			(at 26.67 205.74 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15099,7 +15016,7 @@
 		(dnp no)
 		(uuid "6fa13e0c-16c1-47e0-a3d6-b31b823a27cc")
 		(property "Reference" "Q4"
-			(at 134.62 223.012 0)
+			(at 146.05 228.6 0)
 			(effects
 				(font
 					(size 1.6764 1.4249)
@@ -16057,8 +15974,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 124.46 231.14 180)
+		(lib_id "Device:R")
+		(at 125.73 231.14 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -16066,7 +15983,7 @@
 		(dnp no)
 		(uuid "9040e339-4d6d-421d-abc0-ad59b68f2f4f")
 		(property "Reference" "R11"
-			(at 128.27 232.6386 0)
+			(at 125.73 229.87 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -16075,7 +15992,7 @@
 			)
 		)
 		(property "Value" "10K"
-			(at 128.27 227.838 0)
+			(at 120.9294 229.87 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -16083,8 +16000,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603-RES"
-			(at 124.46 231.14 0)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 125.73 229.362 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16092,8 +16009,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 124.46 231.14 0)
+		(property "Datasheet" "~"
+			(at 125.73 231.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16101,8 +16018,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 124.46 231.14 0)
+		(property "Description" "Resistor"
+			(at 125.73 231.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16549,8 +16466,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 265.43 207.01 90)
+		(lib_id "Device:R")
+		(at 265.43 208.28 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -16558,16 +16475,16 @@
 		(dnp no)
 		(uuid "a16a18a4-b06f-4bb1-91b5-beff995bbf11")
 		(property "Reference" "R8"
-			(at 263.9314 210.82 0)
+			(at 264.16 209.55 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
 				)
-				(justify left bottom)
+				(justify right bottom)
 			)
 		)
 		(property "Value" "150"
-			(at 263.652 205.74 0)
+			(at 264.16 207.01 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -16575,8 +16492,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603-RES"
-			(at 265.43 207.01 0)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 263.652 208.28 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16584,8 +16501,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 265.43 207.01 0)
+		(property "Datasheet" "~"
+			(at 265.43 208.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16593,8 +16510,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 265.43 207.01 0)
+		(property "Description" "Resistor"
+			(at 265.43 208.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16684,8 +16601,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 275.59 207.01 90)
+		(lib_id "Device:R")
+		(at 275.59 208.28 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -16693,16 +16610,16 @@
 		(dnp no)
 		(uuid "ab657ca9-60e9-4f8e-901b-c7fb889683b9")
 		(property "Reference" "R9"
-			(at 274.0914 210.82 0)
+			(at 274.32 209.55 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
 				)
-				(justify left bottom)
+				(justify right bottom)
 			)
 		)
 		(property "Value" "220"
-			(at 273.812 205.74 0)
+			(at 274.32 207.01 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -16710,8 +16627,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603-RES"
-			(at 275.59 207.01 0)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 273.812 208.28 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16719,8 +16636,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 275.59 207.01 0)
+		(property "Datasheet" "~"
+			(at 275.59 208.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16728,8 +16645,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 275.59 207.01 0)
+		(property "Description" "Resistor"
+			(at 275.59 208.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17419,8 +17336,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 25.4 165.1 180)
+		(lib_id "Device:R")
+		(at 25.4 165.1 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -17428,7 +17345,7 @@
 		(dnp no)
 		(uuid "bc325497-802b-4d98-8f75-3f5beaf84a9f")
 		(property "Reference" "R3"
-			(at 29.21 166.5986 0)
+			(at 26.8986 161.29 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -17437,7 +17354,7 @@
 			)
 		)
 		(property "Value" "1R"
-			(at 29.21 161.798 0)
+			(at 22.098 161.29 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -17445,7 +17362,16 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603-RES"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 25.4 163.322 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
 			(at 25.4 165.1 0)
 			(effects
 				(font
@@ -17454,16 +17380,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 25.4 165.1 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
+		(property "Description" "Resistor"
 			(at 25.4 165.1 0)
 			(effects
 				(font
@@ -17641,8 +17558,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 38.1 172.72 90)
+		(lib_id "Device:R")
+		(at 38.1 173.99 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -17650,7 +17567,7 @@
 		(dnp no)
 		(uuid "c1da0411-1827-40f8-8c08-0c1d463474f8")
 		(property "Reference" "R2"
-			(at 36.6014 176.53 0)
+			(at 34.29 172.4914 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -17659,7 +17576,7 @@
 			)
 		)
 		(property "Value" "10K"
-			(at 41.402 176.53 0)
+			(at 34.29 177.292 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -17667,8 +17584,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603-RES"
-			(at 38.1 172.72 0)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 36.322 173.99 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17676,8 +17593,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 38.1 172.72 0)
+		(property "Datasheet" "~"
+			(at 38.1 173.99 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17685,8 +17602,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 38.1 172.72 0)
+		(property "Description" "Resistor"
+			(at 38.1 173.99 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18016,8 +17933,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 180.34 152.4 90)
+		(lib_id "Device:R")
+		(at 180.34 152.4 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -18025,7 +17942,7 @@
 		(dnp no)
 		(uuid "ca72166d-d5a4-4c11-8137-4e706790929a")
 		(property "Reference" "R1"
-			(at 178.8414 156.21 0)
+			(at 176.53 153.67 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -18034,7 +17951,7 @@
 			)
 		)
 		(property "Value" "10K"
-			(at 183.642 156.21 0)
+			(at 176.53 148.8694 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -18042,7 +17959,16 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603-RES"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 182.118 152.4 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
 			(at 180.34 152.4 0)
 			(effects
 				(font
@@ -18051,16 +17977,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 180.34 152.4 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
+		(property "Description" "Resistor"
 			(at 180.34 152.4 0)
 			(effects
 				(font
@@ -18571,8 +18488,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 255.27 207.01 90)
+		(lib_id "Device:R")
+		(at 255.27 208.28 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -18580,16 +18497,16 @@
 		(dnp no)
 		(uuid "d64226eb-b03b-4c3f-bda4-3c45646be645")
 		(property "Reference" "R10"
-			(at 253.7714 210.82 0)
+			(at 254 209.55 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
 				)
-				(justify left bottom)
+				(justify right bottom)
 			)
 		)
 		(property "Value" "150"
-			(at 253.492 205.74 0)
+			(at 254 207.01 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -18597,8 +18514,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603-RES"
-			(at 255.27 207.01 0)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 253.492 208.28 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18606,8 +18523,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 255.27 207.01 0)
+		(property "Datasheet" "~"
+			(at 255.27 208.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18615,8 +18532,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 255.27 207.01 0)
+		(property "Description" "Resistor"
+			(at 255.27 208.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18865,8 +18782,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:10KOHM1/10W1%(0603)0603")
-		(at 38.1 215.9 90)
+		(lib_id "Device:R")
+		(at 38.1 215.9 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -18874,7 +18791,7 @@
 		(dnp no)
 		(uuid "d8bd9d2d-fc1d-4c11-9c9c-2ac3c5dd1d89")
 		(property "Reference" "R5"
-			(at 36.6014 219.71 0)
+			(at 41.91 217.3986 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -18883,7 +18800,7 @@
 			)
 		)
 		(property "Value" "10K"
-			(at 41.402 219.71 0)
+			(at 41.91 212.598 0)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -18891,7 +18808,16 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603-RES"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 39.878 215.9 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
 			(at 38.1 215.9 0)
 			(effects
 				(font
@@ -18900,16 +18826,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 38.1 215.9 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
+		(property "Description" "Resistor"
 			(at 38.1 215.9 0)
 			(effects
 				(font
