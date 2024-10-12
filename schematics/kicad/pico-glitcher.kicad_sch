@@ -5,6 +5,142 @@
 	(uuid "bcbe9e08-2481-468a-b94c-492931ceb6ea")
 	(paper "User" 325.831 274.218)
 	(lib_symbols
+		(symbol "Device:C"
+			(pin_numbers hide)
+			(pin_names
+				(offset 0.254)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "C"
+				(at 0.635 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "C"
+				(at 0.635 -2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" ""
+				(at 0.9652 -3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Unpolarized capacitor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "cap capacitor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "C_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "C_0_1"
+				(polyline
+					(pts
+						(xy -2.032 -0.762) (xy 2.032 -0.762)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.032 0.762) (xy 2.032 0.762)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "C_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 2.794)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 2.794)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
 		(symbol "Device:LED"
 			(pin_numbers hide)
 			(pin_names
@@ -492,148 +628,6 @@
 						)
 					)
 					(number "1"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-			)
-		)
-		(symbol "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "C"
-				(at 1.524 2.921 0)
-				(effects
-					(font
-						(size 1.778 1.778)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Value" ""
-				(at 1.524 -2.159 0)
-				(effects
-					(font
-						(size 1.778 1.778)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Footprint" "pico-glitcher:0603"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "0.1µF ceramic capacitors\n\nA capacitor is a passive two-terminal electrical component used to store electrical energy temporarily in an electric field."
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_locked" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "0.1UF-0603-25V-10%-X7R-WE_1_0"
-				(rectangle
-					(start -2.032 0.508)
-					(end 2.032 1.016)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(rectangle
-					(start -2.032 1.524)
-					(end 2.032 2.032)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 0) (xy 0 0.508)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 2.54) (xy 0 2.032)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin passive line
-					(at 0 5.08 270)
-					(length 2.54)
-					(name "1"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 0 -2.54 90)
-					(length 2.54)
-					(name "2"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "2"
 						(effects
 							(font
 								(size 0 0)
@@ -12797,8 +12791,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
-		(at 208.28 71.12 270)
+		(lib_id "Device:C")
+		(at 209.55 71.12 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12806,7 +12800,7 @@
 		(dnp no)
 		(uuid "3192de64-e937-4b7d-a781-bf2065798cbe")
 		(property "Reference" "C5"
-			(at 211.201 72.644 0)
+			(at 212.471 72.644 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -12815,7 +12809,7 @@
 			)
 		)
 		(property "Value" "0.1uF"
-			(at 206.121 72.644 0)
+			(at 207.391 72.644 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -12823,8 +12817,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603"
-			(at 208.28 71.12 0)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 205.74 72.0852 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12832,8 +12826,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 208.28 71.12 0)
+		(property "Datasheet" "~"
+			(at 209.55 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12841,8 +12835,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 208.28 71.12 0)
+		(property "Description" "Unpolarized capacitor"
+			(at 209.55 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13349,8 +13343,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
-		(at 190.5 71.12 270)
+		(lib_id "Device:C")
+		(at 191.77 71.12 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13358,7 +13352,7 @@
 		(dnp no)
 		(uuid "407e7f77-5bf9-4233-abb3-ab47a2fb7c1c")
 		(property "Reference" "C6"
-			(at 193.421 72.644 0)
+			(at 194.691 72.644 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -13367,7 +13361,7 @@
 			)
 		)
 		(property "Value" "0.1uF"
-			(at 188.341 72.644 0)
+			(at 189.611 72.644 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -13375,8 +13369,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603"
-			(at 190.5 71.12 0)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 187.96 72.0852 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13384,8 +13378,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 190.5 71.12 0)
+		(property "Datasheet" "~"
+			(at 191.77 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13393,8 +13387,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 190.5 71.12 0)
+		(property "Description" "Unpolarized capacitor"
+			(at 191.77 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13418,8 +13412,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
-		(at 124.46 220.98 0)
+		(lib_id "Device:C")
+		(at 124.46 219.71 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13427,7 +13421,7 @@
 		(dnp no)
 		(uuid "417dc913-bc0d-407d-af10-58a920244c44")
 		(property "Reference" "C9"
-			(at 125.984 218.059 0)
+			(at 125.984 216.789 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -13436,7 +13430,7 @@
 			)
 		)
 		(property "Value" "0.1uF"
-			(at 125.984 223.139 0)
+			(at 125.984 221.869 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -13444,8 +13438,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603"
-			(at 124.46 220.98 0)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 125.4252 223.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13453,8 +13447,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 124.46 220.98 0)
+		(property "Datasheet" "~"
+			(at 124.46 219.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13462,8 +13456,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 124.46 220.98 0)
+		(property "Description" "Unpolarized capacitor"
+			(at 124.46 219.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13487,8 +13481,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
-		(at 208.28 144.78 270)
+		(lib_id "Device:C")
+		(at 209.55 144.78 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13496,7 +13490,7 @@
 		(dnp no)
 		(uuid "4281b9e9-63b8-46a1-a70f-68a5170fd47e")
 		(property "Reference" "C4"
-			(at 211.201 146.304 0)
+			(at 212.471 146.304 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -13505,7 +13499,7 @@
 			)
 		)
 		(property "Value" "0.1uF"
-			(at 206.121 146.304 0)
+			(at 207.391 146.304 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -13513,8 +13507,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603"
-			(at 208.28 144.78 0)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 205.74 145.7452 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13522,8 +13516,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 208.28 144.78 0)
+		(property "Datasheet" "~"
+			(at 209.55 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13531,8 +13525,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 208.28 144.78 0)
+		(property "Description" "Unpolarized capacitor"
+			(at 209.55 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15160,8 +15154,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
-		(at 66.04 45.72 0)
+		(lib_id "Device:C")
+		(at 66.04 44.45 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -15169,7 +15163,7 @@
 		(dnp no)
 		(uuid "73b98b52-2365-4cca-b7dc-3a44579e9c8e")
 		(property "Reference" "C1"
-			(at 67.564 42.799 0)
+			(at 67.564 41.529 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -15178,7 +15172,7 @@
 			)
 		)
 		(property "Value" "0.01uF"
-			(at 67.564 47.879 0)
+			(at 67.564 46.609 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -15186,8 +15180,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603"
-			(at 66.04 45.72 0)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 67.0052 48.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15195,8 +15189,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 66.04 45.72 0)
+		(property "Datasheet" "~"
+			(at 66.04 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15204,8 +15198,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 66.04 45.72 0)
+		(property "Description" "Unpolarized capacitor"
+			(at 66.04 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16196,8 +16190,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
-		(at 170.18 236.22 0)
+		(lib_id "Device:C")
+		(at 170.18 234.95 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -16205,7 +16199,7 @@
 		(dnp no)
 		(uuid "982da09c-7ef6-4960-a4a3-dfdafbad40b2")
 		(property "Reference" "C7"
-			(at 171.704 233.299 0)
+			(at 171.704 232.029 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -16214,7 +16208,7 @@
 			)
 		)
 		(property "Value" "0.1uF"
-			(at 171.704 238.379 0)
+			(at 171.704 237.109 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -16222,8 +16216,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603"
-			(at 170.18 236.22 0)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 171.1452 238.76 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16231,8 +16225,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 170.18 236.22 0)
+		(property "Datasheet" "~"
+			(at 170.18 234.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16240,8 +16234,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 170.18 236.22 0)
+		(property "Description" "Unpolarized capacitor"
+			(at 170.18 234.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16283,7 +16277,7 @@
 			)
 		)
 		(property "Value" "VCC"
-			(at 203.2 66.04 90)
+			(at 203.2 64.77 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -16397,8 +16391,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
-		(at 25.4 45.72 0)
+		(lib_id "Device:C")
+		(at 25.4 44.45 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -16406,7 +16400,7 @@
 		(dnp no)
 		(uuid "a008ab13-d370-4cb4-9792-1baa1e65ed07")
 		(property "Reference" "C10"
-			(at 26.924 42.799 0)
+			(at 26.924 41.529 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -16415,7 +16409,7 @@
 			)
 		)
 		(property "Value" "0.1uF"
-			(at 26.924 47.879 0)
+			(at 26.924 46.609 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -16423,8 +16417,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603"
-			(at 25.4 45.72 0)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 26.3652 48.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16432,8 +16426,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 25.4 45.72 0)
+		(property "Datasheet" "~"
+			(at 25.4 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16441,8 +16435,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 25.4 45.72 0)
+		(property "Description" "Unpolarized capacitor"
+			(at 25.4 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17222,7 +17216,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 195.58 71.12 90)
+			(at 198.12 64.77 90)
 			(effects
 				(font
 					(size 1.778 1.5113)
@@ -19797,8 +19791,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:0.1UF-0603-25V-10%-X7R-WE")
-		(at 190.5 144.78 270)
+		(lib_id "Device:C")
+		(at 191.77 144.78 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -19806,7 +19800,7 @@
 		(dnp no)
 		(uuid "feced3e7-be01-4ea4-b06d-688228e35573")
 		(property "Reference" "C3"
-			(at 193.421 146.304 0)
+			(at 194.691 146.304 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -19815,7 +19809,7 @@
 			)
 		)
 		(property "Value" "0.1uF"
-			(at 188.341 146.304 0)
+			(at 189.611 146.304 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -19823,8 +19817,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:0603"
-			(at 190.5 144.78 0)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 187.96 145.7452 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19832,8 +19826,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 190.5 144.78 0)
+		(property "Datasheet" "~"
+			(at 191.77 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19841,8 +19835,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 190.5 144.78 0)
+		(property "Description" "Unpolarized capacitor"
+			(at 191.77 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
