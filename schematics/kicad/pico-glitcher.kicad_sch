@@ -16939,7 +16939,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:TSSOP24"
+		(property "Footprint" "Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm"
 			(at 200.66 172.72 0)
 			(effects
 				(font
@@ -19383,7 +19383,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:TSSOP24"
+		(property "Footprint" "Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm"
 			(at 200.66 99.06 0)
 			(effects
 				(font
