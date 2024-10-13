@@ -1,4 +1,4 @@
-23867573139209558
+23862387146965501
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -96747,13 +96747,6 @@ pico-glitcher
 8
 8
 pico-glitcher
-0805
-Generic 2012 (0805) package{return}{return}0.2mm courtyard excess rounded to nearest 0.05mm.
-
-0
-2
-2
-pico-glitcher
 BU-SMA
 FEMALE SMA CONNECTOR{return}{return}Radiall{return}{return}distributor RS 112-3794
 
@@ -96781,20 +96774,6 @@ SOIC, 0.15 inch width
 0
 8
 8
-pico-glitcher
-SOT23
-SOT-23
-
-0
-3
-3
-pico-glitcher
-SOT23-5L
-Small Outline Transistor{return}{return}package type OT
-
-0
-5
-5
 pico-glitcher
 SWITCH-SP3T-SMD
 

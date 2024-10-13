@@ -1166,6 +1166,164 @@
 				)
 			)
 		)
+		(symbol "Device:C_Polarized"
+			(pin_numbers hide)
+			(pin_names
+				(offset 0.254)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "C"
+				(at 0.635 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "C_Polarized"
+				(at 0.635 -2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" ""
+				(at 0.9652 -3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Polarized capacitor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "cap capacitor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "CP_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "C_Polarized_0_1"
+				(rectangle
+					(start -2.286 0.508)
+					(end 2.286 1.016)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.778 2.286) (xy -0.762 2.286)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.27 2.794) (xy -1.27 1.778)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 2.286 -0.508)
+					(end -2.286 -1.016)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+			)
+			(symbol "C_Polarized_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 2.794)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 2.794)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
 		(symbol "Device:LED"
 			(pin_numbers hide)
 			(pin_names
@@ -1450,172 +1608,6 @@
 						(effects
 							(font
 								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-		)
-		(symbol "pico-glitcher:22UF-POLAR-PANASONIC_C-35V-20%"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "C"
-				(at 1.016 0.635 0)
-				(effects
-					(font
-						(size 1.778 1.778)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Value" ""
-				(at 1.016 -4.191 0)
-				(effects
-					(font
-						(size 1.778 1.778)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Footprint" "pico-glitcher:PANASONIC_C"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "22µF polarized capacitors\n\nA capacitor is a passive two-terminal electrical component used to store electrical energy temporarily in an electric field."
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_locked" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "22UF-POLAR-PANASONIC_C-35V-20%_1_0"
-				(rectangle
-					(start -2.253 0.668)
-					(end -1.364 0.795)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(rectangle
-					(start -1.872 0.287)
-					(end -1.745 1.176)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(arc
-					(start 0 -1.0161)
-					(mid -1.3021 -1.2303)
-					(end -2.4669 -1.8504)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -2.54 0) (xy 2.54 0)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 -1.016) (xy 0 -2.54)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(arc
-					(start 2.4892 -1.8541)
-					(mid 1.3158 -1.2194)
-					(end 0 -1)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin passive line
-					(at 0 2.54 270)
-					(length 2.54)
-					(name "+"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "+"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 0 -5.08 90)
-					(length 2.54)
-					(name "-"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "-"
-						(effects
-							(font
-								(size 0 0)
 							)
 						)
 					)
@@ -13247,8 +13239,8 @@
 		)
 	)
 	(symbol
-		(lib_id "pico-glitcher:22UF-POLAR-PANASONIC_C-35V-20%")
-		(at 185.42 233.68 0)
+		(lib_id "Device:C_Polarized")
+		(at 185.42 234.95 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13256,7 +13248,7 @@
 		(dnp no)
 		(uuid "3687f221-ce8a-4c16-8ed1-23d978ac2cf7")
 		(property "Reference" "C8"
-			(at 186.436 233.045 0)
+			(at 186.436 234.315 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -13265,7 +13257,7 @@
 			)
 		)
 		(property "Value" "22uF"
-			(at 186.436 237.871 0)
+			(at 186.436 239.141 0)
 			(effects
 				(font
 					(size 1.778 1.778)
@@ -13274,7 +13266,7 @@
 			)
 		)
 		(property "Footprint" "pico-glitcher:PANASONIC_C"
-			(at 185.42 233.68 0)
+			(at 186.3852 238.76 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13282,8 +13274,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 185.42 233.68 0)
+		(property "Datasheet" "~"
+			(at 185.42 234.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13291,8 +13283,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "22µF polarized capacitors\n\nA capacitor is a passive two-terminal electrical component used to store electrical energy temporarily in an electric field."
-			(at 185.42 233.68 0)
+		(property "Description" "Polarized capacitor"
+			(at 185.42 234.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13300,10 +13292,10 @@
 				(hide yes)
 			)
 		)
-		(pin "+"
+		(pin "2"
 			(uuid "011fd72d-a29f-4b97-9bdf-2fcf051b8ba5")
 		)
-		(pin "-"
+		(pin "1"
 			(uuid "39bad6a7-a694-4c02-838d-168cb268cc21")
 		)
 		(instances
@@ -13342,7 +13334,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:SOT23-5L"
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5"
 			(at 48.26 40.64 0)
 			(effects
 				(font
@@ -14730,7 +14722,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "BU-SMA-V"
+		(property "Value" "BU-SMA"
 			(at 104.14 160.02 0)
 			(effects
 				(font
@@ -14739,7 +14731,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:BU-SMA-V"
+		(property "Footprint" "pico-glitcher:BU-SMA"
 			(at 101.6 154.94 0)
 			(effects
 				(font
@@ -18561,7 +18553,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:SOT23"
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
 			(at 48.26 162.56 0)
 			(effects
 				(font
@@ -19201,7 +19193,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:BU-SMA-V"
+		(property "Footprint" "pico-glitcher:BU-SMA"
 			(at 127 182.88 0)
 			(effects
 				(font
