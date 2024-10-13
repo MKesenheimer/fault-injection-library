@@ -13059,7 +13059,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:SO08"
+		(property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
 			(at 58.42 200.66 0)
 			(effects
 				(font
@@ -15626,7 +15626,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "pico-glitcher:SO08"
+		(property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
 			(at 147.32 228.6 0)
 			(effects
 				(font
