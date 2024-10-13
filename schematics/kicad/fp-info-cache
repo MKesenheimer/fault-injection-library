@@ -1,4 +1,4 @@
-23862387146965501
+23855471990949094
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -96740,13 +96740,6 @@ Varistor VF
 2
 2
 pico-glitcher
-742C083103JP
-
-
-0
-8
-8
-pico-glitcher
 BU-SMA
 FEMALE SMA CONNECTOR{return}{return}Radiall{return}{return}distributor RS 112-3794
 
@@ -96768,30 +96761,9 @@ RPI_PICO
 43
 43
 pico-glitcher
-SO08
-SOIC, 0.15 inch width
-
-0
-8
-8
-pico-glitcher
 SWITCH-SP3T-SMD
 
 
 0
 8
 8
-pico-glitcher
-TACTILE_SWITCH_TALL
-
-
-0
-4
-4
-pico-glitcher
-TSSOP24
-24-Lead Thin Shrink Small Outline Package TSSOP (RU-24){return}{return}Source: http://www.analog.com/UploadedFiles/Data_Sheets/39677768AD7714_c.pdf
-
-0
-24
-24

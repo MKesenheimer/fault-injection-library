@@ -38,8 +38,8 @@
         "other_text_upright": false,
         "pads": {
           "drill": 0.0,
-          "height": 0.9906,
-          "width": 0.3048
+          "height": 1.0,
+          "width": 2.8
         },
         "silk_line_width": 0.1,
         "silk_text_italic": false,
@@ -546,7 +546,7 @@
       "group_symbols": true,
       "name": "",
       "sort_asc": true,
-      "sort_field": "Reference"
+      "sort_field": "Footprint"
     },
     "connection_grid_size": 50.0,
     "drawing": {
