@@ -8,7 +8,7 @@
 import serial
 from functools import reduce
 import sys
-from GlitchState import ErrorType, WarningType, OKType, ExpectedType, SuccessType
+from .GlitchState import ErrorType, WarningType, OKType, ExpectedType, SuccessType
 import time
 
 class _Expected(ExpectedType):

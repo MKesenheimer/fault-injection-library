@@ -31,12 +31,12 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-## Installing dependencies
+## Installing
 
-After these steps we have to install some requirements via pip.
+After these steps we have to install `findus` (aka `FaulInjectionLib`).
 Make sure to have pip [installed](https://docs.python.org/3/library/ensurepip.html).
 ```bash
-pip install -r requirements.txt
+pip install .
 ```
 
 If you use the rk6006 power supply and want to power-cycle the target via software, install the rd6006 library (supplied as submodule):

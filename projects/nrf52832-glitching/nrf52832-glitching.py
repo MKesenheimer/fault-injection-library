@@ -17,8 +17,7 @@ import time
 import subprocess
 
 # import custom libraries
-sys.path.insert(0, "../../lib/")
-from FaultInjectionLib import Database, PicoGlitcher
+from findus import Database, PicoGlitcher
 
 def test_jtag():
     subout = subprocess.run(['openocd',

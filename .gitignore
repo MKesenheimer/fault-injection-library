@@ -11,3 +11,6 @@ __pycache__
 *.log
 *.org
 *.dsl
+*.egg-info
+build
+dist

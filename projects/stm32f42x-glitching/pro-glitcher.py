@@ -23,10 +23,9 @@ import time
 import subprocess
 
 # import custom libraries
-sys.path.insert(0, "../../lib/")
-from BootloaderCom import BootloaderCom, GlitchState
-from GlitchState import OKType, ExpectedType
-from FaultInjectionLib import Database, ProGlitcher, Helper
+from findus.BootloaderCom import BootloaderCom, GlitchState
+from findus.GlitchState import OKType, ExpectedType
+from findus import Database, ProGlitcher, Helper
 
 def program_target():
     result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32f4x.cfg', '-c', 'init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;'], text=True, capture_output=True)

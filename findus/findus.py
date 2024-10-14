@@ -15,8 +15,8 @@ import datetime
 from termcolor import colored
 import os
 import glob
-import pyboard
-from GlitchState import ErrorType, WarningType, OKType, ExpectedType, SuccessType
+from . import pyboard
+from .GlitchState import ErrorType, WarningType, OKType, ExpectedType, SuccessType
 try:
     from rd6006 import RD6006
     rd6006_available = True
