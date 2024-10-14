@@ -10,8 +10,7 @@ import sys
 import time
 
 # import custom libraries
-sys.path.insert(0, '../lib/')
-from FaultInjectionLib import MicroPythonScript
+from findus import MicroPythonScript
 
 # inherit functionality and overwrite some functions
 class DerivedMicroPythonScript(MicroPythonScript):

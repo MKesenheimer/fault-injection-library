@@ -17,8 +17,7 @@ import sys
 import time
 
 # import custom libraries
-sys.path.insert(0, "../lib/")
-from FaultInjectionLib import Database, PicoGlitcher, Serial
+from findus import Database, PicoGlitcher, Serial
 
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(PicoGlitcher):
