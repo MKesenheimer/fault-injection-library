@@ -361,10 +361,10 @@ class HuskyGlitcher(Glitcher):
         self.scope.clock.clkgen_freq         = 200e6
         self.scope.clock.clkgen_src          = 'system'
         self.scope.adc.basic_mode            = "rising_edge"
-        self.scope.io.tio1                  = 'serial_rx'
-        self.scope.io.tio2                  = 'serial_tx'
-        self.scope.io.tio3                  = 'gpio_low'
-        self.scope.io.tio4                  = 'high_z'
+        self.scope.io.tio1                   = 'serial_rx'
+        self.scope.io.tio2                   = 'serial_tx'
+        self.scope.io.tio3                   = 'gpio_low'    # RESET
+        self.scope.io.tio4                   = 'high_z'      # TRIGGER in
         self.scope.trigger.triggers          = 'tio4'
         self.scope.io.hs2                    = "disabled"
         self.scope.io.glitch_trig_mcx        = 'glitch'
@@ -383,8 +383,8 @@ class HuskyGlitcher(Glitcher):
             self.power_supply = None
 
     def arm(self, delay, length):
-        self.scope.glitch.ext_offset        = delay // (int(1e9) // int(self.scope.clock.clkgen_freq))
-        self.scope.glitch.repeat            = length // (int(1e9) // int(self.scope.clock.clkgen_freq))
+        self.scope.glitch.ext_offset = delay // (int(1e9) // int(self.scope.clock.clkgen_freq))
+        self.scope.glitch.repeat = length // (int(1e9) // int(self.scope.clock.clkgen_freq))
         self.scope.arm()
 
     def capture(self):
@@ -403,12 +403,12 @@ class HuskyGlitcher(Glitcher):
     def enable(self):
         self.scope.glitch.enabled = True
 
-    def reset(self,reset_time=0.2):
+    def reset(self, reset_time=0.2):
         self.scope.io.tio3 = 'gpio_low'
         time.sleep(reset_time)
         self.scope.io.tio3 = 'gpio_high'
 
-    def reset_and_eat_it_all(self,target,target_timeout=0.3):
+    def reset_and_eat_it_all(self, target, target_timeout=0.3):
         self.scope.io.tio3 = 'gpio_low'
         target.ser.timeout = target_timeout
         target.read(4096)
@@ -445,6 +445,20 @@ class HuskyGlitcher(Glitcher):
             self.power_supply.enable_vtarget()
         else:
             print("[-] External power supply not available.")
+
+    def set_lpglitch(self):
+        self.scope.io.glitch_hp = False
+        self.scope.io.glitch_lp = True
+
+    def set_hpglitch(self):
+        self.scope.io.glitch_hp = True
+        self.scope.io.glitch_lp = False
+
+    def rising_edge_trigger(self, dead_time, pin):
+        # Note: dead_time and pin have no functions here (see PicoGlitcher.rising_edge_trigger)
+        self.scope.adc.basic_mode = "rising_edge"
+        self.scope.io.tio4 = 'high_z'
+        self.scope.trigger.triggers = 'tio4'
 
     def uart_trigger(self, pattern):
         self.scope.io.hs2 = "clkgen"
@@ -488,13 +502,14 @@ class ProGlitcher(Glitcher):
             print("[-] No ChipWhisperer found. Exiting.")
             print(f"[-] Exception: {e}")
             sys.exit(1)
+
         self.scope.clock.adc_src            = "clkgen_x1"
         self.scope.clock.clkgen_freq        = 100e6
         self.scope.adc.basic_mode           = "rising_edge"
         self.scope.adc.samples              = 10000
         self.scope.adc.offset               = 0
         self.scope.io.tio1                  = 'high_z'
-        self.scope.io.tio4                  = 'gpio_low'
+        self.scope.io.tio4                  = 'high_z'
         self.scope.trigger.triggers         = 'tio4'
         self.scope.io.hs2                   = "disabled"
         self.scope.io.glitch_hp             = True
@@ -510,12 +525,6 @@ class ProGlitcher(Glitcher):
         else:
             self.power_supply = None
 
-    def set_trigger_out(self, pinstate):
-        if pinstate:
-            self.scope.io.tio4 = 'gpio_high'
-        else:
-            self.scope.io.tio4 = 'gpio_low'
-
     def reset_glitch(self, delay=0.005):
         # TODO: control hp and lp externally
         self.scope.io.glitch_hp = False
@@ -525,8 +534,8 @@ class ProGlitcher(Glitcher):
         self.scope.io.glitch_lp = False
 
     def arm(self, delay, length):
-        self.scope.glitch.ext_offset        = delay // (int(1e9) // int(self.scope.clock.clkgen_freq))
-        self.scope.glitch.repeat            = length // (int(1e9) // int(self.scope.clock.clkgen_freq))
+        self.scope.glitch.ext_offset = delay // (int(1e9) // int(self.scope.clock.clkgen_freq))
+        self.scope.glitch.repeat = length // (int(1e9) // int(self.scope.clock.clkgen_freq))
         self.scope.arm()
 
     def capture(self):
@@ -587,6 +596,19 @@ class ProGlitcher(Glitcher):
         if debug:
             for line in response.splitlines():
                 print('\t', line.decode())
+
+    def set_lpglitch(self):
+        self.scope.io.glitch_hp = False
+        self.scope.io.glitch_lp = True
+
+    def set_hpglitch(self):
+        self.scope.io.glitch_hp = True
+        self.scope.io.glitch_lp = False
+
+    def rising_edge_trigger(self, dead_time, pin):
+        # Note: dead_time and pin have no functions here (see PicoGlitcher.rising_edge_trigger)
+        self.scope.io.tio4 = 'high_z'
+        self.scope.trigger.triggers = 'tio4'
 
     def uart_trigger(self, pattern):
         # UART trigger:

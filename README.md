@@ -42,7 +42,7 @@ pip install .
 If you use the rk6006 power supply and want to power-cycle the target via software, install the rd6006 library (supplied as submodule):
 ```bash
 cd rd6006
-python setup.py install
+pip install .
 ```
 
 However, usage of the rk6006 power supply is optional.
