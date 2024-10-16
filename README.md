@@ -57,16 +57,6 @@ In general the following script can be used to upload Micropython scripts to the
 python lib/upload-micro-python.py --port /dev/<rpi-tty-port> <script.py>
 ```
 
-## Executing blink test
-
-A simple example how the Micropython classes and functions are accessed on the Raspberry Pi Pico, the following "Hello World" program can be executed.
-This should also be the first check, if everything is set up correctly.
-```bash
-cd blink
-python ../helper/upload-micro-python.py --port /dev/<rpi-tty-port> --script mpBlink.py
-python test.py --rpico /dev/tty.usbmodem11101
-```
-
 ## Executing Raspberry Pi Pico glitcher example implementation
 
 To carry out a fault injection attack with the Raspberry Pi Pico on another microcontroller, the following setup can be used.
