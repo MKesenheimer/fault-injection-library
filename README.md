@@ -169,3 +169,12 @@ The assembled and fully functional board is shown in the following figure:
 ![Assembled Pico Glitcher v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/finished.JPG)
 
 
+## Building and uploading to pypi.org
+
+```
+cd fault-injection-lib
+pip install twine
+rm -rf dist
+python setup.py sdist bdist_wheel
+twine upload --repository pypi dist/*
+```

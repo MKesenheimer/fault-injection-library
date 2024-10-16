@@ -5,11 +5,11 @@ with open("README.md", 'r') as f:
 
 setup(
    name='findus',
-   version='0.9',
+   version='0.9.2',
    description='Library to perform fault injection attacks with the PicoGlitcher, Chipwhisperer Husky or Chipwhisperer Pro',
    license="GPL",
    long_description=long_description,
-   url="https://mkesenheimer.github.io/blog/pico-glitcher-pcb.html",
+   url="https://pypi.org/project/findus/",
    author='Matthias Kesenheimer',
    author_email='m.kesenheimer@gmx.net',
    packages=['findus'],

@@ -35,11 +35,11 @@ class DerivedGlitcher(PicoGlitcher):
     def classify(self, response):
         if b'Debug access is denied' in response or b'AP lock engaged' in response:
             color = 'G'
-        elif b'Error connecting DP' in response:
+        elif b'Error connecting DP' in response or b'Error: No J-Link device found' in response or b'unspecified error' in response:
+            color = 'B'
+        elif b'Target not examined yet' in response or b'\n\n\n' in response:
             color = 'M'
-        elif b'Fatal exception' in response:
-            color = 'M'
-        elif b'Timeout' in response:
+        elif b'Timeout' in response or b'timeout occurred' in response:
             color = 'Y'
         else:
             color = 'R'
@@ -114,8 +114,9 @@ class Main():
             experiment_id += 1
 
             # Dump finished
-            #if color == 'R':
-            #    break
+            if color == 'R':
+                time.sleep(1)
+                #break
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
