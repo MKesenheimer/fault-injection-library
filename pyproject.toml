@@ -1,4 +1,4 @@
 [project]
-name = "PicoGlitcher and findus (aka Fault-Injection Library)"
+name = "fault-injection-library"
 authors = [{name = "Matthias Kesenheimer", email = "m.kesenheimer@gmx.net"}]
 dynamic = ["version", "description"]
