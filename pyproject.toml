@@ -12,6 +12,7 @@ version = "0.9.2"
 license = {file = "LICENSE"}
 authors = [{name = "Matthias Kesenheimer", email = "m.kesenheimer@gmx.net"}]
 dependencies = [
+  "setuptools==70.0.0",
   "adafruit-ampy",
   "pyserial",
   "termcolor",
