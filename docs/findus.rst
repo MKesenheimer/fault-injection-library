@@ -1,5 +1,5 @@
 FINDUS
-===
+======
 
 .. autosummary::
    :toctree: generated

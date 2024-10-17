@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = "PicoGlitcher & findus (aka Fault-Injection Library)"
+project = "PicoGlitcher / findus"
 copyright = "2024, Dr. Matthias Kesenheimer"
 author = "Dr. Matthias Kesenheimer"
 

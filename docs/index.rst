@@ -1,8 +1,8 @@
 
-PicoGlitcher and findus documentation!
-======================================
+PicoGlitcher and findus
+=======================
 
-**PicoGlitcher** and **findus** are
+**PicoGlitcher** and **findus** (aka Fault-Injection Library) are tools to perform fault-injection attacks.
 
 Check out the :doc:`usage` section for further information, including how to :ref:`installation` the project.
 
