@@ -15,12 +15,12 @@ import sys
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
 
-from subprocess import call
-# path to source
-this_path = os.path.dirname(os.path.abspath(__file__))
-packagedir = os.path.join(this_path, '..', 'findus')
-outputdir = os.path.join(this_path, "source")
-call(["sphinx-apidoc", "-o", outputdir, packagedir])
+#from subprocess import call
+## path to source
+#this_path = os.path.dirname(os.path.abspath(__file__))
+#packagedir = os.path.join(this_path, '..', 'findus')
+#outputdir = os.path.join(this_path, "source")
+#call(["sphinx-apidoc", "-o", outputdir, packagedir])
 
 # -- Project information -----------------------------------------------------
 
