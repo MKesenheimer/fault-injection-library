@@ -1,6 +1,6 @@
 
 PicoGlitcher and findus documentation!
-===================================
+======================================
 
 **PicoGlitcher** and **findus** are
 
