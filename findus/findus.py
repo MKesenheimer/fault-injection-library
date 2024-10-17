@@ -36,6 +36,9 @@ except Exception as _:
     rd6006_available = False
 
 class Database():
+    """
+    Database class.
+    """
     def __init__(self, argv, dbname=None, resume=False, nostore=False):
         self.nostore = nostore
         if not os.path.isdir('databases'):
