@@ -11,17 +11,16 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 import os
-#import sys
+import sys
+sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('..'))
+
 from subprocess import call
-
-#sys.path.insert(0, os.path.abspath('..'))
-#sys.path.insert(0, os.path.abspath('../findus'))
-
 # path to source
 this_path = os.path.dirname(os.path.abspath(__file__))
 packagedir = os.path.join(this_path, '..', 'findus')
-outputdir = os.path.join(this_path)
-
+outputdir = os.path.join(this_path, "source")
+call(["sphinx-apidoc", "-o", outputdir, packagedir])
 
 # -- Project information -----------------------------------------------------
 
@@ -68,9 +67,4 @@ html_theme = "sphinx_rtd_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
-
-#
-call(["sphinx-apidoc", "-o", outputdir, packagedir])
-call(['make', 'html'])
-#call([os.path.join('..', 'make'), 'latex'])
+#html_static_path = ["_static"]
