@@ -15,4 +15,5 @@ Contents
 
 .. toctree::
 
-   findus/findus
+    Home <self>
+    findus
