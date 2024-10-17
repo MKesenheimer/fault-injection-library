@@ -15,3 +15,5 @@ __pycache__
 build
 dist
 docs/_build
+docs/generated
+docs/source
