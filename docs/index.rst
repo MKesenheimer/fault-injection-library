@@ -14,7 +14,7 @@ Contents
 --------
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 4
 
     Home <self>
-    findus
+    findus <findus.rst>
