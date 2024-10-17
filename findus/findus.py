@@ -6,6 +6,17 @@
 # You should have received a copy of the GPL3 license with this file.
 # If not, please write to: m.kesenheimer@gmx.net.
 
+"""
+findus - Python library to perform fault-injection attacks on embedded devices.
+
+.. code-block:: python
+
+    # import the PicoGlitcher from findus
+    from findus import Database, PicoGlitcher
+
+    # setup PicoGlitcher
+"""
+
 import sqlite3
 import time
 import serial
