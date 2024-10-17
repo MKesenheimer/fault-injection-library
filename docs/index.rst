@@ -1,14 +1,10 @@
 
-Welcome to Lumache's documentation!
+PicoGlitcher and findus documentation!
 ===================================
 
-**Lumache** (/lu'make/) is a Python library for cooks and food lovers
-that creates recipes mixing random ingredients.
-It pulls data from the `Open Food Facts database <https://world.openfoodfacts.org/>`_
-and offers a *simple* and *intuitive* API.
+**PicoGlitcher** and **findus** are
 
-Check out the :doc:`usage` section for further information, including
-how to :ref:`installation` the project.
+Check out the :doc:`usage` section for further information, including how to :ref:`installation` the project.
 
 .. note::
 
@@ -19,4 +15,4 @@ Contents
 
 .. toctree::
 
-   api
+   findus
