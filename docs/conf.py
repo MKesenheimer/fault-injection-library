@@ -72,5 +72,5 @@ html_static_path = ["_static"]
 
 #
 call(["sphinx-apidoc", "-o", outputdir, packagedir])
-call([os.path.join('..', 'make'), 'html'])
+call(['make', 'html'])
 #call([os.path.join('..', 'make'), 'latex'])
