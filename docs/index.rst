@@ -15,4 +15,4 @@ Contents
 
 .. toctree::
 
-   findus
+   findus/findus
