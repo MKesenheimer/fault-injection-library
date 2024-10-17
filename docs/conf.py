@@ -17,9 +17,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = "Basic Sphinx Example Project"
-copyright = "2022, Read the Docs core team"
-author = "Read the Docs core team"
+project = "PicoGlitcher & findus (aka Fault-Injection Library)"
+copyright = "2024, Dr. Matthias Kesenheimer"
+author = "Dr. Matthias Kesenheimer"
 
 
 # -- General configuration ---------------------------------------------------
