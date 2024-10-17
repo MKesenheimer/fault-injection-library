@@ -1,4 +1,3 @@
-setuptools
 adafruit-ampy
 pyserial
 termcolor
