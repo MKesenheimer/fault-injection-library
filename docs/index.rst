@@ -18,4 +18,4 @@ Contents
     :maxdepth: 4
 
     Home <self>
-    findus <findus_root.rst>
+    findus <findus_index.rst>

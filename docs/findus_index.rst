@@ -4,4 +4,4 @@ FINDUS
 .. autosummary::
    :toctree: generated
 
-   findus
+   findus <source/findus.rst>
