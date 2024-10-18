@@ -14,6 +14,11 @@ Furthermore, this library supports the [ChipWhisperer Pro](https://rtfm.newae.co
 The database functionality has been expanded to a certain extent, too.
 With this implementation, e.g. one can add experiments to a previous measurement campaign.
 
+## Documentation
+
+The documentation of the source code and how to use the library and the hardware can be found on [https://fault-injection-library.readthedocs.io/](https://fault-injection-library.readthedocs.io/).
+The documentation is still work in progress and will eventually be completed.
+
 ## Cloning
 
 Set up the project by cloning it:

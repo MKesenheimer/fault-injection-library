@@ -7,12 +7,9 @@
 # If not, please write to: m.kesenheimer@gmx.net.
 
 """
-findus - Python library to perform fault-injection attacks on embedded devices.
+findus - Python library to perform fault-injection attacks on embedded devices
 
-    # import the PicoGlitcher from findus
-    from findus import Database, PicoGlitcher
-
-    # setup PicoGlitcher
+This is the documentation of the findus module and all its classes.
 """
 
 import sqlite3
@@ -35,24 +32,32 @@ except Exception as _:
 
 class Database():
     """
-    Database class managing access to the SQLite database.
+    Database class managing access to the SQLite databases to store results from a glitching campaign.
+    The parameter points stored in these databases are used to render an overview of the scanned parameter point via a web application.
+    The web application and data analyzer can be run separately from the glitcher scripts by the following command:
+
+        python ../analyzer/taofi-analyzer --directory databases
+
     Example usage:
 
         # import Database from findus
         from findus import Database
-        database = Database(['pico-glitcher.py', '--rpico', '/dev/tty.usbmodem2101', '--delay', '1000', '1000', '--length', '100', '100'], resume=False, nostore=False)
+        ...
+        database = Database(argv=argv)
         ...
         database.insert(experiment_id, delay, length, color, response)
+
+    If `dbname` is not provided, a name will automatically generated based on `argv`.
 
     Methods:
         __init__: Default constructor.
         insert: Method to insert datapoints into the SQLite database.
         get_parameters_of_experiment: Get the parameters of a dataset by experiment_id.
         remove: Remove a parameter point from the database by experiment_id.
-        cleanup: Remove all parameter points with a given color. 
+        cleanup: Remove all parameter points with a given color.
         get_number_of_experiments: Get the total number of performed experiments (number of datasets in the database).
         get_latest_experiment_id: Get the latest experiment_id.
-        get_base_experiments_count: 
+        get_base_experiments_count: [Deprecated] Get the total number of performed experiments (number of datasets in the database).
         close: Close the connection to the database.
     """
 
@@ -112,43 +117,110 @@ class Database():
             self.cur.execute("INSERT INTO experiments (id,delay,length,color,response) VALUES (?,?,?,?,?)", [experiment_id + self.base_row_count, delay, length, color, response])
             self.con.commit()
 
-    def get_parameters_of_experiment(self, experiment_id):
-        """"
-        
-        """"
+    def get_parameters_of_experiment(self, experiment_id: int) -> list:
+        """
+        Get the parameters of a dataset by experiment_id.
+
+        Parameters:
+            experiment_id: ID of the experiment to insert into the database.
+
+        Returns:
+            List of parameters.
+        """
         self.cur.execute("SELECT * FROM experiments WHERE id = (?);", [experiment_id + self.base_row_count])
         self.con.commit()
         return next(self.cur, [None])
 
-    def remove(self, experiment_id):
+    def remove(self, experiment_id: int):
+        """
+        Remove a parameter point from the database by experiment_id.
+
+        Parameters:
+            experiment_id: ID of the experiment to insert into the database.
+        """
         self.cur.execute("DELETE FROM experiments WHERE id = (?);", [experiment_id + self.base_row_count])
         self.con.commit()
 
     def cleanup(self, color):
+        """
+        Remove all parameter points with a given color.
+        """
         self.cur.execute("DELETE FROM experiments WHERE color = (?);", [color])
         #self.cur.execute("DELETE FROM experiments WHERE length >= (?);", [color])
         self.con.commit()
 
-    def get_number_of_experiments(self):
+    def get_number_of_experiments(self) -> int:
+        """
+        Get the total number of performed experiments (number of datasets in the database).
+
+        Returns:
+            Number of experiments performed so far in the current database.
+        """
         self.cur.execute("SELECT count(id) FROM experiments")
         result = self.cur.fetchone()
         row_count = result[0]
         return row_count
 
-    def get_latest_experiment_id(self):
+    def get_latest_experiment_id(self) -> int:
+        """
+        Get the latest experiment_id.
+
+        Returns:
+            Experiment ID.
+        """
         self.cur.execute("SELECT * FROM experiments WHERE id=(SELECT max(id) FROM experiments);")
         self.con.commit()
         return next(self.cur, [None])[0]
 
-    def get_base_experiments_count(self):
+    def get_base_experiments_count(self) -> int:
+        """
+        [Deprecated] Get the total number of performed experiments (number of datasets in the database).
+
+        Returns:
+            Number of experiments performed so far in the current database.
+        """
         return self.base_row_count
 
     def close(self):
+        """
+        Close the connection to the database.
+        """
         self.con.close()
 
 
 class Serial():
-    def __init__(self, port="/dev/ttyUSB0", baudrate=115200, timeout=0.1, bytesize=8, parity='E', stopbits=1):
+    r"""
+    Class to manage serial connections more easily.
+    Example usage:
+
+        # import Serial from findus
+        from findus import Serial
+        ser = Serial(port="/dev/ttyUSB0")
+        ser.write(b'\x7f')
+        ...
+        result = ser.read(3)
+
+    Methods:
+        __init__: Default constructor.
+        write: Write data out via the serial interface.
+        read: Read data from the serial interface.
+        reset: Reset target via DTR pin and flush data lines.
+        flush: Flush data buffers.
+        flush_v2: Flush serial data buffers with timeout.
+        close: Close serial connection.
+    """
+    def __init__(self, port:str = "/dev/ttyUSB0", baudrate:int = 115200, timeout:float = 0.1, bytesize:int = 8, parity:str = 'E', stopbits:int = 1):
+        """
+        __init__: Default constructor.
+
+        Parameters:
+            port: Port identifier of the serial connection.
+            baudrate: Baudrate of the serial connection.
+            timeout: Timeout after the serial connection stops listening.
+            bytesize: Number of bytes per payload.
+            parity: Even ('E') or Odd ('O') parity.
+            stopbits: Number of stop bits.
+        """
         self.ser = None
         self.port = port
         self.baudrate = baudrate
@@ -159,16 +231,41 @@ class Serial():
         self.init()
 
     def init(self):
+        """
+        Initializes the serial connection. Can be called again, if the connection was closed previously.
+        """
         self.ser = serial.Serial(port=self.port, baudrate=self.baudrate, timeout=self.timeout, bytesize=self.bytesize, parity=self.parity, stopbits=self.stopbits)
 
-    def write(self, message):
-        self.ser.write(message)
+    def write(self, message: bytes) -> int:
+        """
+        Write the bytes data to the port. This should be of type `bytes` (or compatible such as `bytearray` or `memoryview`). Unicode strings must be encoded (e.g. `'hello'.encode('utf-8')`.
 
-    def read(self, length):
+        Parameters:
+            message: Data to send
+        Returns:
+            Number of bytes written.
+        """
+        return self.ser.write(message)
+
+    def read(self, length: int) -> bytes:
+        """
+        Read `length` bytes from the serial port. If a timeout is set it may return fewer characters than requested. With no timeout it will block until the requested number of bytes is read.
+
+        Parameters:
+            length: Number of bytes to read.
+        Returns:
+            Bytes read from the port.
+        """
         response = self.ser.read(length)
         return response
     
-    def reset(self, debug=False):
+    def reset(self, debug:bool = False) -> bool:
+        """
+        Reset target via DTR pin and flush data lines. Can be used alternatively to the reset lines of the PicoGlitcher (or ChipWhisperer Husky, or ChipWhisperer Pro) to reset the target.
+
+        Parameters:
+            debug: If set to true, garbage on the serial interface is plotted to tty.
+        """
         print("[+] Resetting target...")
         self.ser.dtr = True
         time.sleep(0.1)
@@ -177,17 +274,28 @@ class Serial():
         if debug:
             for line in response.splitlines():
                 print('\t', line.decode())
-        return False
 
-    def empty_read_buffer(self):
+    def flush(self):
+        """
+        Flush serial data buffers.
+        """
         self.ser.reset_input_buffer()
 
-    def empty_read_buffer_v2(self, timeout=0.01):
+    def flush_v2(self, timeout = 0.01):
+        """
+        Flush serial data buffers with timeout.
+
+        Parameters:
+            timeout: Timeout after the serial connection stops listening. Can be tweaked to make sure all data is flushed.
+        """
         self.ser.timeout = timeout
         self.ser.read(8192)
         self.ser.timeout = self.timeout
 
     def close(self):
+        """
+        Close serial connection.
+        """
         self.ser.close()
 
 
