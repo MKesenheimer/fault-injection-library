@@ -6,3 +6,4 @@ theme: readthedocs
 plugins:
   - search
   - mkdocstrings
+  - autorefs

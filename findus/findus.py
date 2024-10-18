@@ -9,8 +9,6 @@
 """
 findus - Python library to perform fault-injection attacks on embedded devices.
 
-.. code-block:: python
-
     # import the PicoGlitcher from findus
     from findus import Database, PicoGlitcher
 
@@ -37,9 +35,37 @@ except Exception as _:
 
 class Database():
     """
-    Database class.
+    Database class managing access to the SQLite database.
+    Example usage:
+
+        # import Database from findus
+        from findus import Database
+        database = Database(['pico-glitcher.py', '--rpico', '/dev/tty.usbmodem2101', '--delay', '1000', '1000', '--length', '100', '100'], resume=False, nostore=False)
+        ...
+        database.insert(experiment_id, delay, length, color, response)
+
+    Methods:
+        __init__: Default constructor.
+        insert: Method to insert datapoints into the SQLite database.
+        get_parameters_of_experiment: Get the parameters of a dataset by experiment_id.
+        remove: Remove a parameter point from the database by experiment_id.
+        cleanup: Remove all parameter points with a given color. 
+        get_number_of_experiments: Get the total number of performed experiments (number of datasets in the database).
+        get_latest_experiment_id: Get the latest experiment_id.
+        get_base_experiments_count: 
+        close: Close the connection to the database.
     """
-    def __init__(self, argv, dbname=None, resume=False, nostore=False):
+
+    def __init__(self, argv: list[str], dbname: str = None, resume: bool = False, nostore: bool = False):
+        """
+        Default constructor of the Database class.
+
+        Parameters:
+            argv: Arguments that were supplied to the main-script. These arguments are stored as metadata when the database is instantiated.
+            dbname: Name of the database to be generated.
+            resume: Resume a previous run and write the results into the previously generated database
+            nostore: Do not store the results in a database (can be used for debugging).
+        """
         self.nostore = nostore
         if not os.path.isdir('databases'):
             os.mkdir("databases")
@@ -68,7 +94,17 @@ class Database():
         if resume or dbname is not None:
             print(f"[+] Number of experiments in previous database: {self.base_row_count}")
 
-    def insert(self, experiment_id, delay, length, color, response):
+    def insert(self, experiment_id: int, delay: int, length: int, color: str, response: bytes):
+        """
+        Method to insert datapoints into the SQLite database.
+
+        Parameters:
+            experiment_id: ID of the experiment to insert into the database.
+            delay: Time from trigger until the glitch is set (in nano seconds).
+            length: Length of glitch (in nano seconds).
+            color: Color with which the parameter point (delay, length) is to be displayed in the graph.
+            response: Byte string of target response. 
+        """
         if not self.nostore:
             if (experiment_id + self.base_row_count) == 0:
                 s_argv = ' '.join(self.argv[1:])
@@ -77,6 +113,9 @@ class Database():
             self.con.commit()
 
     def get_parameters_of_experiment(self, experiment_id):
+        """"
+        
+        """"
         self.cur.execute("SELECT * FROM experiments WHERE id = (?);", [experiment_id + self.base_row_count])
         self.con.commit()
         return next(self.cur, [None])
