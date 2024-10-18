@@ -18,5 +18,5 @@ Contents
     :maxdepth: 4
 
     Home <self>
-    findus <findus_index.rst>
+    findus
     api
