@@ -1,0 +1,8 @@
+site_name: PicoGlitcher / findus
+nav:
+  - Home: index.md
+  - Findus: findus.md
+theme: readthedocs
+plugins:
+  - search
+  - mkdocstrings
