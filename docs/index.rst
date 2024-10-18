@@ -19,3 +19,4 @@ Contents
 
     Home <self>
     findus <findus_index.rst>
+    api
