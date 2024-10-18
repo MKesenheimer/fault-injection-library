@@ -4,4 +4,4 @@ API
 .. autosummary::
    :toctree: generated
 
-   findus
+   lumache
