@@ -18,5 +18,4 @@ Contents
     :maxdepth: 4
 
     Home <self>
-    findus
     api
