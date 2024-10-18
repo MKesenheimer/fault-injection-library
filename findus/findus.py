@@ -281,7 +281,7 @@ class Serial():
         """
         self.ser.reset_input_buffer()
 
-    def flush_v2(self, timeout = 0.01):
+    def flush_v2(self, timeout:float = 0.01):
         """
         Flush serial data buffers with timeout.
 
