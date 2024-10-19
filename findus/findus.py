@@ -298,39 +298,37 @@ class Serial():
         """
         self.ser.close()
 
-
 class MicroPythonScript():
-    def __init__(self, port='/dev/ttyACM1', debug=False):
+    def __init__(self, port:str = '/dev/ttyACM1', debug:bool = False):
         self.port   = None
         self.pyb    = None
         self.debug = debug
 
-    def init(self, port, micropy_script, debug=False):
+    def init(self, port:str, micropy_script:str, debug:bool = False):
         self.port = port
         self.pyb = pyboard.Pyboard(self.port)
         self.pyb.enter_raw_repl()
         self.pyb.exec(f'import {micropy_script}')
         self.pyb.exec(f'mp = {micropy_script}.MicroPythonScript()')
 
-
 # inherit functionality and overwrite some functions
 class PicoGlitcherInterface(MicroPythonScript):
-    def set_trigger(self, trigger):
+    def set_trigger(self, trigger:str):
         self.pyb.exec(f'mp.set_trigger("{trigger}")')
 
-    def set_frequency(self, frequency):
+    def set_frequency(self, frequency:int):
         self.pyb.exec(f'mp.set_frequency({frequency})')
 
-    def set_baudrate(self, baud):
+    def set_baudrate(self, baud:int):
         self.pyb.exec(f'mp.set_baudrate({baud})')
 
-    def set_pattern_match(self, pattern):
+    def set_pattern_match(self, pattern:int):
         self.pyb.exec(f'mp.set_pattern_match({pattern})')
 
-    def power_cycle_target(self, power_cycle_time):
+    def power_cycle_target(self, power_cycle_time:float):
         self.pyb.exec(f'mp.power_cycle_target({power_cycle_time})')
 
-    def arm(self, delay, length):
+    def arm(self, delay:int, length:int):
         self.pyb.exec(f'mp.arm({delay}, {length})')
 
     def reset_target(self):
@@ -345,13 +343,13 @@ class PicoGlitcherInterface(MicroPythonScript):
     def enable_vtarget(self):
         self.pyb.exec('mp.enable_vtarget()')
 
-    def reset(self, reset_time):
+    def reset(self, reset_time:float):
         self.pyb.exec(f'mp.reset({reset_time})')
 
-    def block(self, timeout):
-        return self.pyb.exec(f'mp.block({timeout})')
+    def block(self, timeout:float):
+        self.pyb.exec(f'mp.block({timeout})')
 
-    def get_sm2_output(self):
+    def get_sm2_output(self) -> str:
         return self.pyb.exec('mp.get_sm2_output()')
 
     def set_lpglitch(self):
@@ -360,28 +358,77 @@ class PicoGlitcherInterface(MicroPythonScript):
     def set_hpglitch(self):
         self.pyb.exec('mp.set_hpglitch()')
 
-    def set_dead_zone(self, dead_time, pin):
+    def set_dead_zone(self, dead_time:float, pin:str):
         self.pyb.exec(f'mp.set_dead_zone({dead_time}, "{pin}")')
 
 class ExternalPowerSupply:
-    def __init__(self, port):
+    """
+    Wrapper class for the RD6006 voltage supply to align function names with the rest of the library.
+    Example usage:
+    
+        from findus import ExternalPowerSupply
+        power_supply = ExternalPowerSupply(port="/dev/ttyACM0")
+        power_supply.set_voltage(ext_power_voltage)
+        print(power_supply.status())
+        power_supply.power_cycle_target(power_cycle_time)
+
+    Methods:
+        __init__: Default constructor.
+        status: Get the status of the voltage supply.
+        set_voltage: Set the voltage.
+        enable_vtarget: Enable voltage output.
+        disable_vtarget: Disable voltage output
+        power_cycle_target: Power cycle the target (disables output, waits a certain time, enables voltage output again).
+    """
+
+    def __init__(self, port:str):
+        """
+        Default constructor.
+        
+        Parameters:
+            port: Port identifier of the voltage supply.
+        """
         self.port = port
         self.r = RD6006(self.port)
 
-    def status(self):
+    def status(self) -> str:
+        """
+        Get the status of the voltage supply.
+
+        Returns:
+            Status message of the voltage supply.
+        """
         return self.r.status()
 
-    def set_voltage(self, voltage):
+    def set_voltage(self, voltage:float):
+        """
+        Set the voltage of the power supply.
+        
+        Parameters:
+            voltage: Desired output voltage.
+        """
         self.r.voltage = voltage
         self.r.enable = True
 
     def enable_vtarget(self):
+        """
+        Enable voltage output.
+        """
         self.r.enable = True
 
     def disable_vtarget(self):
+        """
+        Disable voltage output.
+        """
         self.r.enable = False
 
-    def power_cycle_target(self, power_cycle_time=0.2):
+    def power_cycle_target(self, power_cycle_time:float = 0.2):
+        """
+        Power cycle the target (disables output, waits a certain time, enables voltage output again).
+        
+        Parameters:
+            power_cycle_time: Time to wait between disabling and enabling the voltage output again.
+        """
         self.r.enable = False
         time.sleep(power_cycle_time)
         self.r.enable = True
@@ -618,13 +665,13 @@ class HuskyGlitcher(Glitcher):
         self.scope.io.glitch_hp = True
         self.scope.io.glitch_lp = False
 
-    def rising_edge_trigger(self, dead_time, pin):
+    def rising_edge_trigger(self, dead_time:float, pin:str):
         # Note: dead_time and pin have no functions here (see PicoGlitcher.rising_edge_trigger)
         self.scope.adc.basic_mode = "rising_edge"
         self.scope.io.tio4 = 'high_z'
         self.scope.trigger.triggers = 'tio4'
 
-    def uart_trigger(self, pattern):
+    def uart_trigger(self, pattern:int):
         self.scope.io.hs2 = "clkgen"
         self.scope.trigger.module = 'UART'
         self.scope.trigger.triggers = 'tio1'

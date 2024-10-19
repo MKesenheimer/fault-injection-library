@@ -5,5 +5,11 @@ nav:
 theme: readthedocs
 plugins:
   - search
-  - mkdocstrings
+  - mkdocstrings:
+      enabled: !ENV [ENABLE_MKDOCSTRINGS, true]
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_source: false
   - autorefs
