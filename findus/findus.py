@@ -22,7 +22,9 @@ from termcolor import colored
 import os
 import glob
 from . import pyboard
+from enum import Enum
 from .GlitchState import ErrorType, WarningType, OKType, ExpectedType, SuccessType
+from typing import Type
 try:
     from rd6006 import RD6006
     rd6006_available = True
@@ -435,10 +437,35 @@ class ExternalPowerSupply:
 
 
 class Glitcher():
+    """
+    Glitcher template class. This class defines a common anchestor from which other glitcher modules should inherit from.
+
+    Methods:
+        __init__: Default constructor. Does nothing in this case.
+        classify: Template method to classify an output state.
+        colorize: Returns a colored string depending on a color identifier (G, Y, R, M, C, B).
+        get_speed: Calculate and return the average speed of the glitching campaign (glitches per second).
+    """
     def __init__(self):
+        """
+        Default constructor. Does nothing in this case.
+        """
         pass
 
-    def classify(self, state):
+    def classify(self, state:Type(GlitchState)) -> str:
+        """
+        Template method to classify an output state. Overload this class if you want to customize the targets response classification. Alternatively, use the built-in class `GlitchState` to characterize the targets responses. Remember to define certain response states depending on the possible responses. See class `BootloaderCom` for an example.
+
+            from findus import PicoGlitcher
+            from findus.BootloaderCom import BootloaderCom, GlitchState
+            glitcher = PicoGlitcher()
+            ...
+            bootcom = BootloaderCom(port="/dev/ttyACM1", dump_address=0x08000000, dump_len=0x2000)
+            ...
+            response = bootcom.init_bootloader()
+            ...
+            glitcher.classify(response)
+        """
         if issubclass(type(state), ExpectedType):
             color = 'G'
         elif issubclass(type(state), SuccessType):
@@ -451,7 +478,16 @@ class Glitcher():
             color = 'C'
         return color
 
-    def colorize(self, s, color):
+    def colorize(self, s:str, color:str) -> str:
+        """
+        Returns a colored string depending on a color identifier (G, Y, R, M, C, B).
+        
+        Parameters:
+            s: The string you want to colorize.
+            color: Color identifier, on of 'G', 'Y', 'R', 'M', 'C', 'B'.
+        Returns:
+            Returns the colorized string.
+        """
         colors = {
             'G': 'green',
             'Y': 'yellow',
@@ -462,7 +498,16 @@ class Glitcher():
         }
         return colored(s, colors[color])
 
-    def get_speed(self, start_time, number_of_experiments):
+    def get_speed(self, start_time:int, number_of_experiments:int) -> int:
+        """
+        Calculate and return the average speed of the glitching campaign (glitches per second).
+        
+        Parameters:
+            start_time: Start time of the glitching campaign in seconds.
+            number_of_experiments: Number of experiments carried out so far.
+        Returns:
+            Returns the average number of experiments per second.
+        """
         elapsed_time = int(time.time()) - start_time
         if elapsed_time == 0:
             return 'NA'
