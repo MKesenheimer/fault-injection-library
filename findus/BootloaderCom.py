@@ -49,6 +49,19 @@ class GlitchState():
     Success = _Success
 
 class BootloaderCom:
+    """
+    Class that contains methods to communicate with STM32 processors in bootloader mode.
+    Example usage:
+    
+        from findus.BootloaderCom import BootloaderCom
+        bootcom = BootloaderCom(port="/dev/ttyACM1")
+        response = bootcom.init_bootloader()
+        response = bootcom.setup_memread()
+        response, mem = self.bootcom.read_memory(0x08000000, 0xFF)
+
+    Methods:
+        __init__: Default constructor.
+    """
     NACK = b'\x1f'
     ACK  = b'\x79'
     verbose = False

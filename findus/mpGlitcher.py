@@ -4,6 +4,12 @@
 # You should have received a copy of the GPL3 license with this file.
 # If not, please write to: m.kesenheimer@gmx.net.
 
+"""
+This is the documentation of the mpGlitcher module and all its classes.
+
+Upload this module onto your PicoGlitcher. The classes and methods will become available through the pyboard interface.
+"""
+
 import machine
 from rp2 import asm_pio, PIO, StateMachine
 from machine import Pin
@@ -116,6 +122,12 @@ def uart_trigger(BITS=BITS):
     jmp("start")
 
 class MicroPythonScript():
+    """
+    MicroPython class that contains the code to access the hardware of the PicoGlitcher.
+
+    Methods:
+        __init__: Default constructor.
+    """
     def __init__(self):
         self.sm1 = None
         self.sm2 = None

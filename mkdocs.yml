@@ -2,6 +2,8 @@ site_name: PicoGlitcher / findus
 nav:
   - Home: index.md
   - Findus: findus.md
+  - BootloaderCom: bootloadercom.md
+  - mpGlitcher: mpglitcher.md
 theme: readthedocs
 plugins:
   - search
