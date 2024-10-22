@@ -24,7 +24,6 @@ import glob
 from . import pyboard
 from enum import Enum
 from .GlitchState import ErrorType, WarningType, OKType, ExpectedType, SuccessType
-from typing import Type
 try:
     from rd6006 import RD6006
     rd6006_available = True
@@ -451,7 +450,7 @@ class Glitcher():
         """
         pass
 
-    def classify(self, state:Type(GlitchState)) -> str:
+    def classify(self, state:type(Enum)) -> str:
         """
         Template method to classify an output state. Overload this class if you want to customize the targets response classification. Alternatively, use the built-in class `GlitchState` to characterize the targets responses. Remember to define certain response states depending on the possible responses. See class `BootloaderCom` for an example.
 

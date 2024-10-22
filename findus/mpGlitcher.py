@@ -54,11 +54,12 @@ def block_condition():
     # block until dead time received
     pull(block)
     mov(x, osr)
+    # block until condition is received (wait for 0 or 1)
+    pull(block)
+    mov(y, osr)
 
-    # TODO: make this arbitrary, i.e. decide if pin should be 0 or 1
-    # TODO: vtarget_en and reset are active low pins -> change condition accordingly
     # wait for condition
-    wait(0, pin, 0)
+    wait(y, pin, 0)
 
     # wait dead time
     label("delay_loop")
@@ -141,8 +142,8 @@ class MicroPythonScript():
         # VTARGET_OC (active low, overcurrent response)
         self.pin_vtarget_oc = Pin(21, Pin.IN, Pin.PULL_UP)
         # VTARGET_EN (active low)
-        self.pin_power = Pin(20, Pin.OUT, Pin.PULL_UP)
-        self.pin_power.high()
+        self.pin_vtarget_en = Pin(20, Pin.OUT, Pin.PULL_UP)
+        self.pin_vtarget_en.high()
         # RESET
         self.pin_reset = Pin(0, Pin.OUT, Pin.PULL_UP)
         self.pin_reset.low()
@@ -161,7 +162,8 @@ class MicroPythonScript():
         self.pin_glitch = self.pin_lpglitch
         # standard dead zone after power down
         self.dead_time = 0.05
-        self.pin_condition = self.pin_power
+        self.pin_condition = self.pin_vtarget_en
+        self.condition = 0
 
     def set_frequency(self, frequency=200_000_000):
         machine.freq(frequency)
@@ -177,10 +179,10 @@ class MicroPythonScript():
         self.pattern = pattern
 
     def enable_vtarget(self):
-        self.pin_power.low()
+        self.pin_vtarget_en.low()
 
     def disable_vtarget(self):
-        self.pin_power.high()
+        self.pin_vtarget_en.high()
 
     def power_cycle_target(self, power_cycle_time=0.2):
         self.disable_vtarget()
@@ -208,9 +210,13 @@ class MicroPythonScript():
 
     def set_dead_zone(self, dead_time=0.05, pin="power"):
         if pin == "power":
-            self.pin_condition = self.pin_power
+            self.pin_condition = self.pin_vtarget_en
+            # wait until VTARGET_EN is high (meaning VTARGET is disabled)
+            self.condition = 1
         elif pin == "reset":
             self.pin_condition = self.pin_reset
+            # wait until RESET is low
+            self.condition = 0
         self.dead_time = dead_time
 
     def arm(self, delay, length):
@@ -230,8 +236,9 @@ class MicroPythonScript():
             # state machine that blocks for a specific time after a certain condition (dead time)
             self.sm2 = StateMachine(2, block_condition, freq=self.frequency, in_base=self.pin_condition)
             self.sm2.active(1)
-            # push dead time (in seconds) into the fifo of the statemachine
+            # push dead time (in seconds) into the fifo of the statemachine and decide what condition must be met (0 or 1)
             self.sm2.put(int(self.dead_time * self.frequency))
+            self.sm2.put(self.condition)
         
         elif self.trigger == "uart":
             # state machine that emits the glitch if the trigger condition is met

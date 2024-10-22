@@ -7,10 +7,11 @@
 
 # This script can be used to test the pico-glitcher.
 # -> Connect Trigger input with Reset.
-# -> Connect Glitch with VTarget.
+# -> Between Glitch and VTarget, connect a 10 Ohm resistor (this is the test target).
 # -> Run the script:
 # python pico-glitcher-test.py --rpico /dev/tty.usbmodem1101 --delay 100 100 --length 100 100
-# -> Observe the glitches with a oscilloscope.
+# -> You should now be able to observe the glitches with a oscilloscope on the 10 Ohm resistor.
+# -> measure the expected delay and glitch length.
 
 import argparse
 import logging
@@ -49,9 +50,9 @@ class Main():
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
         # choose rising edge trigger with dead time of 0 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
-        self.glitcher.rising_edge_trigger(0, "reset")
+        self.glitcher.rising_edge_trigger(0.005, "power")
         # choose crowbar transistor
-        self.glitcher.set_lpglitch()
+        self.glitcher.set_hpglitch()
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
