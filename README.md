@@ -23,7 +23,7 @@ The documentation is still work in progress and will eventually be completed.
 
 Set up the project by cloning it:
 ```bash
-git clone --recurse-submodules https://github.com/MKesenheimer/fault-injection-library.git
+git clone --depth 1 --recurse-submodules https://github.com/MKesenheimer/fault-injection-library.git
 cd fault-injection-lib
 ```
 
