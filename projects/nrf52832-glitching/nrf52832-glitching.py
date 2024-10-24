@@ -17,13 +17,13 @@ import time
 import subprocess
 
 # import custom libraries
-from findus import Database, PicoGlitcher
+from findus import Database, PicoGlitcher, ProGlitcher
 
 def test_jtag():
     subout = subprocess.run(['openocd',
                           '-f', 'interface/jlink.cfg',
-                          '-c', 'transport select swd', 
-                          '-f', 'testnrf.cfg', 
+                          '-c', 'transport select swd',
+                          '-f', 'testnrf.cfg',
                           '-c', 'init;dump_image nrf52_dumped.bin 0x0 0x80000; exit'],
                           #'-c', 'init; exit'],
                           check=False, capture_output=True)
@@ -31,6 +31,7 @@ def test_jtag():
     return response
 
 # inherit functionality and overwrite some functions
+#class DerivedGlitcher(ProGlitcher):
 class DerivedGlitcher(PicoGlitcher):
     def classify(self, response):
         if b'Debug access is denied' in response or b'AP lock engaged' in response:
@@ -56,11 +57,12 @@ class Main():
         self.glitcher = DerivedGlitcher()
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
+        #self.glitcher.init(ext_power=args.power, ext_power_voltage=3.3)
         # choose rising edge trigger with dead time of 0.03 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
         self.glitcher.rising_edge_trigger(0.03, "power")
         # choose crowbar transistor
-        self.glitcher.set_lpglitch()
+        self.glitcher.set_hpglitch()
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
@@ -83,7 +85,7 @@ class Main():
             self.glitcher.arm(delay, length)
 
             # power cycle target
-            self.glitcher.power_cycle_target(0.03)
+            self.glitcher.power_cycle_target(0.08)
 
             # reset target
             #self.glitcher.reset(0.01)
@@ -116,7 +118,7 @@ class Main():
             # Dump finished
             if color == 'R':
                 time.sleep(1)
-                #break
+                break
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

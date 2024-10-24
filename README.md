@@ -74,7 +74,7 @@ As the reset is released from the device, the trigger signal is sent.
 We install the corresponding Micropython script on the Raspberry Pi Pico:
 ```bash
 upload --port /dev/<rpi-tty-port> --delete-all
-upload --port /dev/<rpi-tty-port> --script lib/mpGlitcher.py
+upload --port /dev/<rpi-tty-port> --script ./findus/mpGlitcher.py
 ```
 Although the software is based on Micropython, using the PIO functions of the Raspberry Pi Pico, very precise switching operations can be made and triggered on external signals.
 
@@ -109,8 +109,7 @@ In a real setup, however, the glitching line should be soldered as close as poss
 
 Install the Raspberry Pi Pico Micropython scripts:
 ```bash
-cd lib
-upload --port /dev/<rpi-tty-port> --script mpGlitcher.py
+upload --port /dev/<rpi-tty-port> --script ./findus/mpGlitcher.py
 ```
 Next, change into `projects/stm32f42x-glitching` and execute the following script.
 ```bash
