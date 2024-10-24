@@ -10,12 +10,11 @@ import sys
 import time
 
 # import custom libraries
-sys.path.insert(0, "../lib/")
-from BootloaderCom import BootloaderCom, GlitchState
-from FaultInjectionLib import ProGlitcher, PicoGlitcher, Helper
-from GlitchState import OKType
+from findus import ProGlitcher, PicoGlitcher, Helper
+from findus.BootloaderCom import BootloaderCom, GlitchState
+from findus.GlitchState import OKType
 
-class Main:
+class PowerCycler:
     def __init__(self, args):
         self.args = args
 
@@ -67,18 +66,20 @@ class Main:
                     print(mem)
                     #break
 
-
-if __name__ == "__main__":
+def main(argv=sys.argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", required=False, help="target port", default="/dev/ttyUSB1")
     parser.add_argument("--rpico", required=False, help="rpico port", default="")
     parser.add_argument("--dump", required=False, action='store_true')
     args = parser.parse_args()
 
-    main = Main(args)
+    pc = PowerCycler(args)
 
     try:
-        main.run()
+        pc.run()
     except KeyboardInterrupt:
         print("\nExitting...")
         sys.exit(1)
+
+if __name__ == "__main__":
+    main()

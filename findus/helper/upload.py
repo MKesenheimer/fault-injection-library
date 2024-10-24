@@ -9,8 +9,9 @@
 import argparse
 import subprocess
 import os
+import sys
 
-def main():
+def main(argv=sys.argv):
     parser = argparse.ArgumentParser(
         description="Upload a micro python script to the Raspberry Pi Pico."
     )

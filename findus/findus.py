@@ -37,7 +37,7 @@ class Database():
     The parameter points stored in these databases are used to render an overview of the scanned parameter point via a web application.
     The web application and data analyzer can be run separately from the glitcher scripts by the following command:
 
-        python ../analyzer/taofi-analyzer --directory databases
+        analyzer --directory databases
 
     Example usage:
 

@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["findus"]
+packages = ["findus", "findus.analyzer", "findus.helper"]
 
 [project]
 name = "findus"
@@ -25,6 +25,12 @@ dependencies = [
   "mkdocs",
   "mkdocstrings[python]",
 ]
+
+[project.scripts]
+analyzer = "findus.analyzer.analyzer:main"
+upload = "findus.helper.upload:main"
+power-cycle-and-read = "findus.helper.power_cycle_and_read:main"
+power-cycle = "findus.helper.power_cycle:main"
 
 [project.urls]
 Homepage = "https://mkesenheimer.github.io"

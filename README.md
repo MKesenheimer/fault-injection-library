@@ -59,7 +59,7 @@ Now we have to prepare the Raspberry Pi Pico.
 Add the [Micropython firmware](https://projects.raspberrypi.org/en/projects/getting-started-with-the-pico/3).
 In general the following script can be used to upload Micropython scripts to the Raspberry Pi Pico.
 ```bash
-python helper/upload-micro-python.py --port /dev/<rpi-tty-port> <script.py>
+upload --port /dev/<rpi-tty-port> <script.py>
 ```
 
 ## Executing Raspberry Pi Pico glitcher example implementation
@@ -73,8 +73,8 @@ As the reset is released from the device, the trigger signal is sent.
 
 We install the corresponding Micropython script on the Raspberry Pi Pico:
 ```bash
-python helper/upload-micro-python.py --port /dev/<rpi-tty-port> --delete-all
-python helper/upload-micro-python.py --port /dev/<rpi-tty-port> --script lib/mpGlitcher.py
+upload --port /dev/<rpi-tty-port> --delete-all
+upload --port /dev/<rpi-tty-port> --script lib/mpGlitcher.py
 ```
 Although the software is based on Micropython, using the PIO functions of the Raspberry Pi Pico, very precise switching operations can be made and triggered on external signals.
 
@@ -87,7 +87,7 @@ The script resets the target, arms the pico glitcher, waits for the external tri
 The response of the target is then read and classified.
 The results are entered into a database, which can be processed in the browser using the command:
 ```bash
-python ../analyzer/taofi-analyzer --directory databases
+analyzer --directory databases
 ```
 This attack can be used, for example, to bypass the read-out protection (RDP) of Apple Airtags and to download the firmware of these devices.
 See [the video by stacksmashing](https://www.youtube.com/watch?v=_E0PWQvW-14) for more details.
@@ -110,7 +110,7 @@ In a real setup, however, the glitching line should be soldered as close as poss
 Install the Raspberry Pi Pico Micropython scripts:
 ```bash
 cd lib
-python upload-micro-python.py --port /dev/<rpi-tty-port> --script mpGlitcher.py
+upload --port /dev/<rpi-tty-port> --script mpGlitcher.py
 ```
 Next, change into `projects/stm32f42x-glitching` and execute the following script.
 ```bash
@@ -125,7 +125,7 @@ python pro-glitcher.py --target /dev/<target-tty-port> --delay 100_000 200_000 -
 
 Again, use the following command to analyze the collected datapoints:
 ```bash
-python ../analyzer/taofi-analyzer --directory databases
+analyzer --directory databases
 ```
 
 If everything goes as expected, a successful run should look something like this:

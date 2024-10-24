@@ -8,12 +8,9 @@
 import argparse
 import sys
 import time
+from findus import ProGlitcher, PicoGlitcher, Helper
 
-# import custom libraries
-sys.path.insert(0, "../lib/")
-from FaultInjectionLib import ProGlitcher, PicoGlitcher, Helper
-
-class Main:
+class PowerCycler:
     def __init__(self, args):
         self.args = args
 
@@ -35,15 +32,18 @@ class Main:
         self.glitcher.reset(0.01)
         time.sleep(0.2)
 
-if __name__ == "__main__":
+def main(argv=sys.argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("--rpico", required=False, help="rpico port", default="")
     args = parser.parse_args()
 
-    main = Main(args)
+    pc = PowerCycler(args)
 
     try:
-        main.run()
+        pc.run()
     except KeyboardInterrupt:
         print("\nExitting...")
         sys.exit(1)
+
+if __name__ == "__main__":
+    main()

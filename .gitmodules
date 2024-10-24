@@ -1,6 +1,3 @@
 [submodule "rd6006"]
 	path = rd6006
 	url = https://github.com/MKesenheimer/rd6006.git
-[submodule "analyzer"]
-	path = analyzer
-	url = https://github.com/MKesenheimer/TAoFI-Analyzer.git

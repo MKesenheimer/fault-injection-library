@@ -1,4 +1,8 @@
 from .findus import *
+#from .analyzer import *
+#from .helper import *
+#from .upload import *
+
 #from .BootloaderCom import *
 #from .GlitchState import *
 
@@ -12,4 +16,4 @@ from .findus import *
 #from .pyboard import *
 
 
-#__all__ = ['findus', 'BootloaderCom', 'GlitchState']
+#__all__ = ['findus', 'BootloaderCom', 'GlitchState']xw
