@@ -1,4 +1,4 @@
-(footprint "PANASONIC_C_510"
+(footprint "PANASONIC_C"
 	(version 20240108)
 	(generator "pcbnew")
 	(generator_version "8.0")
@@ -239,20 +239,20 @@
 		(layer "F.Fab")
 		(uuid "591d92ea-9ea9-4214-9f3a-00df24a32187")
 	)
-	(pad "+" smd rect
-		(at 1.9 0.2)
-		(size 2.2 0.65)
-		(layers "F.Cu" "F.Paste" "F.Mask")
-		(solder_mask_margin 0.1016)
-		(thermal_bridge_angle 0)
-		(uuid "52cd77e0-3340-485d-8f5d-38689cb098e0")
-	)
-	(pad "-" smd rect
+	(pad "1" smd rect
 		(at -1.8 0.2)
 		(size 2.2 0.65)
 		(layers "F.Cu" "F.Paste" "F.Mask")
 		(solder_mask_margin 0.1016)
 		(thermal_bridge_angle 0)
 		(uuid "123e9e3e-fd49-4fe0-b0bf-7d18b1da5262")
+	)
+	(pad "2" smd rect
+		(at 1.9 0.2)
+		(size 2.2 0.65)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(solder_mask_margin 0.1016)
+		(thermal_bridge_angle 0)
+		(uuid "52cd77e0-3340-485d-8f5d-38689cb098e0")
 	)
 )
