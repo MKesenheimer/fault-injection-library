@@ -67,7 +67,7 @@ upload --port /dev/<rpi-tty-port> <script.py>
 To carry out a fault injection attack with the Raspberry Pi Pico on another microcontroller, the following setup can be used.
 
 First, we connect the Pico Glitcher and a target as follows:
-![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/example_bb.png)
+![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/fritzing/example_bb.png)
 Note that the trigger input is connected directly to the reset line.
 As the reset is released from the device, the trigger signal is sent.
 
@@ -100,7 +100,7 @@ This attack has been first described by [SEC consult](https://sec-consult.com/bl
 However, to glitch these devices successully, no expensive hardware is necessary, as it is demonstrated with the following scripts.
 
 Connect the Pico Glitcher and the STM32 target according to the following schematic:
-![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/example2_bb.png)
+![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/fritzing/example2_bb.png)
 Here, the trigger line is connected to the UART-TX line, since we want to trigger on a specific UART word that is sent during the bootloader stage.
 Furthermore, "Boot0" pin of the STM32 needs to be pulled high in order to activate the bootloader.
 This pin is exposed on the Nucleo header.
