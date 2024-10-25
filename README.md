@@ -167,8 +167,8 @@ The assembled and fully functional board is shown in the following figure:
 
 ```
 cd fault-injection-lib
-pip install twine
+pip install --upgrade build
 rm -rf dist
-python setup.py sdist bdist_wheel
+python -m build
 twine upload --repository pypi dist/*
 ```
