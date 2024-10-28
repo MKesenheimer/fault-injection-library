@@ -7,6 +7,7 @@ nav:
   - Findus: findus.md
   - BootloaderCom: bootloadercom.md
   - mpGlitcher: mpglitcher.md
+  - Customize your Pico Glitcher: code.md
 theme: readthedocs
 plugins:
   - search
