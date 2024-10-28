@@ -4,6 +4,8 @@ This library is intended to make fault injection attacks against microcontroller
 This software offers an easy entry point to carry out your own attacks against microcontrollers, SoCs and CPUs.
 With the provided and easy to use functions and classes, fault injection projects can be realized quickly.
 
+![Pico Glitcher Board](images/pgfpv1.1-1.jpg)
+
 This library is based on [TAoFI-FaultLib](https://github.com/raelize/TAoFI-FaultLib).
 However, several new features have been implemented.
 For example, the original library was developed to work with the [ChipWhisperer-Husky](https://rtfm.newae.com/Capture/ChipWhisperer-Husky/) only.
