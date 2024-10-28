@@ -754,20 +754,20 @@ class HuskyGlitcher(Glitcher):
     Methods:
         __init__: Default constructor. Does nothing in this case.
         init: Default initialization procedure.
-        arm: Arm the PicoGlitcher and wait for trigger condition.
+        arm: Arm the Husky and wait for trigger condition.
         capture: Captures trace. Scope must be armed before capturing.
         block: Block the main script until trigger condition is met. Times out.
         disable: Disables glitch and glitch outputs.
         enable: Enables glitch and glitch outputs.
-        reset: Reset the target via the PicoGlitcher's `RESET` output.
-        power_cycle_target: Power cycle the target via the PicoGlitcher `VTARGET` output.
-        power_cycle_reset: Power cycle and reset the target via the PicoGlitcher `RESET` and `VTARGET` output.
+        reset: Reset the target via the Husky's `RESET` output.
+        power_cycle_target: Power cycle the target via the Husky `VTARGET` output.
+        power_cycle_reset: Power cycle and reset the target via the Husky `RESET` and `VTARGET` output.
         reset_and_eat_it_all: Reset the target and flush the serial buffers.
         reset_wait: Reset the target and read from serial.
         set_lpglitch: Enable low-power MOSFET for glitch generation.
         set_hpglitch: Enable high-power MOSFET for glitch generation.
-        rising_edge_trigger: Configure the PicoGlitcher to trigger on a rising edge on the `TRIGGER` line.
-        uart_trigger: Configure the PicoGlitcher to trigger when a specific byte pattern is observed on the `TRIGGER` line.
+        rising_edge_trigger: Configure the Husky to trigger on a rising edge on the `TRIGGER` line.
+        uart_trigger: Configure the Husky to trigger when a specific byte pattern is observed on the `TRIGGER` line.
         disconnect: Disconnects the Husky.
         reconnect: Disconnects and reconnects the Husky.
         reconnect_with_uart: Disconnects and reconnects the Husky. Husky is set up for UART glitching.
@@ -1039,7 +1039,6 @@ class HuskyGlitcher(Glitcher):
         Default deconstructor. Disconnects Husky.
         """
         self.disconnect()
-
 
 class ProGlitcher(Glitcher):
     def __init__(self):
