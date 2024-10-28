@@ -9,7 +9,7 @@
 # -> Connect Trigger input with Reset.
 # -> Between Glitch and VTarget, connect a 10 Ohm resistor (this is the test target).
 # -> Run the script:
-# python pico-glitcher-test.py --rpico /dev/tty.usbmodem1101 --delay 100 100 --length 100 100
+# python pico-glitcher.py --rpico /dev/tty.usbmodem1101 --delay 100 100 --length 100 100
 # -> You should now be able to observe the glitches with a oscilloscope on the 10 Ohm resistor.
 # -> measure the expected delay and glitch length.
 

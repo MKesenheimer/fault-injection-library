@@ -3,6 +3,7 @@ nav:
   - Home: index.md
   - Overview: overview.md
   - Getting Started: getting_started.md
+  - Examples: examples.md
   - Findus: findus.md
   - BootloaderCom: bootloadercom.md
   - mpGlitcher: mpglitcher.md

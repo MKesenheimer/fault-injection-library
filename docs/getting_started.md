@@ -30,6 +30,11 @@ python
 ...
 ```
 
+The next step is to copy an existing glitching script and to adapt it to your needs.
+Start by copying [https://github.com/MKesenheimer/fault-injection-library/blob/master/example/pico-glitcher.py](https://github.com/MKesenheimer/fault-injection-library/blob/master/example/pico-glitcher.py). More example projects are located at [https://github.com/MKesenheimer/fault-injection-library/tree/master/projects](https://github.com/MKesenheimer/fault-injection-library/tree/master/projects).
+
+See [examples](examples.md) for more information how to use findus and the Pico Glitcher.
+
 ## Updating the Pico Glitcher firmware
 
 Your Pico Glitcher should come with the latest firmware already installed. If not, follow the following procedure to update the software on the Pico Glitcher.
@@ -82,8 +87,6 @@ upload --port /dev/<rpi-tty-port> mpGlitcher.py
 
 Your Pico Glitcher should now be ready to perform fault-injection attacks.
 
-
-
 ## Building from source
 
 If you want to get involved in the development or to have access to all the resources of this repository, clone the findus library:
@@ -103,3 +106,5 @@ pip install .
 
 The next step is to copy an existing glitching script and to adapt it to your needs.
 Start by copying `fault-injection-library/example/pico-glitcher.py`. More example projects are located at `fault-injection-library/projects`.
+
+See [examples](examples.md) for more information how to use findus and the Pico Glitcher.
