@@ -12,6 +12,7 @@ __pycache__
 *.org
 *.dsl
 *.egg-info
+*.xcf
 build
 dist
 docs/_build
