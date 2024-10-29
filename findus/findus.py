@@ -623,9 +623,10 @@ class PicoGlitcher(Glitcher):
     def power_cycle_target(self, power_cycle_time:float = 0.2):
         """
         Power cycle the target via the PicoGlitcher `VTARGET` output.
+        If available, target is power-cycled by the external power supply RD6006.
         
         Parameters:
-            power_cycle_time: Time how long the power supply is cut. If `ext_power` is defined, the external power supply is cycled.
+            power_cycle_time: Time how long the power supply is cut. If `ext_power` is defined, the external power supply (RD6006) is cycled.
         """
         if self.power_supply is not None:
             self.power_supply.power_cycle_target(power_cycle_time)
@@ -708,7 +709,7 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.set_hpglitch()
 
-    def rising_edge_trigger(self, dead_time:float, pin:str):
+    def rising_edge_trigger(self, dead_time:float = 0, pin:str = "reset"):
         """
         Configure the PicoGlitcher to trigger on a rising edge on the `TRIGGER` line.
         
@@ -743,6 +744,8 @@ class HuskyGlitcher(Glitcher):
         ...
         # one shot glitching
         glitcher.arm(delay, length)
+        self.glitcher.block(timeout=1)
+
         # reset target for 0.01 seconds (the rising edge on reset line triggers the glitch)
         glitcher.reset(0.01)
         # read the response from the device (for example UART, SWD, etc.)
@@ -791,8 +794,8 @@ class HuskyGlitcher(Glitcher):
         - Use the high-power crowbar MOSFET.
 
         Parameters:
-            ext_power: Port identifier of the external power supply (RD6006). If None, target is assumed to be supplied by `VTARGET` of the PicoGlitcher.
-            ext_power_voltage: Supply voltage of the external power supply. Must be used in combination with `ext_power`. You can not control the supply voltage `VTARGET` of the PicoGlitcher with this parameter.
+            ext_power: Port identifier of the external power supply (RD6006). If None, target is assumed to be supplied by a separate voltage source.
+            ext_power_voltage: Supply voltage of the external power supply. Must be used in combination with `ext_power`.
         """
         self.scope = cw.scope()
         self.scope.clock.adc_mul             = 1
@@ -834,8 +837,8 @@ class HuskyGlitcher(Glitcher):
 
     def capture(self) -> bool:
         """
-        Captures trace. Scope must be armed before capturing.
-        Blocks until scope triggered (or times out), then disarms scope and copies data back.
+        Captures trace. Glitcher must be armed before capturing.
+        Blocks until glitcher triggered (or times out), then disarms glitcher and copies data back.
 
         Returns:
             True if capture timed out, false if it didn't.
@@ -854,8 +857,6 @@ class HuskyGlitcher(Glitcher):
             Timout exception.
         """
         # TODO: set the timeout of scope.capture.
-        # blocks until scope triggered (or times out),
-        # then disarms scope and copies data back.
         if self.scope.capture():
             raise Exception("Function execution timed out!")
 
@@ -968,9 +969,9 @@ class HuskyGlitcher(Glitcher):
         self.scope.io.glitch_hp = True
         self.scope.io.glitch_lp = False
 
-    def rising_edge_trigger(self, dead_time:float, pin:str):
+    def rising_edge_trigger(self, dead_time:float = 0, pin:str = ""):
         """
-        Configure the PicoGlitcher to trigger on a rising edge on the `TRIGGER` line.
+        Configure the ChipWhisperer Pro to trigger on a rising edge on the `TRIGGER` line (`tio4` pin).
         Note: `dead_time` and `pin` have no functions here (see `PicoGlitcher.rising_edge_trigger`).
 
         Parameters:
@@ -1036,15 +1037,78 @@ class HuskyGlitcher(Glitcher):
 
     def __del__(self):
         """
-        Default deconstructor. Disconnects Husky.
+        Default deconstructor. Disconnects the Husky.
         """
         self.disconnect()
 
 class ProGlitcher(Glitcher):
+    """
+    Class giving access to the functions of the Chipwhisperer Pro. Derived from Glitcher class.
+    Code snippet:
+
+        from findus import ProGlitcher
+        glitcher = ProGlitcher()
+        glitcher.init()
+        # set up database, define delay and length
+        ...
+        # one shot glitching
+        glitcher.arm(delay, length)
+        # reset target for 0.01 seconds (the rising edge on reset line triggers the glitch)
+        glitcher.reset(0.01)
+        self.glitcher.block(timeout=1)
+
+        # read the response from the device (for example UART, SWD, etc.)
+        response = ...
+        # classify the response and put into database
+        color = glitcher.classify(response)
+        database.insert(experiment_id, delay, length, color, response)
+
+        # reset crowbar transistors
+        self.glitcher.reset_glitch()
+
+    Methods:
+        __init__: Default constructor. Does nothing in this case.
+        init: Default initialization procedure.
+        arm: Arm the ChipWhisperer Pro and wait for trigger condition.
+        capture: Captures trace. Scope must be armed before capturing.
+        block: Block the main script until trigger condition is met. Times out.
+        reset_glitch: Disables and enables crowbar MOSFETs. Waits `delay` seconds in between.
+        reset: Reset the target via the ChipWhisperer Pro's `RESET` output.
+        power_cycle_target: Power cycle the target via the ChipWhisperer Pro `VTARGET` output.
+        power_cycle_reset: Power cycle and reset the target via the ChipWhisperer Pro `RESET` and `VTARGET` output.
+        reset_and_eat_it_all: Reset the target and flush the serial buffers.
+        reset_wait: Reset the target and read from serial.
+        set_lpglitch: Enable low-power MOSFET for glitch generation.
+        set_hpglitch: Enable high-power MOSFET for glitch generation.
+        rising_edge_trigger: Configure the ChipWhisperer Pro to trigger on a rising edge on the `TRIGGER` line.
+        uart_trigger: Configure the ChipWhisperer Pro to trigger when a specific byte pattern is observed on the `TRIGGER` line.
+        disconnect: Disconnects the ChipWhisperer Pro.
+        reconnect: Disconnects and reconnects the ChipWhisperer Pro.
+        reconnect_with_uart: Disconnects and reconnects the ChipWhisperer Pro. The ChipWhisperer Pro is set up for UART glitching.
+        __del__: Default deconstructor. Disconnects the ChipWhisperer Pro.
+    """
+
     def __init__(self):
+        """
+        Default constructor. Does nothing in this case.
+        """
         self.scope = None
 
-    def init(self, ext_power=None, ext_power_voltage=3.3):
+    def init(self, ext_power:str = None, ext_power_voltage:float = 3.3):
+        """
+        Default initialization procedure of the ChipWhisperer Pro. Default configuration is:
+
+        - Set the Pro's system clock to 100 MHz.
+        - Set the trigger input to rising-edge trigger on `TIO4` pin.
+        - Set reset out on `nrst` pin.
+        - Set serial RX on `TIO1` and TX on `TIO2` pin (necessary for UART-trigger).
+        - Use the high-power crowbar MOSFET.
+
+        Parameters:
+            ext_power: Port identifier of the external power supply (RD6006). If None, target is assumed to be supplied by the voltage supplies of the ChipWhisperer Pro UFO board.
+            ext_power_voltage: Supply voltage of the external power supply. Must be used in combination with `ext_power`.
+        """
+
         try:
             self.scope = cw.scope()
         except Exception as e:
@@ -1057,8 +1121,8 @@ class ProGlitcher(Glitcher):
         self.scope.adc.basic_mode           = "rising_edge"
         self.scope.adc.samples              = 10000
         self.scope.adc.offset               = 0
-        self.scope.io.tio1                  = 'high_z'
-        self.scope.io.tio4                  = 'high_z'
+        self.scope.io.tio1                  = 'high_z'  # UART RX
+        self.scope.io.tio4                  = 'high_z'  # TRIGGER
         self.scope.trigger.triggers         = 'tio4'
         self.scope.io.hs2                   = "disabled"
         self.scope.io.glitch_hp             = True
@@ -1074,7 +1138,51 @@ class ProGlitcher(Glitcher):
         else:
             self.power_supply = None
 
-    def reset_glitch(self, delay=0.005):
+    def arm(self, delay:int, length:int):
+        """
+        Arm the ChipWhisperer Pro and wait for the trigger condition. The trigger condition can either be trigger when the reset on the target is released or when a certain pattern is observed in the serial communication.
+
+        Parameters:
+            delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 10 nano seconds.
+            length: Length of the glitch in nano seconds. Expect a resolution of about 10 nano seconds.
+        """
+        self.scope.glitch.ext_offset = delay // (int(1e9) // int(self.scope.clock.clkgen_freq))
+        self.scope.glitch.repeat = length // (int(1e9) // int(self.scope.clock.clkgen_freq))
+        self.scope.arm()
+
+    def capture(self) -> bool:
+        """
+        Captures trace. Glitcher must be armed before capturing.
+        Blocks until glitcher triggered (or times out), then disarms glitcher and copies data back.
+
+        Returns:
+            True if capture timed out, false if it didn't.
+        Raises:
+            IOError - Unknown failure.
+        """
+        return self.scope.capture()
+
+    def block(self, timeout:float = 1):
+        """
+        Block until trigger condition is met. Raises an exception if times out.
+
+        Parameters:
+            timeout: Time after the block is released (not implemented yet).
+        Raises:
+            Timout exception.
+        """
+        # TODO: set the timeout of scope.capture
+        if self.scope.capture():
+            raise Exception("Function execution timed out!")
+
+    def reset_glitch(self, delay:float = 0.005):
+        """
+        Disables and enables crowbar MOSFETs. Waits `delay` seconds in between.
+        Note: Up until now, only the high-power MOSFET is disabled and enabled again.
+
+        Parameters:
+            delay: Delay between disabling and re-enabling the crowbar MOSFETs.
+        """
         # TODO: control hp and lp externally
         self.scope.io.glitch_hp = False
         self.scope.io.glitch_lp = False
@@ -1082,22 +1190,25 @@ class ProGlitcher(Glitcher):
         self.scope.io.glitch_hp = True
         self.scope.io.glitch_lp = False
 
-    def arm(self, delay, length):
-        self.scope.glitch.ext_offset = delay // (int(1e9) // int(self.scope.clock.clkgen_freq))
-        self.scope.glitch.repeat = length // (int(1e9) // int(self.scope.clock.clkgen_freq))
-        self.scope.arm()
+    def reset(self, reset_time:float = 0.2):
+        """
+        Reset the target via the ChipWhisperer Pro's `nrst` output.
 
-    def capture(self):
-        self.scope.capture()
+        Parameters:
+            reset_time: Time how long the target is held in reset.
+        """
+        self.scope.io.nrst = 'low'
+        time.sleep(reset_time)
+        self.scope.io.nrst = 'high_z'
 
-    def block(self, timeout=1):
-        # TODO: set the timeout of scope.capture
-        # blocks until scope triggered (or times out),
-        # then disarms scope and copies data back.
-        if self.scope.capture():
-            raise Exception("Function execution timed out!")
-
-    def power_cycle_target(self, power_cycle_time=0.2):
+    def power_cycle_target(self, power_cycle_time:float = 0.2):
+        """
+        Power cycle the target via the ChipWhisperer Pro's UFO board.
+        If available, target is power-cycled by the external power supply RD6006.
+        
+        Parameters:
+            power_cycle_time: Time how long the power supply is cut. If `ext_power` is defined, the external power supply (RD6006) is cycled.
+        """
         if self.power_supply is not None:
             self.power_supply.power_cycle_target(power_cycle_time)
         else:
@@ -1105,12 +1216,13 @@ class ProGlitcher(Glitcher):
             time.sleep(power_cycle_time)
             self.scope.io.target_pwr = True
 
-    def reset(self, reset_time=0.2):
-        self.scope.io.nrst = 'low'
-        time.sleep(reset_time)
-        self.scope.io.nrst = 'high_z'
-
-    def power_cycle_reset(self, power_cycle_time=0.2):
+    def power_cycle_reset(self, power_cycle_time:float = 0.2):
+        """
+        Power cycle and reset the target via the ChipWhisperer Pro's UFO board and `nrst` output. Can also be used to define sharper trigger conditions via the `nrst` line.
+        
+        Parameters:
+            power_cycle_time: Time how long the power supply is cut. If `ext_power` is defined, the external power supply is cycled.
+        """
         if self.power_supply is not None:
             self.power_supply.disable_vtarget()
             self.scope.io.nrst = False
@@ -1124,42 +1236,85 @@ class ProGlitcher(Glitcher):
             self.scope.io.nrst = "high_z"
             self.scope.io.target_pwr = True
 
-    def reset_and_eat_it_all(self, target, target_timeout=0.3):
+    def reset_and_eat_it_all(self, target:serial.Serial, target_timeout:float = 0.3):
+        """
+        Reset the target via the ChipWhisperer Pro's `nrst` output and flush the serial buffers.
+
+        Parameters:
+            target: Serial communication object (usually defined as `target = serial.Serial(...)`).
+            target_timeout: Time-out of the serial communication. After this time, reading from the serial connection is canceled and it is assumed that there is no more garbage on the line.
+        """
         self.scope.io.nrst = 'low'
         target.ser.timeout = target_timeout
         target.read(4096)
         target.ser.timeout = target.timeout
         self.scope.io.nrst = 'high_z'
 
-    def reset_wait(self, target, token, reset_time=0.2, debug=False):
+    def reset_wait(self, target:serial.Serial, token:bytes, reset_time:float = 0.2, debug:bool = False) -> str:
+        """
+        Reset the target via the ChipWhisperer Pro's `nrst` output and wait until the target responds (read from serial).
+
+        Parameters:
+            target: Serial communication object (usually defined as `target = serial.Serial(...)`).
+            token: Expected response from target. Read from serial multiple times until target responds.
+            reset_time:  Time how long the target is held under reset.
+            debug: If `true`, more output is given.
+
+        Returns:
+            Returns the target's response.
+        """
         self.scope.io.nrst = 'low'
         time.sleep(reset_time)
         self.scope.io.nrst = 'high_z'
-
         response = target.read(4096)
         for _ in range(0, 5):
             if token in response:
                 break
             response += target.read(4096)
-
         if debug:
             for line in response.splitlines():
                 print('\t', line.decode())
+        return response
 
     def set_lpglitch(self):
+        """
+        Enable the low-power crowbar MOSFET for glitch generation.
+
+        The glitch output is an SMA-connected output line that is normally connected to a target's power rails. If this setting is enabled, a low-powered MOSFET shorts the power-rail to ground when the glitch module's output is active.
+        """
         self.scope.io.glitch_hp = False
         self.scope.io.glitch_lp = True
 
     def set_hpglitch(self):
+        """
+        Enable the high-power crowbar MOSFET for glitch generation.
+
+        The glitch output is an SMA-connected output line that is normally connected to a target's power rails. If this setting is enabled, a high-powered MOSFET shorts the power-rail to ground when the glitch module's output is active.
+        """
         self.scope.io.glitch_hp = True
         self.scope.io.glitch_lp = False
 
-    def rising_edge_trigger(self, dead_time, pin):
-        # Note: dead_time and pin have no functions here (see PicoGlitcher.rising_edge_trigger)
+    def rising_edge_trigger(self, dead_time:float = 0, pin:str = ""):
+        """
+        Configure the PicoGlitcher to trigger on a rising edge on the `TRIGGER` line (`tio4` pin).
+        Note: `dead_time` and `pin` have no functions here (see `PicoGlitcher.rising_edge_trigger`).
+
+        Parameters:
+            dead_time: Unused.
+            pin: Unused.
+        """
         self.scope.io.tio4 = 'high_z'
         self.scope.trigger.triggers = 'tio4'
 
-    def uart_trigger(self, pattern, baudrate:int = 115200):
+    def uart_trigger(self, pattern:int, baudrate:int = 115200):
+        """
+        Configure the ChipWhisperer Pro to trigger when a specific byte pattern is observed on the RX line (`tio1` pin).
+        Note: To comply with the STM32 bootloader, this is currently configured for even parity UART.
+
+        Parameters:
+            pattern: Byte pattern that is transmitted on the serial lines to trigger on. For example `0x11`.
+            baudrate: The baudrate of the serial communication.
+        """
         # UART trigger:
         # even parity problem
         # see: https://sec-consult.com/blog/detail/secglitcher-part-1-reproducible-voltage-glitching-on-stm32-microcontrollers/
@@ -1178,6 +1333,12 @@ class ProGlitcher(Glitcher):
         #self.scope.io.hs2 = "clkgen"
 
     def disconnect(self) -> bool:
+        """
+        Disconnects the ChipWhisperer Pro.
+
+        Returns:
+            True if the disconnection was successful, False otherwise.
+        """
         if self.scope is not None:
             print("[+] Disconnecting ChipWhisperer Pro")
             #self.scope.io.glitch_hp = False
@@ -1185,20 +1346,51 @@ class ProGlitcher(Glitcher):
             return self.scope.dis()
         return False
 
-    def reconnect(self, disconnect_wait=0.5):
+    def reconnect(self, disconnect_wait:float = 0.5):
+        """
+        Disconnects and reconnects the ChipWhisperer Pro. The method `ProGlitcher.init()` for default initialization is called.
+
+        Parameters:
+            disconnect_wait: Time to wait during disconnects.
+        """
         self.disconnect()
         time.sleep(disconnect_wait)
         self.init()
 
-    def reconnect_with_uart(self, pattern, baudrate:int = 115200, disconnect_wait=0.5):
+    def reconnect_with_uart(self, pattern:int, baudrate:int = 115200, disconnect_wait:float = 0.5):
+        """
+        Disconnects and reconnects the ChipWhisperer Pro. The ChipWhisperer Pro is set up for UART glitching.
+
+        Parameters:
+            disconnect_wait: Time to wait during disconnects.
+        """
         self.disconnect()
         time.sleep(disconnect_wait)
         self.init()
         self.uart_trigger(pattern, baudrate)
 
     def __del__(self):
+        """
+        Default deconstructor. Disconnects the ChipWhisperer Pro.
+        """
         self.disconnect()
 
 class Helper():
-    def timestamp():
+    """
+    Helper class that provides useful functions.
+    Example usage:
+    
+        from findus import Helper as helper
+        filename = f"{helper.timestamp()}_memory_dump.bin"
+
+    Methods:
+        timestamp: Provides the current timestamp in a file-friendly format.
+    """
+    def timestamp() -> str:
+        """
+        Provides the current timestamp in a file-friendly format.
+        
+        Returns:
+            Returns the current timestamp in the format %Y-%m-%d_%H-%M-%S.
+        """
         return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
