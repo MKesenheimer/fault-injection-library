@@ -82,7 +82,7 @@ Take note of the device path. Next upload `mpGlitcher.py` via the following comm
 
 ```bash
 cd findus
-upload --port /dev/<rpi-tty-port> mpGlitcher.py
+upload --port /dev/<rpi-tty-port> --script mpGlitcher.py
 ```
 
 Your Pico Glitcher should now be ready to perform fault-injection attacks.

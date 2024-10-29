@@ -4,6 +4,7 @@ nav:
   - Overview: overview.md
   - Getting Started: getting_started.md
   - Examples: examples.md
+  - Command Line Tools: cli.md
   - Findus: findus.md
   - BootloaderCom: bootloadercom.md
   - mpGlitcher: mpglitcher.md

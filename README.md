@@ -57,7 +57,7 @@ Add the [Micropython firmware](https://projects.raspberrypi.org/en/projects/gett
 In general the following script can be used to upload Micropython scripts to the Raspberry Pi Pico.
 
 ```bash
-upload --port /dev/<rpi-tty-port> <script.py>
+upload --port /dev/<rpi-tty-port> --script <script.py>
 ```
 
 ## Executing Raspberry Pi Pico glitcher example implementation

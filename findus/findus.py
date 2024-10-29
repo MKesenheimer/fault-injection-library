@@ -7,7 +7,7 @@
 # If not, please write to: m.kesenheimer@gmx.net.
 
 """
-Python library to perform fault-injection attacks on embedded devices
+Findus is a Python library to perform fault-injection attacks on embedded devices. It was developed for the PicoGlitcher, however, the ChipWhisperer Pro and the ChipWhisperer Husky is also supported.
 
 This is the documentation of the findus module and all its classes.
 """
