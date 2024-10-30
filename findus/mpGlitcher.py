@@ -128,9 +128,11 @@ class MicroPythonScript():
 
     Methods:
         __init__: Default constructor.
-        set_frequency: 
+        set_frequency: Set the CPU frequency of the Raspberry Pi Pico.
+        get_frequency: Get the current CPU frequency of the Raspberry Pi Pico.
         set_trigger: 
         set_baudrate:
+        set_number_of_bits:
         set_pattern_match:
         enable_vtarget:
         power_cycle_target:
@@ -184,6 +186,9 @@ class MicroPythonScript():
     def set_frequency(self, frequency=200_000_000):
         machine.freq(frequency)
         self.frequency = machine.freq()
+
+    def get_frequency(self):
+        print(machine.freq())
 
     def set_trigger(self, trigger="tio"):
         self.trigger = trigger

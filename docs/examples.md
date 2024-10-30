@@ -22,6 +22,23 @@ python pico-glitcher.py --rpico /dev/<rpi-tty-port> --delay 1000 1000 --length 1
 You should now be able to observe the glitches with an oscilloscope on the 10 Ohm resistor.
 Measure the expected delay and glitch length with the oscilloscope.
 
+## UART Trigger
+
+- Connect 'TRIGGER' input to 'RX' and 'TX' of a USB-to-UART adapter
+- Between 'GLITCH' and 'VTARGET', connect a 10 Ohm resistor (this is the test target in this case).
+- Optionally connect channel 1 of an oscilloscope to 'RESET' and channel 2 to 'GLITCH'.
+
+![Example setup](images/test-example-uart.png)
+
+Next, run the test script `pico-glitcher-uart.py` located in `fault-injection-library/example`:
+
+```bash
+cd example
+python pico-glitcher-uart.py --rpico /dev/<rpi-tty-port> --target /dev/<target-tty-port> --delay 1000 1000 --length 100 100
+```
+
+You should now be able to observe the glitches with an oscilloscope on the 10 Ohm resistor.
+Measure the expected delay and glitch length with the oscilloscope.
 
 ## Airtag Glitching
 

@@ -319,6 +319,9 @@ class PicoGlitcherInterface(MicroPythonScript):
     def set_frequency(self, frequency:int):
         self.pyb.exec(f'mp.set_frequency({frequency})')
 
+    def get_frequency(self):
+        return self.pyb.exec(f'mp.get_frequency()')
+
     def set_baudrate(self, baud:int):
         self.pyb.exec(f'mp.set_baudrate({baud})')
 
@@ -557,6 +560,8 @@ class PicoGlitcher(Glitcher):
         set_hpglitch: Enable high-power MOSFET for glitch generation.
         rising_edge_trigger: Configure the PicoGlitcher to trigger on a rising edge on the `TRIGGER` line.
         uart_trigger: Configure the PicoGlitcher to trigger when a specific byte pattern is observed on the `TRIGGER` line.
+        set_cpu_frequency: Set the CPU frequency of the Raspberry Pi Pico.
+        get_cpu_frequency: Get the current CPU frequency of the Raspberry Pi Pico.
     """
     def __init__(self):
         """
@@ -736,6 +741,24 @@ class PicoGlitcher(Glitcher):
         self.pico_glitcher.set_baudrate(baudrate)
         self.pico_glitcher.set_number_of_bits(number_of_bits)
         self.pico_glitcher.set_pattern_match(pattern)
+
+    def set_cpu_frequency(self, frequency:int = 200_000_000):
+        """
+        Set the CPU frequency of the Raspberry Pi Pico.
+        
+        Parameters:
+            frequency: CPU frequency.
+        """
+        self.pico_glitcher.set_frequency(frequency)
+
+    def get_cpu_frequency(self):
+        """
+        Get the current CPU frequency of the Raspberry Pi Pico.
+        
+        Returns:
+            Returns the CPU frequency.
+        """
+        return self.pico_glitcher.get_frequency()
 
 class HuskyGlitcher(Glitcher):
     """
