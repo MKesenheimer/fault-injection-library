@@ -15,9 +15,6 @@ from rp2 import asm_pio, PIO, StateMachine
 from machine import Pin
 import time
 
-# number of bits for UART
-BITS = 8
-
 @asm_pio(set_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
 def glitch_tio_trigger():
     # block until delay received
@@ -94,17 +91,20 @@ def glitch_uart_trigger():
     push(block)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
-def uart_trigger(BITS=BITS):
+def uart_trigger():
     # block until pattern received
     pull(block)
     mov(x, osr)
+    # block until number of bits (self.number_of_bits - 1) received
+    pull(block)
+    mov(y, osr)
 
     label("start")
     mov(isr, null)
     # Wait for start bit
     wait(0, pin, 0)
-    # Preload bit counter, delay until eye of first data bit
-    set(y, BITS - 1) [10]
+    # delay until eye of first data bit
+    nop() [10]
     # Loop 9 times
     label("bitloop")
     # Sample data, shift sampled data into ISR
@@ -128,6 +128,21 @@ class MicroPythonScript():
 
     Methods:
         __init__: Default constructor.
+        set_frequency: 
+        set_trigger: 
+        set_baudrate:
+        set_pattern_match:
+        enable_vtarget:
+        power_cycle_target:
+        reset_target:
+        release_reset:
+        reset:
+        set_lpglitch:
+        set_hpglitch:
+        set_dead_zone:
+        arm:
+        block:
+        get_sm2_output:
     """
     def __init__(self):
         self.sm1 = None
@@ -135,6 +150,7 @@ class MicroPythonScript():
         self.frequency = None
         self.trigger = None
         self.baudrate = 115200
+        self.number_of_bits = 8
         self.set_frequency(200_000_000) # overclocking supposedly works, script runs also with 270_000_000
         # LED
         self.led = Pin("LED", Pin.OUT)
@@ -174,6 +190,9 @@ class MicroPythonScript():
 
     def set_baudrate(self, baud=115200):
         self.baudrate = baud
+
+    def set_number_of_bits(self, number_of_bits:int = 8):
+        self.number_of_bits = number_of_bits
 
     def set_pattern_match(self, pattern):
         self.pattern = pattern
@@ -252,8 +271,10 @@ class MicroPythonScript():
             self.sm2 = StateMachine(2, uart_trigger, freq=self.baudrate * 8, in_base=self.pin_trigger)
             self.sm2.active(1)
             # push pattern into the fifo of the statemachine
-            pattern = self.pattern << (32 - BITS)
+            pattern = self.pattern << (32 - self.number_of_bits)
             self.sm2.put(pattern)
+            # push number of bits into the fifo of the statemachine (self.number_of_bits - 1 is an optimization here)
+            self.sm2.put(self.number_of_bits - 1)
 
     def block(self, timeout):
         if self.sm1 is not None:

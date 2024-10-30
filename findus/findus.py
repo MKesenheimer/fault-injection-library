@@ -322,6 +322,9 @@ class PicoGlitcherInterface(MicroPythonScript):
     def set_baudrate(self, baud:int):
         self.pyb.exec(f'mp.set_baudrate({baud})')
 
+    def set_number_of_bits(self, number_of_bits:int):
+        self.pyb.exec(f'mp.set_number_of_bits({number_of_bits})')
+
     def set_pattern_match(self, pattern:int):
         self.pyb.exec(f'mp.set_pattern_match({pattern})')
 
@@ -720,16 +723,18 @@ class PicoGlitcher(Glitcher):
         self.pico_glitcher.set_trigger("tio")
         self.pico_glitcher.set_dead_zone(dead_time, pin)
 
-    def uart_trigger(self, pattern:int, baudrate:int = 115200):
+    def uart_trigger(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8):
         """
         Configure the PicoGlitcher to trigger when a specific byte pattern is observed on the `TRIGGER` line.
         
         Parameters:
             pattern: Byte pattern that is transmitted on the serial lines to trigger on. For example `0x11`.
             baudrate: The baudrate of the serial communication.
+            number_of_bits: The number of bits of the UART payload.
         """
         self.pico_glitcher.set_trigger("uart")
         self.pico_glitcher.set_baudrate(baudrate)
+        self.pico_glitcher.set_number_of_bits(number_of_bits)
         self.pico_glitcher.set_pattern_match(pattern)
 
 class HuskyGlitcher(Glitcher):
@@ -982,14 +987,16 @@ class HuskyGlitcher(Glitcher):
         self.scope.io.tio4 = 'high_z'
         self.scope.trigger.triggers = 'tio4'
 
-    def uart_trigger(self, pattern:int, baudrate:int = 115200):
+    def uart_trigger(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8):
         """
         Configure the Husky to trigger when a specific byte pattern is observed on the RX line (`tio1` pin).
 
         Parameters:
             pattern: Byte pattern that is transmitted on the serial lines to trigger on. For example `0x11`.
             baudrate: The baudrate of the serial communication.
+            number_of_bits: The number of bits of the UART payload (not implemented yet, default is 8).
         """
+        # TODO: implement the number of bits.
         self.scope.io.hs2 = "clkgen"
         self.scope.trigger.module = 'UART'
         self.scope.trigger.triggers = 'tio1'
@@ -1023,17 +1030,20 @@ class HuskyGlitcher(Glitcher):
         time.sleep(disconnect_wait)
         self.init()
 
-    def reconnect_with_uart(self, pattern:int, baudrate:int = 115200, disconnect_wait:float = 0.5):
+    def reconnect_with_uart(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8, disconnect_wait:float = 0.5):
         """
         Disconnects and reconnects the Husky. Husky is set up for UART glitching.
 
         Parameters:
+            pattern: Byte pattern that is transmitted on the serial lines to trigger on. For example `0x11`.
+            baudrate: The baudrate of the serial communication.
+            number_of_bits: The number of bits of the UART payload (not implemented yet, default is 8).
             disconnect_wait: Time to wait during disconnects.
         """
         self.disconnect()
         time.sleep(disconnect_wait)
         self.init()
-        self.uart_trigger(pattern, baudrate)
+        self.uart_trigger(pattern, baudrate, number_of_bits)
 
     def __del__(self):
         """
@@ -1306,7 +1316,7 @@ class ProGlitcher(Glitcher):
         self.scope.io.tio4 = 'high_z'
         self.scope.trigger.triggers = 'tio4'
 
-    def uart_trigger(self, pattern:int, baudrate:int = 115200):
+    def uart_trigger(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8):
         """
         Configure the ChipWhisperer Pro to trigger when a specific byte pattern is observed on the RX line (`tio1` pin).
         Note: To comply with the STM32 bootloader, this is currently configured for even parity UART.
@@ -1314,7 +1324,9 @@ class ProGlitcher(Glitcher):
         Parameters:
             pattern: Byte pattern that is transmitted on the serial lines to trigger on. For example `0x11`.
             baudrate: The baudrate of the serial communication.
+            number_of_bits: The number of bits of the UART payload (not implemented yet, default is 8).
         """
+        # TODO: implement the number of bits.
         # UART trigger:
         # even parity problem
         # see: https://sec-consult.com/blog/detail/secglitcher-part-1-reproducible-voltage-glitching-on-stm32-microcontrollers/
@@ -1357,17 +1369,20 @@ class ProGlitcher(Glitcher):
         time.sleep(disconnect_wait)
         self.init()
 
-    def reconnect_with_uart(self, pattern:int, baudrate:int = 115200, disconnect_wait:float = 0.5):
+    def reconnect_with_uart(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8, disconnect_wait:float = 0.5):
         """
         Disconnects and reconnects the ChipWhisperer Pro. The ChipWhisperer Pro is set up for UART glitching.
 
         Parameters:
+            pattern: Byte pattern that is transmitted on the serial lines to trigger on. For example `0x11`.
+            baudrate: The baudrate of the serial communication.
+            number_of_bits: The number of bits of the UART payload (not implemented yet, default is 8).
             disconnect_wait: Time to wait during disconnects.
         """
         self.disconnect()
         time.sleep(disconnect_wait)
         self.init()
-        self.uart_trigger(pattern, baudrate)
+        self.uart_trigger(pattern, baudrate, number_of_bits)
 
     def __del__(self):
         """
