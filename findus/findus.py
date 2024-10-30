@@ -599,7 +599,7 @@ class PicoGlitcher(Glitcher):
 
     def arm(self, delay:int, length:int):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be trigger when the reset on the target is released or when a certain pattern is observed in the serial communication. 
+        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. 
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -747,11 +747,11 @@ class PicoGlitcher(Glitcher):
         Set the CPU frequency of the Raspberry Pi Pico.
         
         Parameters:
-            frequency: CPU frequency.
+            frequency: the CPU frequency.
         """
         self.pico_glitcher.set_frequency(frequency)
 
-    def get_cpu_frequency(self):
+    def get_cpu_frequency(self) -> int:
         """
         Get the current CPU frequency of the Raspberry Pi Pico.
         

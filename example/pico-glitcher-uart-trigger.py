@@ -5,6 +5,14 @@
 # You should have received a copy of the GPL3 license with this file.
 # If not, please write to: m.kesenheimer@gmx.net.
 
+# This script can be used to test the pico-glitcher.
+# -> Connect Trigger input to RX and TX of a USB-to-UART adapter.
+# -> Between Glitch and VTarget, connect a 10 Ohm resistor (this is the test target).
+# -> Run the script:
+# python pico-glitcher-uart.py --rpico /dev/tty.usbmodem1101 --target /dev/tty.usbserial --delay 100 100 --length 100 100
+# -> You should now be able to observe the glitches with a oscilloscope on the 10 Ohm resistor.
+# -> measure the expected delay and glitch length.
+
 import argparse
 import logging
 import random

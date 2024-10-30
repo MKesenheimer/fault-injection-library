@@ -127,30 +127,37 @@ class MicroPythonScript():
     MicroPython class that contains the code to access the hardware of the PicoGlitcher.
 
     Methods:
-        __init__: Default constructor.
+        __init__: Default constructor. Initializes the PicoGlitcher with the default configuration.
         set_frequency: Set the CPU frequency of the Raspberry Pi Pico.
         get_frequency: Get the current CPU frequency of the Raspberry Pi Pico.
-        set_trigger: 
-        set_baudrate:
-        set_number_of_bits:
-        set_pattern_match:
-        enable_vtarget:
-        power_cycle_target:
-        reset_target:
-        release_reset:
-        reset:
-        set_lpglitch:
-        set_hpglitch:
-        set_dead_zone:
-        arm:
-        block:
-        get_sm2_output:
+        set_trigger: Configures the PicoGlitcher which triggger condition to use.
+        set_baudrate: Set the baudrate of the UART communication in UART-trigger mode.
+        set_number_of_bits: Set the number of bits of the UART communication in UART-trigger mode.
+        set_pattern_match: Configure the PicoGlitcher to trigger when a specific byte pattern is observed on the RX line (`TRIGGER` pin).
+        enable_vtarget: Enable `VTARGET` output. Activates the PicoGlitcher's power supply for the target.
+        disable_vtarget: Disables `VTARGET` output. Disables the PicoGlitcher's power supply for the target.
+        power_cycle_target: Power cycle the target via the PicoGlitcher `VTARGET` output.
+        reset_target: Reset the target via the PicoGlitcher's `RESET` output.
+        release_reset: Release the reset on the target via the PicoGlitcher's `RESET` output.
+        reset: Reset the target via the PicoGlitcher's `RESET` output, release the reset on the target after a certain time. Disables `GLITCH_EN` output after release.
+        set_lpglitch: Enable the low-power crowbar MOSFET for glitch generation.
+        set_hpglitch: Enable the high-power crowbar MOSFET for glitch generation.
+        set_dead_zone: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
+        arm: Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. 
+        block: Block until trigger condition is met. Raises an exception if times out.
     """
     def __init__(self):
+        """
+        Default constructor.
+        Initializes the PicoGlitcher with the default configuration.
+        - Disables `VTARGET`
+        - Enables the low-power MOSFET for glitching
+        - Configures the PicoGlitcher to use the rising-edge triggger condition.
+        """
         self.sm1 = None
         self.sm2 = None
         self.frequency = None
-        self.trigger = None
+        self.trigger = "tio"
         self.baudrate = 115200
         self.number_of_bits = 8
         self.set_frequency(200_000_000) # overclocking supposedly works, script runs also with 270_000_000
@@ -179,60 +186,139 @@ class MicroPythonScript():
         # which glitching transistor to use. Default: lpglitch
         self.pin_glitch = self.pin_lpglitch
         # standard dead zone after power down
-        self.dead_time = 0.05
+        self.dead_time = 0.0
         self.pin_condition = self.pin_vtarget_en
         self.condition = 0
 
-    def set_frequency(self, frequency=200_000_000):
+    def set_frequency(self, frequency:int = 200_000_000):
+        """
+        Set the CPU frequency of the Raspberry Pi Pico.
+        
+        Parameters:
+            frequency: the CPU frequency.
+        """
         machine.freq(frequency)
         self.frequency = machine.freq()
 
-    def get_frequency(self):
+    def get_frequency(self) -> int:
+        """
+        Get the current CPU frequency of the Raspberry Pi Pico.
+        
+        Returns:
+            Returns the CPU frequency.
+        """
         print(machine.freq())
+        return machine.freq()
 
-    def set_trigger(self, trigger="tio"):
+    def set_trigger(self, trigger:str = "tio"):
+        """
+        Configures the PicoGlitcher which triggger condition to use.
+        In "tio"-mode, the PicoGlitcher triggers on a rising edge on the `TRIGGER` pin. If "uart"-mode is chosen, the PicoGlitcher listens on the `TRIGGER` pin and triggers if a specific byte pattern in the serial communication is observed.
+
+        Parameters:
+            trigger: The trigger condition to use. Either "tio" or "uart".
+        """
         self.trigger = trigger
 
-    def set_baudrate(self, baud=115200):
+    def set_baudrate(self, baud:int = 115200):
+        """
+        Set the baudrate of the UART communication in UART-trigger mode.
+
+        Parameters:
+            baud: The baudrate to use.
+        """
         self.baudrate = baud
 
     def set_number_of_bits(self, number_of_bits:int = 8):
+        """
+        Set the number of bits of the UART communication in UART-trigger mode.
+        
+        Parameters:
+            number_of_bits: The number of bits of the UART payload to use.
+        """
         self.number_of_bits = number_of_bits
 
-    def set_pattern_match(self, pattern):
+    def set_pattern_match(self, pattern:int):
+        """
+        Configure the PicoGlitcher to trigger when a specific byte pattern is observed on the RX line (`TRIGGER` pin).
+
+        Parameters:
+            pattern: Byte pattern that is transmitted on the serial lines to trigger on. For example `0x11`.
+        """
         self.pattern = pattern
 
     def enable_vtarget(self):
+        """
+        Enable `VTARGET` output. Activates the PicoGlitcher's power supply for the target.
+        """
         self.pin_vtarget_en.low()
 
     def disable_vtarget(self):
+        """
+        Disables `VTARGET` output. Disables the PicoGlitcher's power supply for the target.
+        """
         self.pin_vtarget_en.high()
 
-    def power_cycle_target(self, power_cycle_time=0.2):
+    def power_cycle_target(self, power_cycle_time:float = 0.2):
+        """
+        Power cycle the target via the PicoGlitcher `VTARGET` output.
+        
+        Parameters:
+            power_cycle_time: Time how long the power supply is cut.
+        """
         self.disable_vtarget()
         time.sleep(power_cycle_time)
         self.enable_vtarget()
         self.pin_glitch_en.low()
 
     def reset_target(self):
+        """
+        Reset the target via the PicoGlitcher's `RESET` output.
+        """
         self.pin_reset.low()
 
     def release_reset(self):
+        """
+        Release the reset on the target via the PicoGlitcher's `RESET` output.
+        """
         self.pin_reset.high()
 
-    def reset(self, reset_time=0.01):
+    def reset(self, reset_time:float = 0.01):
+        """
+        Reset the target via the PicoGlitcher's `RESET` output, release the reset on the target after a certain time. Disables `GLITCH_EN` output after release.
+        
+        Parameters:
+            reset_time: Time how long the target is held in reset.
+        """
         self.reset_target()
         time.sleep(reset_time)
         self.release_reset()
         self.pin_glitch_en.low()
 
     def set_lpglitch(self):
+        """
+        Enable the low-power crowbar MOSFET for glitch generation.
+
+        The glitch output is an SMA-connected output line that is normally connected to a target's power rails. If this setting is enabled, a low-powered MOSFET shorts the power-rail to ground when the glitch module's output is active.
+        """
         self.pin_glitch = self.pin_lpglitch
 
     def set_hpglitch(self):
+        """
+        Enable the high-power crowbar MOSFET for glitch generation.
+
+        The glitch output is an SMA-connected output line that is normally connected to a target's power rails. If this setting is enabled, a low-powered MOSFET shorts the power-rail to ground when the glitch module's output is active.
+        """
         self.pin_glitch = self.pin_hpglitch
 
-    def set_dead_zone(self, dead_time=0.05, pin="power"):
+    def set_dead_zone(self, dead_time:float = 0.05, pin:str = "power"):
+        """
+        Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
+        
+        Parameters:
+            dead_time: Rejection time during triggering is disabled.
+            pin: Can either be "power" or "reset". In "power" mode, the `TRIGGER` input is connected to the target's power and the rejection time is measured after power doen. In "reset" mode, the `TRIGGER` input is connected to the `RESET` line and the rejection time is measured after the device is reset. These modes imply different internal conditions to configure the dead time.
+        """
         if pin == "power":
             self.pin_condition = self.pin_vtarget_en
             # wait until VTARGET_EN is high (meaning VTARGET is disabled)
@@ -243,7 +329,14 @@ class MicroPythonScript():
             self.condition = 0
         self.dead_time = dead_time
 
-    def arm(self, delay, length):
+    def arm(self, delay:int, length:int):
+        """
+        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. 
+
+        Parameters:
+            delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            length: Length of the glitch in nano seconds. Expect a resolution of about 5 nano seconds.
+        """
         self.release_reset()
         self.pin_glitch_en.high()
         self.pin_hpglitch.low()
@@ -281,7 +374,13 @@ class MicroPythonScript():
             # push number of bits into the fifo of the statemachine (self.number_of_bits - 1 is an optimization here)
             self.sm2.put(self.number_of_bits - 1)
 
-    def block(self, timeout):
+    def block(self, timeout:float):
+        """
+        Block until trigger condition is met. Raises an exception if times out.
+        
+        Parameters:
+            timeout: Time after the block is released.
+        """
         if self.sm1 is not None:
             start_time = time.time()
             while time.time() - start_time < timeout:
