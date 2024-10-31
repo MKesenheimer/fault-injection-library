@@ -58,6 +58,15 @@ analyzer --directory databases
 Visit `http://127.0.0.1:8080` in your web browser to access the analyzer web application.
 ![Parameter space web application](images/parameterspace-pico-glitcher.png)
 
+## bootloader-com
+
+Communicate with a STM32 microcontroller in bootloader mode and read the flash memory (only if RDP-0 is active). If read-out protection is active, the corresponding target responses are printed.
+
+Example:
+```bash
+bootloader-com /dev/<target-tty-port>
+```
+
 ## power-cycle-and-read
 
 Test the power supply capabilities of your setup by executing this script. The target's response is read over UART after power-cycle.

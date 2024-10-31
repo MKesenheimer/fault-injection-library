@@ -52,7 +52,7 @@ class Main():
         # note that you still have to physically connect the trigger input with vtarget
         self.glitcher.rising_edge_trigger(0.005, "power")
         # choose crowbar transistor
-        self.glitcher.set_hpglitch()
+        self.glitcher.set_lpglitch()
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
