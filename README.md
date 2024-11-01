@@ -10,7 +10,6 @@ More information about the ChipWhisperer Pro and the ChipWhisperer Husky can be 
 ## Documentation
 
 The documentation of the source code and how to use the library and the hardware can be found on [https://fault-injection-library.readthedocs.io/](https://fault-injection-library.readthedocs.io/).
-The documentation is still work in progress and will eventually be completed.
 
 ## Cloning
 
