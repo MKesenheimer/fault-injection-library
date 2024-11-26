@@ -24,7 +24,7 @@ def glitch_tio_trigger():
     pull(block)
     mov(y, osr)
 
-    # wait for irq in block_condition state machine
+    # wait for irq in block_rising_condition or block_falling_condition state machine
     wait(1, irq, 7)
 
     # wait for rising edge on trigger pin
@@ -47,16 +47,13 @@ def glitch_tio_trigger():
     push(block)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
-def block_condition():
+def block_rising_condition():
     # block until dead time received
     pull(block)
     mov(x, osr)
-    # block until condition is received (wait for 0 or 1)
-    pull(block)
-    mov(y, osr)
 
-    # wait for condition
-    wait(y, pin, 0)
+    # wait for rising edge condition
+    wait(1, pin, 0)
 
     # wait dead time
     label("delay_loop")
@@ -64,6 +61,32 @@ def block_condition():
 
     # tell execution finished (fills the sm's fifo buffer)
     irq(block, 7)
+
+@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
+def block_falling_condition():
+    # block until dead time received
+    pull(block)
+    mov(x, osr)
+
+    # wait for falling edge condition
+    wait(0, pin, 0)
+
+    # wait dead time
+    label("delay_loop")
+    jmp(x_dec, "delay_loop")
+
+    # tell execution finished (fills the sm's fifo buffer)
+    irq(block, 7)
+
+@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
+def test():
+    # block until dead time received
+    pull(block)
+    mov(x, osr)
+
+    # get the content of x with function get_sm2_output()
+    mov(isr, x)
+    push(block)
 
 @asm_pio(set_init=(PIO.OUT_LOW))
 def glitch_uart_trigger():
@@ -311,15 +334,19 @@ class MicroPythonScript():
         """
         self.pin_glitch = self.pin_hpglitch
 
-    def set_dead_zone(self, dead_time:float = 0.05, pin:str = "power"):
+    def set_dead_zone(self, dead_time:float = 0, pin:str = "default"):
         """
         Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
         
         Parameters:
             dead_time: Rejection time during triggering is disabled.
-            pin: Can either be "power" or "reset". In "power" mode, the `TRIGGER` input is connected to the target's power and the rejection time is measured after power doen. In "reset" mode, the `TRIGGER` input is connected to the `RESET` line and the rejection time is measured after the device is reset. These modes imply different internal conditions to configure the dead time.
+            pin: Can either be "default", "power" or "reset". In "power" mode, the `TRIGGER` input is connected to the target's power and the rejection time is measured after power doen. In "reset" mode, the `TRIGGER` input is connected to the `RESET` line and the rejection time is measured after the device is reset. These modes imply different internal conditions to configure the dead time. If "default" is chosen, no dead time is active.
         """
-        if pin == "power":
+        if pin == "default":
+            self.pin_condition = self.pin_glitch_en
+            # wait until GLITCH_EN is high
+            self.condition = 1
+        elif pin == "power":
             self.pin_condition = self.pin_vtarget_en
             # wait until VTARGET_EN is high (meaning VTARGET is disabled)
             self.condition = 1
@@ -351,11 +378,15 @@ class MicroPythonScript():
             self.sm1.put(length // (1_000_000_000 // self.frequency))
 
             # state machine that blocks for a specific time after a certain condition (dead time)
-            self.sm2 = StateMachine(2, block_condition, freq=self.frequency, in_base=self.pin_condition)
+            sm2_func = None
+            if self.condition == 1:
+                sm2_func = block_rising_condition
+            else:
+                sm2_func = block_falling_condition
+            self.sm2 = StateMachine(2, sm2_func, freq=self.frequency, in_base=self.pin_condition)
             self.sm2.active(1)
-            # push dead time (in seconds) into the fifo of the statemachine and decide what condition must be met (0 or 1)
+            # push dead time (in seconds) into the fifo of the statemachine
             self.sm2.put(int(self.dead_time * self.frequency))
-            self.sm2.put(self.condition)
         
         elif self.trigger == "uart":
             # state machine that emits the glitch if the trigger condition is met

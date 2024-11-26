@@ -209,7 +209,7 @@ class Serial():
         flush_v2: Flush serial data buffers with timeout.
         close: Close serial connection.
     """
-    def __init__(self, port:str = "/dev/ttyUSB0", baudrate:int = 115200, timeout:float = 0.1, bytesize:int = 8, parity:str = 'E', stopbits:int = 1):
+    def __init__(self, port:str = "/dev/ttyUSB0", baudrate:int = 115200, timeout:float = 0.1, bytesize:int = 8, parity:str = 'N', stopbits:int = 1):
         """
         __init__: Default constructor.
 
@@ -585,7 +585,7 @@ class PicoGlitcher(Glitcher):
         self.pico_glitcher = PicoGlitcherInterface()
         self.pico_glitcher.init(port, 'mpGlitcher')
         self.pico_glitcher.set_trigger("tio")
-        self.pico_glitcher.set_dead_zone(0.03, "reset")
+        self.pico_glitcher.set_dead_zone(0, "default")
         self.pico_glitcher.set_frequency(200_000_000)
         self.pico_glitcher.set_hpglitch()
         if rd6006_available and ext_power is not None:
@@ -717,13 +717,13 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.set_hpglitch()
 
-    def rising_edge_trigger(self, dead_time:float = 0, pin:str = "reset"):
+    def rising_edge_trigger(self, dead_time:float = 0, pin:str = "default"):
         """
         Configure the PicoGlitcher to trigger on a rising edge on the `TRIGGER` line.
         
         Parameters:
             dead_time: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
-            pin: The rejection time is generated internally by measuring the state of the `power` or `reset` pin of the PicoGlitcher. If you want to trigger on the reset condition, set `pin = 'reset'`, else if you want to trigger on the target power set `pin = 'power'`. If `dead_time` is set to zero, this parameter is ignored.
+            pin: The rejection time is generated internally by measuring the state of the `power` or `reset` pin of the PicoGlitcher. If you want to trigger on the reset condition, set `pin = 'reset'`, else if you want to trigger on the target power set `pin = 'power'`. If `dead_time` is set to zero and `pin = 'default'`, this parameter is ignored.
         """
         self.pico_glitcher.set_trigger("tio")
         self.pico_glitcher.set_dead_zone(dead_time, pin)
