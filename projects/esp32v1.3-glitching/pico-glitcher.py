@@ -27,7 +27,9 @@ class DerivedGlitcher(PicoGlitcher):
     def classify(self, response):
         if b'XXXX00000400YYYY00000400ZZZZ\r\n' in response:
             color = 'G'
-        elif b'Error' in response or b'' in response:
+        elif b'' == response:
+            color = 'M'
+        elif b'Error' in response:
             color = 'M'
         elif b'Fatal exception' in response:
             color = 'M'
