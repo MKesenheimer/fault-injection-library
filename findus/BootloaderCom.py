@@ -129,7 +129,7 @@ class BootloaderCom:
         self.current_dump_len = dump_len
 
     def check_ack(self) -> GlitchState:
-        """
+        r"""
         Read a byte from serial and returns `GlitchState.Error.nack` or `GlitchState.Error.ack` depending whether the device's bootloader responds with a NACK or a ACK over UART.
 
         Returns:

@@ -320,7 +320,7 @@ class PicoGlitcherInterface(MicroPythonScript):
         self.pyb.exec(f'mp.set_frequency({frequency})')
 
     def get_frequency(self):
-        return self.pyb.exec(f'mp.get_frequency()')
+        return self.pyb.exec('mp.get_frequency()')
 
     def set_baudrate(self, baud:int):
         self.pyb.exec(f'mp.set_baudrate({baud})')
@@ -336,6 +336,9 @@ class PicoGlitcherInterface(MicroPythonScript):
 
     def arm(self, delay:int, length:int):
         self.pyb.exec(f'mp.arm({delay}, {length})')
+
+    def reset_arm(self):
+        self.pyb.exec('mp.reset_arm()')
 
     def reset_target(self):
         self.pyb.exec('mp.reset_target()')
@@ -606,6 +609,9 @@ class PicoGlitcher(Glitcher):
             length: Length of the glitch in nano seconds. Expect a resolution of about 5 nano seconds.
         """
         self.pico_glitcher.arm(delay, length)
+
+    def reset_arm(self):
+        self.pico_glitcher.reset_arm()
 
     def block(self, timeout:float = 1.0):
         """

@@ -15,7 +15,7 @@ from rp2 import asm_pio, PIO, StateMachine
 from machine import Pin
 import time
 
-@asm_pio(set_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
 def glitch_tio_trigger():
     # block until delay received
     pull(block)
@@ -23,6 +23,9 @@ def glitch_tio_trigger():
     # block until length received
     pull(block)
     mov(y, osr)
+
+    # enable pin_glitch_en
+    nop().side(0b1)
 
     # wait for irq in block_rising_condition or block_falling_condition state machine
     wait(1, irq, 7)
@@ -42,6 +45,9 @@ def glitch_tio_trigger():
     label("length_loop")       
     jmp(y_dec, "length_loop")
     set(pins, 0b0)
+
+    # disable pin_glitch_en
+    nop().side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
     push(block)
@@ -88,7 +94,7 @@ def test():
     mov(isr, x)
     push(block)
 
-@asm_pio(set_init=(PIO.OUT_LOW))
+@asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW))
 def glitch_uart_trigger():
     # block until delay received
     pull(block)
@@ -96,6 +102,9 @@ def glitch_uart_trigger():
     # block until length received
     pull(block)
     mov(y, osr)
+
+    # enable pin_glitch_en
+    nop().side(0b1)
 
     # wait for irq in uart_trigger state machine
     wait(1, irq, 7)
@@ -110,6 +119,9 @@ def glitch_uart_trigger():
     jmp(y_dec, "length_loop")
     set(pins, 0b0)
 
+    # disable pin_glitch_en
+    nop().side(0b0)
+
     # tell execution finished (fills the sm's fifo buffer)
     push(block)
 
@@ -118,16 +130,15 @@ def uart_trigger():
     # block until pattern received
     pull(block)
     mov(x, osr)
-    # block until number of bits (self.number_of_bits - 1) received
+    # block until number of bits (self.number_of_bits - 1) received, store in osr
     pull(block)
-    mov(y, osr)
 
     label("start")
     mov(isr, null)
     # Wait for start bit
     wait(0, pin, 0)
-    # delay until eye of first data bit
-    nop() [10]
+    # Preload bit counter, delay until eye of first data bit
+    mov(y, osr) [10]
     # Loop 9 times
     label("bitloop")
     # Sample data, shift sampled data into ISR
@@ -162,7 +173,7 @@ class MicroPythonScript():
         power_cycle_target: Power cycle the target via the PicoGlitcher `VTARGET` output.
         reset_target: Reset the target via the PicoGlitcher's `RESET` output.
         release_reset: Release the reset on the target via the PicoGlitcher's `RESET` output.
-        reset: Reset the target via the PicoGlitcher's `RESET` output, release the reset on the target after a certain time. Disables `GLITCH_EN` output after release.
+        reset: Reset the target via the PicoGlitcher's `RESET` output, release the reset on the target after a certain time.
         set_lpglitch: Enable the low-power crowbar MOSFET for glitch generation.
         set_hpglitch: Enable the high-power crowbar MOSFET for glitch generation.
         set_dead_zone: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
@@ -292,7 +303,6 @@ class MicroPythonScript():
         self.disable_vtarget()
         time.sleep(power_cycle_time)
         self.enable_vtarget()
-        self.pin_glitch_en.low()
 
     def reset_target(self):
         """
@@ -308,7 +318,7 @@ class MicroPythonScript():
 
     def reset(self, reset_time:float = 0.01):
         """
-        Reset the target via the PicoGlitcher's `RESET` output, release the reset on the target after a certain time. Disables `GLITCH_EN` output after release.
+        Reset the target via the PicoGlitcher's `RESET` output, release the reset on the target after a certain time.
         
         Parameters:
             reset_time: Time how long the target is held in reset.
@@ -316,7 +326,6 @@ class MicroPythonScript():
         self.reset_target()
         time.sleep(reset_time)
         self.release_reset()
-        self.pin_glitch_en.low()
 
     def set_lpglitch(self):
         """
@@ -344,7 +353,7 @@ class MicroPythonScript():
         """
         if pin == "default":
             self.pin_condition = self.pin_glitch_en
-            # wait until GLITCH_EN is high
+            # wait until GLITCH_EN is high (if armed)
             self.condition = 1
         elif pin == "power":
             self.pin_condition = self.pin_vtarget_en
@@ -365,13 +374,12 @@ class MicroPythonScript():
             length: Length of the glitch in nano seconds. Expect a resolution of about 5 nano seconds.
         """
         self.release_reset()
-        self.pin_glitch_en.high()
         self.pin_hpglitch.low()
         self.pin_lpglitch.low()
 
         if self.trigger == "tio":
             # state machine that emits the glitch if the trigger condition is met
-            self.sm1 = StateMachine(1, glitch_tio_trigger, freq=self.frequency, set_base=self.pin_glitch)
+            self.sm1 = StateMachine(1, glitch_tio_trigger, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
             self.sm1.active(1)
             # push delay and length (in nano seconds) into the fifo of the statemachine
             self.sm1.put(delay // (1_000_000_000 // self.frequency))
@@ -390,7 +398,7 @@ class MicroPythonScript():
         
         elif self.trigger == "uart":
             # state machine that emits the glitch if the trigger condition is met
-            self.sm1 = StateMachine(1, glitch_uart_trigger, freq=self.frequency, set_base=self.pin_glitch)
+            self.sm1 = StateMachine(1, glitch_uart_trigger, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
             self.sm1.active(1)
             # push delay and length (in nano seconds) into the fifo of the statemachine
             self.sm1.put(delay // (1_000_000_000 // self.frequency))
@@ -405,6 +413,9 @@ class MicroPythonScript():
             # push number of bits into the fifo of the statemachine (self.number_of_bits - 1 is an optimization here)
             self.sm2.put(self.number_of_bits - 1)
 
+    def reset_arm(self):
+        self.pin_glitch_en.low()
+
     def block(self, timeout:float):
         """
         Block until trigger condition is met. Raises an exception if times out.
@@ -418,6 +429,8 @@ class MicroPythonScript():
                 if self.sm1.rx_fifo() > 0:
                     break
             if time.time() - start_time >= timeout:
+                self.sm1.active(0)
+                self.pin_glitch_en.low()
                 raise Exception("Function execution timed out!")
 
     def get_sm2_output(self):
