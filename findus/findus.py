@@ -14,6 +14,7 @@ This is the documentation of the findus module and all its classes.
 
 import sqlite3
 import time
+import ast
 import serial
 import sys
 import chipwhisperer as cw
@@ -30,6 +31,7 @@ try:
 except Exception as _:
     print("[-] Library RD6006 not installed. Functions to control the external power supply not available.")
     rd6006_available = False
+from importlib.metadata import version
 
 class Database():
     """
@@ -313,8 +315,13 @@ class MicroPythonScript():
 
 # inherit functionality and overwrite some functions
 class PicoGlitcherInterface(MicroPythonScript):
-    def set_trigger(self, trigger:str):
-        self.pyb.exec(f'mp.set_trigger("{trigger}")')
+    def get_firmware_version(self):
+        version_bytes = self.pyb.exec('mp.get_firmware_version()')
+        decoded_str = version_bytes.decode('utf-8').strip()
+        return ast.literal_eval(decoded_str)
+
+    def set_trigger(self, mode:str, pin_trigger:str):
+        self.pyb.exec(f'mp.set_trigger("{mode}", "{pin_trigger}")')
 
     def set_frequency(self, frequency:int):
         self.pyb.exec(f'mp.set_frequency({frequency})')
@@ -336,9 +343,6 @@ class PicoGlitcherInterface(MicroPythonScript):
 
     def arm(self, delay:int, length:int):
         self.pyb.exec(f'mp.arm({delay}, {length})')
-
-    def reset_arm(self):
-        self.pyb.exec('mp.reset_arm()')
 
     def reset_target(self):
         self.pyb.exec('mp.reset_target()')
@@ -367,8 +371,11 @@ class PicoGlitcherInterface(MicroPythonScript):
     def set_hpglitch(self):
         self.pyb.exec('mp.set_hpglitch()')
 
-    def set_dead_zone(self, dead_time:float, pin:str):
-        self.pyb.exec(f'mp.set_dead_zone({dead_time}, "{pin}")')
+    def set_pulse_shaping(self):
+        self.pyb.exec('mp.set_pulse_shaping()')
+
+    def set_dead_zone(self, dead_time:float, pin_condition:str):
+        self.pyb.exec(f'mp.set_dead_zone({dead_time}, "{pin_condition}")')
 
 class ExternalPowerSupply:
     """
@@ -587,7 +594,21 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher = PicoGlitcherInterface()
         self.pico_glitcher.init(port, 'mpGlitcher')
-        self.pico_glitcher.set_trigger("tio")
+
+        # check compatibility
+        try:
+            pg_fw_version = self.pico_glitcher.get_firmware_version()
+            fi_fw_version = list(map(int, version("findus").split('.')))
+            print(f"Version of PicoGlitcher: {pg_fw_version}")
+            print(f"Version of findus: {fi_fw_version}")
+            if pg_fw_version != fi_fw_version:
+                raise Exception("Version mismatch")
+        except Exception as _:
+            print("[-] Fatal error: Versions of findus and PicoGlitcher do not match.")
+            print("[-] Update the PicoGlitcher firmware and findus software. See README.md.")
+            sys.exit(-1)
+
+        self.pico_glitcher.set_trigger("tio", "default")
         self.pico_glitcher.set_dead_zone(0, "default")
         self.pico_glitcher.set_frequency(200_000_000)
         self.pico_glitcher.set_hpglitch()
@@ -609,9 +630,6 @@ class PicoGlitcher(Glitcher):
             length: Length of the glitch in nano seconds. Expect a resolution of about 5 nano seconds.
         """
         self.pico_glitcher.arm(delay, length)
-
-    def reset_arm(self):
-        self.pico_glitcher.reset_arm()
 
     def block(self, timeout:float = 1.0):
         """
@@ -723,18 +741,25 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.set_hpglitch()
 
-    def rising_edge_trigger(self, dead_time:float = 0, pin:str = "default"):
+    def set_pulse_shaping(self):
+        """
+        TODO
+        """
+        self.pico_glitcher.set_pulse_shaping()
+
+    def rising_edge_trigger(self, pin_trigger:str = "default", dead_time:float = 0, pin_condition:str = "default"):
         """
         Configure the PicoGlitcher to trigger on a rising edge on the `TRIGGER` line.
         
         Parameters:
+            pin_trigger: The trigger pin to use. Can be either "default" or "alt". For hardware version 2 options "ext1" or "ext2" can also be chosen.
             dead_time: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
-            pin: The rejection time is generated internally by measuring the state of the `power` or `reset` pin of the PicoGlitcher. If you want to trigger on the reset condition, set `pin = 'reset'`, else if you want to trigger on the target power set `pin = 'power'`. If `dead_time` is set to zero and `pin = 'default'`, this parameter is ignored.
+            pin_condition: The rejection time is generated internally by measuring the state of the `power` or `reset` pin of the PicoGlitcher. If you want to trigger on the reset condition, set `pin_condition = 'reset'`, else if you want to trigger on the target power set `pin_condition = 'power'`. If `dead_time` is set to zero and `pin_condition = 'default'`, this parameter is ignored.
         """
-        self.pico_glitcher.set_trigger("tio")
-        self.pico_glitcher.set_dead_zone(dead_time, pin)
+        self.pico_glitcher.set_trigger("tio", pin_trigger)
+        self.pico_glitcher.set_dead_zone(dead_time, pin_condition)
 
-    def uart_trigger(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8):
+    def uart_trigger(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8, pin_trigger:str = "default"):
         """
         Configure the PicoGlitcher to trigger when a specific byte pattern is observed on the `TRIGGER` line.
         
@@ -742,8 +767,9 @@ class PicoGlitcher(Glitcher):
             pattern: Byte pattern that is transmitted on the serial lines to trigger on. For example `0x11`.
             baudrate: The baudrate of the serial communication.
             number_of_bits: The number of bits of the UART payload.
+            pin_trigger: The trigger pin to use. Can be either "default" or "alt". For hardware version 2 options "ext1" or "ext2" can also be chosen.
         """
-        self.pico_glitcher.set_trigger("uart")
+        self.pico_glitcher.set_trigger("uart", pin_trigger)
         self.pico_glitcher.set_baudrate(baudrate)
         self.pico_glitcher.set_number_of_bits(number_of_bits)
         self.pico_glitcher.set_pattern_match(pattern)
@@ -1003,20 +1029,25 @@ class HuskyGlitcher(Glitcher):
         self.scope.io.glitch_hp = True
         self.scope.io.glitch_lp = False
 
-    def rising_edge_trigger(self, dead_time:float = 0, pin:str = ""):
+    def rising_edge_trigger(self, pin_trigger:str = "default", dead_time:float = 0, pin:str = ""):
         """
         Configure the ChipWhisperer Pro to trigger on a rising edge on the `TRIGGER` line (`tio4` pin).
         Note: `dead_time` and `pin` have no functions here (see `PicoGlitcher.rising_edge_trigger`).
 
         Parameters:
+            pin_trigger: The trigger input pin to use. Default is tio4.
             dead_time: Unused.
             pin: Unused.
         """
         self.scope.adc.basic_mode = "rising_edge"
-        self.scope.io.tio4 = 'high_z'
-        self.scope.trigger.triggers = 'tio4'
+        if pin_trigger == "default":
+            self.scope.io.tio4 = 'high_z'
+            self.scope.trigger.triggers = 'tio4'
+        else:
+            self.scope.trigger.triggers = pin_trigger
+            # TODO: set self.scope.io.tiox based on pin_trigger
 
-    def uart_trigger(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8):
+    def uart_trigger(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8, pin_trigger:str = "default"):
         """
         Configure the Husky to trigger when a specific byte pattern is observed on the RX line (`tio1` pin).
 
@@ -1024,11 +1055,15 @@ class HuskyGlitcher(Glitcher):
             pattern: Byte pattern that is transmitted on the serial lines to trigger on. For example `0x11`.
             baudrate: The baudrate of the serial communication.
             number_of_bits: The number of bits of the UART payload (not implemented yet, default is 8).
+            pin_trigger: The trigger pin to use.
         """
         # TODO: implement the number of bits.
         self.scope.io.hs2 = "clkgen"
         self.scope.trigger.module = 'UART'
-        self.scope.trigger.triggers = 'tio1'
+        if pin_trigger == "default":
+            self.scope.trigger.triggers = 'tio1'
+        else:
+            self.scope.trigger.triggers = pin_trigger
         self.scope.UARTTrigger.enabled = True
         self.scope.UARTTrigger.baud = baudrate
         self.scope.UARTTrigger.set_pattern_match(0, pattern)
@@ -1059,7 +1094,7 @@ class HuskyGlitcher(Glitcher):
         time.sleep(disconnect_wait)
         self.init()
 
-    def reconnect_with_uart(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8, disconnect_wait:float = 0.5):
+    def reconnect_with_uart(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8, disconnect_wait:float = 0.5, pin_trigger:str = "default"):
         """
         Disconnects and reconnects the Husky. Husky is set up for UART glitching.
 
@@ -1068,11 +1103,12 @@ class HuskyGlitcher(Glitcher):
             baudrate: The baudrate of the serial communication.
             number_of_bits: The number of bits of the UART payload (not implemented yet, default is 8).
             disconnect_wait: Time to wait during disconnects.
+            pin_trigger: The trigger pin to use. Can be either "default" or "alt". For hardware version 2 options "ext1" or "ext2" can also be chosen.
         """
         self.disconnect()
         time.sleep(disconnect_wait)
         self.init()
-        self.uart_trigger(pattern, baudrate, number_of_bits)
+        self.uart_trigger(pattern, baudrate, number_of_bits, pin_trigger)
 
     def __del__(self):
         """
@@ -1333,19 +1369,24 @@ class ProGlitcher(Glitcher):
         self.scope.io.glitch_hp = True
         self.scope.io.glitch_lp = False
 
-    def rising_edge_trigger(self, dead_time:float = 0, pin:str = ""):
+    def rising_edge_trigger(self, pin_trigger:str = "default", dead_time:float = 0, pin:str = ""):
         """
         Configure the PicoGlitcher to trigger on a rising edge on the `TRIGGER` line (`tio4` pin).
         Note: `dead_time` and `pin` have no functions here (see `PicoGlitcher.rising_edge_trigger`).
 
         Parameters:
+            pin_trigger: The trigger input pin to use. Default is tio4.
             dead_time: Unused.
             pin: Unused.
         """
-        self.scope.io.tio4 = 'high_z'
-        self.scope.trigger.triggers = 'tio4'
+        if pin_trigger == "default":
+            self.scope.trigger.triggers = 'tio4'
+            self.scope.io.tio4 = 'high_z'
+        else:
+            self.scope.trigger.triggers = pin_trigger
+            # TODO: set self.scope.io.tiox based on pin_trigger
 
-    def uart_trigger(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8):
+    def uart_trigger(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8, pin_trigger:str = "default"):
         """
         Configure the ChipWhisperer Pro to trigger when a specific byte pattern is observed on the RX line (`tio1` pin).
         Note: To comply with the STM32 bootloader, this is currently configured for even parity UART.
@@ -1354,6 +1395,7 @@ class ProGlitcher(Glitcher):
             pattern: Byte pattern that is transmitted on the serial lines to trigger on. For example `0x11`.
             baudrate: The baudrate of the serial communication.
             number_of_bits: The number of bits of the UART payload (not implemented yet, default is 8).
+            pin_trigger: The trigger pin to use.
         """
         # TODO: implement the number of bits.
         # UART trigger:
@@ -1366,7 +1408,10 @@ class ProGlitcher(Glitcher):
         data = self.scope.decode_IO.oa.sendMessage(CODE_READ, ADDR_DECODECFG, Validate=False, maxResp=8)
         data[1] = data[1] | 0x01
         self.scope.decode_IO.oa.sendMessage(CODE_WRITE, ADDR_DECODECFG, data)
-        self.scope.trigger.triggers = 'tio1'
+        if pin_trigger == "default":
+            self.scope.trigger.triggers = 'tio1'
+        else:
+            self.scope.trigger.triggers = pin_trigger
         self.scope.trigger.module = 'DECODEIO'
         self.scope.decode_IO.rx_baud = baudrate
         self.scope.decode_IO.decode_type = 'USART'
@@ -1398,7 +1443,7 @@ class ProGlitcher(Glitcher):
         time.sleep(disconnect_wait)
         self.init()
 
-    def reconnect_with_uart(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8, disconnect_wait:float = 0.5):
+    def reconnect_with_uart(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8, disconnect_wait:float = 0.5, pin_trigger:str = "default"):
         """
         Disconnects and reconnects the ChipWhisperer Pro. The ChipWhisperer Pro is set up for UART glitching.
 
@@ -1407,11 +1452,12 @@ class ProGlitcher(Glitcher):
             baudrate: The baudrate of the serial communication.
             number_of_bits: The number of bits of the UART payload (not implemented yet, default is 8).
             disconnect_wait: Time to wait during disconnects.
+            pin_trigger: The trigger pin to use.
         """
         self.disconnect()
         time.sleep(disconnect_wait)
         self.init()
-        self.uart_trigger(pattern, baudrate, number_of_bits)
+        self.uart_trigger(pattern, baudrate, number_of_bits, pin_trigger)
 
     def __del__(self):
         """

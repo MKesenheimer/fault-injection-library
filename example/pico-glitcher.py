@@ -50,9 +50,11 @@ class Main():
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
         # choose rising edge trigger with dead time of 0 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
-        self.glitcher.rising_edge_trigger()
+        self.glitcher.rising_edge_trigger(pin_trigger="default")
         # choose crowbar transistor
-        self.glitcher.set_lpglitch()
+        #self.glitcher.set_lpglitch()
+        # choose pulse shaping
+        self.glitcher.set_pulse_shaping()
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)

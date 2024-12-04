@@ -123,7 +123,7 @@ class BootloaderCom:
             return
         """
         print(f"[+] Opening serial port {port}.")
-        self.ser = serial.Serial(port=port, baudrate=115200, timeout=1, bytesize=8, parity="E", stopbits=1)
+        self.ser = serial.Serial(port=port, baudrate=115200, timeout=0.5, bytesize=8, parity="E", stopbits=1)
         # memory read settings
         self.current_dump_addr = dump_address
         self.current_dump_len = dump_len

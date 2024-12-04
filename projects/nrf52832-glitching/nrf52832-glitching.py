@@ -60,7 +60,7 @@ class Main():
         #self.glitcher.init(ext_power=args.power, ext_power_voltage=3.3)
         # choose rising edge trigger with dead time of 0.03 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
-        self.glitcher.rising_edge_trigger(0.03, "power")
+        self.glitcher.rising_edge_trigger(dead_time=0.03, pin_condition="power")
         # choose crowbar transistor
         self.glitcher.set_hpglitch()
 

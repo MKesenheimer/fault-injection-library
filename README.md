@@ -68,10 +68,19 @@ First, we connect the Pico Glitcher and a target as follows:
 Note that the trigger input is connected directly to the reset line.
 As the reset is released from the device, the trigger signal is sent.
 
-We install the corresponding Micropython script on the Raspberry Pi Pico:
+We install the corresponding Micropython script and the corresponding config file (must be done only once) on the Raspberry Pi Pico:
 
 ```bash
 upload --port /dev/<rpi-tty-port> --delete-all
+upload --port /dev/<rpi-tty-port> --script ./findus/mpConfig_v1/mpConfig.py
+upload --port /dev/<rpi-tty-port> --script ./findus/mpGlitcher.py
+```
+
+For hardware version 2.x of the PicoGlitcher, the corresponding config file must be provided:
+
+```bash
+upload --port /dev/<rpi-tty-port> --delete-all
+upload --port /dev/<rpi-tty-port> --script ./findus/mpConfig_v2/mpConfig.py
 upload --port /dev/<rpi-tty-port> --script ./findus/mpGlitcher.py
 ```
 
@@ -113,6 +122,7 @@ In a real setup, however, the glitching line should be soldered as close as poss
 Install the Raspberry Pi Pico Micropython scripts:
 
 ```bash
+upload --port /dev/<rpi-tty-port> --script ./findus/mpConfig_v1/mpConfig.py
 upload --port /dev/<rpi-tty-port> --script ./findus/mpGlitcher.py
 ```
 
