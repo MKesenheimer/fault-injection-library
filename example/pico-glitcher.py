@@ -51,10 +51,13 @@ class Main():
         # choose rising edge trigger with dead time of 0 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
         self.glitcher.rising_edge_trigger(pin_trigger="default")
-        # choose crowbar transistor
-        #self.glitcher.set_lpglitch()
-        # choose pulse shaping
-        self.glitcher.set_pulse_shaping()
+        #self.glitcher.rising_edge_trigger(pin_trigger="default", dead_time=0.01, pin_condition="reset")
+
+        # choose pulse shaping or crowbar glitching
+        if args.pulse_shaping:
+            self.glitcher.set_pulse_shaping()
+        else:
+            self.glitcher.set_lpglitch()
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
@@ -74,7 +77,11 @@ class Main():
             # set up glitch parameters (in nano seconds) and arm glitcher
             length = random.randint(s_length, e_length)
             delay = random.randint(s_delay, e_delay)
-            self.glitcher.arm(delay, length)
+            if args.pulse_shaping:
+                pulse_config = {"t1": length, "v1": "GND", "t2": 2*length, "v2": "1.8", "t3": length, "v3": "GND", "t4": 2*length, "v4": "1.8"}
+                self.glitcher.arm_pulse_shaping(delay, pulse_config)
+            else:
+                self.glitcher.arm(delay, length)
 
             # power cycle target
             #self.glitcher.power_cycle_target(0.1)
@@ -117,6 +124,7 @@ if __name__ == "__main__":
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
+    parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with pulse shaping (requires PicoGlitcher v2).")
     args = parser.parse_args()
 
     main = Main(args)

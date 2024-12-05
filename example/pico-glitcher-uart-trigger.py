@@ -43,6 +43,12 @@ class Main:
         # Update: Triggering on x11 in configuration 8n1 works good enough.
         self.glitcher.uart_trigger(0x11)
 
+        # choose pulse shaping or crowbar glitching
+        if args.pulse_shaping:
+            self.glitcher.set_pulse_shaping()
+        else:
+            self.glitcher.set_lpglitch()
+
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
         # if number of experiments get too large, remove the expected results
@@ -71,14 +77,18 @@ class Main:
             # set up glitch parameters (in nano seconds) and arm glitcher
             length = random.randint(s_length, e_length)
             delay = random.randint(s_delay, e_delay)
-            self.glitcher.arm(delay, length)
+            if args.pulse_shaping:
+                pulse_config = {"t1": length, "v1": "GND", "t2": 2*length, "v2": "1.8", "t3": length, "v3": "GND", "t4": 2*length, "v4": "1.8"}
+                self.glitcher.arm_pulse_shaping(delay, pulse_config)
+            else:
+                self.glitcher.arm(delay, length)
 
             # reset target
             self.glitcher.reset(0.01)
             self.bootcom.flush()
 
             # setup memory read; this function triggers the glitch
-            response = self.bootcom.setup_memread()
+            response = self.bootcom.setup_memread(read=False)
 
             # block until glitch
             try:
@@ -113,6 +123,7 @@ if __name__ == "__main__":
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
+    parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with pulse shaping (requires PicoGlitcher v2).")
     args = parser.parse_args()
 
     main = Main(args)
