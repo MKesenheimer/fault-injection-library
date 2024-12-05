@@ -52,11 +52,9 @@ def glitch():
     pull(block)
     mov(y, osr)
 
-    # enable pin_glitch_en
-    nop().side(0b1)
-
     # wait for trigger condition
-    wait(1, irq, 7)
+    # enable pin_glitch_en
+    wait(1, irq, 7).side(0b1)
 
     # wait delay
     label("delay_loop")
@@ -66,13 +64,11 @@ def glitch():
     set(pins, 0b1)
     label("length_loop")       
     jmp(y_dec, "length_loop")
-    set(pins, 0b0)
 
-    # disable pin_glitch_en
-    nop().side(0b0)
+    # stop glitch and disable pin_glitch_en
+    set(pins, 0b0).side(0b0)
 
-    # tell execution finished (fills the sm's fifo buffer and clears irq7)
-    irq(clear, 7)
+    # tell execution finished (fills the sm's fifo buffer)
     push(block)
 
 @asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_LOW), out_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
@@ -83,33 +79,27 @@ def pulse1():
     # block until pulse config received
     pull(block)
 
-    # enable pin_glitch_en
-    nop().side(0b1)
-
     # wait for trigger condition
-    wait(1, irq, 7)
+    # enable pin_glitch_en
+    wait(1, irq, 7).side(0b1)
 
     # wait delay
     label("delay_loop")
     jmp(x_dec, "delay_loop")
 
-    # t1, v1
-    out(y, 14) # t1 = OSR >> 14
-    out(pins, 2) # v1 = OSR >> 2
-    label("length_loop1")
-    jmp(y_dec, "length_loop1")
-
-    # t2, v2
-    out(y, 14) # t2 = OSR >> 14
-    out(pins, 2) # v2 = OSR >> 2
-    label("length_loop2")       
-    jmp(y_dec, "length_loop2")
+    # get the pulse length and pulse voltage and set the corresponding outputs
+    set(x, 2)
+    label("two_pulses")
+    out(y, 14) # t = OSR >> 14
+    out(pins, 2) # v = OSR >> 2
+    label("length_loop")
+    jmp(y_dec, "length_loop")
+    jmp(x_dec, "two_pulses")
 
     # continue in pulse2, block until irq0 is cleared
     irq(block, 0)
 
-    # tell execution finished (fills the sm's fifo buffer and clears irq7)
-    irq(clear, 7)
+    # tell execution finished (fills the sm's fifo buffer)
     push(block)
 
 @asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_LOW), out_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
@@ -120,33 +110,23 @@ def pulse2():
     # wait for pulse1 to finish
     wait(1, irq, 0)
 
-    # t3, v3
-    out(x, 14) # t3 = OSR >> 14
-    out(pins, 2) # v3 = OSR >> 2
-    label("length_loop3")
-    jmp(x_dec, "length_loop3")
+    # get the pulse length and pulse voltage and set the corresponding outputs
+    set(x, 2)
+    label("two_pulses")
+    out(y, 14) # t = OSR >> 14
+    out(pins, 2) # v = OSR >> 2
+    label("length_loop")
+    jmp(y_dec, "length_loop")
+    jmp(x_dec, "two_pulses")
 
-    # t4, v4
-    out(x, 14) # t4 = OSR >> 14
-    out(pins, 2) # v4 = OSR >> 2
-    label("length_loop4")
-    jmp(x_dec, "length_loop4")
-
-    # reset
-    set(pins, 0b00)
-
-    # disable pin_glitch_en
-    nop().side(0b0)
+    # reset and disable pin_glitch_en
+    set(pins, 0b00).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer and clears irq0)
     irq(clear, 0)
-    push(block)
-
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
 def tio_trigger():
-    label("start")
-
     # wait for rising edge on trigger pin
     wait(0, pin, 0)
     wait(1, pin, 0)
@@ -155,14 +135,8 @@ def tio_trigger():
     # TODO: should block be removed?
     irq(block, 7)
 
-    # wrap around
-    irq(clear, 6)
-    jmp("start")
-
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
 def tio_trigger_with_dead_time():
-    label("start")
-
     # wait for irq in block_rising_condition or block_falling_condition state machine (dead time)
     wait(1, irq, 6)
 
@@ -173,10 +147,6 @@ def tio_trigger_with_dead_time():
     # tell observed trigger
     # TODO: should block be removed?
     irq(block, 7)
-
-    # wrap around
-    irq(clear, 6)
-    jmp("start")
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
 def block_rising_condition():
@@ -223,7 +193,7 @@ def test():
     mov(isr, x)
     push(block)
 
-@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_LEFT)
 def uart_trigger():
     # block until pattern received
     pull(block)
@@ -236,7 +206,9 @@ def uart_trigger():
     # Wait for start bit
     wait(0, pin, 0)
     # Preload bit counter, delay until eye of first data bit
+    #set(y, BITS - 1) [10]
     mov(y, osr) [10]
+
     # Loop 9 times
     label("bitloop")
     # Sample data, shift sampled data into ISR
@@ -614,7 +586,6 @@ class MicroPythonScript():
         self.sm2.put(config)
 
         self.arm_common()
-
 
     def block(self, timeout:float):
         """

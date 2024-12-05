@@ -197,18 +197,22 @@ class BootloaderCom:
 
     # returns "rdp_active" if RDP is active (expected)
     # returns "rdp_inactive" if glitch was successful
-    def setup_memread(self) -> GlitchState:
+    def setup_memread(self, read:bool = True) -> GlitchState:
         """
         Configures the bootloader to read memory from specific memory addresses.
+
+        Parameters:
+            read: Whether to read the response or not.
 
         Returns:
             Returns `GlitchState.Expected.rdp_active` if RDP is active (expected), or `GlitchState.OK.rdp_inactive` if glitch was successful
         """
         # read memory (x11: read memory, xee: crc)
         self.ser.write(b'\x11\xee')
-        s = self.ser.read(1)
-        if s == self.ACK:
-            return GlitchState.OK.rdp_inactive
+        if read:
+            s = self.ser.read(1)
+            if s == self.ACK:
+                return GlitchState.OK.rdp_inactive
         return GlitchState.Expected.rdp_active
 
     # returns "dump_ok" if glitch and memory read was successful
