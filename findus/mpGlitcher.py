@@ -72,7 +72,7 @@ def glitch():
     push(block)
 
 @asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_LOW), out_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
-def pulse1():
+def pulse():
     # block until delay received
     pull(block)
     mov(x, osr)
@@ -96,34 +96,23 @@ def pulse1():
     jmp(y_dec, "length_loop")
     jmp(x_dec, "two_pulses")
 
-    # continue in pulse2, block until irq0 is cleared
-    irq(block, 0)
-
-    # tell execution finished (fills the sm's fifo buffer)
-    push(block)
-
-@asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_LOW), out_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
-def pulse2():
-    # block until pulse config received
+    # pull the next config
     pull(block)
-
-    # wait for pulse1 to finish
-    wait(1, irq, 0)
 
     # get the pulse length and pulse voltage and set the corresponding outputs
     set(x, 2)
-    label("two_pulses")
+    label("two_pulses2")
     out(y, 14) # t = OSR >> 14
     out(pins, 2) # v = OSR >> 2
-    label("length_loop")
-    jmp(y_dec, "length_loop")
-    jmp(x_dec, "two_pulses")
+    label("length_loop2")
+    jmp(y_dec, "length_loop2")
+    jmp(x_dec, "two_pulses2")
 
     # reset and disable pin_glitch_en
     set(pins, 0b00).side(0b0)
 
-    # tell execution finished (fills the sm's fifo buffer and clears irq0)
-    irq(clear, 0)
+    # tell execution finished (fills the sm's fifo buffer)
+    push(block)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
 def tio_trigger():
@@ -549,7 +538,7 @@ class MicroPythonScript():
         self.pin_mux0.low()
 
         # state machine that emits the glitch if the trigger condition is met (part 1)
-        self.sm0 = StateMachine(0, pulse1, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+        self.sm0 = StateMachine(0, pulse, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
         # push pulse shape config into the fifo of the statemachine
         self.sm0.put(delay // (1_000_000_000 // self.frequency))
         try:
@@ -566,10 +555,7 @@ class MicroPythonScript():
             v2 = 0b00
         config = v2 << 30 | t2 << 16 | v1 << 14 | t1
         self.sm0.put(config)
-
-        # state machine that emits the glitch if the trigger condition is met (part 2)
-        self.sm2 = StateMachine(2, pulse2, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
-        # push pulse shape config into the fifo of the statemachine
+        # push the next pulse shape config into the fifo of the statemachine
         try:
             t3 = pulse_config["t3"] // (1_000_000_000 // self.frequency)
             v3 = self.voltage_map[pulse_config["v3"]]
@@ -583,7 +569,7 @@ class MicroPythonScript():
             t4 = 0
             v4 = 0b00
         config = v4 << 30 | t4 << 16 | v3 << 14 | t3
-        self.sm2.put(config)
+        self.sm0.put(config)
 
         self.arm_common()
 
