@@ -14,7 +14,7 @@ import machine
 from rp2 import asm_pio, PIO, StateMachine
 from machine import Pin
 import time
-from mpConfig import *
+from mpConfig import hardware_version, software_version
 
 if hardware_version[0] == 1:
     # Trigger 1 (without level shifter)
@@ -71,17 +71,17 @@ def glitch():
     # disable pin_glitch_en
     nop().side(0b0)
 
-    # tell execution finished (fills the sm's fifo buffer)
+    # tell execution finished (fills the sm's fifo buffer and clears irq7)
+    irq(clear, 7)
     push(block)
 
-@asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
-def pulse():
+@asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_LOW), out_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
+def pulse1():
     # block until delay received
     pull(block)
     mov(x, osr)
-    # block until length received
+    # block until pulse config received
     pull(block)
-    mov(y, osr)
 
     # enable pin_glitch_en
     nop().side(0b1)
@@ -93,31 +93,74 @@ def pulse():
     label("delay_loop")
     jmp(x_dec, "delay_loop")
 
-    # emit glitch at base pin
-    # lsb: GPIO0 -> MUX1
-    # msb: GPIO1 -> MUX0
-    # 0b00: IN1 = 1: VCC
-    # 0b01: IN3 = 1: +1V8
-    # 0b10: IN2 = 1: +3V3
-    # 0b11: IN4 = 1: GND
-    set(pins, 0b01)
-    label("length_loop")       
-    jmp(y_dec, "length_loop")
-    set(pins, 0b11)
+    # t1, v1
+    out(y, 14) # t1 = OSR >> 14
+    out(pins, 2) # v1 = OSR >> 2
+    label("length_loop1")
+    jmp(y_dec, "length_loop1")
 
-    mov(y, osr)
+    # t2, v2
+    out(y, 14) # t2 = OSR >> 14
+    out(pins, 2) # v2 = OSR >> 2
     label("length_loop2")       
     jmp(y_dec, "length_loop2")
+
+    # continue in pulse2, block until irq0 is cleared
+    irq(block, 0)
+
+    # tell execution finished (fills the sm's fifo buffer and clears irq7)
+    irq(clear, 7)
+    push(block)
+
+@asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_LOW), out_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
+def pulse2():
+    # block until pulse config received
+    pull(block)
+
+    # wait for pulse1 to finish
+    wait(1, irq, 0)
+
+    # t3, v3
+    out(x, 14) # t3 = OSR >> 14
+    out(pins, 2) # v3 = OSR >> 2
+    label("length_loop3")
+    jmp(x_dec, "length_loop3")
+
+    # t4, v4
+    out(x, 14) # t4 = OSR >> 14
+    out(pins, 2) # v4 = OSR >> 2
+    label("length_loop4")
+    jmp(x_dec, "length_loop4")
+
+    # reset
     set(pins, 0b00)
 
     # disable pin_glitch_en
     nop().side(0b0)
 
-    # tell execution finished (fills the sm's fifo buffer)
+    # tell execution finished (fills the sm's fifo buffer and clears irq0)
+    irq(clear, 0)
     push(block)
+
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
 def tio_trigger():
+    label("start")
+
+    # wait for rising edge on trigger pin
+    wait(0, pin, 0)
+    wait(1, pin, 0)
+
+    # tell observed trigger
+    # TODO: should block be removed?
+    irq(block, 7)
+
+    # wrap around
+    irq(clear, 6)
+    jmp("start")
+
+@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
+def tio_trigger_with_dead_time():
     label("start")
 
     # wait for irq in block_rising_condition or block_falling_condition state machine (dead time)
@@ -128,9 +171,11 @@ def tio_trigger():
     wait(1, pin, 0)
 
     # tell observed trigger
+    # TODO: should block be removed?
     irq(block, 7)
 
     # wrap around
+    irq(clear, 6)
     jmp("start")
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
@@ -146,7 +191,8 @@ def block_rising_condition():
     label("delay_loop")
     jmp(x_dec, "delay_loop")
 
-    # tell execution finished (fills the sm's fifo buffer)
+    # tell execution finished
+    # TODO: can block be removed?
     irq(block, 6)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
@@ -162,16 +208,18 @@ def block_falling_condition():
     label("delay_loop")
     jmp(x_dec, "delay_loop")
 
-    # tell execution finished (fills the sm's fifo buffer)
+    # tell execution finished
+    # TODO: can block be removed?
     irq(block, 6)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
 def test():
     # block until dead time received
     pull(block)
-    mov(x, osr)
+    #mov(x, osr)
+    out(x, 18)
 
-    # get the content of x with function get_sm2_output()
+    # get the content of x with function get_sm1_output()
     mov(isr, x)
     push(block)
 
@@ -201,6 +249,7 @@ def uart_trigger():
     jmp(x_not_y, "start")
 
     # if received data matches pattern, set the irq and activate the glitch
+    # TODO: can "block" be removed?
     irq(block, 7)
 
     # wrap around
@@ -227,7 +276,8 @@ class MicroPythonScript():
         reset: Reset the target via the PicoGlitcher's `RESET` output, release the reset on the target after a certain time.
         set_lpglitch: Enable the low-power crowbar MOSFET for glitch generation.
         set_hpglitch: Enable the high-power crowbar MOSFET for glitch generation.
-        set_dead_zone: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
+        set_pulse_shaping: Enables the pulse-shaping mode of the PicoGlitcher version 2.
+        set_dead_zone: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature. Only implemented for hardware version 1.x.
         arm: Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. 
         block: Block until trigger condition is met. Raises an exception if times out.
     """
@@ -239,15 +289,19 @@ class MicroPythonScript():
         - Enables the low-power MOSFET for glitching
         - Configures the PicoGlitcher to use the rising-edge triggger condition.
         """
+        self.sm0 = None
         self.sm1 = None
         self.sm2 = None
-        self.sm3 = None
         self.frequency = None
         self.trigger_mode = "tio"
         self.glitch_mode = "crowbar"
         self.baudrate = 115200
         self.number_of_bits = 8
-        self.set_frequency(200_000_000) # overclocking supposedly works, script runs also with 270_000_000
+        if hardware_version[0] == 1:
+            # overclocking supposedly works, script runs also with 270_000_000
+            self.set_frequency(200_000_000)
+        elif hardware_version[0] == 2:
+            self.set_frequency(250_000_000)
         # LED
         self.led = Pin("LED", Pin.OUT)
         self.led.low()
@@ -276,6 +330,13 @@ class MicroPythonScript():
             self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
             self.pin_mux1.low()
             self.pin_mux0.low()
+            # lsb: GPIO0 -> MUX1
+            # msb: GPIO1 -> MUX0
+            # 0b00: IN1 = 1: VCC
+            # 0b01: IN3 = 1: +1V8
+            # 0b10: IN2 = 1: +3V3
+            # 0b11: IN4 = 1: GND
+            self.voltage_map = {"VCC": 0b00, "1.8": 0b01, "3.3": 0b10, "GND": 0b11}
         # standard dead zone after power down
         self.dead_time = 0.0
         self.pin_condition = self.pin_vtarget_en
@@ -424,8 +485,10 @@ class MicroPythonScript():
 
     def set_pulse_shaping(self):
         """
-        TODO
+        Enables the pulse-shaping mode of the PicoGlitcher version 2.
         """
+        if hardware_version[0] < 2:
+            raise Exception("Pulse shaping not implemented in hardware version 1.")
         self.glitch_mode = "pulse"
         self.pin_glitch = self.pin_mux1
 
@@ -451,9 +514,44 @@ class MicroPythonScript():
             self.condition = 0
         self.dead_time = dead_time
 
+    def arm_common(self):
+        if self.trigger_mode == "tio":
+            if hardware_version[0] == 1:
+                # state machine that checks the trigger condition
+                self.sm1 = StateMachine(1, tio_trigger_with_dead_time, freq=self.frequency, in_base=self.pin_trigger)
+
+                # state machine that blocks for a specific time after a certain condition (dead time)
+                sm2_func = None
+                if self.condition == 1:
+                    sm2_func = block_rising_condition
+                else:
+                    sm2_func = block_falling_condition
+                self.sm2 = StateMachine(2, sm2_func, freq=self.frequency, in_base=self.pin_condition)
+                # push dead time (in seconds) into the fifo of the statemachine
+                self.sm2.put(int(self.dead_time * self.frequency))
+            else:
+                # state machine that checks the trigger condition (without dead time)
+                self.sm1 = StateMachine(1, tio_trigger, freq=self.frequency, in_base=self.pin_trigger)
+
+        elif self.trigger_mode == "uart":
+            # state machine that checks the trigger condition
+            self.sm1 = StateMachine(1, uart_trigger, freq=self.baudrate * 8, in_base=self.pin_trigger)
+            # push pattern into the fifo of the statemachine
+            pattern = self.pattern << (32 - self.number_of_bits)
+            self.sm1.put(pattern)
+            # push number of bits into the fifo of the statemachine (self.number_of_bits - 1 is an optimization here)
+            self.sm1.put(self.number_of_bits - 1)
+
+        if self.sm0 is not None:
+            self.sm0.active(1)
+        if self.sm1 is not None:
+            self.sm1.active(1)
+        if self.sm2 is not None:
+            self.sm2.active(1)
+
     def arm(self, delay:int, length:int):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. 
+        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -462,51 +560,61 @@ class MicroPythonScript():
         self.release_reset()
         self.pin_hpglitch.low()
         self.pin_lpglitch.low()
-        if hardware_version[0] >= 2:
-            self.pin_mux1.low()
-            self.pin_mux0.low()
 
-        if self.glitch_mode == "crowbar":
-            # state machine that emits the glitch if the trigger condition is met
-            self.sm1 = StateMachine(1, glitch, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
-            self.sm1.active(1)
-            # push delay and length (in nano seconds) into the fifo of the statemachine
-            self.sm1.put(delay // (1_000_000_000 // self.frequency))
-            self.sm1.put(length // (1_000_000_000 // self.frequency))
+        # state machine that emits the glitch if the trigger condition is met
+        self.sm0 = StateMachine(0, glitch, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+        # push delay and length (in nano seconds) into the fifo of the statemachine
+        self.sm0.put(delay // (1_000_000_000 // self.frequency))
+        self.sm0.put(length // (1_000_000_000 // self.frequency))
 
-        elif self.glitch_mode == "pulse":
-            # state machine that emits the glitch if the trigger condition is met
-            self.sm1 = StateMachine(1, pulse, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
-            self.sm1.active(1)
-            # push delay and length (in nano seconds) into the fifo of the statemachine
-            self.sm1.put(delay // (1_000_000_000 // self.frequency))
-            self.sm1.put(length // (1_000_000_000 // self.frequency))
+        self.arm_common()
 
-        if self.trigger_mode == "tio":
-            # state machine that checks the trigger condition
-            self.sm2 = StateMachine(2, tio_trigger, freq=self.frequency, in_base=self.pin_trigger)
-            self.sm2.active(1)
+    def arm_pulse_shaping(self, delay:int, pulse_config:dict):
+        if hardware_version[0] < 2:
+            raise Exception("Pulse shaping not implemented in hardware version 1.")
 
-            # state machine that blocks for a specific time after a certain condition (dead time)
-            sm3_func = None
-            if self.condition == 1:
-                sm3_func = block_rising_condition
-            else:
-                sm3_func = block_falling_condition
-            self.sm3 = StateMachine(3, sm3_func, freq=self.frequency, in_base=self.pin_condition)
-            self.sm3.active(1)
-            # push dead time (in seconds) into the fifo of the statemachine
-            self.sm3.put(int(self.dead_time * self.frequency))
+        self.pin_mux1.low()
+        self.pin_mux0.low()
 
-        elif self.trigger_mode == "uart":
-            # state machine that checks the trigger condition
-            self.sm2 = StateMachine(2, uart_trigger, freq=self.baudrate * 8, in_base=self.pin_trigger)
-            self.sm2.active(1)
-            # push pattern into the fifo of the statemachine
-            pattern = self.pattern << (32 - self.number_of_bits)
-            self.sm2.put(pattern)
-            # push number of bits into the fifo of the statemachine (self.number_of_bits - 1 is an optimization here)
-            self.sm2.put(self.number_of_bits - 1)
+        # state machine that emits the glitch if the trigger condition is met (part 1)
+        self.sm0 = StateMachine(0, pulse1, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+        # push pulse shape config into the fifo of the statemachine
+        self.sm0.put(delay // (1_000_000_000 // self.frequency))
+        try:
+            t1 = pulse_config["t1"] // (1_000_000_000 // self.frequency)
+            v1 = self.voltage_map[pulse_config["v1"]]
+        except Exception as _:
+            t1 = 0
+            v1 = 0b00
+        try:
+            t2 = pulse_config["t2"] // (1_000_000_000 // self.frequency)
+            v2 = self.voltage_map[pulse_config["v2"]]
+        except Exception as _:
+            t2 = 0
+            v2 = 0b00
+        config = v2 << 30 | t2 << 16 | v1 << 14 | t1
+        self.sm0.put(config)
+
+        # state machine that emits the glitch if the trigger condition is met (part 2)
+        self.sm2 = StateMachine(2, pulse2, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+        # push pulse shape config into the fifo of the statemachine
+        try:
+            t3 = pulse_config["t3"] // (1_000_000_000 // self.frequency)
+            v3 = self.voltage_map[pulse_config["v3"]]
+        except Exception as _:
+            t3 = 0
+            v3 = 0b00
+        try:
+            t4 = pulse_config["t4"] // (1_000_000_000 // self.frequency)
+            v4 = self.voltage_map[pulse_config["v4"]]
+        except Exception as _:
+            t4 = 0
+            v4 = 0b00
+        config = v4 << 30 | t4 << 16 | v3 << 14 | t3
+        self.sm2.put(config)
+
+        self.arm_common()
+
 
     def block(self, timeout:float):
         """
@@ -515,18 +623,18 @@ class MicroPythonScript():
         Parameters:
             timeout: Time after the block is released.
         """
-        if self.sm1 is not None:
+        if self.sm0 is not None:
             start_time = time.time()
             while time.time() - start_time < timeout:
-                if self.sm1.rx_fifo() > 0:
+                if self.sm0.rx_fifo() > 0:
                     break
             if time.time() - start_time >= timeout:
-                self.sm1.active(0)
+                self.sm0.active(0)
                 self.pin_glitch_en.low()
                 raise Exception("Function execution timed out!")
 
-    def get_sm2_output(self):
-        if self.sm2 is not None:
+    def get_sm1_output(self):
+        if self.sm1 is not None:
             # pull the output of statemachine 2
-            res = self.sm2.get()
+            res = self.sm1.get()
             print(res)

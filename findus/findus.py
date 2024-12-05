@@ -344,6 +344,9 @@ class PicoGlitcherInterface(MicroPythonScript):
     def arm(self, delay:int, length:int):
         self.pyb.exec(f'mp.arm({delay}, {length})')
 
+    def arm_pulse_shaping(self, delay:int, pulse_config:dict):
+        self.pyb.exec(f'mp.arm_pulse_shaping({delay}, {pulse_config})')
+
     def reset_target(self):
         self.pyb.exec('mp.reset_target()')
 
@@ -362,8 +365,8 @@ class PicoGlitcherInterface(MicroPythonScript):
     def block(self, timeout:float):
         self.pyb.exec(f'mp.block({timeout})')
 
-    def get_sm2_output(self) -> str:
-        return self.pyb.exec('mp.get_sm2_output()')
+    def get_sm1_output(self) -> str:
+        return self.pyb.exec('mp.get_sm1_output()')
 
     def set_lpglitch(self):
         self.pyb.exec('mp.set_lpglitch()')
@@ -623,13 +626,23 @@ class PicoGlitcher(Glitcher):
 
     def arm(self, delay:int, length:int):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. 
+        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
             length: Length of the glitch in nano seconds. Expect a resolution of about 5 nano seconds.
         """
         self.pico_glitcher.arm(delay, length)
+
+    def arm_pulse_shaping(self, delay:int, pulse_config:dict):
+        """
+        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.
+
+        Parameters:
+            delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            pulse_config: <TODO>. Note: The default voltage when performing fault injection with pulse shaping is 3.3V. This can not be changed by the variable `pulse_config`. If you need to have a different default voltage, you may need to modify the `mpGlitcher.py` script.
+        """
+        self.pico_glitcher.arm_pulse_shaping(delay, pulse_config)
 
     def block(self, timeout:float = 1.0):
         """
@@ -640,8 +653,8 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.block(timeout)
 
-    def get_sm2_output(self) -> str:
-        return self.pico_glitcher.get_sm2_output()
+    def get_sm1_output(self) -> str:
+        return self.pico_glitcher.get_sm1_output()
 
     def reset(self, reset_time:float = 0.2):
         """
