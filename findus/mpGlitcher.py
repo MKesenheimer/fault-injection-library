@@ -112,17 +112,8 @@ def pulse():
     set(pins, 0b00).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
+    irq(clear, 7)
     push(block)
-
-@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
-def tio_trigger():
-    # wait for rising edge on trigger pin
-    wait(0, pin, 0)
-    wait(1, pin, 0)
-
-    # tell observed trigger
-    # TODO: should block be removed?
-    irq(block, 7)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
 def tio_trigger_with_dead_time():
@@ -238,7 +229,7 @@ class MicroPythonScript():
         set_lpglitch: Enable the low-power crowbar MOSFET for glitch generation.
         set_hpglitch: Enable the high-power crowbar MOSFET for glitch generation.
         set_pulse_shaping: Enables the pulse-shaping mode of the PicoGlitcher version 2.
-        set_dead_zone: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature. Only implemented for hardware version 1.x.
+        set_dead_zone: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
         arm: Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. 
         block: Block until trigger condition is met. Raises an exception if times out.
     """
@@ -343,6 +334,7 @@ class MicroPythonScript():
             mode: The trigger mode to use. Either "tio" or "uart".
             pin_trigger: The trigger pin to use. Can be either "default" or "alt". For hardware version 2 options "ext1" or "ext2" can also be chosen.
         """
+        # TODO: EXT1 and EXT2 are inverting!
         self.trigger_mode = mode
         if pin_trigger == "default":
             self.pin_trigger = Pin(TRIGGER, Pin.IN, Pin.PULL_DOWN)
@@ -477,22 +469,18 @@ class MicroPythonScript():
 
     def arm_common(self):
         if self.trigger_mode == "tio":
-            if hardware_version[0] == 1:
-                # state machine that checks the trigger condition
-                self.sm1 = StateMachine(1, tio_trigger_with_dead_time, freq=self.frequency, in_base=self.pin_trigger)
+            # state machine that checks the trigger condition
+            self.sm1 = StateMachine(1, tio_trigger_with_dead_time, freq=self.frequency, in_base=self.pin_trigger)
 
-                # state machine that blocks for a specific time after a certain condition (dead time)
-                sm2_func = None
-                if self.condition == 1:
-                    sm2_func = block_rising_condition
-                else:
-                    sm2_func = block_falling_condition
-                self.sm2 = StateMachine(2, sm2_func, freq=self.frequency, in_base=self.pin_condition)
-                # push dead time (in seconds) into the fifo of the statemachine
-                self.sm2.put(int(self.dead_time * self.frequency))
+            # state machine that blocks for a specific time after a certain condition (dead time)
+            sm2_func = None
+            if self.condition == 1:
+                sm2_func = block_rising_condition
             else:
-                # state machine that checks the trigger condition (without dead time)
-                self.sm1 = StateMachine(1, tio_trigger, freq=self.frequency, in_base=self.pin_trigger)
+                sm2_func = block_falling_condition
+            self.sm2 = StateMachine(2, sm2_func, freq=self.frequency, in_base=self.pin_condition)
+            # push dead time (in seconds) into the fifo of the statemachine
+            self.sm2.put(int(self.dead_time * self.frequency))
 
         elif self.trigger_mode == "uart":
             # state machine that checks the trigger condition

@@ -77,6 +77,8 @@ class Main:
             # set up glitch parameters (in nano seconds) and arm glitcher
             length = random.randint(s_length, e_length)
             delay = random.randint(s_delay, e_delay)
+
+            # arm
             if args.pulse_shaping:
                 pulse_config = {"t1": length, "v1": "GND", "t2": 2*length, "v2": "1.8", "t3": length, "v3": "GND", "t4": 2*length, "v4": "1.8"}
                 self.glitcher.arm_pulse_shaping(delay, pulse_config)

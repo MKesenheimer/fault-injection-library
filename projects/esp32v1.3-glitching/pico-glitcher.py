@@ -55,8 +55,11 @@ class Main():
         # note that you still have to physically connect the trigger input with vtarget
         self.glitcher.rising_edge_trigger()
 
-        # choose crowbar transistor
-        self.glitcher.set_lpglitch()
+        # choose pulse shaping or crowbar glitching
+        if args.pulse_shaping:
+            self.glitcher.set_pulse_shaping()
+        else:
+            self.glitcher.set_lpglitch()
 
         # target communication
         self.target = Serial(port=args.target, baudrate=115200)
@@ -82,7 +85,13 @@ class Main():
             # set up glitch parameters (in nano seconds) and arm glitcher
             length = random.randint(s_length, e_length)
             delay = random.randint(s_delay, e_delay)
-            self.glitcher.arm(delay, length)
+
+            # arm
+            if args.pulse_shaping:
+                pulse_config = {"t1": 1000, "v1": "1.8", "t2": length, "v2": "GND", "t3": 1000, "v3": "1.8",}
+                self.glitcher.arm_pulse_shaping(delay, pulse_config)
+            else:
+                self.glitcher.arm(delay, length)
 
             # initialize the loop on the ESP32
             self.target.write(b'A')
@@ -122,6 +131,7 @@ if __name__ == "__main__":
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
+    parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with pulse shaping (requires PicoGlitcher v2).")
     args = parser.parse_args()
 
     main = Main(args)
