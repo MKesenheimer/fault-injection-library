@@ -116,13 +116,26 @@ def pulse():
     push(block)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
-def tio_trigger_with_dead_time():
+def tio_trigger_with_dead_time_rising_edge():
     # wait for irq in block_rising_condition or block_falling_condition state machine (dead time)
     wait(1, irq, 6)
 
     # wait for rising edge on trigger pin
     wait(0, pin, 0)
     wait(1, pin, 0)
+
+    # tell observed trigger
+    # TODO: should block be removed?
+    irq(block, 7)
+
+@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
+def tio_trigger_with_dead_time_falling_edge():
+    # wait for irq in block_rising_condition or block_falling_condition state machine (dead time)
+    wait(1, irq, 6)
+
+    # wait for falling edge on trigger pin
+    wait(1, pin, 0)
+    wait(0, pin, 0)
 
     # tell observed trigger
     # TODO: should block be removed?
@@ -268,6 +281,7 @@ class MicroPythonScript():
         self.pin_glitch_en.low()
         # TRIGGER
         self.pin_trigger = Pin(TRIGGER, Pin.IN, Pin.PULL_DOWN)
+        self.trigger_inverting = False
         # HP_GLITCH
         self.pin_hpglitch = Pin(HP_GLITCH, Pin.OUT, Pin.PULL_DOWN)
         self.pin_hpglitch.low()
@@ -338,12 +352,16 @@ class MicroPythonScript():
         self.trigger_mode = mode
         if pin_trigger == "default":
             self.pin_trigger = Pin(TRIGGER, Pin.IN, Pin.PULL_DOWN)
+            self.trigger_inverting = False
         elif pin_trigger == "alt":
             self.pin_trigger = Pin(ALT_TRIGGER, Pin.IN, Pin.PULL_DOWN)
+            self.trigger_inverting = False
         elif pin_trigger == "ext1":
             self.pin_trigger = Pin(EXT1, Pin.IN, Pin.PULL_DOWN)
+            self.trigger_inverting = True
         elif pin_trigger == "ext2":
             self.pin_trigger = Pin(EXT2, Pin.IN, Pin.PULL_DOWN)
+            self.trigger_inverting = True
 
     def set_baudrate(self, baud:int = 115200):
         """
@@ -469,8 +487,13 @@ class MicroPythonScript():
 
     def arm_common(self):
         if self.trigger_mode == "tio":
+            sm1_func = None
+            if not self.trigger_inverting:
+                sm1_func = tio_trigger_with_dead_time_rising_edge
+            else:
+                sm1_func = tio_trigger_with_dead_time_falling_edge
             # state machine that checks the trigger condition
-            self.sm1 = StateMachine(1, tio_trigger_with_dead_time, freq=self.frequency, in_base=self.pin_trigger)
+            self.sm1 = StateMachine(1, sm1_func, freq=self.frequency, in_base=self.pin_trigger)
 
             # state machine that blocks for a specific time after a certain condition (dead time)
             sm2_func = None

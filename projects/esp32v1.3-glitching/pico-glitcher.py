@@ -20,24 +20,25 @@ import sys
 import time
 
 # import custom libraries
-from findus import Database, ProGlitcher, PicoGlitcher, Serial
+from findus import Database, PicoGlitcher, Serial
+from findus import OptimizationController
 
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(PicoGlitcher):
     def classify(self, response):
         if b'XXXX00000400YYYY00000400ZZZZ\r\n' in response:
-            color = 'G'
+            color, weight = 'G', 0
         elif b'' == response:
-            color = 'M'
+            color, weight = 'M', 0
         elif b'Error' in response:
-            color = 'M'
+            color, weight = 'M', 0
         elif b'Fatal exception' in response:
-            color = 'M'
+            color, weight = 'M', 1
         elif b'Timeout' in response:
-            color = 'Y'
+            color, weight = 'Y', -2
         else:
-            color = 'R'
-        return color
+            color, weight = 'R', 10
+        return color, weight
 
 class Main():
     def __init__(self, args):
@@ -53,7 +54,7 @@ class Main():
         #self.glitcher.init(ext_power=args.power, ext_power_voltage=3.3)
         # choose rising edge trigger with dead time of 0 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
-        self.glitcher.rising_edge_trigger()
+        self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
 
         # choose pulse shaping or crowbar glitching
         if args.pulse_shaping:
@@ -79,16 +80,27 @@ class Main():
         e_length = self.args.length[1]
         s_delay = self.args.delay[0]
         e_delay = self.args.delay[1]
+        s_length_glitch = 150
+        e_length_glitch = 250
+
+         # Genetic Algorithm to search for the best performing bin
+        boundaries = [(s_delay, e_delay), (s_length, e_length), (s_length_glitch, e_length_glitch)]
+        divisions = [10, 10, 5]
+        opt = OptimizationController(parameter_boundaries=boundaries, parameter_divisions=divisions, number_of_individuals=10, length_of_genom=20)
 
         experiment_id = 0
         while True:
-            # set up glitch parameters (in nano seconds) and arm glitcher
-            length = random.randint(s_length, e_length)
-            delay = random.randint(s_delay, e_delay)
+            # get the next parameter set
+            delay, length, length_glitch = opt.step()
+            if experiment_id % 100 == 0:
+                boundaries = opt.get_best_performing_bins()
+                print("[+] Best performing bin:")
+                for b in boundaries:
+                    print(b)
 
             # arm
             if args.pulse_shaping:
-                pulse_config = {"t1": 1000, "v1": "1.8", "t2": length, "v2": "GND", "t3": 1000, "v3": "1.8",}
+                pulse_config = {"t1": length, "v1": "1.8", "t2": length_glitch, "v2": "GND"}
                 self.glitcher.arm_pulse_shaping(delay, pulse_config)
             else:
                 self.glitcher.arm(delay, length)
@@ -98,7 +110,7 @@ class Main():
 
             # block until glitch and read response
             try:
-                self.glitcher.block(timeout=1)
+                self.glitcher.block(timeout=0.5)
                 response = self.target.read(30)
             except Exception as _:
                 print("[-] Timeout received in block(). Continuing.")
@@ -109,10 +121,13 @@ class Main():
                 response = b'Timeout'
 
             # classify response
-            color = self.glitcher.classify(response)
+            color, weight = self.glitcher.classify(response)
 
             # add to database
             self.database.insert(experiment_id, delay, length, color, response)
+
+            # add experiment to parameterspace of genetic algorithm
+            opt.add_experiment(weight, delay, length, length_glitch)
 
             # monitor
             speed = self.glitcher.get_speed(self.start_time, experiment_id)
@@ -121,6 +136,11 @@ class Main():
 
             # increase experiment id
             experiment_id += 1
+
+            # stop after enough data captured
+            #if experiment_id >= 5000:
+            #    break
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -132,6 +152,7 @@ if __name__ == "__main__":
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
     parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with pulse shaping (requires PicoGlitcher v2).")
+    parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
     args = parser.parse_args()
 
     main = Main(args)

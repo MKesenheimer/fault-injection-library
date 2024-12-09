@@ -183,14 +183,3 @@ This allows a cold start of the target to be carried out in the event of error s
 
 The assembled and fully functional board is shown in the following figure:
 ![Assembled Pico Glitcher v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/finished.JPG)
-
-
-## Building and uploading to pypi.org
-
-```
-cd fault-injection-lib
-pip install --upgrade build twine
-rm -rf dist
-python -m build
-twine upload --repository pypi dist/*
-```

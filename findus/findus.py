@@ -32,6 +32,7 @@ except Exception as _:
     print("[-] Library RD6006 not installed. Functions to control the external power supply not available.")
     rd6006_available = False
 from importlib.metadata import version
+import random
 
 class Database():
     """
@@ -1497,3 +1498,244 @@ class Helper():
             Returns the current timestamp in the format %Y-%m-%d_%H-%M-%S.
         """
         return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+class Parameterspace():
+    def __init__(self, parameter_boundaries:list[tuple[int, int]], parameter_divisions:list[int]):
+        # TODO: sanity checks!
+        self.parameter_boundaries = parameter_boundaries
+        self.parameter_divisions = parameter_divisions
+        self.cardinality = 1
+        for num in self.parameter_divisions:
+            self.cardinality *= num
+        self.weights_per_bin = [0 for x in range( self.cardinality )]
+
+    def get_cardinality(self):
+        return self.cardinality
+
+    def get_bin_assignment(self, *parameter:int) -> list[int]:
+        fact = 1
+        bina = 0
+        for i in range(len(self.parameter_divisions)):
+            division =  self.parameter_divisions[i]
+            # xdelta = (xmax - xmin) / xdiv
+            delta = (self.parameter_boundaries[i][1] - self.parameter_boundaries[i][0]) / division
+            bin_number = int((parameter[i] - self.parameter_boundaries[i][0]) // delta)
+            #print(f"par = {parameter[i]}, delta = {delta}, bina = {bin_number}")
+            if i > 0:
+                fact *= self.parameter_divisions[i - 1]
+            bina += fact * bin_number
+        return bina
+
+    def add_experiment(self, weight:int, *parameter:int):
+        for i in range(len(self.parameter_divisions)):
+            if parameter[i] < self.parameter_boundaries[i][0] or parameter[i] >= self.parameter_boundaries[i][1]:
+                print("[-] Error: parameter out of bounds. Skipping.")
+                print(f"[-] Dimension: {i}, lower = {self.parameter_boundaries[i][0]}, upper = {self.parameter_boundaries[i][1]}, parameter = {parameter[i]}")
+                return
+        bina = self.get_bin_assignment(*parameter)
+        self.weights_per_bin[bina] += weight
+
+    def get_weights(self) -> list[int]:
+        return self.weights_per_bin
+
+    def get_bin_numbers_sorted_by_weights(self) -> list[int]:
+        return list(reversed(sorted(range(len(self.weights_per_bin)), key=lambda i: self.weights_per_bin[i])))
+
+    def get_coordinates(self, bin_assignment:int) -> list[int]:
+        bin_numbers = []
+        reversed_parameter_divisions = list(reversed(self.parameter_divisions))
+        fact = self.cardinality
+        if bin_assignment > fact:
+            print("[-] Error: bin number exceeds total number of bins.")
+            return
+        for div in reversed_parameter_divisions:
+            c = (fact // div)
+            b = int(bin_assignment // c)
+            #print(f"bin_assignment = {bin_assignment}, fact = {fact}, div = {div}, (fact // div) = {c}, bin_number = {b}")
+            bin_numbers.append(b)
+            fact /= div
+            bin_assignment -= b * c
+        return list(reversed(bin_numbers))
+
+    def get_boundaries_from_coordinates(self, coordinates:list[int]) -> list[tuple[int, int]]:
+        boundaries = []
+        for i in range(len(self.parameter_divisions)):
+            division =  self.parameter_divisions[i]
+            delta = (self.parameter_boundaries[i][1] - self.parameter_boundaries[i][0]) / division
+            lower = self.parameter_boundaries[i][0] + delta * coordinates[i]
+            upper = self.parameter_boundaries[i][0] + delta * (coordinates[i] + 1)
+            tup = (int(lower), int(upper))
+            boundaries.append(tup)
+        return boundaries
+
+    def get_boundaries(self, bin_assignment:int) -> list[tuple[int, int]]:
+        bin_numbers = self.get_coordinates(bin_assignment)
+        return self.get_boundaries_from_coordinates(bin_numbers)
+
+class Individual():
+    def __init__(self, parameters:list[int]):
+        self.parameters = parameters
+        self.health = 0
+
+    def set_genom(self, parameters:list[int]):
+        self.parameters = parameters
+
+    def get_genom(self) -> list[int]:
+        return self.parameters
+
+    def set_health(self, health:int):
+        self.health = health
+
+    def get_health(self) -> int:
+        return self.health
+
+class Population():
+    def __init__(self, number_of_individuals:int, length_of_genom:int):
+        if number_of_individuals < 6:
+            print("[-] Error: Population too small.")
+            return
+
+        self.number_of_individuals = number_of_individuals
+        self.length_of_genom = length_of_genom
+
+        self.population = [None] * self.number_of_individuals
+        for i in range(self.number_of_individuals):
+            self.population[i] = self.generate_random_individual()
+
+    def get_number_of_individuals(self) -> int:
+        return self.number_of_individuals
+
+    def get_length_of_genom(self) -> int:
+        return self.length_of_genom
+
+    def generate_random_individual(self) -> Individual:
+        genom = [0] * self.length_of_genom
+        for i in range(self.length_of_genom):
+            genom[i] = random.uniform(0, 1)
+        return Individual(genom)
+
+    def get_individuals(self) -> list[Individual]:
+        return self.population
+
+    def set_individuals(self, individuals:list[Individual]):
+        self.population = individuals
+
+    def sort_by_health(self):
+        self.population = list(reversed(sorted(self.population, key=lambda ind: ind.get_health())))
+
+    def update_health(self, health_function):
+        for ind in self.population:
+            ind.set_health(health_function(ind.get_genom()))
+
+    def breed(self, i:int, j:int) -> Individual:
+        geni = self.population[i].get_genom()
+        genj = self.population[j].get_genom()
+        for k in range(len(geni)):
+            select = random.randint(0, 1)
+            if select == 1:
+                geni[k] = genj[k]
+        return Individual(geni)
+
+    def replace(self, i:int, individual:Individual):
+        self.population[i] = individual
+
+    def replace_with_random(self, i:int):
+        self.population[i] = self.generate_random_individual()
+
+class GeneticAlgorithm:
+    def __init__(self, parameterspace:Parameterspace, population:Population):
+        self.parameterspace = parameterspace
+        self.population = population
+
+    def get_bins_from_genom(self, parameters:list[int]) -> list[int]:
+        bins = [int(x * self.parameterspace.get_cardinality()) for x in parameters]
+        return bins
+
+    def health_function(self, parameters:list[int]) -> int:
+        bins = self.get_bins_from_genom(parameters)
+        # reduce health for every bin that occurs twice
+        counts = {}
+        for item in bins:
+            counts[item] = counts.get(item, 0) + 1
+        malus = 0
+        for c in counts:
+            if c > 1:
+                malus += 1
+        health = -malus
+        weights = self.parameterspace.get_weights()
+        for b in bins:
+            health += weights[b]
+        return health
+
+    def get_max_health(self) -> int:
+        genom_length = self.population.get_length_of_genom()
+        return max(self.parameterspace.get_weights()) * genom_length
+
+    def step(self) -> list[Individual]:
+        self.population.update_health(self.health_function)
+        self.population.sort_by_health()
+
+        # Step 1: breeding
+        child1 = self.population.breed(0, 1)
+        child2 = self.population.breed(2, 3)
+        # replace the individuals with bad health
+        number_of_individuals = self.population.get_number_of_individuals()
+        self.population.replace(number_of_individuals - 1, child1)
+        self.population.replace(number_of_individuals - 2, child2)
+
+        # Step 2: replace weak individuals with random ones
+        self.population.replace_with_random(number_of_individuals - 3)
+        self.population.replace_with_random(number_of_individuals - 4)
+
+        return self.population.get_individuals()
+
+    def run(self, threshold:float) -> list[int]:
+        maxhealth = self.get_max_health()
+        while True:
+            individuals = self.step()
+            for ind in individuals:
+                print(f"health of ind {ind}: {ind.get_health()}")
+            print()
+            if individuals[0].get_health() >= maxhealth * threshold:
+                parameters = individuals[0].get_genom()
+                return self.get_bins_from_genom(parameters)
+
+class OptimizationController():
+    def __init__(self, parameter_boundaries:list[tuple[int, int]], parameter_divisions:list[int], number_of_individuals:int = 10, length_of_genom:int = 20):
+        self.par = Parameterspace(parameter_boundaries, parameter_divisions)
+        self.pop = Population(number_of_individuals=10, length_of_genom=20)
+        self.opt = GeneticAlgorithm(self.par, self.pop)
+        self.i_current_individual = 0
+        self.i_current_bin = 0
+        self.number_of_individuals = self.pop.get_number_of_individuals()
+        self.length_of_genom = self.pop.get_length_of_genom()
+
+    def get_best_performing_bins(self) -> list[tuple[int, int]]:
+        boundaries = []
+        for b in self.opt.get_bins_from_genom(self.pop.get_individuals()[0].get_genom()):
+            boundaries.append(self.par.get_boundaries(b))
+        return boundaries
+
+    def step(self) -> list[int]:
+        individuals = self.opt.step()
+        parameters = individuals[self.i_current_individual].get_genom()
+        bins = self.opt.get_bins_from_genom(parameters)
+        boundaries = self.par.get_boundaries(bins[self.i_current_bin])
+
+        random_numbers = []
+        for b in boundaries:
+            random_numbers.append(random.randint(b[0], b[1]))
+
+        # next bin
+        self.i_current_bin += 1
+        if self.i_current_bin >= self.length_of_genom:
+            self.i_current_bin = 0
+            # next individual
+            self.i_current_individual += 1
+            if self.i_current_individual >= self.number_of_individuals:
+                self.i_current_individual = 0
+
+        return random_numbers
+
+    def add_experiment(self, weight:int, *parameter:int):
+        self.par.add_experiment(weight, *parameter)

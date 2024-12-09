@@ -50,8 +50,8 @@ class Main():
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
         # choose rising edge trigger with dead time of 0 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
-        self.glitcher.rising_edge_trigger(pin_trigger="default")
-        #self.glitcher.rising_edge_trigger(pin_trigger="default", dead_time=0.01, pin_condition="reset")
+        self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
+        #self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input, dead_time=0.01, pin_condition="reset")
 
         # choose pulse shaping or crowbar glitching
         if args.pulse_shaping:
@@ -127,6 +127,7 @@ if __name__ == "__main__":
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
     parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with pulse shaping (requires PicoGlitcher v2).")
+    parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
     args = parser.parse_args()
 
     main = Main(args)
