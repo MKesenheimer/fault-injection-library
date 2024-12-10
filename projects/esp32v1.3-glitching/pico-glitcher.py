@@ -35,7 +35,7 @@ class DerivedGlitcher(PicoGlitcher):
         elif b'Fatal exception' in response:
             color, weight = 'M', 1
         elif b'Timeout' in response:
-            color, weight = 'Y', -2
+            color, weight = 'Y', -5
         else:
             color, weight = 'R', 10
         return color, weight
@@ -80,18 +80,20 @@ class Main():
         e_length = self.args.length[1]
         s_delay = self.args.delay[0]
         e_delay = self.args.delay[1]
-        s_length_glitch = 150
-        e_length_glitch = 250
+        s_t1 = 0
+        e_t1 = 2000
+        s_t3 = 0
+        e_t3 = 2000
 
          # Genetic Algorithm to search for the best performing bin
-        boundaries = [(s_delay, e_delay), (s_length, e_length), (s_length_glitch, e_length_glitch)]
-        divisions = [10, 10, 5]
+        boundaries = [(s_delay, e_delay), (s_t1, e_t1), (s_length, e_length), (s_t3, e_t3)]
+        divisions = [10, 10, 5, 10]
         opt = OptimizationController(parameter_boundaries=boundaries, parameter_divisions=divisions, number_of_individuals=10, length_of_genom=20)
 
         experiment_id = 0
         while True:
             # get the next parameter set
-            delay, length, length_glitch = opt.step()
+            delay, t1, length, t3 = opt.step()
             if experiment_id % 100 == 0:
                 boundaries = opt.get_best_performing_bins()
                 print("[+] Best performing bin:")
@@ -100,7 +102,7 @@ class Main():
 
             # arm
             if args.pulse_shaping:
-                pulse_config = {"t1": length, "v1": "1.8", "t2": length_glitch, "v2": "GND"}
+                pulse_config = {"t1": t1, "v1": "1.8", "t2": length, "v2": "GND", "t3": t3, "v3": "1.8"}
                 self.glitcher.arm_pulse_shaping(delay, pulse_config)
             else:
                 self.glitcher.arm(delay, length)
@@ -127,7 +129,7 @@ class Main():
             self.database.insert(experiment_id, delay, length, color, response)
 
             # add experiment to parameterspace of genetic algorithm
-            opt.add_experiment(weight, delay, length, length_glitch)
+            opt.add_experiment(weight, delay, t1, length, t3)
 
             # monitor
             speed = self.glitcher.get_speed(self.start_time, experiment_id)

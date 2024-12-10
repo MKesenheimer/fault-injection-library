@@ -1643,9 +1643,11 @@ class Population():
         self.population[i] = self.generate_random_individual()
 
 class GeneticAlgorithm:
-    def __init__(self, parameterspace:Parameterspace, population:Population):
+    def __init__(self, parameterspace:Parameterspace, population:Population, health_malus_factor:int = 1, health_bonus_factor:int = 1):
         self.parameterspace = parameterspace
         self.population = population
+        self.health_malus_factor = health_malus_factor
+        self.health_bonus_factor = health_bonus_factor
 
     def get_bins_from_genom(self, parameters:list[int]) -> list[int]:
         bins = [int(x * self.parameterspace.get_cardinality()) for x in parameters]
@@ -1653,18 +1655,19 @@ class GeneticAlgorithm:
 
     def health_function(self, parameters:list[int]) -> int:
         bins = self.get_bins_from_genom(parameters)
-        # reduce health for every bin that occurs twice
+        # for every bin that occurs more than once, reduce health
+        # (forces the algorithm to look into separate bins)
         counts = {}
         for item in bins:
             counts[item] = counts.get(item, 0) + 1
         malus = 0
         for c in counts:
-            if c > 1:
-                malus += 1
-        health = -malus
+            if counts[c] > 1:
+                malus += counts[c] - 1
+        health = - (self.health_malus_factor * malus)
         weights = self.parameterspace.get_weights()
         for b in bins:
-            health += weights[b]
+            health += self.health_bonus_factor * weights[b]
         return health
 
     def get_max_health(self) -> int:
@@ -1701,10 +1704,10 @@ class GeneticAlgorithm:
                 return self.get_bins_from_genom(parameters)
 
 class OptimizationController():
-    def __init__(self, parameter_boundaries:list[tuple[int, int]], parameter_divisions:list[int], number_of_individuals:int = 10, length_of_genom:int = 20):
+    def __init__(self, parameter_boundaries:list[tuple[int, int]], parameter_divisions:list[int], number_of_individuals:int = 10, length_of_genom:int = 20, health_malus_factor:int = 1, health_bonus_factor:int = 1):
         self.par = Parameterspace(parameter_boundaries, parameter_divisions)
-        self.pop = Population(number_of_individuals=10, length_of_genom=20)
-        self.opt = GeneticAlgorithm(self.par, self.pop)
+        self.pop = Population(number_of_individuals, length_of_genom)
+        self.opt = GeneticAlgorithm(self.par, self.pop, health_malus_factor, health_bonus_factor)
         self.i_current_individual = 0
         self.i_current_bin = 0
         self.number_of_individuals = self.pop.get_number_of_individuals()
