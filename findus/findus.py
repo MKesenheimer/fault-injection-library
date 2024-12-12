@@ -1539,7 +1539,7 @@ class Parameterspace():
         return self.weights_per_bin
 
     def get_bin_numbers_sorted_by_weights(self) -> list[int]:
-        return list(reversed(sorted(range(len(self.weights_per_bin)), key=lambda i: self.weights_per_bin[i])))
+        return sorted(range(len(self.weights_per_bin)), key=lambda i: self.weights_per_bin[i])
 
     def get_coordinates(self, bin_assignment:int) -> list[int]:
         bin_numbers = []
@@ -1573,9 +1573,11 @@ class Parameterspace():
         return self.get_boundaries_from_coordinates(bin_numbers)
 
 class Individual():
-    def __init__(self, parameters:list[int]):
+    def __init__(self, parameters:list[int], max_age:int = 10):
         self.parameters = parameters
         self.health = 0
+        self.max_age = max_age
+        self.age = 0
 
     def set_genom(self, parameters:list[int]):
         self.parameters = parameters
@@ -1589,11 +1591,20 @@ class Individual():
     def get_health(self) -> int:
         return self.health
 
+    def get_age(self) -> int:
+        return self.age
+
+    def get_max_age(self) -> int:
+        return self.max_age
+
+    def increase_age(self):
+        self.age += 1
+
 class Population():
     def __init__(self, number_of_individuals:int, length_of_genom:int):
-        if number_of_individuals < 6:
+        if number_of_individuals < 10:
             print("[-] Error: Population too small.")
-            return
+            sys.exit(-1)
 
         self.number_of_individuals = number_of_individuals
         self.length_of_genom = length_of_genom
@@ -1621,20 +1632,25 @@ class Population():
         self.population = individuals
 
     def sort_by_health(self):
-        self.population = list(reversed(sorted(self.population, key=lambda ind: ind.get_health())))
+        self.population = sorted(self.population, key=lambda ind: ind.get_health())
 
     def update_health(self, health_function):
         for ind in self.population:
             ind.set_health(health_function(ind.get_genom()))
+            #print(ind.get_health())
 
     def breed(self, i:int, j:int) -> Individual:
-        geni = self.population[i].get_genom()
-        genj = self.population[j].get_genom()
+        geni = self.population[i].get_genom().copy()
+        genj = self.population[j].get_genom().copy()
         for k in range(len(geni)):
             select = random.randint(0, 1)
             if select == 1:
                 geni[k] = genj[k]
         return Individual(geni)
+
+    def mutate(self, i:int) -> Individual:
+        gene = random.randint(0, self.length_of_genom - 1)
+        self.population[i].get_genom()[gene] = random.uniform(0, 1)
 
     def replace(self, i:int, individual:Individual):
         self.population[i] = individual
@@ -1642,12 +1658,20 @@ class Population():
     def replace_with_random(self, i:int):
         self.population[i] = self.generate_random_individual()
 
+    def kill_and_replace(self):
+        for i in range(len(self.population)):
+            if self.population[i].get_age() > self.population[i].get_max_age():
+                self.population[i] = self.generate_random_individual()
+
+    def increase_age_of_population(self):
+        for i in range(len(self.population)):
+            self.population[i].increase_age()
+
 class GeneticAlgorithm:
-    def __init__(self, parameterspace:Parameterspace, population:Population, health_malus_factor:int = 1, health_bonus_factor:int = 1):
+    def __init__(self, parameterspace:Parameterspace, population:Population, health_malus_factor:float = 1):
         self.parameterspace = parameterspace
         self.population = population
         self.health_malus_factor = health_malus_factor
-        self.health_bonus_factor = health_bonus_factor
 
     def get_bins_from_genom(self, parameters:list[int]) -> list[int]:
         bins = [int(x * self.parameterspace.get_cardinality()) for x in parameters]
@@ -1655,8 +1679,22 @@ class GeneticAlgorithm:
 
     def health_function(self, parameters:list[int]) -> int:
         bins = self.get_bins_from_genom(parameters)
+        """
+        Calculates the health of a individual:
+
+            health = Sum(weight_i) - factor * malus * Sum(weight_i)
+            health = (1 - factor * malus) * Sum(weight_i)
+        """
+        # sum up the weights in each bin
+        health = 0
+        weights = self.parameterspace.get_weights()
+        for b in bins:
+            health += weights[b]
+
         # for every bin that occurs more than once, reduce health
         # (forces the algorithm to look into separate bins)
+        # malus can maximal be the number of genoms (=bins),
+        # therefore it is reasonable to choose health_malus_factor < (1 / number_of_bins)
         counts = {}
         for item in bins:
             counts[item] = counts.get(item, 0) + 1
@@ -1664,10 +1702,8 @@ class GeneticAlgorithm:
         for c in counts:
             if counts[c] > 1:
                 malus += counts[c] - 1
-        health = - (self.health_malus_factor * malus)
-        weights = self.parameterspace.get_weights()
-        for b in bins:
-            health += self.health_bonus_factor * weights[b]
+        health -= (self.health_malus_factor * malus * health)
+
         return health
 
     def get_max_health(self) -> int:
@@ -1675,20 +1711,35 @@ class GeneticAlgorithm:
         return max(self.parameterspace.get_weights()) * genom_length
 
     def step(self) -> list[Individual]:
+        self.population.increase_age_of_population()
         self.population.update_health(self.health_function)
         self.population.sort_by_health()
 
         # Step 1: breeding
-        child1 = self.population.breed(0, 1)
-        child2 = self.population.breed(2, 3)
-        # replace the individuals with bad health
         number_of_individuals = self.population.get_number_of_individuals()
-        self.population.replace(number_of_individuals - 1, child1)
-        self.population.replace(number_of_individuals - 2, child2)
+        child12 = self.population.breed(number_of_individuals - 1, number_of_individuals - 2)
+        child21 = self.population.breed(number_of_individuals - 2, number_of_individuals - 1)
+        child34 = self.population.breed(number_of_individuals - 3, number_of_individuals - 4)
+        child43 = self.population.breed(number_of_individuals - 4, number_of_individuals - 3)
+        # replace the individuals with bad health
+        self.population.replace(0, child12)
+        self.population.replace(1, child21)
+        self.population.replace(2, child34)
+        self.population.replace(3, child43)
 
-        # Step 2: replace weak individuals with random ones
-        self.population.replace_with_random(number_of_individuals - 3)
-        self.population.replace_with_random(number_of_individuals - 4)
+        # Step 2: mutate
+        self.population.mutate(0)
+        self.population.mutate(2)
+
+        # Step 3: replace weak individuals with random ones
+        self.population.replace_with_random(4)
+        self.population.replace_with_random(5)
+
+        # Step 4: Kill old individuals
+        self.population.kill_and_replace()
+
+        self.population.update_health(self.health_function)
+        self.population.sort_by_health()
 
         return self.population.get_individuals()
 
@@ -1703,24 +1754,40 @@ class GeneticAlgorithm:
                 parameters = individuals[0].get_genom()
                 return self.get_bins_from_genom(parameters)
 
+    def get_population(self) -> Population:
+        return self.population
+
+    def get_parameterspace(self) -> Parameterspace:
+        return self.parameterspace
+
 class OptimizationController():
-    def __init__(self, parameter_boundaries:list[tuple[int, int]], parameter_divisions:list[int], number_of_individuals:int = 10, length_of_genom:int = 20, health_malus_factor:int = 1, health_bonus_factor:int = 1):
+    def __init__(self, parameter_boundaries:list[tuple[int, int]], parameter_divisions:list[int], number_of_individuals:int = 10, length_of_genom:int = 20, malus_factor_for_equal_bins:float = 1):
         self.par = Parameterspace(parameter_boundaries, parameter_divisions)
         self.pop = Population(number_of_individuals, length_of_genom)
-        self.opt = GeneticAlgorithm(self.par, self.pop, health_malus_factor, health_bonus_factor)
+        # renorm the malus factor to the maximum number of genoms,
+        # thus malus_factor_for_equal_bins can be chosen between 0 and 1.
+        factor = malus_factor_for_equal_bins / length_of_genom
+        self.opt = GeneticAlgorithm(self.par, self.pop, factor)
         self.i_current_individual = 0
         self.i_current_bin = 0
         self.number_of_individuals = self.pop.get_number_of_individuals()
         self.length_of_genom = self.pop.get_length_of_genom()
 
-    def get_best_performing_bins(self) -> list[tuple[int, int]]:
+    def print_best_performing_bins(self):
+        number_of_individuals = self.pop.get_number_of_individuals()
+        ind0 = self.pop.get_individuals()[number_of_individuals - 1]
+        print(f"[+] Individual health = {ind0.get_health()}, age = {ind0.get_age()}")
+        print("[+] Best performing bins:")
+        genom = ind0.get_genom()
+        bins = self.opt.get_bins_from_genom(genom)
         boundaries = []
-        for b in self.opt.get_bins_from_genom(self.pop.get_individuals()[0].get_genom()):
-            boundaries.append(self.par.get_boundaries(b))
-        return boundaries
+        for i in range(len(bins)):
+            boundary = self.par.get_boundaries(bins[i])
+            print(f"    bin = {bins[i]}: {boundary}")
+            boundaries.append(boundary)
 
     def step(self) -> list[int]:
-        individuals = self.opt.step()
+        individuals = self.pop.get_individuals()
         parameters = individuals[self.i_current_individual].get_genom()
         bins = self.opt.get_bins_from_genom(parameters)
         boundaries = self.par.get_boundaries(bins[self.i_current_bin])
@@ -1737,6 +1804,8 @@ class OptimizationController():
             self.i_current_individual += 1
             if self.i_current_individual >= self.number_of_individuals:
                 self.i_current_individual = 0
+                # next age step
+                self.pop.set_individuals(self.opt.step())
 
         return random_numbers
 

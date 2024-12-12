@@ -15,7 +15,6 @@
 
 import argparse
 import logging
-import random
 import sys
 import time
 
@@ -33,11 +32,11 @@ class DerivedGlitcher(PicoGlitcher):
         elif b'Error' in response:
             color, weight = 'M', 0
         elif b'Fatal exception' in response:
-            color, weight = 'M', 1
+            color, weight = 'M', 0
         elif b'Timeout' in response:
-            color, weight = 'Y', -5
+            color, weight = 'Y', -1
         else:
-            color, weight = 'R', 10
+            color, weight = 'R', 2
         return color, weight
 
 class Main():
@@ -82,27 +81,23 @@ class Main():
         e_delay = self.args.delay[1]
         s_t1 = 0
         e_t1 = 2000
-        s_t3 = 0
-        e_t3 = 2000
 
-         # Genetic Algorithm to search for the best performing bin
-        boundaries = [(s_delay, e_delay), (s_t1, e_t1), (s_length, e_length), (s_t3, e_t3)]
-        divisions = [10, 10, 5, 10]
-        opt = OptimizationController(parameter_boundaries=boundaries, parameter_divisions=divisions, number_of_individuals=10, length_of_genom=20)
+        # Genetic Algorithm to search for the best performing bin
+        boundaries = [(s_delay, e_delay), (s_t1, e_t1), (s_length, e_length)]
+        divisions = [10, 10, 5]
+        opt = OptimizationController(parameter_boundaries=boundaries, parameter_divisions=divisions, number_of_individuals=10, length_of_genom=20, malus_factor_for_equal_bins
+        =1)
 
         experiment_id = 0
         while True:
             # get the next parameter set
-            delay, t1, length, t3 = opt.step()
+            delay, t1, length = opt.step()
             if experiment_id % 100 == 0:
-                boundaries = opt.get_best_performing_bins()
-                print("[+] Best performing bin:")
-                for b in boundaries:
-                    print(b)
+                opt.print_best_performing_bins()
 
             # arm
             if args.pulse_shaping:
-                pulse_config = {"t1": t1, "v1": "1.8", "t2": length, "v2": "GND", "t3": t3, "v3": "1.8"}
+                pulse_config = {"t1": t1, "v1": "1.8", "t2": length, "v2": "GND"}
                 self.glitcher.arm_pulse_shaping(delay, pulse_config)
             else:
                 self.glitcher.arm(delay, length)
@@ -129,7 +124,8 @@ class Main():
             self.database.insert(experiment_id, delay, length, color, response)
 
             # add experiment to parameterspace of genetic algorithm
-            opt.add_experiment(weight, delay, t1, length, t3)
+            opt.add_experiment(weight, delay, t1, length)
+            #opt.add_experiment(weight, delay, length)
 
             # monitor
             speed = self.glitcher.get_speed(self.start_time, experiment_id)

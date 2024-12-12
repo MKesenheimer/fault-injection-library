@@ -24,7 +24,7 @@ import subprocess
 
 # import custom libraries
 from findus.BootloaderCom import BootloaderCom, GlitchState
-from findus.GlitchState import OKType, ExpectedType
+from findus.GlitchState import OKType
 from findus import Database, PicoGlitcher, Helper
 
 def program_target():
@@ -52,6 +52,12 @@ class Main:
         # we can trigger on x22 with the configuration 9n1 instead
         # Update: Triggering on x11 in configuration 8n1 works good enough.
         self.glitcher.uart_trigger(0x11)
+
+        # choose pulse shaping or crowbar glitching
+        if args.pulse_shaping:
+            self.glitcher.set_pulse_shaping()
+        else:
+            self.glitcher.set_lpglitch()
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
@@ -81,40 +87,47 @@ class Main:
             # set up glitch parameters (in nano seconds) and arm glitcher
             length = random.randint(s_length, e_length)
             delay = random.randint(s_delay, e_delay)
-            self.glitcher.arm(delay, length)
+
+            # arm
+            if args.pulse_shaping:
+                pulse_config = {"t1": 100 * length, "v1": "GND", "t2": length, "v2": "1.8"}
+                self.glitcher.arm_pulse_shaping(delay, pulse_config)
+            else:
+                self.glitcher.arm(delay, length)
 
             # reset target
-            self.glitcher.reset(0.1)
+            self.glitcher.reset(0.01)
             #self.glitcher.power_cycle_target()
-            #time.sleep(0.1)
+            time.sleep(0.01)
 
             # setup bootloader communication
-            #response = self.bootcom.init_bootloader()
+            response = self.bootcom.init_bootloader()
+
             # setup memory read; this function triggers the glitch
-            #if issubclass(type(response), OKType):
-            response = self.bootcom.setup_memread()
-
-            # block until glitch
-            try:
-                self.glitcher.block(timeout=1)
-            except Exception as _:
-                print("[-] Timeout received in block(). Continuing.")
-                #self.glitcher.power_cycle_target()
-                #time.sleep(0.2)
-                response = GlitchState.Warning.timeout
-
-            # dump memory
             mem = b''
             if issubclass(type(response), OKType):
-                #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
-                start = 0x08000000
-                #start = 0x08000000 - 0*0xFF
-                size = 0xFF
-                response, mem = self.bootcom.read_memory(start, size)
-                # DEBUG (to easily find the glitch with a logic analyzer)
-                #time.sleep(1)
-                #if mem != b'\x1f' and mem != b'\x79' and mem != b'':
-                #    time.sleep(4)
+                response = self.bootcom.setup_memread()
+
+                # block until glitch
+                try:
+                    self.glitcher.block(timeout=1)
+                except Exception as _:
+                    print("[-] Timeout received in block(). Continuing.")
+                    #self.glitcher.power_cycle_target()
+                    #time.sleep(0.2)
+                    response = GlitchState.Warning.timeout
+
+                # dump memory
+                if issubclass(type(response), OKType):
+                    #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
+                    start = 0x08000000
+                    #start = 0x08000000 - 0*0xFF
+                    size = 0xFF
+                    response, mem = self.bootcom.read_memory(start, size)
+                    # DEBUG (to easily find the glitch with a logic analyzer)
+                    #time.sleep(1)
+                    #if mem != b'\x1f' and mem != b'\x79' and mem != b'':
+                    #    time.sleep(4)
 
             # classify response
             color = self.glitcher.classify(response)
@@ -176,6 +189,8 @@ if __name__ == "__main__":
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
+    parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with pulse shaping (requires PicoGlitcher v2).")
+    parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
     args = parser.parse_args()
 
     main = Main(args)
