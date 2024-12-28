@@ -64,7 +64,7 @@ upload --port /dev/<rpi-tty-port> --script <script.py>
 To carry out a fault injection attack with the Raspberry Pi Pico on another microcontroller, the following setup can be used.
 
 First, we connect the Pico Glitcher and a target as follows:
-![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/esp32-glitching.png)
+![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/fritzing/esp32-glitching.png)
 Note that the trigger input is connected directly to the reset line.
 As the reset is released from the device, the trigger signal is sent.
 
@@ -112,7 +112,7 @@ This attack has been first described by [SEC consult](https://sec-consult.com/bl
 However, to glitch these devices successully, no expensive hardware is necessary, as it is demonstrated with the following scripts.
 
 Connect the Pico Glitcher and the STM32 target according to the following schematic:
-![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/stm32-glitching.png)
+![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/fritzing/stm32-glitching.png)
 Here, the trigger line is connected to the UART-TX line, since we want to trigger on a specific UART word that is sent during the bootloader stage.
 Furthermore, "Boot0" pin of the STM32 needs to be pulled high in order to activate the bootloader.
 This pin is exposed on the Nucleo header.
@@ -173,7 +173,7 @@ As mentioned above, only a Raspberry Pi Pico and a few other components are requ
 However, in order to achieve the best results, a circuit board was developed that was adapted directly for the fault-injection-library. 
 
 The board consists of a Raspberry Pi Pico, two level shifters for in- and outputs with any voltage, and glitching transistors that can switch up to 66 amps.
-![Pico Glichter v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/pico-glitcher-v1.1_sch.png)
+![Pico Glichter v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/kicad/pico-glitcher-v1/pico-glitcher-v1.1_sch.png)
 
 There are several connection options for different voltage sources, from 1.8V, 3.3V to 5V.
 The Pico Glitcher v1 can also be supplied with any external voltage via `VCC_EXTERN`.
