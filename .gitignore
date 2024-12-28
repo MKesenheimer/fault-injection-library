@@ -19,6 +19,10 @@ docs/_build
 docs/generated
 docs/source
 fritzing
-schematics/pico-glitcher-v2*
+schematics/fusion360
 pypi.md
 projects/test
+schematics/kicad/pico-glitcher-v2-amplifier
+schematics/kicad/pico-glitcher-v2-opamp-amplifier
+schematics/kicad/pico-glitcher-v2-simulation
+**/*backups

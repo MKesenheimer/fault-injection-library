@@ -427,8 +427,11 @@ class ExternalPowerSupply:
         Parameters:
             voltage: Desired output voltage.
         """
-        self.r.voltage = voltage
-        self.r.enable = True
+        try:
+            self.r.voltage = voltage
+            self.r.enable = True
+        except Exception as _:
+            pass
 
     def enable_vtarget(self):
         """

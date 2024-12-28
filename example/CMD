@@ -1,3 +1,5 @@
 python pico-glitcher.py --rpico /dev/tty.usbmodem1101 --delay 10 10 --length 100 100
+python pico-glitcher.py --rpico /dev/tty.usbmodem101 --delay 10 10 --length 100 100 --pulse-shaping
+
 python pico-glitcher-uart-trigger.py --rpico /dev/tty.usbmodem1101 --target /dev/tty.usbserial-A50285BI  --delay 10 10 --length 100 100
 

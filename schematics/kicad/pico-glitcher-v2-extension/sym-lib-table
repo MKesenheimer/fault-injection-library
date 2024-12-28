@@ -1,0 +1,6 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "ad9102")(type "KiCad")(uri "${KIPRJMOD}/ad9102.kicad_sym")(options "")(descr ""))
+  (lib (name "adm8829")(type "KiCad")(uri "${KIPRJMOD}/adm8829.kicad_sym")(options "")(descr ""))
+  (lib (name "THS3091DDAR")(type "KiCad")(uri "${KIPRJMOD}/THS3091DDAR.kicad_sym")(options "")(descr ""))
+)
