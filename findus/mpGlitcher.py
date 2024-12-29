@@ -244,6 +244,7 @@ class MicroPythonScript():
         set_multiplexing: Enables the multiplexing mode of the PicoGlitcher version 2 to switch between different voltage levels.
         set_dead_zone: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
         arm: Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. 
+        arm_multiplexing: 
         block: Block until trigger condition is met. Raises an exception if times out.
     """
     def __init__(self):
@@ -542,8 +543,15 @@ class MicroPythonScript():
         self.arm_common()
 
     def arm_multiplexing(self, delay:int, mul_config:dict):
+        """
+        Arm the PicoGlitcher in multiplexing mode and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.
+
+        Parameters:
+            delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            mul_config: The dictionary for the multiplexing profile with pairs of identifiers and values. For example, this could be `{"t1": 10, "v1": "GND", "t2": 20, "v2": "1.8", "t3": 30, "v3": "GND", "t4": 40, "v4": "1.8"}`. Meaning that when triggered, a GND-voltage pulse with duration of `10ns` is emitted, followed by a +1.8V step with duration of `20ns` and so on. Note: The default voltage when performing fault injection in multiplexing mode is 3.3V. This can not be changed by the variable `mul_config`. If you need to have a different default voltage, you may need to modify the `multiplex()` PIO-function.
+        """
         if hardware_version[0] < 2:
-            raise Exception("Pulse shaping not implemented in hardware version 1.")
+            raise Exception("Multiplexing not implemented in hardware version 1.")
 
         self.pin_mux1.low()
         self.pin_mux0.low()

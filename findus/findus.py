@@ -644,7 +644,7 @@ class PicoGlitcher(Glitcher):
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
-            mul_config: <TODO>. Note: The default voltage when performing fault injection in multiplexing mode is 3.3V. This can not be changed by the variable `mul_config`. If you need to have a different default voltage, you may need to modify the `mpGlitcher.py` script.
+            mul_config: The dictionary for the multiplexing profile with pairs of identifiers and values. For example, this could be `{"t1": 10, "v1": "GND", "t2": 20, "v2": "1.8", "t3": 30, "v3": "GND", "t4": 40, "v4": "1.8"}`. Meaning that when triggered, a GND-voltage pulse with duration of `10ns` is emitted, followed by a +1.8V step with duration of `20ns` and so on. Note: The default voltage when performing fault injection in multiplexing mode is 3.3V. This can not be changed by the variable `mul_config`. If you need to have a different default voltage, you may need to modify the `mpGlitcher.py` script.
         """
         self.pico_glitcher.arm_multiplexing(delay, mul_config)
 
@@ -1510,7 +1510,7 @@ class Parameterspace():
         self.cardinality = 1
         for num in self.parameter_divisions:
             self.cardinality *= num
-        self.weights_per_bin = [0 for x in range( self.cardinality )]
+        self.weights_per_bin = [0 for x in range(self.cardinality)]
 
     def get_cardinality(self):
         return self.cardinality
