@@ -1,6 +1,6 @@
 # Example Projects
 
-Start your glitching career with these two examples.
+Start your glitching career with these examples.
 
 ## Test the functionality of your Pico Glitcher
 
@@ -136,7 +136,7 @@ Difficulty: Advanced
 STMicroelectronics offers a wide range of STM32 microcontrollers, based on ARM Cortex-M cores, catering to various performance and power requirements. These microcontrollers are integral in applications across industrial automation, consumer electronics, automotive systems, and IoT devices, providing efficient processing, connectivity, and real-time control.
 Since they are widely used, these microcontrollers are a interesting target for hardware attacks.
 
-A processor from the ST32F4 series was chosen, specifically the STM Black Pill board with the STM32F401 microcontroller which is based on the Arm® Cortex®-M4 architecture. The Black Pill board contains all necessary components for operation.
+A processor from the ST32F4 series was chosen as the target, specifically the STM Black Pill board with the STM32F401 microcontroller which is based on the Arm® Cortex®-M4 architecture. The Black Pill board contains all necessary components for operation.
 
 STM32 processors utilize a readout protection (RDP) that is divided into three stages.
 RDP level 1 (RDP-1) is the first level that restricts access to the microcontroller.
@@ -155,7 +155,7 @@ The colors of the connections encode these signals:
 - purple: 1.8V voltage supply to the 'VCAP' pin decoupled with a 10 Ohms resistor and glitch input. The 1.8V voltage supply via the resistor is needed to get a stable voltage on the 'VCAP' pin.
 - yellow: TX line to the STM32 microcontroller.
 - orange. RX line to the STM32 microcontroller.
-- yellow: Trigger line, connected to the TX line to the STM32 microcontroller. If 0x11 (memory read command) is transmitted, the trigger is set.
+- also yellow: Trigger line, connected to the TX line to the STM32 microcontroller. If 0x11 (memory read command) is transmitted, the trigger is set.
 - geen: Reset line to reset the microcontroller.
 
 Additionally, an oscilloscope is connected to the TX line and the 'VCAP' pin (glitch line).
@@ -179,6 +179,7 @@ A successful glitching campaign can be seen in the following figure. Successful 
 ![Parameter space and a successful glitch](images/parameterspace-attempt-2.png)
 
 A status message is printed with the memory content if a successful glitch was found.
+
 ![Memory dump](images/successful-dump.png)
 
 ### Things that can and will go wrong
