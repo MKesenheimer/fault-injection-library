@@ -44,4 +44,6 @@ Status LEDs also indicate the current status of the board: Whether the target vo
 
 ## Pico Glitcher v2
 
+--- TODO ---
+
 Continue reading [getting started](getting_started.md) to learn more about how to set up your Pico Glitcher.

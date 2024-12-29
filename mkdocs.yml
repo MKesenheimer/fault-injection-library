@@ -2,16 +2,16 @@ site_name: PicoGlitcher / findus
 nav:
   - Home: index.md
   - Overview: overview.md
-  - Getting Started: getting_started.md
+  - Getting started: getting_started.md
   - Examples: examples.md
-  - Command Line Tools: cli.md
+  - Command line tools: cli.md
   - Findus: findus.md
   - BootloaderCom: bootloadercom.md
   - mpGlitcher: mpglitcher.md
   - Customize your Pico Glitcher: customize.md
-  - Multiplexing Capabilities of Pico Glitcher v2: multiplexing.md
-  - Pulse Shaping Capabilities of Pico Glitcher v2: pulse_shaping.md
-  - Genetic Algorithm: genetic.md
+  - Multiplexing capabilities of Pico Glitcher v2: multiplexing.md
+  - Pulse Shaping capabilities of Pico Glitcher v2 with extension board: pulse_shaping.md
+  - Genetic algorithm: genetic.md
 theme: readthedocs
 plugins:
   - search

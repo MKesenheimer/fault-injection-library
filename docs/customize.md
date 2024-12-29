@@ -35,7 +35,8 @@ The output pins with level-shifting are `GPIO2` - `GPIO7`. For inputs the pins `
 
 ## Pico Glitcher v2 GPIO pin overview
 
-Of course, the second revision of the Pico Glitcher can also be modified to suit your needs.
+Of course, the second revision of the Pico Glitcher can also be modified to suit your needs. Unfortunately, for better routing on the PCB and with added features, the GPIO pin assignment is different to version 1. Hence, code written for version 1 will likely not run on version 2.
+
 The Pico Glitcher v2 is built from the following components:
 
 --- TODO: update picture ---

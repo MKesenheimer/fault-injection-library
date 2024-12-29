@@ -1764,7 +1764,14 @@ class GeneticAlgorithm:
         return self.parameterspace
 
 class OptimizationController():
+    """
+    TODO
+    """
+
     def __init__(self, parameter_boundaries:list[tuple[int, int]], parameter_divisions:list[int], number_of_individuals:int = 10, length_of_genom:int = 20, malus_factor_for_equal_bins:float = 1):
+        """
+        TODO
+        """
         self.par = Parameterspace(parameter_boundaries, parameter_divisions)
         self.pop = Population(number_of_individuals, length_of_genom)
         # renorm the malus factor to the maximum number of genoms,
@@ -1777,6 +1784,9 @@ class OptimizationController():
         self.length_of_genom = self.pop.get_length_of_genom()
 
     def print_best_performing_bins(self):
+        """
+        TODO
+        """
         number_of_individuals = self.pop.get_number_of_individuals()
         ind0 = self.pop.get_individuals()[number_of_individuals - 1]
         print(f"[+] Individual health = {ind0.get_health()}, age = {ind0.get_age()}")
@@ -1790,6 +1800,9 @@ class OptimizationController():
             boundaries.append(boundary)
 
     def step(self) -> list[int]:
+        """
+        TODO
+        """
         individuals = self.pop.get_individuals()
         parameters = individuals[self.i_current_individual].get_genom()
         bins = self.opt.get_bins_from_genom(parameters)
@@ -1813,4 +1826,7 @@ class OptimizationController():
         return random_numbers
 
     def add_experiment(self, weight:int, *parameter:int):
+        """
+        TODO
+        """
         self.par.add_experiment(weight, *parameter)
