@@ -640,7 +640,7 @@ class PicoGlitcher(Glitcher):
 
     def arm_multiplexing(self, delay:int, mul_config:dict):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.
+        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later of the PicoGlitcher.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
