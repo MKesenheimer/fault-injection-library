@@ -8,7 +8,8 @@ nav:
   - Findus: findus.md
   - BootloaderCom: bootloadercom.md
   - mpGlitcher: mpglitcher.md
-  - Customize your Pico Glitcher: code.md
+  - Customize your Pico Glitcher: customize.md
+  - Genetic Algorithm: genetic.md
 theme: readthedocs
 plugins:
   - search
