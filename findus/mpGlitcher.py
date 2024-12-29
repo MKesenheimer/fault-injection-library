@@ -72,11 +72,11 @@ def glitch():
     push(block)
 
 @asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_LOW), out_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
-def pulse():
+def multiplex():
     # block until delay received
     pull(block)
     mov(x, osr)
-    # block until pulse config received
+    # block until multiplexing config received
     pull(block)
 
     # wait for trigger condition
@@ -241,7 +241,7 @@ class MicroPythonScript():
         reset: Reset the target via the PicoGlitcher's `RESET` output, release the reset on the target after a certain time.
         set_lpglitch: Enable the low-power crowbar MOSFET for glitch generation.
         set_hpglitch: Enable the high-power crowbar MOSFET for glitch generation.
-        set_pulse_shaping: Enables the pulse-shaping mode of the PicoGlitcher version 2.
+        set_multiplexing: Enables the multiplexing mode of the PicoGlitcher version 2 to switch between different voltage levels.
         set_dead_zone: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
         arm: Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. 
         block: Block until trigger condition is met. Raises an exception if times out.
@@ -290,7 +290,7 @@ class MicroPythonScript():
         self.pin_lpglitch.low()
         # which glitching transistor to use. Default: lpglitch
         self.pin_glitch = self.pin_lpglitch
-        # pins for pulse shaping (only hardware version 2)
+        # pins for multiplexing (only hardware version 2)
         if hardware_version[0] >= 2:
             self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
             self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
@@ -454,13 +454,13 @@ class MicroPythonScript():
         self.glitch_mode = "crowbar"
         self.pin_glitch = self.pin_hpglitch
 
-    def set_pulse_shaping(self):
+    def set_multiplexing(self):
         """
-        Enables the pulse-shaping mode of the PicoGlitcher version 2.
+        Enables the multiplexing mode of the PicoGlitcher version 2 to switch between different voltage levels.
         """
         if hardware_version[0] < 2:
-            raise Exception("Pulse shaping not implemented in hardware version 1.")
-        self.glitch_mode = "pulse"
+            raise Exception("Multiplexing not implemented in hardware version 1.")
+        self.glitch_mode = "mul"
         self.pin_glitch = self.pin_mux1
 
     def set_dead_zone(self, dead_time:float = 0, pin_condition:str = "default"):
@@ -541,7 +541,7 @@ class MicroPythonScript():
 
         self.arm_common()
 
-    def arm_pulse_shaping(self, delay:int, pulse_config:dict):
+    def arm_multiplexing(self, delay:int, mul_config:dict):
         if hardware_version[0] < 2:
             raise Exception("Pulse shaping not implemented in hardware version 1.")
 
@@ -549,33 +549,33 @@ class MicroPythonScript():
         self.pin_mux0.low()
 
         # state machine that emits the glitch if the trigger condition is met (part 1)
-        self.sm0 = StateMachine(0, pulse, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
-        # push pulse shape config into the fifo of the statemachine
+        self.sm0 = StateMachine(0, multiplex, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+        # push multiplexing shape config into the fifo of the statemachine
         self.sm0.put(delay // (1_000_000_000 // self.frequency))
         try:
-            t1 = pulse_config["t1"] // (1_000_000_000 // self.frequency)
-            v1 = self.voltage_map[pulse_config["v1"]]
+            t1 = mul_config["t1"] // (1_000_000_000 // self.frequency)
+            v1 = self.voltage_map[mul_config["v1"]]
         except Exception as _:
             t1 = 0
             v1 = 0b00
         try:
-            t2 = pulse_config["t2"] // (1_000_000_000 // self.frequency)
-            v2 = self.voltage_map[pulse_config["v2"]]
+            t2 = mul_config["t2"] // (1_000_000_000 // self.frequency)
+            v2 = self.voltage_map[mul_config["v2"]]
         except Exception as _:
             t2 = 0
             v2 = 0b00
         config = v2 << 30 | t2 << 16 | v1 << 14 | t1
         self.sm0.put(config)
-        # push the next pulse shape config into the fifo of the statemachine
+        # push the next multiplexing shape config into the fifo of the statemachine
         try:
-            t3 = pulse_config["t3"] // (1_000_000_000 // self.frequency)
-            v3 = self.voltage_map[pulse_config["v3"]]
+            t3 = mul_config["t3"] // (1_000_000_000 // self.frequency)
+            v3 = self.voltage_map[mul_config["v3"]]
         except Exception as _:
             t3 = 0
             v3 = 0b00
         try:
-            t4 = pulse_config["t4"] // (1_000_000_000 // self.frequency)
-            v4 = self.voltage_map[pulse_config["v4"]]
+            t4 = mul_config["t4"] // (1_000_000_000 // self.frequency)
+            v4 = self.voltage_map[mul_config["v4"]]
         except Exception as _:
             t4 = 0
             v4 = 0b00

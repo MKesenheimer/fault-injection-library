@@ -9,6 +9,8 @@ nav:
   - BootloaderCom: bootloadercom.md
   - mpGlitcher: mpglitcher.md
   - Customize your Pico Glitcher: customize.md
+  - Multiplexing Capabilities of Pico Glitcher v2: multiplexing.md
+  - Pulse Shaping Capabilities of Pico Glitcher v2: pulse_shaping.md
   - Genetic Algorithm: genetic.md
 theme: readthedocs
 plugins:

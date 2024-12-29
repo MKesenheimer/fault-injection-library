@@ -345,8 +345,8 @@ class PicoGlitcherInterface(MicroPythonScript):
     def arm(self, delay:int, length:int):
         self.pyb.exec(f'mp.arm({delay}, {length})')
 
-    def arm_pulse_shaping(self, delay:int, pulse_config:dict):
-        self.pyb.exec(f'mp.arm_pulse_shaping({delay}, {pulse_config})')
+    def arm_multiplexing(self, delay:int, mul_config:dict):
+        self.pyb.exec(f'mp.arm_multiplexing({delay}, {mul_config})')
 
     def reset_target(self):
         self.pyb.exec('mp.reset_target()')
@@ -375,8 +375,8 @@ class PicoGlitcherInterface(MicroPythonScript):
     def set_hpglitch(self):
         self.pyb.exec('mp.set_hpglitch()')
 
-    def set_pulse_shaping(self):
-        self.pyb.exec('mp.set_pulse_shaping()')
+    def set_multiplexing(self):
+        self.pyb.exec('mp.set_multiplexing()')
 
     def set_dead_zone(self, dead_time:float, pin_condition:str):
         self.pyb.exec(f'mp.set_dead_zone({dead_time}, "{pin_condition}")')
@@ -638,15 +638,15 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.arm(delay, length)
 
-    def arm_pulse_shaping(self, delay:int, pulse_config:dict):
+    def arm_multiplexing(self, delay:int, mul_config:dict):
         """
         Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
-            pulse_config: <TODO>. Note: The default voltage when performing fault injection with pulse shaping is 3.3V. This can not be changed by the variable `pulse_config`. If you need to have a different default voltage, you may need to modify the `mpGlitcher.py` script.
+            mul_config: <TODO>. Note: The default voltage when performing fault injection in multiplexing mode is 3.3V. This can not be changed by the variable `mul_config`. If you need to have a different default voltage, you may need to modify the `mpGlitcher.py` script.
         """
-        self.pico_glitcher.arm_pulse_shaping(delay, pulse_config)
+        self.pico_glitcher.arm_multiplexing(delay, mul_config)
 
     def block(self, timeout:float = 1.0):
         """
@@ -758,11 +758,11 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.set_hpglitch()
 
-    def set_pulse_shaping(self):
+    def set_multiplexing(self):
         """
-        TODO
+        Enables the multiplexing mode of the PicoGlitcher version 2 to quickly switch between different voltage levels.
         """
-        self.pico_glitcher.set_pulse_shaping()
+        self.pico_glitcher.set_multiplexing()
 
     def rising_edge_trigger(self, pin_trigger:str = "default", dead_time:float = 0, pin_condition:str = "default"):
         """

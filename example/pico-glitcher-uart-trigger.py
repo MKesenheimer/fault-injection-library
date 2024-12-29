@@ -43,9 +43,9 @@ class Main:
         # Update: Triggering on x11 in configuration 8n1 works good enough.
         self.glitcher.uart_trigger(0x11)
 
-        # choose pulse shaping or crowbar glitching
-        if args.pulse_shaping:
-            self.glitcher.set_pulse_shaping()
+        # choose multiplexing or crowbar glitching
+        if args.multiplexing:
+            self.glitcher.set_multiplexing()
         else:
             self.glitcher.set_lpglitch()
 
@@ -79,9 +79,9 @@ class Main:
             delay = random.randint(s_delay, e_delay)
 
             # arm
-            if args.pulse_shaping:
-                pulse_config = {"t1": length, "v1": "GND", "t2": 2*length, "v2": "1.8", "t3": length, "v3": "GND", "t4": 2*length, "v4": "1.8"}
-                self.glitcher.arm_pulse_shaping(delay, pulse_config)
+            if args.multiplexing:
+                mul_config = {"t1": length, "v1": "GND", "t2": 2*length, "v2": "1.8", "t3": length, "v3": "GND", "t4": 2*length, "v4": "1.8"}
+                self.glitcher.arm_multiplexing(delay, mul_config)
             else:
                 self.glitcher.arm(delay, length)
 
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
-    parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with pulse shaping (requires PicoGlitcher v2).")
+    parser.add_argument("--multiplexing", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with multiplexing between different voltages (requires PicoGlitcher v2).")
     args = parser.parse_args()
 
     main = Main(args)

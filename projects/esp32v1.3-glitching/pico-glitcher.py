@@ -55,9 +55,9 @@ class Main():
         # note that you still have to physically connect the trigger input with vtarget
         self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
 
-        # choose pulse shaping or crowbar glitching
-        if args.pulse_shaping:
-            self.glitcher.set_pulse_shaping()
+        # choose multiplexing or crowbar glitching
+        if args.multiplexing:
+            self.glitcher.set_multiplexing()
         else:
             self.glitcher.set_lpglitch()
 
@@ -96,9 +96,9 @@ class Main():
                 opt.print_best_performing_bins()
 
             # arm
-            if args.pulse_shaping:
-                pulse_config = {"t1": t1, "v1": "1.8", "t2": length, "v2": "GND"}
-                self.glitcher.arm_pulse_shaping(delay, pulse_config)
+            if args.multiplexing:
+                mul_config = {"t1": t1, "v1": "1.8", "t2": length, "v2": "GND"}
+                self.glitcher.arm_multiplexing(delay, mul_config)
             else:
                 self.glitcher.arm(delay, length)
 
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
-    parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with pulse shaping (requires PicoGlitcher v2).")
+    parser.add_argument("--multiplexing", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with multiplexing between different voltages (requires PicoGlitcher v2).")
     parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
     args = parser.parse_args()
 
