@@ -456,7 +456,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "pico-glitcher-v2-extension.kicad_pro",
+    "filename": "pico-glitcher-v2.1-extension.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -491,8 +491,8 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "/Users/kesenheimer/Desktop/",
-      "pos_files": "",
+      "plot": "production/pico-glitcher-v2-extension",
+      "pos_files": "production",
       "specctra_dsn": "",
       "step": "",
       "svg": "",

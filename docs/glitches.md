@@ -25,8 +25,8 @@ One advantage of the multiplexing method is that the microcontroller can be supp
 A disadvantage is the complex electronics required to switch quickly between different voltage levels.
 
 ## Pulse shaping
-A even more advanced methode is the pulse shaping methode, first described [here](https://doi.org/10.13154/tches.v2019.i2.199-224).
-The key idea here is to use a Digital Direct Synthesis (DDS) to generate a pulse form that is amplified and applied to the target.
+An even more advanced methode is the pulse shaping methode, first described [here](https://doi.org/10.13154/tches.v2019.i2.199-224).
+The key idea here is to use a Digital Direct Synthesis (DDS) to generate an arbitrary pulse form that is amplified and applied to the target.
 The advantages of this method are obvious: almost any voltage curve with any intermediate voltages can be defined and generated. The overshoots when switching the voltage through the crowbar transistors or with the multiplexing stage are also eliminated, which ensures a cleaner voltage curve.
 
 --- TODO: figures of pulse-shaping ---

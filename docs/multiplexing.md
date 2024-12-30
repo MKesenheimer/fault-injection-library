@@ -7,7 +7,13 @@ It is also possible to go through a sequence of different supply voltages, so ca
 With the second hardware revision of the Pico Glitcher, it is possible to create different voltage profiles and apply them to the supply voltage of the target. This is made possible by the introduction of the multiplexing stage, section [customizing your Pico Glitcher](customize.md#pico-glitcher-v2-gpio-pin-overview).
 The multiplexing stage also allows the target to be supplied with power entirely via this multiplexing stage. It is therefore not necessary to additionally supply the target with voltage via the ‘VTARGET’ output.
 
---- TODO: fritzing schematics of a typical multiplexing setup ---
+## Multiplexing test setup
+
+The following setup can be used to test the multiplexing stage of the Pico Glitcher v2:
+
+![](images/multiplexing/multiplexing-test-setup.png)
+
+See `fault-injection-library/example/pico-glitcher.py` for a complete test script.
 
 ## Using the multiplexing stage
 
