@@ -1765,17 +1765,33 @@ class GeneticAlgorithm:
 
 class OptimizationController():
     """
-    TODO
+    Wrapper class for initializing parameter space binning and using the Genetic Algorithm to search for optimal paramters.
+
+    Methods:
+        __init__: Constructor of the OptimizationController. Parameter boundaries and parameter divisions must be provided. Parameters for the genetic algorithm are optional.
+        print_best_performing_bins: Output the best performing parameter space bins. In these bins a successful glitch is assumed.
+        step: Perform the next step of the Genetic Algorithm; should be called before every experiment.
+        add_experiment: Add the parameters and the outcome (weights) to the parameter space.
     """
 
     def __init__(self, parameter_boundaries:list[tuple[int, int]], parameter_divisions:list[int], number_of_individuals:int = 10, length_of_genom:int = 20, malus_factor_for_equal_bins:float = 1):
         """
-        TODO
+        Constructor of the OptimizationController. Parameter boundaries and parameter divisions must be provided. Parameters for the genetic algorithm are optional.
+
+        Parameters:
+            parameter_boundaries: Boundaries of all parameters to look into, for example `[(s_delay, e_delay), (s_t1, e_t1), (s_length, e_length)]`.
+            parameter_divisions: Number of how many bins the individual parameter ranges should be divided into, for example `[10, 10, 5]`. Bigger values mean division into smaller bins which increases accuracy at the expense of performance (longer glitching campaign duration).
+            number_of_individuals: Number of individuals used simultaneously in the genetic algorithm. Increasing this number improves accuracy at the expense of performance (longer glitching campaign duration).
+            length_of_genom: Number of bins to track per individual. The larger the parameter space, the higher this number should be.
+            malus_factor_for_equal_bins: Can be used to punish individuals that look into the same bin multiple times. Must be in range [0, 1]. A bigger value means a greater penalty.
         """
         self.par = Parameterspace(parameter_boundaries, parameter_divisions)
         self.pop = Population(number_of_individuals, length_of_genom)
         # renorm the malus factor to the maximum number of genoms,
         # thus malus_factor_for_equal_bins can be chosen between 0 and 1.
+        if malus_factor_for_equal_bins > 1 or malus_factor_for_equal_bins < 0:
+            print("[-] Error: malus_factor_for_equal_bins must be in range [0, 1].")
+            sys.exit(-1)
         factor = malus_factor_for_equal_bins / length_of_genom
         self.opt = GeneticAlgorithm(self.par, self.pop, factor)
         self.i_current_individual = 0
@@ -1785,7 +1801,7 @@ class OptimizationController():
 
     def print_best_performing_bins(self):
         """
-        TODO
+        Method that prints an overview of the best performing bins of the parameterspace. Can be called from time to time to obtain an overview of the optimization process.
         """
         number_of_individuals = self.pop.get_number_of_individuals()
         ind0 = self.pop.get_individuals()[number_of_individuals - 1]
@@ -1801,7 +1817,10 @@ class OptimizationController():
 
     def step(self) -> list[int]:
         """
-        TODO
+        Perform the next step in the optimization process. Should be called before the next experiment.
+
+        Returns:
+            A list of the parameters for the next experiment.
         """
         individuals = self.pop.get_individuals()
         parameters = individuals[self.i_current_individual].get_genom()
@@ -1827,6 +1846,10 @@ class OptimizationController():
 
     def add_experiment(self, weight:int, *parameter:int):
         """
-        TODO
+        Method to add the parameters and the outcome (weights) to the parameter space. Can be used similar to the method `Database.insert()`.
+
+        Parameters:
+            weight: Weight of the outcome of the experiment. Higher values mean a better performing bin and a better health of the individuals that track that bin.
+            parameter: list of parameters that were used for the experiment.
         """
         self.par.add_experiment(weight, *parameter)
