@@ -34,7 +34,7 @@ The Pico Glitcher is capable of generating voltage glitches very precisely. It a
 
 The hardware is based on the [Raspberry Pi Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/), a low-power and a high-power MOSFET for glitch generation and other components for power supply. Level shifters ensure that the Pico Glitcher can handle a wide range of reference voltages, i.e. the Pico Glitcher is not limited to a fixed logic level.
 
-Three tapping points are available for reference voltages: 1.8V, 3.3V and 5V. These can be used to supply the target or to provide reference voltages for external circuits. The voltage on the 'VTARGET' pin header can be switched on and off via the findus library, which is useful for performing a hard reset on the target (power-cycle). The 'VTARGET' pinouts can also be supplied by an external power supply unit. To do this, the 'JMP_VCC_INTERN' jumper must be removed. The external power supply is then applied to the 'VCC_EXTERN' pin.
+Three tapping points are available for reference voltages: 1.8V, 3.3V and 5V. These can be used to supply the target or to provide reference voltages for external circuits. The voltage on the `VTARGET` pin header can be switched on and off via the findus library, which is useful for performing a hard reset on the target (power-cycle). The `VTARGET` pinouts can also be supplied by an external power supply unit. To do this, the `JMP_VCC_INTERN` jumper must be removed. The external power supply is then applied to the `VCC_EXTERN` pin.
 
 An additional pin header is connected to the remaining GPIO pins of the Raspberry Pi Pico via level shifters. These can be programmed for further inputs and outputs as required. For example, further triggers can be created on these pin headers or protocol translators can be implemented.
 
@@ -44,6 +44,19 @@ Status LEDs also indicate the current status of the board: Whether the target vo
 
 ## Pico Glitcher v2
 
---- TODO ---
+Compared to hardware revision 1, several new features have been added in revision 2. However, the basic usage is the same and the scripts for version 1 will also (likely) work for version 2 [1].
+
+--- TODO: update picture ---
+![Pico Glitcher v2.1 components](images/pico-glitcher-v2.1-components.png)
+
+The hardware is similar to the Pico Glitcher v1 (based on the Raspberry Pi Pico, high-power MOSFETs for glitch generation, level shifters to ensure compatibility over a wide voltage range etc.).
+The pin assignment of the GPIO header has changed due to PCB routing optimization.
+These pins still can be programmed for further inputs and outputs as required. For example, further triggers can be created on these pin headers or protocol translators can be implemented.
+Input pins `GPIO16` - `GPIO19` are connected to the Raspberry Pi Pico without a level shifter and can be used bi-directionally.
+
+A new input stage (`EXT1` and `EXT2`) has been added to the board which can be used to filter out noise and other disturbances, see section [Schmitt Trigger EXT inputs](schmitt.md).
+The multiplexing output can be used to quickly switch between different voltage levels and to supply the target board with power. Up to four different voltage levels can be configured and switched between (see section [Multiplexing](multiplexing.md)).
+
+[1]: If not, please submit an issue at [https://github.com/MKesenheimer/fault-injection-library/issues](https://github.com/MKesenheimer/fault-injection-library/issues).
 
 Continue reading [getting started](getting_started.md) to learn more about how to set up your Pico Glitcher.
