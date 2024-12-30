@@ -10,6 +10,14 @@ The following test setup can be used to test the pulse-shaping expansion board o
 
 ![](images/pulse-shaping/pulse-shaping-setup.png)
 
+## Using the pulse-shaping stage
+
+--- TODO ---
+
+## Example of voltage profiles
+
+--- TODO ---
+
 ## Technical details
 
 The waveform generator AD9102 from Analog devices was chosen and is used to generate arbitrary voltage profiles.
