@@ -1,7 +1,7 @@
 # Genetic Algorithm
 
 In some cases, finding the parameters of a successful glitch can be quite tedious.
-Especially if the possible parameter space is large.
+Especially if the possible parameter space is large (see [multiplexing](multiplexing.md) and [pulse-shaping](pulse_shaping.md)).
 
 See for example `projects/esp32v1.3-glitching`.
 
@@ -47,10 +47,11 @@ if experiment_id % 100 == 0:
 [...]
 
 # classify response
-color, weight = self.glitcher.classify(response)
+color, weight = glitcher.classify(response)
 
 # add experiment to parameterspace of genetic algorithm
 opt.add_experiment(weight, delay, t1, length)
 
 ```
 
+Note that the implementation of the genetic algorithm is not specific to the Pico Glitcher and can therefore also be used by the ChipWhisperer Pro and Husky.
