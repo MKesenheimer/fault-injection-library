@@ -78,11 +78,12 @@ Connect the Pico Glitcher to your computer and check which serial device comes u
 ls /dev/tty*
 ```
 
-Take note of the device path. Next upload `mpGlitcher.py` via the following command:
+Take note of the device path. Next upload `mpGlitcher.py` and the specific configuration for your Pico Glitcher hardware version via the following command:
 
 ```bash
 cd findus
 upload --port /dev/<rpi-tty-port> --script mpGlitcher.py
+upload --port /dev/<rpi-tty-port> --script mpConfig_vx/mpConfig.py
 ```
 
 Your Pico Glitcher should now be ready to perform fault-injection attacks.
@@ -98,7 +99,7 @@ git clone --depth 1 --recurse-submodules https://github.com/MKesenheimer/fault-i
 Install the findus and the optional rd6006 library:
 
 ```bash
-cd fault-injection-lib
+cd fault-injection-library
 pip install .
 cd rd6006
 pip install .

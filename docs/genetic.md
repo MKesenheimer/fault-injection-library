@@ -2,7 +2,7 @@
 
 In some cases, finding the parameters of a successful glitch can be quite tedious.
 Especially if the possible parameter space is large (see [multiplexing](multiplexing.md) and [pulse-shaping](pulse_shaping.md)).
-Therefore, the search for a suitable parameter point must be somewhat more intelligent than a brute force approach.
+Therefore, the search for a suitable parameter point must be done somewhat more intelligently than with a brute force approach.
 
 In the case of `findus`, a genetic algorithm has been implemented that can be used to search for the optimum parameter points.
 
