@@ -1765,12 +1765,12 @@ class GeneticAlgorithm:
 
 class OptimizationController():
     """
-    Wrapper class for initializing parameter space binning and using the Genetic Algorithm to search for optimal paramters.
+    Wrapper class for initializing parameter space binning and using the genetic algorithm to search for optimal paramters.
 
     Methods:
         __init__: Constructor of the OptimizationController. Parameter boundaries and parameter divisions must be provided. Parameters for the genetic algorithm are optional.
         print_best_performing_bins: Output the best performing parameter space bins. In these bins a successful glitch is assumed.
-        step: Perform the next step of the Genetic Algorithm; should be called before every experiment.
+        step: Perform the next step of the genetic algorithm; should be called before every experiment.
         add_experiment: Add the parameters and the outcome (weights) to the parameter space.
     """
 
@@ -1846,7 +1846,7 @@ class OptimizationController():
 
     def add_experiment(self, weight:int, *parameter:int):
         """
-        Method to add the parameters and the outcome (weights) to the parameter space. Can be used similar to the method `Database.insert()`.
+        Method to add the parameters and the outcome (weights) to the parameter space. Can be used similarly to the method `Database.insert()`.
 
         Parameters:
             weight: Weight of the outcome of the experiment. Higher values mean a better performing bin and a better health of the individuals that track that bin.
