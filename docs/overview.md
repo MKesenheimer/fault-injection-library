@@ -46,7 +46,6 @@ Status LEDs also indicate the current status of the board: Whether the target vo
 
 Compared to hardware revision 1, several new features have been added in revision 2. However, the basic usage is the same and the scripts for version 1 will also (likely) work for version 2 [1].
 
---- TODO: update picture ---
 ![Pico Glitcher v2.1 components](images/pico-glitcher-v2.1-components.png)
 
 The hardware is similar to the Pico Glitcher v1 (based on the Raspberry Pi Pico, high-power MOSFETs for glitch generation, level shifters to ensure compatibility over a wide voltage range etc.).

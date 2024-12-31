@@ -39,7 +39,6 @@ Of course, the second revision of the Pico Glitcher can also be modified to suit
 
 The Pico Glitcher v2 is built from the following components:
 
---- TODO: update picture ---
 ![Pico Glitcher v2.1 components](images/pico-glitcher-v2.1-components.png)
 
 The GPIO pins of the Raspberry Pi Pico are connected to the following outlets:
