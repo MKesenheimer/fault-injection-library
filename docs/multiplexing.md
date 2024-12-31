@@ -13,6 +13,7 @@ The following setup can be used to test the multiplexing stage of the Pico Glitc
 
 ![](images/multiplexing/multiplexing-test-setup.png)
 
+Note that the power supply is optional and can be used to generate a third, intermediate voltage. Without the additional power supply, the multiplexing stage of the Pico Glitcher can switch between `3.3V`, `1.8V` and `0V`.
 See `fault-injection-library/example/pico-glitcher.py` for a complete test script.
 
 ## Using the multiplexing stage
