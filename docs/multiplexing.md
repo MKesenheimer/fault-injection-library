@@ -54,6 +54,10 @@ where `VCC` is a user-supplied voltage level by the `VIN` input.
 
 Below are some examples of voltage traces that can be applied to the target.
 
+- `1.8V` voltage step, custom voltage of `0.95V`, followed by a pull to GND (`mul_config = {"t1": 4000, "v1": "1.8", "t2": 4000, "v2": "VCC", "t3": 1000, "v3": "GND"}`):
+
+![](images/multiplexing/ps_1000ns_annotated.bmp)
+
 - `1.8V` voltage step followed by a pull to GND (`mul_config = {"t1": t1, "v1": "1.8", "t2": length, "v2": "GND"}`):
 
 ![](images/multiplexing/1.8-gnd-1000ns.bmp)

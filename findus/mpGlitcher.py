@@ -71,7 +71,7 @@ def glitch():
     # tell execution finished (fills the sm's fifo buffer)
     push(block)
 
-@asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_LOW), out_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_HIGH), out_init=(PIO.OUT_LOW, PIO.OUT_HIGH), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
 def multiplex():
     # block until delay received
     pull(block)
@@ -109,7 +109,7 @@ def multiplex():
     jmp(x_dec, "two_pulses2")
 
     # reset and disable pin_glitch_en
-    set(pins, 0b00).side(0b0)
+    set(pins, 0b10).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
     irq(clear, 7)
@@ -295,7 +295,7 @@ class MicroPythonScript():
         if hardware_version[0] >= 2:
             self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
             self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
-            self.pin_mux1.low()
+            self.pin_mux1.high()
             self.pin_mux0.low()
             # lsb: GPIO0 -> MUX1
             # msb: GPIO1 -> MUX0
@@ -553,7 +553,7 @@ class MicroPythonScript():
         if hardware_version[0] < 2:
             raise Exception("Multiplexing not implemented in hardware version 1.")
 
-        self.pin_mux1.low()
+        self.pin_mux1.high()
         self.pin_mux0.low()
 
         # state machine that emits the glitch if the trigger condition is met (part 1)

@@ -80,7 +80,7 @@ class Main():
 
             # arm
             if args.multiplexing:
-                mul_config = {"t1": length, "v1": "GND", "t2": 2*length, "v2": "1.8", "t3": length, "v3": "GND", "t4": 2*length, "v4": "1.8"}
+                mul_config = {"t1": 4*length, "v1": "1.8", "t2": 4*length, "v2": "VCC", "t3": length, "v3": "GND"}
                 self.glitcher.arm_multiplexing(delay, mul_config)
             else:
                 self.glitcher.arm(delay, length)
