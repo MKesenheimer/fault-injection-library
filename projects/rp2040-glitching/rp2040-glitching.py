@@ -62,9 +62,9 @@ class Main():
             self.glitcher.set_lpglitch()
 
         # target communication
+        self.glitcher.release_reset()
+        time.sleep(1)
         self.target = Serial(port=args.target, baudrate=115200)
-        time.sleep(0.01)
-        self.glitcher.reset(0.01)
         print(self.target.read(1024))
 
         # set up the database
@@ -102,7 +102,10 @@ class Main():
                 response = self.target.readline()
             except Exception as _:
                 print("[-] Timeout received in block(). Continuing.")
-                self.glitcher.reset(0.01)
+                self.glitcher.reset(0.1)
+                time.sleep(1)
+                self.target = Serial(port=args.target, baudrate=115200)
+                print(self.target.read(1024))
                 #time.sleep(0.01)
                 #self.target.flush_v2()
                 self.target.read(1024)

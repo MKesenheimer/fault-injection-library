@@ -576,6 +576,7 @@ class PicoGlitcher(Glitcher):
         arm: Arm the PicoGlitcher and wait for trigger condition.
         block: Block the main script until trigger condition is met. Times out.
         reset: Reset the target via the PicoGlitcher's `RESET` output.
+        release_reset: Release the reset to the target via the PicoGlitcher's `RESET` output.
         power_cycle_target: Power cycle the target via the PicoGlitcher `VTARGET` output.
         power_cycle_reset: Power cycle and reset the target via the PicoGlitcher `RESET` and `VTARGET` output. 
         reset_and_eat_it_all: Reset the target and flush the serial buffers.
@@ -675,6 +676,12 @@ class PicoGlitcher(Glitcher):
             reset_time: Time how long the target is held in reset.
         """
         self.pico_glitcher.reset(reset_time)
+
+    def release_reset(self):
+        """
+        Release the reset to the target via the PicoGlitcher's `RESET` output.
+        """
+        self.pico_glitcher.release_reset()
 
     def power_cycle_target(self, power_cycle_time:float = 0.2):
         """
