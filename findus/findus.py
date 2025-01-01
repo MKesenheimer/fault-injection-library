@@ -262,6 +262,13 @@ class Serial():
         response = self.ser.read(length)
         return response
     
+    def readline(self) -> bytes:
+        """
+        TODO
+        """
+        response = self.ser.readline()
+        return response
+
     def reset(self, debug:bool = False) -> bool:
         """
         Reset target via DTR pin and flush data lines. Can be used alternatively to the reset lines of the PicoGlitcher (or ChipWhisperer Husky, or ChipWhisperer Pro) to reset the target.
