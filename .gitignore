@@ -26,3 +26,4 @@ schematics/kicad/pico-glitcher-v2-amplifier
 schematics/kicad/pico-glitcher-v2-opamp-amplifier
 schematics/kicad/pico-glitcher-v2-simulation
 **/*backups
+schematics/product

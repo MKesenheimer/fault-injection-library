@@ -66,7 +66,7 @@ The GPIO pins of the Raspberry Pi Pico are connected to the following outlets:
 ## Pico Glitcher v2 GPIO pin header
 
 If you want to write code for additional communication protocols, such as a UART-to-USB adapter, or an SPI-to-USB adapter, then the unused GPIO pins are perfect for that.
-Use pins `GPIO16` - `GPIO19` that are connected to the Raspberry Pi Pico without a level shifter, and can be used bi-directionally.
+Pins `GPIO16` - `GPIO19` are connected to the Raspberry Pi Pico without a level shifter and can be used bi-directionally.
 The output pins with level-shifting are `GPIO4` - `GPIO9`. For inputs with level shifter the pins `GPIO15`, `GPIO20` and `GPIO21` can be used.
 
 ## Modify the MicroPython script
