@@ -1,11 +1,11 @@
 # Multiplexing
 
 Multiplexing is a technique to quickly switch between different supply voltage levels of the microcontroller. Similar to glitching with the [crowbar technique](glitches.md), this can cause a fault in the microcontroller.
-A fundamental difference is that with the multiplexing fault injection method, the supply voltage of the microcontroller is not pulled to GND, but intermediate voltages can also be used, for example 1.8V or user-defined voltages.
+A fundamental difference is that with the multiplexing-fault-injection method, the supply voltage of the microcontroller is not pulled to GND, but intermediate voltages can also be used, for example 1.8V or user-defined voltages.
 It is also possible to go through a sequence of different supply voltages, so called voltage profiles.
 
 With the second hardware revision of the Pico Glitcher, it is possible to create different voltage profiles and apply them to the supply voltage of the target. This is made possible by the introduction of the multiplexing stage, section [customizing your Pico Glitcher](customize.md#pico-glitcher-v2-gpio-pin-overview).
-The multiplexing stage also allows the target to be supplied with power entirely via this multiplexing stage. It is therefore not necessary to additionally supply the target with voltage via the ‘VTARGET’ output.
+The multiplexing stage also allows the target to be supplied with power. It is therefore not necessary to additionally supply the target with voltage via the ‘VTARGET’ output.
 
 ## Multiplexing test setup
 
@@ -47,7 +47,7 @@ The above profile, for example, will send a pulse of `1.8V` for `100ns`, followe
 ## Example of voltage profiles
 
 The software for controlling the multiplexing stage is extremely flexible and a vast number of voltage profiles with countless parameterizations can be generated.
-Up to four different voltage steps can be paramtrized and utilized with the general multiplexing configuration similar to
+Up to four different voltage steps can be parametrized and utilized with the general multiplexing configuration similar to
 ```python
 mul_config = {"t1": t1, "v1": "GND", "t2": t2, "v2": "1.8", "t3": t3, "v3": "VCC", "t4": t4, "v4": "3.3"} 
 ```
@@ -82,7 +82,7 @@ By using the multiplexing stage, the possible parameter combinations can increas
 
 ## Technical details
 In order to switch quickly between different voltage levels, the chip 'TS3A4751' from Texas Instruments is used. This chip is a 4-channel analog switch in SPST (single-pull-single-through) configuration.
-To make the analog switch easier to control and to reduce the signal lines to the analog switch, a digital demultiplexer is used ('SN74LVC1G139DCUT'). Since the voltage levels are reversed after the demultiplexer, a 4-channel not-gate is used to reverse the voltage levels.
+To make the analog switch easier to control and to reduce the signal lines from the Raspberry Pi Pico to the analog switch, a digital demultiplexer is used ('SN74LVC1G139DCUT'). Since the voltage levels are reversed after the demultiplexer, a 4-channel not-gate is used to reverse the voltage levels.
 
 ![](images/multiplexing/multiplexing-schematics.png)
 
