@@ -26,6 +26,12 @@ from findus import PicoGlitcher
 
 glitcher = PicoGlitcher()
 glitcher.init(port='/dev/ttyACM0')
+
+# optional steps: set the initial voltage value
+# the initial voltage for multiplexing must be hard-coded and can only be applied if the raspberry pi pico is reset and re-initialized.
+glitcher.change_config_and_reset("mux_vinit", "1.8")
+glitcher.init(port='/dev/ttyACM0')
+
 glitcher.rising_edge_trigger()
 
 glitcher.set_multiplexing()
