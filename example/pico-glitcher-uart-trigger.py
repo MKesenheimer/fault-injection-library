@@ -37,6 +37,13 @@ class Main:
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
 
+        # the initial voltage for multiplexing must be hard-coded and can only be applied
+        # if the raspberry pi pico is reset an re-initialized.
+        if args.multiplexing:
+            self.glitcher.change_config_and_reset("mux_vinit", "1.8")
+            self.glitcher = PicoGlitcher()
+            self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
+
         # we want to trigger on x11 with the configuration 8e1
         # since our statemachine understands only 8n1,
         # we can trigger on x22 with the configuration 9n1 instead

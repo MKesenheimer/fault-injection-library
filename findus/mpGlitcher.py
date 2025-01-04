@@ -14,9 +14,13 @@ import machine
 from rp2 import asm_pio, PIO, StateMachine
 from machine import Pin
 import time
-from mpConfig import hardware_version, software_version
+import ujson
 
-if hardware_version[0] == 1:
+# load config
+with open("config.json", "r") as file:
+    config = ujson.load(file)
+
+if config["hardware_version"][0] == 1:
     # Trigger 1 (without level shifter)
     ALT_TRIGGER = 18
     # Trigger 2 (with level shifter)
@@ -27,7 +31,7 @@ if hardware_version[0] == 1:
     GLITCH_EN = 1
     HP_GLITCH = 16
     LP_GLITCH = 17
-elif hardware_version[0] == 2:
+elif config["hardware_version"][0] == 2:
     TRIGGER = 14
     # alternative trigger on EXT1
     ALT_TRIGGER = 11
@@ -42,6 +46,30 @@ elif hardware_version[0] == 2:
     MUX1 = 0
     EXT1 = 11
     EXT2 = 10
+    if config["mux_vinit"] == "GND":
+        MUX1_INIT = 1
+        MUX0_INIT = 1
+        MUX1_PIO_INIT = PIO.OUT_HIGH
+        MUX0_PIO_INIT = PIO.OUT_HIGH
+        MUX_PIO_INIT = 0b11
+    elif config["mux_vinit"] == "1.8":
+        MUX1_INIT = 0
+        MUX0_INIT = 1
+        MUX1_PIO_INIT = PIO.OUT_LOW
+        MUX0_PIO_INIT = PIO.OUT_HIGH
+        MUX_PIO_INIT = 0b01
+    elif config["mux_vinit"] == "VCC":
+        MUX1_INIT = 0
+        MUX0_INIT = 0
+        MUX1_PIO_INIT = PIO.OUT_LOW
+        MUX0_PIO_INIT = PIO.OUT_LOW
+        MUX_PIO_INIT = 0b00
+    else: # 3.3V
+        MUX1_INIT = 1
+        MUX0_INIT = 0
+        MUX1_PIO_INIT = PIO.OUT_HIGH
+        MUX0_PIO_INIT = PIO.OUT_LOW
+        MUX_PIO_INIT = 0b10
 
 @asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
 def glitch():
@@ -71,8 +99,8 @@ def glitch():
     # tell execution finished (fills the sm's fifo buffer)
     push(block)
 
-@asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_HIGH), out_init=(PIO.OUT_LOW, PIO.OUT_HIGH), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
-def multiplex():
+@asm_pio(set_init=(MUX0_PIO_INIT, MUX1_PIO_INIT), out_init=(MUX0_PIO_INIT, MUX1_PIO_INIT), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
+def multiplex(MUX_PIO_INIT=MUX_PIO_INIT):
     # block until delay received
     pull(block)
     mov(x, osr)
@@ -109,7 +137,7 @@ def multiplex():
     jmp(x_dec, "two_pulses2")
 
     # reset and disable pin_glitch_en
-    set(pins, 0b10).side(0b0)
+    set(pins, MUX_PIO_INIT).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
     irq(clear, 7)
@@ -263,10 +291,15 @@ class MicroPythonScript():
         self.glitch_mode = "crowbar"
         self.baudrate = 115200
         self.number_of_bits = 8
-        if hardware_version[0] == 1:
+
+        # read config
+        with open("config.json", "r") as file:
+            self.config = ujson.load(file)
+
+        if self.config["hardware_version"][0] == 1:
             # overclocking supposedly works, script runs also with 270_000_000
             self.set_frequency(200_000_000)
-        elif hardware_version[0] == 2:
+        elif self.config["hardware_version"][0] == 2:
             self.set_frequency(250_000_000)
         # LED
         self.led = Pin("LED", Pin.OUT)
@@ -292,11 +325,11 @@ class MicroPythonScript():
         # which glitching transistor to use. Default: lpglitch
         self.pin_glitch = self.pin_lpglitch
         # pins for multiplexing (only hardware version 2)
-        if hardware_version[0] >= 2:
+        if self.config["hardware_version"][0] >= 2:
             self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
             self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
-            self.pin_mux1.high()
-            self.pin_mux0.low()
+            self.pin_mux1.value(MUX1_INIT)
+            self.pin_mux0.value(MUX0_INIT)
             # lsb: GPIO0 -> MUX1
             # msb: GPIO1 -> MUX0
             # 0b00: IN1 = 1: VCC
@@ -316,8 +349,8 @@ class MicroPythonScript():
         Returns:
             Returns the current firmware version.
         """
-        print(software_version)
-        return software_version
+        print(self.config["software_version"])
+        return self.config["software_version"]
 
     def set_frequency(self, frequency:int = 200_000_000):
         """
@@ -455,11 +488,11 @@ class MicroPythonScript():
         self.glitch_mode = "crowbar"
         self.pin_glitch = self.pin_hpglitch
 
-    def set_multiplexing(self):
+    def set_multiplexing(self, vinit="1.8"):
         """
         Enables the multiplexing mode of the PicoGlitcher version 2 to switch between different voltage levels.
         """
-        if hardware_version[0] < 2:
+        if self.config["hardware_version"][0] < 2:
             raise Exception("Multiplexing not implemented in hardware version 1.")
         self.glitch_mode = "mul"
         self.pin_glitch = self.pin_mux1
@@ -550,11 +583,11 @@ class MicroPythonScript():
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
             mul_config: The dictionary for the multiplexing profile with pairs of identifiers and values. For example, this could be `{"t1": 10, "v1": "GND", "t2": 20, "v2": "1.8", "t3": 30, "v3": "GND", "t4": 40, "v4": "1.8"}`. Meaning that when triggered, a GND-voltage pulse with duration of `10ns` is emitted, followed by a +1.8V step with duration of `20ns` and so on. Note: The default voltage when performing fault injection in multiplexing mode is 3.3V. This can not be changed by the variable `mul_config`. If you need to have a different default voltage, you may need to modify the `multiplex()` PIO-function.
         """
-        if hardware_version[0] < 2:
+        if self.config["hardware_version"][0] < 2:
             raise Exception("Multiplexing not implemented in hardware version 1.")
 
-        self.pin_mux1.high()
-        self.pin_mux0.low()
+        self.pin_mux1.value(MUX1_INIT)
+        self.pin_mux0.value(MUX0_INIT)
 
         # state machine that emits the glitch if the trigger condition is met (part 1)
         self.sm0 = StateMachine(0, multiplex, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
@@ -614,3 +647,21 @@ class MicroPythonScript():
             # pull the output of statemachine 2
             res = self.sm1.get()
             print(res)
+
+    def change_config_and_reset(self, key, value):
+        with open("config.json", "r") as file:
+            config = ujson.load(file)
+
+        # change value
+        config[key] = value
+        # dump config to file
+        with open("config.json", "w") as file:
+            ujson.dump(config, file)
+
+        # read back
+        with open("config.json", "r") as file:
+            config = ujson.load(file)
+        print(config)
+
+        machine.soft_reset()
+        #machine.reset()

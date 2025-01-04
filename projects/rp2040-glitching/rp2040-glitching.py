@@ -61,12 +61,6 @@ class Main():
         else:
             self.glitcher.set_lpglitch()
 
-        # target communication
-        self.glitcher.release_reset()
-        time.sleep(1)
-        self.target = Serial(port=args.target, baudrate=115200)
-        print(self.target.read(1024))
-
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
         self.start_time = int(time.time())
@@ -94,21 +88,19 @@ class Main():
                 self.glitcher.arm(delay, length)
 
             # initialize the loop on the rp2040
-            self.target.write(b'A\r\n')
+            self.glitcher.reset(0.01)
+            #self.target.write(b'A\r\n')
 
             # block until glitch and read response
             try:
                 self.glitcher.block(timeout=0.5)
-                response = self.target.readline()
+                # TODO: check target response
+                #response = self.target.readline()
+                response = b'XXX256YYY256ZZZ\r\n'
             except Exception as _:
                 print("[-] Timeout received in block(). Continuing.")
                 self.glitcher.reset(0.1)
-                time.sleep(1)
-                self.target = Serial(port=args.target, baudrate=115200)
-                print(self.target.read(1024))
-                #time.sleep(0.01)
-                #self.target.flush_v2()
-                self.target.read(1024)
+                time.sleep(0.1)
                 response = b'Timeout'
 
             # classify response

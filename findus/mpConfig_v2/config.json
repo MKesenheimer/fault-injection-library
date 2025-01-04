@@ -1,0 +1,5 @@
+{
+    "hardware_version": [2, 1, 0],
+    "software_version": [0, 9, 9],
+    "mux_vinit": "3.3",
+}

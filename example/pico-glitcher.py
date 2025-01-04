@@ -50,6 +50,14 @@ class Main():
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
         # choose rising edge trigger with dead time of 0 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
+
+        # the initial voltage for multiplexing must be hard-coded and can only be applied
+        # if the raspberry pi pico is reset an re-initialized.
+        if args.multiplexing:
+            self.glitcher.change_config_and_reset("mux_vinit", "1.8")
+            self.glitcher = DerivedGlitcher()
+            self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
+
         self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
         #self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input, dead_time=0.01, pin_condition="reset")
 

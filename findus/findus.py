@@ -388,6 +388,9 @@ class PicoGlitcherInterface(MicroPythonScript):
     def set_dead_zone(self, dead_time:float, pin_condition:str):
         self.pyb.exec(f'mp.set_dead_zone({dead_time}, "{pin_condition}")')
 
+    def change_config_and_reset(self, key, value) -> str:
+        return self.pyb.exec(f'mp.change_config_and_reset("{key}", "{value}")')
+
 class ExternalPowerSupply:
     """
     Wrapper class for the RD6006 voltage supply to align function names with the rest of the library.
@@ -822,6 +825,9 @@ class PicoGlitcher(Glitcher):
             Returns the CPU frequency.
         """
         return self.pico_glitcher.get_frequency()
+
+    def change_config_and_reset(self, key, value):
+        return self.pico_glitcher.change_config_and_reset(key, value)
 
 class HuskyGlitcher(Glitcher):
     """

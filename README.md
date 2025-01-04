@@ -72,7 +72,7 @@ We install the corresponding Micropython script and the corresponding config fil
 
 ```bash
 upload --port /dev/<rpi-tty-port> --delete-all
-upload --port /dev/<rpi-tty-port> --script ./findus/mpConfig_v1/mpConfig.py
+upload --port /dev/<rpi-tty-port> --script ./findus/mpConfig_v1/config.json
 upload --port /dev/<rpi-tty-port> --script ./findus/mpGlitcher.py
 ```
 
@@ -80,7 +80,7 @@ For hardware version 2.x of the PicoGlitcher, the corresponding config file must
 
 ```bash
 upload --port /dev/<rpi-tty-port> --delete-all
-upload --port /dev/<rpi-tty-port> --script ./findus/mpConfig_v2/mpConfig.py
+upload --port /dev/<rpi-tty-port> --script ./findus/mpConfig_v2/config.json
 upload --port /dev/<rpi-tty-port> --script ./findus/mpGlitcher.py
 ```
 
@@ -122,7 +122,7 @@ In a real setup, however, the glitching line should be soldered as close as poss
 Install the Raspberry Pi Pico Micropython scripts:
 
 ```bash
-upload --port /dev/<rpi-tty-port> --script ./findus/mpConfig_v1/mpConfig.py
+upload --port /dev/<rpi-tty-port> --script ./findus/mpConfig_v1/config.json
 upload --port /dev/<rpi-tty-port> --script ./findus/mpGlitcher.py
 ```
 
