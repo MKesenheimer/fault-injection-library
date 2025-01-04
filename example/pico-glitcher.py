@@ -52,7 +52,7 @@ class Main():
         # note that you still have to physically connect the trigger input with vtarget
 
         # the initial voltage for multiplexing must be hard-coded and can only be applied
-        # if the raspberry pi pico is reset an re-initialized.
+        # if the raspberry pi pico is reset and re-initialized.
         if args.multiplexing:
             self.glitcher.change_config_and_reset("mux_vinit", "1.8")
             self.glitcher = DerivedGlitcher()

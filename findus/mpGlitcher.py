@@ -274,6 +274,7 @@ class MicroPythonScript():
         arm: Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. 
         arm_multiplexing: 
         block: Block until trigger condition is met. Raises an exception if times out.
+        change_config_and_reset: Change the content of the configuration file `config.json`. Can for example be used to change the initial voltage for multiplexing.
     """
     def __init__(self):
         """
@@ -649,6 +650,13 @@ class MicroPythonScript():
             print(res)
 
     def change_config_and_reset(self, key, value):
+        """
+        Change the content of the configuration file `config.json`. Note that the value to be changed must already exist.
+
+        Parameters:
+            key: Key of value to be replacedl.
+            value: Value to be set.
+        """
         with open("config.json", "r") as file:
             config = ujson.load(file)
 

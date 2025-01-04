@@ -827,6 +827,13 @@ class PicoGlitcher(Glitcher):
         return self.pico_glitcher.get_frequency()
 
     def change_config_and_reset(self, key, value):
+        """
+        Change the content of the configuration file `config.json`. Note that the value to be changed must already exist. After calling this function, the Pico Glitcher must be re-initialized.
+
+        Parameters:
+            key: Key of value to be replacedl.
+            value: Value to be set.
+        """
         return self.pico_glitcher.change_config_and_reset(key, value)
 
 class HuskyGlitcher(Glitcher):
