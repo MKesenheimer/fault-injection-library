@@ -54,7 +54,7 @@ class Main():
         # the initial voltage for multiplexing must be hard-coded and can only be applied
         # if the raspberry pi pico is reset and re-initialized.
         if args.multiplexing:
-            self.glitcher.change_config_and_reset("mux_vinit", "1.8")
+            self.glitcher.change_config_and_reset("mux_vinit", "3.3")
             self.glitcher = DerivedGlitcher()
             self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
 

@@ -44,7 +44,7 @@ opt = OptimizationController(parameter_boundaries=boundaries, parameter_division
 =1)
 ```
 
-In the while-loop after the experiment was performed, the best performing bins can be monitored from time to time. Also the glitch outcome must be classified and fed into the genetic algorithm again.
+In the while-loop before the experiment is performed, the best performing bins can be monitored from time to time. The next parameter set is pulled with the command `opt.step()`. Also the glitch outcome must be classified and fed into the genetic algorithm again.
 ```python
 # get the next parameter set
 delay, t1, length = opt.step()
