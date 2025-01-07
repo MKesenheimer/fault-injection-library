@@ -391,6 +391,9 @@ class PicoGlitcherInterface(MicroPythonScript):
     def test_waveform_generator(self):
         self.pyb.exec('mp.test_waveform_generator()')
 
+    def test_pulse_generator(self):
+        self.pyb.exec('mp.test_pulse_generator()')
+
     def set_dead_zone(self, dead_time:float, pin_condition:str):
         self.pyb.exec(f'mp.set_dead_zone({dead_time}, "{pin_condition}")')
 
@@ -847,6 +850,12 @@ class PicoGlitcher(Glitcher):
         TODO
         """
         self.pico_glitcher.test_waveform_generator()
+
+    def test_pulse_generator(self):
+        """
+        TODO
+        """
+        self.pico_glitcher.test_pulse_generator()
 
 class HuskyGlitcher(Glitcher):
     """

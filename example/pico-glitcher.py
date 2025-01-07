@@ -52,7 +52,8 @@ class Main():
         # note that you still have to physically connect the trigger input with vtarget
 
         # Test Waveform generator
-        self.glitcher.test_waveform_generator()
+        #self.glitcher.test_waveform_generator()
+        #self.glitcher.test_pulse_generator()
 
         # the initial voltage for multiplexing must be hard-coded and can only be applied
         # if the raspberry pi pico is reset and re-initialized.

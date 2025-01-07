@@ -12,7 +12,7 @@ Upload this module onto your PicoGlitcher. The classes and methods will become a
 
 import machine
 from rp2 import asm_pio, PIO, StateMachine
-from machine import Pin, SPI
+from machine import Pin
 import time
 import ujson
 
@@ -70,128 +70,8 @@ elif config["hardware_version"][0] == 2:
         MUX1_PIO_INIT = PIO.OUT_HIGH
         MUX0_PIO_INIT = PIO.OUT_LOW
         MUX_PIO_INIT = 0b10
+    import AD910X
     PS_TRIGGER = 5
-    PS_RESET = 6
-    PS_SPI_MISO = 16
-    PS_SPI_CS = 17
-    PS_SPI_SCK = 18
-    PS_SPI_MOSI = 19
-
-REG_SPI_CONFIG     = 0x0000
-REG_POWER_CONFIG   = 0x0001
-REG_CLOCK_CONFIG   = 0x0002
-REG_REF_ADJ        = 0x0003
-REG_DAC4_AGAIN     = 0x0004
-REG_DAC3_AGAIN     = 0x0005
-REG_DAC2_AGAIN     = 0x0006
-REG_DAC1_AGAIN     = 0x0007
-REG_DACX_RANGE     = 0x0008
-REG_DAC4_RSET      = 0x0009
-REG_DAC3_RSET      = 0x000A
-REG_DAC2_RSET      = 0x000B
-REG_DAC1_RSET      = 0x000C
-REG_CAL_CONFIG     = 0x000D
-REG_COMP_OFFSET    = 0x000E
-REG_RAM_UPDATE     = 0x001D
-REG_PAT_STATUS     = 0x001E
-REG_PAT_TYPE       = 0x001F
-REG_PATTERN_DLY    = 0x0020
-REG_DAC4_DOF       = 0x0022
-REG_DAC3_DOF       = 0x0023
-REG_DAC2_DOF       = 0x0024
-REG_DAC1_DOF       = 0x0025
-REG_WAV43_CONFIG   = 0x0026
-REG_WAV21_CONFIG   = 0x0027
-REG_PAT_TIMEBASE   = 0x0028
-REG_PAT_PERIOD     = 0x0029
-REG_DAC43_PATX     = 0x002A
-REG_DAC21_PATX     = 0x002B
-REG_DOUT_START_DLY = 0x002C
-REG_DOUT_CONFIG    = 0x002D
-REG_DAC4_CST       = 0x002E
-REG_DAC3_CST       = 0x002F
-REG_DAC2_CST       = 0x0030
-REG_DAC1_CST       = 0x0031
-REG_DAC4_DGAIN     = 0x0032
-REG_DAC3_DGAIN     = 0x0033
-REG_DAC2_DGAIN     = 0x0034
-REG_DAC1_DGAIN     = 0x0035
-REG_SAW43_CONFIG   = 0x0036
-REG_SAW21_CONFIG   = 0x0037
-REG_DDS_TW32       = 0x003E
-REG_DDS_TW1        = 0x003F
-REG_DDS4_PW        = 0x0040
-REG_DDS3_PW        = 0x0041
-REG_DDS2_PW        = 0x0042
-REG_DDS1_PW        = 0x0043
-REG_TRIG_TW_SEL    = 0x0044
-REG_DDSX_CONFIG    = 0x0045
-REG_TW_RAM_CONFIG  = 0x0047
-REG_START_DLY4     = 0x0050
-REG_START_ADDR4    = 0x0051
-REG_STOP_ADDR4     = 0x0052
-REG_DDS_CYC4       = 0x0053
-REG_START_DLY3     = 0x0054
-REG_START_ADDR3    = 0x0055
-REG_STOP_ADDR3     = 0x0056
-REG_DDS_CYC3       = 0x0057
-REG_START_DLY2     = 0x0058
-REG_START_ADDR2    = 0x0059
-REG_STOP_ADDR2     = 0x005A
-REG_DDS_CYC2       = 0x005B
-REG_START_DLY1     = 0x005C
-REG_START_ADDR1    = 0x005D
-REG_STOP_ADDR1     = 0x005E
-REG_DDS_CYC1       = 0x005F
-REG_CFG_ERROR      = 0x0060
-SRAM_ADDRESS_MIN   = 0x6000
-SRAM_ADDRESS_MAX   = 0x6FFF
-
-UPDATE_SETTINGS    = 0x01
-MEM_ACCESS_ENABLE  = 0x04
-MEM_ACCESS_DISABLE = 0x00
-START_PATTERN      = 0x01
-STOP_PATTERN       = 0x00
-
-SPI_READ_MASK      = 0x80
-SPI_WRITE_MASK     = 0x7F
-
-BUF_READ           = 0x08
-MASTER_CLOCK       = 125000000
-FREQ_RESOLUTION    = 0x1000000
-
-GAIN_MAX           = 2.0
-GAIN_MIN           = -2.0
-GAIN_RESOLUTION    = 1024
-DEFAULT_GAIN       = 0.5
-DEFAULT_FREQUENCY  = 100000
-
-WAVE_SINE              = 0x00
-WAVE_COSINE            = 0x01
-WAVE_TRIANGLE          = 0x02
-WAVE_POSITIVE_SAWTOOTH = 0x03
-WAVE_NEGATIVE_SAWTOOTH = 0x04
-
-WAV_CFG_PRESTORE_CST         = 0x00
-WAV_CFG_PRESTORE_SAWTOOTH    = 0x10
-WAV_CFG_PRESTORE_PSEUDO      = 0x20
-WAV_CFG_PRESTORE_DDS         = 0x30
-WAV_CFG_WAVE_FROM_RAM        = 0x00
-WAV_CFG_WAVE_PRESTORED       = 0x01
-WAV_CFG_WAVE_PRESTORED_DELAY = 0x02
-WAV_CFG_WAVE_PRESTORED_RAM   = 0x03
-DDSX_CFG_ENABLE_COSINE       = 0x08
-SAW_CFG_RAMP_UP              = 0x00
-SAW_CFG_RAMP_DOWN            = 0x01
-SAW_CFG_TRIANGLE             = 0x02
-SAW_CFG_NO_WAVE              = 0x03
-SAW_CFG_STEP_1               = 0x04
-
-def usleep(x:int):
-    time.sleep(x/1000000.0)
-
-def bit_not(n, numbits=8):
-    return (1 << numbits) - 1 - n
 
 @asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
 def glitch():
@@ -370,261 +250,6 @@ def uart_trigger():
     # wrap around
     jmp("start")
 
-class AD910X():
-    def __init__(self):
-        self.pin_cs = Pin(PS_SPI_CS, mode=Pin.OUT, value=1)
-        self.pin_reset = Pin(PS_RESET, mode=Pin.OUT, value=1)
-        self.pin_trigger = Pin(PS_TRIGGER, mode=Pin.OUT, value=1)
-        self.spi = SPI(0,
-                  baudrate=100000,
-                  polarity=1,
-                  phase=1,
-                  bits=8,
-                  firstbit=SPI.MSB,
-                  sck=Pin(PS_SPI_SCK),
-                  mosi=Pin(PS_SPI_MOSI),
-                  miso=Pin(PS_SPI_MISO))
-
-    def spi_write_registers(self, addr:int, data:list[int]):
-        """
-        Write a list of 16-bit data to AD910x SPI/SRAM register
-
-        Parameters:
-            addr: 16-bit SPI/SRAM start address
-            data: list of 16-bit data to be written
-        """
-        tx_buf = [0] * 259
-        tx_buf[0] = ((((addr >> 8) & 0xFF) & SPI_WRITE_MASK) & 0xFF)
-        tx_buf[1] = (addr & 0xFF)
-        for cnt in range(len(data)):
-            tx_buf[( cnt * 2 ) + 2] = ((data[cnt] >> 8) & 0xFF)
-            tx_buf[( cnt * 2 ) + 3] = (data[cnt] & 0xFF)
-        self.pin_cs.value(0)
-        self.spi.write(bytes(tx_buf))
-        self.pin_cs.value(1)
-        usleep(1)
-
-    def spi_read_registers(self, addr:int, length:int) -> list[int]:
-        """
-        Read a list of 16-bit data from AD910x SPI/SRAM register.
-
-        Parameters:
-            addr: 16-bit SPI/SRAM start address.
-            length: number of registers to read.
-
-        Returns:
-            16-bit data returned by AD910x
-        """
-        tx_buf = [0] * 2
-        tx_buf[0] = (((( addr >> 8 ) & 0xFF ) | SPI_READ_MASK) & 0xFF)
-        tx_buf[1] = (addr & 0xFF )
-        self.pin_cs.value(0)
-        self.spi.write(bytes(tx_buf))
-        rx_buf = list(self.spi.read(length * 2))
-        self.pin_cs.value(1)
-        if len(rx_buf) == 0:
-            return []
-        data_out = [0] * length
-        for cnt in range(0, length):
-            data_out[cnt] = (rx_buf[cnt * 2] << 8) | rx_buf[(cnt * 2) + 1]
-        usleep(1)
-        return data_out
-
-    def spi_write_register(self, addr:int, data:int):
-        """
-        Write 16-bit data to AD910x SPI/SRAM register
-
-        Parameters:
-            addr: 16-bit SPI/SRAM address
-            data: 16-bit data to be written to register address
-        """
-        self.spi_write_registers(addr, [data])
-
-    def spi_read_register(self, addr:int) -> int:
-        """
-        Read 16-bit data from AD910x SPI/SRAM register.
-
-        Parameters:
-            addr: 16-bit SPI/SRAM address.
-
-        Returns:
-            16-bit data returned by AD910x.
-        """
-        data = self.spi_read_registers(addr, 1)
-        if len(data) > 0:
-            return data[0]
-        return 0x00
-
-    def reset(self):
-        """
-        Reset AD910x SPI registers to default values
-        """
-        self.pin_reset.low()
-        usleep(10)
-        self.pin_reset.high()
-
-    def print_data(addr:int, data:int):
-        """
-        Print register address and data in hexadecimal format
-
-        Parameters:
-            addr: 16-bit SPI/SRAM register address
-            data: 16-bit data
-        """
-        print(f'0x{addr:0>4X}, 0x{data:0>4X}')
-
-    def write_sram(self, addr:int, data:list[int]):
-        """
-        Write data to SRAM.
-
-        Parameters:
-            addr: 16-bit SPI/SRAM register start address.
-            data: array of 16-bit data to be written to SRAM.
-        """
-        if (addr < SRAM_ADDRESS_MIN) or (addr > SRAM_ADDRESS_MAX) or (( addr + len(data)) > (SRAM_ADDRESS_MAX + 1)):
-            raise Exception("SRAM address not in range [0x6000, 0x6FFF]")
-        self.spi_write_register(REG_PAT_STATUS, MEM_ACCESS_ENABLE)
-        for cnt in range(0, len(data)):
-            self.spi_write_register(addr + cnt, data[cnt] << 4)
-        self.spi_write_register(REG_PAT_STATUS, MEM_ACCESS_DISABLE)
-
-    def read_sram(self, addr:int, length:int) -> list[int]:
-        """
-        Read array of 16-bit data from SRAM.
-
-        Parameters:
-            length: number of SRAM addresses to be read from.
-
-        Returns:
-            Array of 16-bit data read from SRAM.
-        """
-        if (addr < SRAM_ADDRESS_MIN) or (addr > SRAM_ADDRESS_MAX) or ((addr + length) > (SRAM_ADDRESS_MAX + 1)):
-            raise Exception("SRAM address not in range [0x6000, 0x6FFF]")
-        self.spi_write_register(REG_PAT_STATUS, MEM_ACCESS_ENABLE | BUF_READ)
-        data = [0] * length
-        for cnt in range(0, length):
-            data[cnt] = self.spi_read_register(addr + cnt) >> 4
-        self.spi_write_register(REG_PAT_STATUS, MEM_ACCESS_DISABLE)
-        return data
-
-    def print_sram(self, n:int):
-        """
-        Read from SRAM and print data.
-
-        Parameters:
-            n: number of SRAM addresses to be read from
-        """
-        self.spi_write_register(REG_PAT_STATUS, 0x000C)
-        sram_add = 0x6000
-        for i in range(0, n):
-            data_shifted = self.spi_read(sram_add + i) >> 2
-            self.print_data(sram_add + i, data_shifted)
-        self.spi_write_register(REG_PAT_STATUS, 0x0010)
-
-    def update_regs(self, data:list[int]):
-        """
-        Write to SPI registers, and read and print new register values.
-
-        Parameters:
-            data: array of data to written to SPI registers
-        """
-        data_display = 0
-        for i in range(0, 66):
-            self.spi_write_register(self.reg_add[i], data[i])
-            data_display = self.spi_read(self.reg_add[i])
-            self.print_data(self.reg_add[i], data_display)
-
-    def start_pattern(self):
-        """
-        Start pattern generation by setting AD910x trigger pin to 0.
-        """
-        self.spi_write_register(REG_PAT_STATUS, START_PATTERN)
-        self.pin_trigger.low()
-
-    def stop_pattern(self):
-        """
-        Stop pattern generation by setting AD910x trigger pin to 1.
-        """
-        self.spi_write_register(REG_PAT_STATUS, STOP_PATTERN)
-        self.pin_trigger.high()
-
-    def update_settings(self):
-        """
-        Update the settings of AD910x.
-        """
-        self.spi_write_register(REG_RAM_UPDATE, UPDATE_SETTINGS)
-
-    def set_frequency(self, freq:int):
-        """
-        Set the frequency of the waveform.
-
-        Parameters:
-            freq: Frequency to be set.
-        """
-        if freq > MASTER_CLOCK:
-            raise Exception("Frequency not supported.")
-        freq_tmp = int((freq / (MASTER_CLOCK / FREQ_RESOLUTION))) & 0xFFFFFFFF
-        tw_msb = ((freq_tmp >> 8) & 0xFFFF)
-        tw_lsb = ((freq_tmp << 8 ) & 0xFF00)
-        self.stop_pattern()
-        self.spi_write_register(REG_DDS_TW32, tw_msb)
-        self.spi_write_register(REG_DDS_TW1, tw_lsb)
-        self.update_settings()
-        self.start_pattern()
-
-    def set_gain(self, gain:float):
-        """
-        Set the gain of the DAC.
-
-        Parameters:
-            gain: Gain to be set.
-        """
-        if gain > GAIN_MAX or gain < GAIN_MIN:
-            raise Exception("Gain value not supported.")
-        gain_tmp = (int((gain * GAIN_RESOLUTION)) << 4) & 0xFFFFFFFF
-        self.stop_pattern()
-        self.spi_write_register(REG_DAC1_DGAIN, gain_tmp)
-        self.update_settings()
-        self.start_pattern()
-
-    def set_wave_output(self, wave:int):
-        """
-        Set the type of wave to output.
-
-        Parameters:
-            wave: Waveform identifier.
-        """
-        if wave < WAVE_SINE or wave > WAVE_NEGATIVE_SAWTOOTH:
-            raise Exception("Waveform identifier not supported.")
-        reg_address = REG_WAV21_CONFIG
-        self.stop_pattern()
-        reg_data = self.spi_read_register(reg_address) & 0xFF00
-
-        if wave < WAVE_TRIANGLE:
-            reg_data |= (WAV_CFG_PRESTORE_DDS | WAV_CFG_WAVE_PRESTORED)
-            self.spi_write_register(reg_address, reg_data)
-            reg_data = self.spi_read_register(REG_DDSX_CONFIG)
-            if wave == WAVE_COSINE:
-                reg_data |= DDSX_CFG_ENABLE_COSINE
-            else:
-                reg_data &= bit_not((DDSX_CFG_ENABLE_COSINE & 0xFFFF))
-            self.spi_write_register(REG_DDSX_CONFIG, reg_data)
-        else:
-            reg_data |= ((WAV_CFG_PRESTORE_SAWTOOTH | WAV_CFG_WAVE_PRESTORED))
-            self.spiw_write_register(reg_address, reg_data)
-            reg_address = REG_SAW21_CONFIG
-            reg_data = self.spi_read_register(reg_address) & 0xFF00
-
-            if wave == WAVE_TRIANGLE:
-                reg_data |= ((SAW_CFG_TRIANGLE | SAW_CFG_STEP_1))
-            elif wave == WAVE_POSITIVE_SAWTOOTH:
-                reg_data |= ((SAW_CFG_RAMP_UP | SAW_CFG_STEP_1))
-            else:
-                reg_data |= ((SAW_CFG_RAMP_DOWN | SAW_CFG_STEP_1))
-            self.spi_write_register(reg_address, reg_data)
-        self.update_settings()
-        self.start_pattern()
-
 class MicroPythonScript():
     """
     MicroPython class that contains the code to access the hardware of the PicoGlitcher.
@@ -720,12 +345,20 @@ class MicroPythonScript():
         self.pin_condition = self.pin_vtarget_en
         self.condition = 0
         # Pulse shaping expansion board related stuff
-        self.ad910x = AD910X()
+        self.ad910x = AD910X.AD910X()
+        self.ad910x.reset()
 
     def test_waveform_generator(self):
-        self.ad910x.set_frequency(DEFAULT_FREQUENCY)
-        self.ad910x.set_gain(DEFAULT_GAIN)
-        self.ad910x.set_wave_output(WAVE_COSINE)
+        self.ad910x.set_frequency(AD910X.DEFAULT_FREQUENCY)
+        self.ad910x.set_gain(AD910X.DEFAULT_GAIN)
+        self.ad910x.set_wave_output(AD910X.WAVE_COSINE)
+
+    def test_pulse_generator(self):
+        self.ad910x.set_gain(AD910X.DEFAULT_GAIN)
+        self.ad910x.set_pulse_output_oneshot(AD910X.GAUSSIAN_PULSE)
+        # pattern is emitted if trigger pin is set low
+        # TODO: control this by PIO
+        self.ad910x.trigger_low()
 
     def get_firmware_version(self) -> list[int]:
         """
