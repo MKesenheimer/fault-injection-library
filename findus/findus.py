@@ -263,8 +263,11 @@ class Serial():
         return response
     
     def readline(self) -> bytes:
-        """
-        TODO
+        r"""
+        Read up to one line, including the \n at the end.
+
+        Returns:
+            The line received from the target.
         """
         response = self.ser.readline()
         return response
@@ -384,6 +387,9 @@ class PicoGlitcherInterface(MicroPythonScript):
 
     def set_multiplexing(self):
         self.pyb.exec('mp.set_multiplexing()')
+
+    def test_waveform_generator(self):
+        self.pyb.exec('mp.test_waveform_generator()')
 
     def set_dead_zone(self, dead_time:float, pin_condition:str):
         self.pyb.exec(f'mp.set_dead_zone({dead_time}, "{pin_condition}")')
@@ -835,6 +841,12 @@ class PicoGlitcher(Glitcher):
             value: Value to be set.
         """
         return self.pico_glitcher.change_config_and_reset(key, value)
+
+    def test_waveform_generator(self):
+        """
+        TODO
+        """
+        self.pico_glitcher.test_waveform_generator()
 
 class HuskyGlitcher(Glitcher):
     """

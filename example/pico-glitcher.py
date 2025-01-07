@@ -51,6 +51,9 @@ class Main():
         # choose rising edge trigger with dead time of 0 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
 
+        # Test Waveform generator
+        self.glitcher.test_waveform_generator()
+
         # the initial voltage for multiplexing must be hard-coded and can only be applied
         # if the raspberry pi pico is reset and re-initialized.
         if args.multiplexing:
