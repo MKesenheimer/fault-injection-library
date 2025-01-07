@@ -248,6 +248,8 @@ class AD910X():
         Parameters:
             data: array of 16-bit data to be written to SRAM.
         """
+        if len(data) > 4095:
+            raise Exception("Pulse too large.")
         self.write_sram(SRAM_ADDRESS_MIN, data)
 
     def read_sram(self, addr:int, length:int) -> list[int]:
@@ -333,19 +335,13 @@ class AD910X():
         self.update_settings()
         self.start_pattern()
 
-    def set_pulse_output_oneshot(self, pulse:list[int]):
+    def set_pulse_output_oneshot(self):
         """
         Configure the DDS to output one defined pulse.
 
         Parameters:
             pulse: The pulse to output
         """
-        if len(pulse) > 4095:
-            raise Exception("Pulse too large.")
-
-        # update SRAM
-        self.write_sram_from_start(pulse)
-
         # update settings
         self.stop_pattern()
         self.spi_write_register(REG_PAT_TYPE, PATTERN_RPT_FINITE) # pattern is emitted a finite amount of times

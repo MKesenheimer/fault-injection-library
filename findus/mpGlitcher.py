@@ -354,8 +354,11 @@ class MicroPythonScript():
         self.ad910x.set_wave_output(AD910X.WAVE_COSINE)
 
     def test_pulse_generator(self):
+        self.ad910x.set_frequency(AD910X.DEFAULT_FREQUENCY)
         self.ad910x.set_gain(AD910X.DEFAULT_GAIN)
-        self.ad910x.set_pulse_output_oneshot(AD910X.GAUSSIAN_PULSE)
+        # TODO: can write_sram_from_start and set_pulse_output_oneshot swapped?
+        self.ad910x.write_sram_from_start(AD910X.GAUSSIAN_PULSE)
+        self.ad910x.set_pulse_output_oneshot()
         # pattern is emitted if trigger pin is set low
         # TODO: control this by PIO
         self.ad910x.trigger_low()
