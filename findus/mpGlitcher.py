@@ -269,6 +269,80 @@ def uart_trigger():
     # wrap around
     jmp("start")
 
+class PulseGenerator():
+    def __init__(self, time_resolution:int = 10, total_pulse_duration:int = 1000):
+        # all units in [ns] and [V]
+        self.time_resolution = time_resolution
+        self.frequency = 1_000_000_000 / self.time_resolution
+        self.max_points = 4096
+        self.set_total_pulse_duration(total_pulse_duration)
+        self.points_per_ns = 1 / self.time_resolution
+        voltage_resolution = 4096
+        max_voltage = 5.0
+        self.points_per_volt = int(voltage_resolution / max_voltage)
+        #print(f"Points per volt: {self.points_per_volt}")
+
+    def set_total_pulse_duration(self, total_pulse_duration:int):
+        self.total_pulse_duration = total_pulse_duration
+        self.pulse_number_of_points = int(self.total_pulse_duration / self.time_resolution)
+        if self.pulse_number_of_points > self.max_points:
+            self.pulse_number_of_points = self.max_points
+
+    def get_frequency(self):
+        return self.frequency
+
+    def get_max_points(self):
+        return self.max_points
+
+    def get_pulse_number_of_points(self):
+        return self.pulse_number_of_points
+
+    def pulse_from_config(self, ps_config:list[list[int]], padding:bool = False) -> list[int]:
+        pulse = []
+        for point in ps_config:
+            t = point[0]
+            v = point[1]
+            n = int(t * self.points_per_ns)
+            value = int(v * self.points_per_volt)
+            pulse += [value] * n
+        # padding with last value
+        if padding:
+            length = len(pulse)
+            if length < self.max_points:
+                last_value = pulse[-1]
+                pulse += [last_value] * (self.max_points - length)
+        # sanity check
+        if len(pulse) > self.max_points:
+            raise Exception("Erroneous pulse config: pulse too large.")
+        return pulse
+
+    def pulse_from_lambda(self, ps_lambda, total_pulse_duration:int, padding:bool = False) -> list[int]:
+        self.set_total_pulse_duration(total_pulse_duration)
+        pulse = [0] * self.pulse_number_of_points
+        t = 0
+        dt = self.time_resolution
+        for i in range(self.pulse_number_of_points):
+            pulse[i] = int(ps_lambda(t) * self.points_per_volt)
+            t += dt
+        # padding with last value
+        if padding:
+            if self.pulse_number_of_points < self.max_points:
+                last_value = pulse[-1]
+                pulse += [last_value] * (self.max_points - self.pulse_number_of_points)
+        return pulse
+
+    def pulse_from_list(self, pulse:list[int], padding:bool = False) -> list[int]:
+        # padding with last value
+        if padding:
+            length = len(pulse)
+            if length < self.max_points:
+                last_value = pulse[-1]
+                pulse += [last_value] * (self.max_points - length)
+        # sanity check
+        if len(pulse) > self.max_points:
+            raise Exception("Fatal error: pulse too large.")
+        return pulse
+
 class MicroPythonScript():
     """
     MicroPython class that contains the code to access the hardware of the PicoGlitcher.
@@ -367,6 +441,7 @@ class MicroPythonScript():
             self.ad910x = AD910X.AD910X()
             self.ad910x.reset()
             self.pin_ps_trigger = self.ad910x.get_trigger_pin()
+            self.pulse_generator = PulseGenerator()
 
     def test_waveform_generator(self):
         self.ad910x.set_frequency(AD910X.DEFAULT_FREQUENCY)
@@ -674,7 +749,31 @@ class MicroPythonScript():
 
         self.arm_common()
 
-    def arm_pulseshaping(self, delay:int, ps_config:dict):
+    def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[int]]):
+        """
+        TODO
+        """
+        pulse = self.pulse_generator.pulse_from_config(ps_config)
+        self.arm_pulseshaping(delay, pulse)
+
+    def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda, pulse_number_of_points:int):
+        """
+        TODO
+        """
+        # hack: pyboard can not transmit the plain lambda object over UART.
+        # Thus we have to transmit the "lambda code" and interprete it here
+        #lam = eval("lambda t: " + ps_lambda)
+        pulse = self.pulse_generator.pulse_from_lambda(ps_lambda, pulse_number_of_points)
+        self.arm_pulseshaping(delay, pulse)
+
+    def arm_pulseshaping_from_list(self, delay:int, pulse:list[int]):
+        """
+        TODO
+        """
+        pulse = self.pulse_generator.pulse_from_list(pulse)
+        self.arm_pulseshaping(delay, pulse)
+
+    def arm_pulseshaping(self, delay:int, pulse:list[int]):
         """
         TODO
         """
@@ -684,18 +783,18 @@ class MicroPythonScript():
         # disable pulse output
         self.pin_ps_trigger.high()
 
-        # Configure the AD9102
-        # TODO: set appropriate frequency and gain
-        # TODO: must likely be done only once in set_pulseshaping or in __init__
-        self.ad910x.set_frequency(AD910X.DEFAULT_FREQUENCY)
-        self.ad910x.set_gain(AD910X.DEFAULT_GAIN)
-        # TODO: define the pulse from ps_config
-        sram_pulse = AD910X.GAUSSIAN_PULSE
-        # load the pulse into AD9102 SRAM
-        self.ad910x.write_sram_from_start(sram_pulse)
-        # configure the AD9102 to emit a oneshot pulse
-        # TODO: must likely be done only once in set_pulseshaping or in __init__
-        self.ad910x.set_pulse_output_oneshot()
+        # DEBUG
+        if 0:
+            # Configure the AD9102
+            # TODO: set appropriate frequency and gain
+            # TODO: must likely be done only once in set_pulseshaping or in __init__
+            self.ad910x.set_frequency(AD910X.DEFAULT_FREQUENCY)
+            self.ad910x.set_gain(AD910X.DEFAULT_GAIN)
+            # load the pulse into AD9102 SRAM
+            self.ad910x.write_sram_from_start(pulse)
+            # configure the AD9102 to emit a oneshot pulse
+            # TODO: must likely be done only once in set_pulseshaping or in __init__
+            self.ad910x.set_pulse_output_oneshot(len(pulse))
 
         # state machine that pulls the ps_trigger pin to low if the trigger condition is met
         self.sm0 = StateMachine(0, pulse_shaping, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
@@ -704,6 +803,7 @@ class MicroPythonScript():
         self.sm0.put(delay // (1_000_000_000 // self.frequency))
 
         self.arm_common()
+        print(pulse)
 
     def block(self, timeout:float):
         """

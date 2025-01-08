@@ -338,7 +338,7 @@ class AD910X():
         self.update_settings()
         self.start_pattern()
 
-    def set_pulse_output_oneshot(self):
+    def set_pulse_output_oneshot(self, pulse_number_of_points:int):
         """
         Configure the DDS to output one defined pulse.
 
@@ -354,7 +354,8 @@ class AD910X():
         self.spi_write_register(REG_PATTERN_DLY, 0x0000) # TODO: control this by the delay parameter
         self.spi_write_register(REG_START_DLY, 0x0000) # TODO: OR: control this by the delay parameter
         self.spi_write_register(REG_START_ADDR, 0x0000) # start SRAM addr to read data from
-        self.spi_write_register(REG_STOP_ADDR, 0xFFF0)  # stop SRAM addr
+        stop_addr = (pulse_number_of_points - 1) << 4
+        self.spi_write_register(REG_STOP_ADDR, stop_addr)  # stop SRAM addr
         #self.spi_write_register(REG_DDS_CYC, 0x0100) # ?
         self.spi_write_register(REG_PAT_STATUS, START_PATTERN)
         self.spi_write_register(REG_RAM_UPDATE, UPDATE_SETTINGS)

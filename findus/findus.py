@@ -358,8 +358,14 @@ class PicoGlitcherInterface(MicroPythonScript):
     def arm_multiplexing(self, delay:int, mul_config:dict):
         self.pyb.exec(f'mp.arm_multiplexing({delay}, {mul_config})')
 
-    def arm_pulseshaping(self, delay:int, ps_config:dict):
-        self.pyb.exec(f'mp.arm_pulseshaping({delay}, {ps_config})')
+    def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[int]]):
+        return self.pyb.exec(f'mp.arm_pulseshaping_from_config({delay}, {ps_config})')
+
+    def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda, pulse_number_of_points:int):
+        return self.pyb.exec(f'mp.arm_pulseshaping_from_lambda({delay}, {ps_lambda}, {pulse_number_of_points})')
+
+    def arm_pulseshaping_from_list(self, delay:int, pulse:list[int]):
+        return self.pyb.exec(f'mp.arm_pulseshaping_from_list({delay}, {pulse})')
 
     def reset_target(self):
         self.pyb.exec('mp.reset_target()')
@@ -676,11 +682,25 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.arm_multiplexing(delay, mul_config)
 
-    def arm_pulseshaping(self, delay:int, ps_config:dict):
+    def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[int]]):
+        """
+        Example:
+
+            ps_config = [[4*length, 1.8], [4*length, 0.95], [length, 0.0]]
+        """
+        return self.pico_glitcher.arm_pulseshaping_from_config(delay, ps_config)
+
+    def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda, pulse_number_of_points:int):
         """
         TODO
         """
-        self.pico_glitcher.arm_pulseshaping(delay, ps_config)
+        return self.pico_glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, pulse_number_of_points)
+
+    def arm_pulseshaping_from_list(self, delay:int, pulse:list[int]):
+        """
+        TODO
+        """
+        return self.pico_glitcher.arm_pulseshaping_from_list(delay, pulse)
 
     def block(self, timeout:float = 1.0):
         """
