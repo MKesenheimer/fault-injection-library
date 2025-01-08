@@ -71,7 +71,6 @@ elif config["hardware_version"][0] == 2:
         MUX0_PIO_INIT = PIO.OUT_LOW
         MUX_PIO_INIT = 0b10
     import AD910X
-    PS_TRIGGER = 5
 
 @asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
 def glitch():
@@ -97,6 +96,26 @@ def glitch():
 
     # stop glitch and disable pin_glitch_en
     set(pins, 0b0).side(0b0)
+
+    # tell execution finished (fills the sm's fifo buffer)
+    push(block)
+
+@asm_pio(set_init=(PIO.OUT_HIGH), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
+def pulse_shaping():
+    # block until delay received
+    pull(block)
+    mov(x, osr)
+
+    # wait for trigger condition
+    # enable pin_glitch_en
+    wait(1, irq, 7).side(0b1)
+
+    # wait delay
+    label("delay_loop")
+    jmp(x_dec, "delay_loop")
+
+    # set trigger pin low (start pulse generator)
+    set(pins, 0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
     push(block)
@@ -327,7 +346,11 @@ class MicroPythonScript():
         self.pin_lpglitch.low()
         # which glitching transistor to use. Default: lpglitch
         self.pin_glitch = self.pin_lpglitch
-        # pins for multiplexing (only hardware version 2)
+        # standard dead zone after power down
+        self.dead_time = 0.0
+        self.pin_condition = self.pin_vtarget_en
+        self.condition = 0
+        # pins for multiplexing and pulse-shaping (only hardware version 2)
         if self.config["hardware_version"][0] >= 2:
             self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
             self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
@@ -340,13 +363,10 @@ class MicroPythonScript():
             # 0b10: IN2 = 1: +3V3
             # 0b11: IN4 = 1: GND
             self.voltage_map = {"VCC": 0b00, "1.8": 0b01, "3.3": 0b10, "GND": 0b11}
-        # standard dead zone after power down
-        self.dead_time = 0.0
-        self.pin_condition = self.pin_vtarget_en
-        self.condition = 0
-        # Pulse shaping expansion board related stuff
-        self.ad910x = AD910X.AD910X()
-        self.ad910x.reset()
+            # Pulse shaping expansion board related stuff
+            self.ad910x = AD910X.AD910X()
+            self.ad910x.reset()
+            self.pin_ps_trigger = self.ad910x.get_trigger_pin()
 
     def test_waveform_generator(self):
         self.ad910x.set_frequency(AD910X.DEFAULT_FREQUENCY)
@@ -517,6 +537,15 @@ class MicroPythonScript():
         self.glitch_mode = "mul"
         self.pin_glitch = self.pin_mux1
 
+    def set_pulseshaping(self):
+        """
+        Enables the pulse-shaping mode of the PicoGlitcher version 2 to emit a pre-defined voltage pulse on the Pulse Shaping expansion board.
+        """
+        if self.config["hardware_version"][0] < 2:
+            raise Exception("Pulse-shaping not implemented in hardware version 1.")
+        self.glitch_mode = "pul"
+        self.pin_glitch = self.pin_ps_trigger
+
     def set_dead_zone(self, dead_time:float = 0, pin_condition:str = "default"):
         """
         Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
@@ -601,7 +630,7 @@ class MicroPythonScript():
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
-            mul_config: The dictionary for the multiplexing profile with pairs of identifiers and values. For example, this could be `{"t1": 10, "v1": "GND", "t2": 20, "v2": "1.8", "t3": 30, "v3": "GND", "t4": 40, "v4": "1.8"}`. Meaning that when triggered, a GND-voltage pulse with duration of `10ns` is emitted, followed by a +1.8V step with duration of `20ns` and so on. Note: The default voltage when performing fault injection in multiplexing mode is 3.3V. This can not be changed by the variable `mul_config`. If you need to have a different default voltage, you may need to modify the `multiplex()` PIO-function.
+            mul_config: The dictionary for the multiplexing profile with pairs of identifiers and values. For example, this could be `{"t1": 10, "v1": "GND", "t2": 20, "v2": "1.8", "t3": 30, "v3": "GND", "t4": 40, "v4": "1.8"}`. Meaning that when triggered, a GND-voltage pulse with duration of `10ns` is emitted, followed by a +1.8V step with duration of `20ns` and so on.
         """
         if self.config["hardware_version"][0] < 2:
             raise Exception("Multiplexing not implemented in hardware version 1.")
@@ -642,6 +671,37 @@ class MicroPythonScript():
             v4 = 0b00
         config = v4 << 30 | t4 << 16 | v3 << 14 | t3
         self.sm0.put(config)
+
+        self.arm_common()
+
+    def arm_pulseshaping(self, delay:int, ps_config:dict):
+        """
+        TODO
+        """
+        if self.config["hardware_version"][0] < 2:
+            raise Exception("Multiplexing not implemented in hardware version 1.")
+
+        # disable pulse output
+        self.pin_ps_trigger.high()
+
+        # Configure the AD9102
+        # TODO: set appropriate frequency and gain
+        # TODO: must likely be done only once in set_pulseshaping or in __init__
+        self.ad910x.set_frequency(AD910X.DEFAULT_FREQUENCY)
+        self.ad910x.set_gain(AD910X.DEFAULT_GAIN)
+        # TODO: define the pulse from ps_config
+        sram_pulse = AD910X.GAUSSIAN_PULSE
+        # load the pulse into AD9102 SRAM
+        self.ad910x.write_sram_from_start(sram_pulse)
+        # configure the AD9102 to emit a oneshot pulse
+        # TODO: must likely be done only once in set_pulseshaping or in __init__
+        self.ad910x.set_pulse_output_oneshot()
+
+        # state machine that pulls the ps_trigger pin to low if the trigger condition is met
+        self.sm0 = StateMachine(0, pulse_shaping, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+
+        # push delay (in nano seconds) into the fifo of the statemachine
+        self.sm0.put(delay // (1_000_000_000 // self.frequency))
 
         self.arm_common()
 

@@ -51,23 +51,21 @@ class Main():
         # choose rising edge trigger with dead time of 0 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
 
-        # Test Waveform generator
-        #self.glitcher.test_waveform_generator()
-        #self.glitcher.test_pulse_generator()
-
         # the initial voltage for multiplexing must be hard-coded and can only be applied
         # if the raspberry pi pico is reset and re-initialized.
         if args.multiplexing:
-            self.glitcher.change_config_and_reset("mux_vinit", "3.3")
+            self.glitcher.change_config_and_reset("mux_vinit", "1.8")
             self.glitcher = DerivedGlitcher()
             self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
 
         self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
         #self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input, dead_time=0.01, pin_condition="reset")
 
-        # choose multiplexing or crowbar glitching
+        # choose multiplexing, pulse-shaping or crowbar glitching
         if args.multiplexing:
             self.glitcher.set_multiplexing()
+        elif args.pulse_shaping:
+            self.glitcher.set_pulseshaping()
         else:
             self.glitcher.set_lpglitch()
 
@@ -94,6 +92,9 @@ class Main():
             if args.multiplexing:
                 mul_config = {"t1": 4*length, "v1": "1.8", "t2": 4*length, "v2": "VCC", "t3": length, "v3": "GND"}
                 self.glitcher.arm_multiplexing(delay, mul_config)
+            elif args.pulse_shaping:
+                ps_config = {"t1": 4*length, "v1": 1.8, "t2": 4*length, "v2": 0.95, "t3": length, "v3": 0.0}
+                self.glitcher.arm_pulseshaping(delay, ps_config)
             else:
                 self.glitcher.arm(delay, length)
 
@@ -139,6 +140,7 @@ if __name__ == "__main__":
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
     parser.add_argument("--multiplexing", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with multiplexing between different voltages (requires PicoGlitcher v2).")
+    parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with a predefined voltage profile (requires PicoGlitcher v2).")
     parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
     args = parser.parse_args()
 

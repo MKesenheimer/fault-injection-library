@@ -126,6 +126,9 @@ class AD910X():
         self.spi_write_register(REG_DAC_AGAIN, 0x4000)
         self.spi_write_register(REG_DAC_RSET, 0x1F00) # DAC_RSET_CAL = 11111
 
+    def get_trigger_pin(self):
+        return self.pin_trigger
+
     def spi_write_registers(self, addr:int, data:list[int]):
         """
         Write a list of 16-bit data to AD910x SPI/SRAM register
@@ -248,7 +251,7 @@ class AD910X():
         Parameters:
             data: array of 16-bit data to be written to SRAM.
         """
-        if len(data) > 4095:
+        if len(data) > 4096:
             raise Exception("Pulse too large.")
         self.write_sram(SRAM_ADDRESS_MIN, data)
 

@@ -358,6 +358,9 @@ class PicoGlitcherInterface(MicroPythonScript):
     def arm_multiplexing(self, delay:int, mul_config:dict):
         self.pyb.exec(f'mp.arm_multiplexing({delay}, {mul_config})')
 
+    def arm_pulseshaping(self, delay:int, ps_config:dict):
+        self.pyb.exec(f'mp.arm_pulseshaping({delay}, {ps_config})')
+
     def reset_target(self):
         self.pyb.exec('mp.reset_target()')
 
@@ -388,9 +391,14 @@ class PicoGlitcherInterface(MicroPythonScript):
     def set_multiplexing(self):
         self.pyb.exec('mp.set_multiplexing()')
 
+    def set_pulseshaping(self):
+        self.pyb.exec('mp.set_pulseshaping()')
+
+    # TODO: remove
     def test_waveform_generator(self):
         self.pyb.exec('mp.test_waveform_generator()')
 
+    # TODO: remove
     def test_pulse_generator(self):
         self.pyb.exec('mp.test_pulse_generator()')
 
@@ -664,9 +672,15 @@ class PicoGlitcher(Glitcher):
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
-            mul_config: The dictionary for the multiplexing profile with pairs of identifiers and values. For example, this could be `{"t1": 10, "v1": "GND", "t2": 20, "v2": "1.8", "t3": 30, "v3": "GND", "t4": 40, "v4": "1.8"}`. Meaning that when triggered, a GND-voltage pulse with duration of `10ns` is emitted, followed by a +1.8V step with duration of `20ns` and so on. Note: The default voltage when performing fault injection in multiplexing mode is 3.3V. This can not be changed by the variable `mul_config`. If you need to have a different default voltage, you may need to modify the `mpGlitcher.py` script.
+            mul_config: The dictionary for the multiplexing profile with pairs of identifiers and values. For example, this could be `{"t1": 10, "v1": "GND", "t2": 20, "v2": "1.8", "t3": 30, "v3": "GND", "t4": 40, "v4": "1.8"}`. Meaning that when triggered, a GND-voltage pulse with duration of `10ns` is emitted, followed by a +1.8V step with duration of `20ns` and so on.
         """
         self.pico_glitcher.arm_multiplexing(delay, mul_config)
+
+    def arm_pulseshaping(self, delay:int, ps_config:dict):
+        """
+        TODO
+        """
+        self.pico_glitcher.arm_pulseshaping(delay, ps_config)
 
     def block(self, timeout:float = 1.0):
         """
@@ -789,6 +803,12 @@ class PicoGlitcher(Glitcher):
         Enables the multiplexing mode of the PicoGlitcher version 2 to quickly switch between different voltage levels.
         """
         self.pico_glitcher.set_multiplexing()
+
+    def set_pulseshaping(self):
+        """
+        Enables the pulse-shaping mode of the PicoGlitcher version 2 to apply a voltage profile to the target's supply voltage.
+        """
+        self.pico_glitcher.set_pulseshaping()
 
     def rising_edge_trigger(self, pin_trigger:str = "default", dead_time:float = 0, pin_condition:str = "default"):
         """
