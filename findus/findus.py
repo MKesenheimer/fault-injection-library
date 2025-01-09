@@ -367,6 +367,9 @@ class PicoGlitcherInterface(MicroPythonScript):
     def arm_pulseshaping_from_list(self, delay:int, pulse:list[int]):
         return self.pyb.exec(f'mp.arm_pulseshaping_from_list({delay}, {pulse})')
 
+    def arm_pulseshaping_from_predefined(self, delay:int, ps_config:dict, recalc_constant:bool = False):
+        return self.pyb.exec(f'mp.arm_pulseshaping_from_predefined({delay}, {ps_config}, {recalc_constant})')
+
     def reset_target(self):
         self.pyb.exec('mp.reset_target()')
 
@@ -701,6 +704,12 @@ class PicoGlitcher(Glitcher):
         TODO
         """
         return self.pico_glitcher.arm_pulseshaping_from_list(delay, pulse)
+
+    def arm_pulseshaping_from_predefined(self, delay:int, ps_config:dict, recalc_const:bool = False):
+        """
+        TODO
+        """
+        return self.pico_glitcher.arm_pulseshaping_from_predefined(delay, ps_config, recalc_const)
 
     def block(self, timeout:float = 1.0):
         """
