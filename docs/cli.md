@@ -9,22 +9,28 @@ Usage:
 
 ``` bash
 $ upload --help
-usage: upload [-h] [--port PORT] [--delete-all] [--script SCRIPT]
+usage: upload [-h] [--port PORT] [--delete-all] [--file FILE] [--files FILE1 FILE2...]
 
 Upload a micro python script to the Raspberry Pi Pico.
 
 options:
-  -h, --help       show this help message and exit
-  --port PORT      /dev/tty* of the Raspberry Pi Pico
-  --delete-all     delete all micro python scripts from the Raspberry Pi Pico
-  --script SCRIPT  micro python script to upload to the Raspberry Pi Pico
+  -h, --help            show this help message and exit
+  --port PORT           /dev/tty* of the Raspberry Pi Pico
+  --delete-all          delete all files from the Raspberry Pi Pico
+  --file FILE           file to upload to the Raspberry Pi Pico
+  --files FILE1 FILE2   files to upload to the Raspberry Pi Pico
 ```
 
 Examples:
 
 - Upload or update an existing MicroPython script:
 ```bash
-upload --port /dev/<rpi-tty-port> --script <script.py>
+upload --port /dev/<rpi-tty-port> --file <file.py>
+```
+
+- Upload multiple files:
+```bash
+upload --port /dev/<rpi-tty-port> --files <file1.py> <file2.py>
 ```
 
 - Delete all content:

@@ -56,7 +56,7 @@ Add the [Micropython firmware](https://projects.raspberrypi.org/en/projects/gett
 In general the following script can be used to upload Micropython scripts to the Raspberry Pi Pico.
 
 ```bash
-upload --port /dev/<rpi-tty-port> --script <script.py>
+upload --port /dev/<rpi-tty-port> --file[s] <file.py> [files...]
 ```
 
 ## Executing Raspberry Pi Pico glitcher example implementation
@@ -71,17 +71,13 @@ As the reset is released from the device, the trigger signal is sent.
 We install the corresponding Micropython script and the corresponding config file (must be done only once) on the Raspberry Pi Pico:
 
 ```bash
-upload --port /dev/<rpi-tty-port> --delete-all
-upload --port /dev/<rpi-tty-port> --script ./findus/mpConfig_v1/config.json
-upload --port /dev/<rpi-tty-port> --script ./findus/mpGlitcher.py
+upload --port /dev/<rpi-tty-port> --files findus/mpGlitcher.py findus/mpConfig_v1/config.json
 ```
 
 For hardware version 2.x of the PicoGlitcher, the corresponding config file must be provided:
 
 ```bash
-upload --port /dev/<rpi-tty-port> --delete-all
-upload --port /dev/<rpi-tty-port> --script ./findus/mpConfig_v2/config.json
-upload --port /dev/<rpi-tty-port> --script ./findus/mpGlitcher.py
+upload --port /dev/tty.<rpi-tty-port> --files findus/mpGlitcher.py findus/AD910X.py findus/PulseGenerator.py findus/mpConfig_v2/config.json
 ```
 
 Although the software is based on Micropython, using the PIO functions of the Raspberry Pi Pico, very precise switching operations can be made and triggered on external signals.
@@ -119,11 +115,10 @@ This pin is exposed on the Nucleo header.
 In addition, due to the inherent limitations of the drawing program Fritzing, the glitching line was connected directly to 3.3V of the target in the schematics.
 In a real setup, however, the glitching line should be soldered as close as possible to the power supply of the STM32 and the capacitors should be removed nearby.
 
-Install the Raspberry Pi Pico Micropython scripts:
+Install the Raspberry Pi Pico Micropython scripts (for hardware version 1 see below):
 
 ```bash
-upload --port /dev/<rpi-tty-port> --script ./findus/mpConfig_v1/config.json
-upload --port /dev/<rpi-tty-port> --script ./findus/mpGlitcher.py
+upload --port /dev/tty.<rpi-tty-port> --files findus/mpGlitcher.py findus/AD910X.py findus/PulseGenerator.py findus/mpConfig_v2/config.json
 ```
 
 Next, change into `projects/stm32f42x-glitching` and execute the following script.

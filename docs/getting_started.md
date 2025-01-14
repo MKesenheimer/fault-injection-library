@@ -78,12 +78,11 @@ Connect the Pico Glitcher to your computer and check which serial device comes u
 ls /dev/tty*
 ```
 
-Take note of the device path. Next upload `mpGlitcher.py` and the specific configuration for your Pico Glitcher hardware version via the following command:
+Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version via the following command:
 
 ```bash
 cd findus
-upload --port /dev/<rpi-tty-port> --script mpGlitcher.py
-upload --port /dev/<rpi-tty-port> --script mpConfig_vx/config.json
+upload --port /dev/tty.<rpi-tty-port> --files findus/mpGlitcher.py findus/AD910X.py findus/PulseGenerator.py findus/mpConfig_vx/config.json
 ```
 
 Your Pico Glitcher should now be ready to perform fault-injection attacks.

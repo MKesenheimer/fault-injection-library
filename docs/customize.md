@@ -74,5 +74,5 @@ The output pins with level-shifting are `GPIO4` - `GPIO9`. For inputs with level
 Add your modifications to `mpGlitcher.py` ([https://github.com/MKesenheimer/fault-injection-library/blob/master/findus/mpGlitcher.py](https://github.com/MKesenheimer/fault-injection-library/blob/master/findus/mpGlitcher.py), or `fault-injection-library/findus/mpGlitcher.py` if you cloned the whole repository) and upload the MicroPython script to the Raspberry Pi Pico:
 
 ```bash
-upload --port /dev/<rpi-tty-port> mpGlitcher.py
+upload --port /dev/<rpi-tty-port> --file mpGlitcher.py
 ```
