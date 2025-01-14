@@ -359,16 +359,17 @@ class PicoGlitcherInterface(MicroPythonScript):
         self.pyb.exec(f'mp.arm_multiplexing({delay}, {mul_config})')
 
     def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[int]]):
-        return self.pyb.exec(f'mp.arm_pulseshaping_from_config({delay}, {ps_config})')
+        self.pyb.exec(f'mp.arm_pulseshaping_from_config({delay}, {ps_config})')
 
     def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda, pulse_number_of_points:int):
-        return self.pyb.exec(f'mp.arm_pulseshaping_from_lambda({delay}, {ps_lambda}, {pulse_number_of_points})')
+        self.pyb.exec(f'mp.arm_pulseshaping_from_lambda({delay}, {ps_lambda}, {pulse_number_of_points})')
 
     def arm_pulseshaping_from_list(self, delay:int, pulse:list[int]):
-        return self.pyb.exec(f'mp.arm_pulseshaping_from_list({delay}, {pulse})')
+        ret = self.pyb.exec(f'mp.arm_pulseshaping_from_list({delay}, {pulse})')
+        print(ret.decode())
 
     def arm_pulseshaping_from_predefined(self, delay:int, ps_config:dict, recalc_constant:bool = False):
-        return self.pyb.exec(f'mp.arm_pulseshaping_from_predefined({delay}, {ps_config}, {recalc_constant})')
+        self.pyb.exec(f'mp.arm_pulseshaping_from_predefined({delay}, {ps_config}, {recalc_constant})')
 
     def reset_target(self):
         self.pyb.exec('mp.reset_target()')
@@ -400,16 +401,17 @@ class PicoGlitcherInterface(MicroPythonScript):
     def set_multiplexing(self):
         self.pyb.exec('mp.set_multiplexing()')
 
-    def set_pulseshaping(self):
-        self.pyb.exec('mp.set_pulseshaping()')
+    def set_pulseshaping(self, vinit=1.8):
+        self.pyb.exec(f'mp.set_pulseshaping({vinit})')
 
-    # TODO: remove
-    def test_waveform_generator(self):
-        self.pyb.exec('mp.test_waveform_generator()')
+    def do_calibration(self, vhigh:float):
+        self.pyb.exec(f'mp.do_calibration({vhigh})')
 
-    # TODO: remove
-    def test_pulse_generator(self):
-        self.pyb.exec('mp.test_pulse_generator()')
+    def apply_calibration(self, vhigh:float, vlow:float, store:bool = True):
+        self.pyb.exec(f'mp.apply_calibration({vhigh}, {vlow}, {store})')
+
+    def waveform_generator(self, frequency:int, gain:float, waveid:int):
+        return self.pyb.exec(f'mp.waveform_generator({frequency}, {gain}, {waveid})')
 
     def set_dead_zone(self, dead_time:float, pin_condition:str):
         self.pyb.exec(f'mp.set_dead_zone({dead_time}, "{pin_condition}")')
@@ -833,11 +835,26 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.set_multiplexing()
 
-    def set_pulseshaping(self):
+    def set_pulseshaping(self, vinit=1.8):
         """
         Enables the pulse-shaping mode of the PicoGlitcher version 2 to apply a voltage profile to the target's supply voltage.
+
+        Parameters:
+            vinit: The initial voltage (voltage offset) to base the calculations on. This does not change the output voltage of the pulse shaping expansion board. However, this parameter is used to calculate the correct offsets and scaling of the pulse.
         """
-        self.pico_glitcher.set_pulseshaping()
+        self.pico_glitcher.set_pulseshaping(vinit)
+
+    def do_calibration(self, vhigh:float):
+        """
+        TODO
+        """
+        self.pico_glitcher.do_calibration(vhigh)
+
+    def apply_calibration(self, vhigh:float, vlow:float, store:bool = True):
+        """
+        TODO
+        """
+        self.pico_glitcher.apply_calibration(vhigh, vlow, store)
 
     def rising_edge_trigger(self, pin_trigger:str = "default", dead_time:float = 0, pin_condition:str = "default"):
         """
@@ -894,17 +911,11 @@ class PicoGlitcher(Glitcher):
         """
         return self.pico_glitcher.change_config_and_reset(key, value)
 
-    def test_waveform_generator(self):
+    def waveform_generator(self, frequency:int, gain:float, waveid:int):
         """
         TODO
         """
-        self.pico_glitcher.test_waveform_generator()
-
-    def test_pulse_generator(self):
-        """
-        TODO
-        """
-        self.pico_glitcher.test_pulse_generator()
+        self.pico_glitcher.waveform_generator(frequency, gain, waveid)
 
 class HuskyGlitcher(Glitcher):
     """

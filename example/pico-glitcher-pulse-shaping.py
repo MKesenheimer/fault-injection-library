@@ -37,6 +37,15 @@ class DerivedGlitcher(PicoGlitcher):
             color = 'R'
         return color
 
+def pulse_from_lambda(ps_lambda) -> list[int]:
+        pulse = [0] * 512
+        t = 0
+        dt = 10
+        for i in range(512):
+            pulse[i] = int(ps_lambda(t) * 816)
+            t += dt
+        return pulse
+
 class Main():
     def __init__(self, args):
         self.args = args
@@ -51,23 +60,14 @@ class Main():
         # choose rising edge trigger with dead time of 0 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
 
-        # the initial voltage for multiplexing must be hard-coded and can only be applied
-        # if the raspberry pi pico is reset and re-initialized.
-        if args.multiplexing:
-            self.glitcher.change_config_and_reset("mux_vinit", "1.8")
-            self.glitcher = DerivedGlitcher()
-            self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
+        #self.glitcher.waveform_generator(frequency=100_000, gain=1, waveid=0)
+        #sys.exit(0)
 
         self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
-        #self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input, dead_time=0.01, pin_condition="reset")
 
-        # choose multiplexing, pulse-shaping or crowbar glitching
-        if args.multiplexing:
-            self.glitcher.set_multiplexing()
-        elif args.pulse_shaping:
-            self.glitcher.set_pulseshaping(vinit=3.0)
-        else:
-            self.glitcher.set_lpglitch()
+        # pulse-shape glitching
+        self.glitcher.set_pulseshaping(vinit=3.0)
+        self.calculate_constant = True
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
@@ -91,18 +91,37 @@ class Main():
             delay = random.randint(s_delay, e_delay)
 
             # arm
-            if args.multiplexing:
-                mul_config = {"t1": 4*length, "v1": "1.8", "t2": 4*length, "v2": "VCC", "t3": length, "v3": "GND"}
-                self.glitcher.arm_multiplexing(delay, mul_config)
-            elif args.pulse_shaping:
-                # pulse from lambda; ramp down to 1.8V than GND glitch
-                ps_lambda = f"lambda t:-1.5/({2*length})*t+3.3 if t<{2*length} else 1.8 if t<{4*length} else 0.0 if t<{5*length} else 3.3"
-                self.glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 6*length)
-            else:
-                self.glitcher.arm(delay, length)
+            # pulse shaping with config
+            if args.pulse_type == 0:
+                ps_config = [[length, 2.0], [length, 1.0], [length, 0.0], [length, 3.0]]
+                self.glitcher.arm_pulseshaping_from_config(delay, ps_config)
 
-            # power cycle target
-            #self.glitcher.power_cycle_target(0.1)
+            # pulse from lambda; same pulse as above
+            elif args.pulse_type == 1:
+                ps_lambda = f"lambda t:1.8 if t<{4*length} else 0.95 if t<{8*length} else 0.0 if t<{9*length} else 3.3"
+                self.glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 10*length)
+
+            # pulse from raw list
+            elif args.pulse_type == 2:
+                pulse = [-0x1fff] * 50 + [-0x0fff] * 50 + [-0x07ff] * 50 + [0x0000] * 50
+                self.glitcher.arm_pulseshaping_from_list(delay, pulse)
+
+            # pulse from lambda; ramp down to 1.8V than GND glitch
+            elif args.pulse_type == 3:
+                    ps_lambda = f"lambda t:-1.5/({2*length})*t+3.3 if t<{2*length} else 1.8 if t<{4*length} else 0.0 if t<{5*length} else 3.3"
+                    self.glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 6*length)
+
+            # pulse from predefined; ramp down to 1.8V than GND glitch
+            elif args.pulse_type == 1:
+                if self.calculate_constant:
+                    # send full config first time
+                    ps_config = {"psid": 1, "vstart": 3.3, "tramp": 4 * length, "vstep": 1.8, "tstep": 4 * length, "length": length, "vend": 3.3}
+                    self.glitcher.arm_pulseshaping_from_predefined(delay, ps_config, self.calculate_constant)
+                    self.calculate_constant = False
+                else:
+                    # only update relevant parameters next time
+                    ps_config = {"psid": 1, "length": length, "vend": 3.3}
+                    self.glitcher.arm_pulseshaping_from_predefined(delay, ps_config)
 
             # reset target
             time.sleep(0.01)
@@ -142,8 +161,7 @@ if __name__ == "__main__":
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
-    parser.add_argument("--multiplexing", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with multiplexing between different voltages (requires PicoGlitcher v2).")
-    parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with a predefined voltage profile (requires PicoGlitcher v2).")
+    parser.add_argument("--pulse-type", required=False, help="", type=int)
     parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
     args = parser.parse_args()
 

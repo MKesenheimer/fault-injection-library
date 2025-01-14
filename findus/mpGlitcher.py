@@ -106,6 +106,9 @@ def pulse_shaping():
     # block until delay received
     pull(block)
     mov(x, osr)
+    # block until total length of pulse received
+    pull(block)
+    mov(y, osr)
 
     # wait for trigger condition
     # enable pin_glitch_en
@@ -117,6 +120,11 @@ def pulse_shaping():
 
     # set trigger pin low (start pulse generator)
     set(pins, 0b0)
+    label("length_loop")
+    jmp(y_dec, "length_loop")
+
+    # stop pulse and disable pin_glitch_en
+    set(pins, 0b1).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
     push(block)
@@ -367,23 +375,18 @@ class MicroPythonScript():
             # Pulse shaping expansion board related stuff
             self.ad910x = AD910X.AD910X()
             self.ad910x.reset()
+            self.ad910x.init()
             self.pin_ps_trigger = self.ad910x.get_trigger_pin()
-            self.pulse_generator = PulseGenerator()
+            self.pulse_generator = PulseGenerator(vhigh=self.config["ps_offset"], factor=self.config["ps_factor"])
 
-    def test_waveform_generator(self):
-        self.ad910x.set_frequency(AD910X.DEFAULT_FREQUENCY)
-        self.ad910x.set_gain(AD910X.DEFAULT_GAIN)
-        self.ad910x.set_wave_output(AD910X.WAVE_COSINE)
-
-    def test_pulse_generator(self):
-        self.ad910x.set_frequency(AD910X.DEFAULT_FREQUENCY)
-        self.ad910x.set_gain(AD910X.DEFAULT_GAIN)
-        # TODO: can write_sram_from_start and set_pulse_output_oneshot swapped?
-        self.ad910x.write_sram_from_start(AD910X.GAUSSIAN_PULSE)
-        self.ad910x.set_pulse_output_oneshot()
-        # pattern is emitted if trigger pin is set low
-        # TODO: control this by PIO
-        self.ad910x.trigger_low()
+    def waveform_generator(self, frequency:int = AD910X.DEFAULT_FREQUENCY, gain:float = AD910X.DEFAULT_GAIN, waveid:int = AD910X.WAVE_TRIANGLE):
+        if self.config["hardware_version"][0] < 2:
+            raise Exception("Pulse-shaping not implemented in hardware version 1.")
+        if waveid < AD910X.WAVE_SINE or waveid > AD910X.WAVE_NEGATIVE_SAWTOOTH:
+            raise Exception("Wave-id not supported. Choose one of [0, 1, 2, 3, 4].")
+        self.ad910x.set_frequency(frequency)
+        self.ad910x.set_gain(gain)
+        self.ad910x.set_wave_output(waveid)
 
     def get_firmware_version(self) -> list[int]:
         """
@@ -530,7 +533,7 @@ class MicroPythonScript():
         self.glitch_mode = "crowbar"
         self.pin_glitch = self.pin_hpglitch
 
-    def set_multiplexing(self, vinit="1.8"):
+    def set_multiplexing(self):
         """
         Enables the multiplexing mode of the PicoGlitcher version 2 to switch between different voltage levels.
         """
@@ -539,7 +542,7 @@ class MicroPythonScript():
         self.glitch_mode = "mul"
         self.pin_glitch = self.pin_mux1
 
-    def set_pulseshaping(self):
+    def set_pulseshaping(self, vinit=1.8):
         """
         Enables the pulse-shaping mode of the PicoGlitcher version 2 to emit a pre-defined voltage pulse on the Pulse Shaping expansion board.
         """
@@ -547,6 +550,33 @@ class MicroPythonScript():
             raise Exception("Pulse-shaping not implemented in hardware version 1.")
         self.glitch_mode = "pul"
         self.pin_glitch = self.pin_ps_trigger
+
+        # Configure the AD9102
+        self.pulse_generator.set_offset(vinit)
+        self.ad910x.set_frequency(self.pulse_generator.get_frequency())
+        self.ad910x.set_gain(1)
+        #self.ad910x.set_offset(2048)
+        # configure the AD9102 to emit a oneshot pulse
+        self.ad910x.set_pulse_output_oneshot()
+
+    def do_calibration(self, vhigh:float):
+        """
+        TODO
+        """
+        self.set_pulseshaping(vhigh)
+        pulse = self.pulse_generator.calibration_pulse()
+        self.arm_pulseshaping(delay=100, pulse=pulse)
+        self.reset(0.01)
+
+    def apply_calibration(self, vhigh:float, vlow:float, store:bool = True):
+        """
+        TODO
+        """
+        factor = 1/(vhigh - vlow)
+        self.pulse_generator.set_calibration(vhigh, factor)
+        if store:
+            self.change_config("ps_offset", vhigh)
+            self.change_config("ps_factor", factor)
 
     def set_dead_zone(self, dead_time:float = 0, pin_condition:str = "default"):
         """
@@ -716,25 +746,16 @@ class MicroPythonScript():
 
         # disable pulse output
         self.pin_ps_trigger.high()
-
-        # DEBUG
-        if 0:
-            # Configure the AD9102
-            # TODO: set appropriate frequency and gain
-            # TODO: must likely be done only once in set_pulseshaping or in __init__
-            self.ad910x.set_frequency(self.pulse_generator.get_frequency())
-            self.ad910x.set_gain(AD910X.DEFAULT_GAIN)
-            # load the pulse into AD9102 SRAM
-            self.ad910x.write_sram_from_start(pulse)
-            # configure the AD9102 to emit a oneshot pulse
-            # TODO: must likely be done only once in set_pulseshaping or in __init__
-            self.ad910x.set_pulse_output_oneshot(len(pulse))
+        # load the pulse into AD9102 SRAM
+        self.ad910x.write_sram_from_start(pulse)
+        self.ad910x.update_sram(len(pulse))
 
         # state machine that pulls the ps_trigger pin to low if the trigger condition is met
         self.sm0 = StateMachine(0, pulse_shaping, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
-
         # push delay (in nano seconds) into the fifo of the statemachine
         self.sm0.put(delay // (1_000_000_000 // self.frequency))
+        maxlength = 10_000 # TODO: control this by an argument or the pulse length
+        self.sm0.put(maxlength // (1_000_000_000 // self.frequency))
 
         self.arm_common()
         #print(pulse)
@@ -762,12 +783,12 @@ class MicroPythonScript():
             res = self.sm1.get()
             print(res)
 
-    def change_config_and_reset(self, key, value):
+    def change_config(self, key, value):
         """
         Change the content of the configuration file `config.json`. Note that the value to be changed must already exist.
 
         Parameters:
-            key: Key of value to be replacedl.
+            key: Key of value to be replaced.
             value: Value to be set.
         """
         with open("config.json", "r") as file:
@@ -784,5 +805,14 @@ class MicroPythonScript():
             config = ujson.load(file)
         print(config)
 
+    def change_config_and_reset(self, key, value):
+        """
+        Change the content of the configuration file `config.json`. Note that the value to be changed must already exist. Reset the Pico Glitcher.
+
+        Parameters:
+            key: Key of value to be replaced.
+            value: Value to be set.
+        """
+        self.change_config(key, value)
         machine.soft_reset()
         #machine.reset()

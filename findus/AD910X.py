@@ -72,6 +72,7 @@ FREQ_RESOLUTION    = 0x1000000
 GAIN_MAX           = 2.0
 GAIN_MIN           = -2.0
 GAIN_RESOLUTION    = 1024
+OFFSET_RESOLUTION = 4096
 DEFAULT_GAIN       = 0.5
 DEFAULT_FREQUENCY  = 100000
 
@@ -98,9 +99,6 @@ SAW_CFG_TRIANGLE             = 0x02
 SAW_CFG_NO_WAVE              = 0x03
 SAW_CFG_STEP_1               = 0x04
 
-# example pulseforms
-GAUSSIAN_PULSE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 15, 15, 15, 16, 16, 16, 17, 17, 17, 18, 18, 18, 19, 19, 20, 20, 20, 21, 21, 22, 22, 23, 23, 23, 24, 24, 25, 25, 26, 27, 27, 28, 28, 29, 29, 30, 31, 31, 32, 33, 33, 34, 35, 35, 36, 37, 37, 38, 39, 40, 41, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 61, 62, 63, 65, 66, 67, 69, 70, 72, 73, 75, 76, 78, 79, 81, 82, 84, 86, 88, 89, 91, 93, 95, 97, 99, 101, 103, 105, 107, 109, 111, 114, 116, 118, 121, 123, 126, 128, 131, 133, 136, 139, 142, 145, 148, 151, 154, 157, 160, 163, 166, 170, 173, 177, 180, 184, 188, 192, 195, 199, 203, 207, 212, 216, 220, 225, 229, 234, 239, 244, 249, 254, 259, 264, 269, 275, 280, 286, 292, 298, 304, 310, 316, 322, 329, 336, 342, 349, 356, 364, 371, 378, 386, 394, 402, 410, 418, 427, 435, 444, 453, 462, 472, 481, 491, 501, 511, 521, 532, 543, 554, 565, 576, 588, 600, 612, 624, 637, 650, 663, 676, 690, 704, 718, 733, 748, 763, 778, 794, 810, 826, 843, 860, 877, 895, 913, 932, 951, 970, 989, 1009, 1030, 1051, 1072, 1093, 1116, 1138, 1161, 1185, 1208, 1233, 1258, 1283, 1309, 1336, 1363, 1390, 1418, 1447, 1476, 1506, 1536, 1567, 1599, 1631, 1664, 1698, 1732, 1767, 1803, 1840, 1877, 1915, 1953, 1993, 2033, 2074, 2116, 2159, 2202, 2247, 2292, 2339, 2386, 2434, 2483, 2533, 2585, 2637, 2690, 2744, 2800, 2856, 2914, 2973, 3033, 3094, 3157, 3221, 3286, 3352, 3420, 3489, 3560, 3631, 3705, 3780, 3856, 3934, 4013, 4095, 4013, 3934, 3856, 3780, 3705, 3631, 3560, 3489, 3420, 3352, 3286, 3221, 3157, 3094, 3033, 2973, 2914, 2856, 2800, 2744, 2690, 2637, 2585, 2533, 2483, 2434, 2386, 2339, 2292, 2247, 2202, 2159, 2116, 2074, 2033, 1993, 1953, 1915, 1877, 1840, 1803, 1767, 1732, 1698, 1664, 1631, 1599, 1567, 1536, 1506, 1476, 1447, 1418, 1390, 1363, 1336, 1309, 1283, 1258, 1233, 1208, 1185, 1161, 1138, 1116, 1093, 1072, 1051, 1030, 1009, 989, 970, 951, 932, 913, 895, 877, 860, 843, 826, 810, 794, 778, 763, 748, 733, 718, 704, 690, 676, 663, 650, 637, 624, 612, 600, 588, 576, 565, 554, 543, 532, 521, 511, 501, 491, 481, 472, 462, 453, 444, 435, 427, 418, 410, 402, 394, 386, 378, 371, 364, 356, 349, 342, 336, 329, 322, 316, 310, 304, 298, 292, 286, 280, 275, 269, 264, 259, 254, 249, 244, 239, 234, 229, 225, 220, 216, 212, 207, 203, 199, 195, 192, 188, 184, 180, 177, 173, 170, 166, 163, 160, 157, 154, 151, 148, 145, 142, 139, 136, 133, 131, 128, 126, 123, 121, 118, 116, 114, 111, 109, 107, 105, 103, 101, 99, 97, 95, 93, 91, 89, 88, 86, 84, 82, 81, 79, 78, 76, 75, 73, 72, 70, 69, 67, 66, 65, 63, 62, 61, 60, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 41, 40, 39, 38, 37, 37, 36, 35, 35, 34, 33, 33, 32, 31, 31, 30, 29, 29, 28, 28, 27, 27, 26, 25, 25, 24, 24, 23, 23, 23, 22, 22, 21, 21, 20, 20, 20, 19, 19, 18, 18, 18, 17, 17, 17, 16, 16, 16, 15, 15, 15, 14, 14, 14, 13, 13, 13, 13, 12, 12, 12, 12, 11, 11, 11, 11, 10, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
 def usleep(x:int):
     time.sleep(x/1000000.0)
 
@@ -113,20 +111,28 @@ class AD910X():
         self.pin_reset = Pin(PS_RESET, mode=Pin.OUT, value=1)
         self.pin_trigger = Pin(PS_TRIGGER, mode=Pin.OUT, value=1)
         self.spi = SPI(0,
-                  baudrate=100000,
-                  polarity=1,
-                  phase=1,
-                  bits=8,
+                  baudrate=1000000, # 100000 oder 1000000
+                  polarity=0,
+                  phase=0,
+                  bits=8, # 8 oder 16
                   firstbit=SPI.MSB,
                   sck=Pin(PS_SPI_SCK),
                   mosi=Pin(PS_SPI_MOSI),
                   miso=Pin(PS_SPI_MISO))
-        # TODO: SPI config kontrollieren
+
+    def init(self):
+        #self.spi_read_register(REG_SPI_CONFIG)
         # TODO: do a proper calibration!
-        self.spi_write_register(REG_DAC_AGAIN, 0x4000)
-        self.spi_write_register(REG_DAC_RSET, 0x1F00) # DAC_RSET_CAL = 11111
+        #self.spi_write_register(REG_DAC_AGAIN, 0x4000)
+        #self.spi_write_register(REG_DAC_RSET, 0x1F00) # DAC_RSET_CAL = 11111
+        #self.spi_write_register(REG_DOUT_START_DLY, 0x0003)
+        #self.spi_write_register(REG_COMP_OFFSET, ) offset
+        pass
 
     def get_trigger_pin(self):
+        """
+        TODO
+        """
         return self.pin_trigger
 
     def spi_write_registers(self, addr:int, data:list[int]):
@@ -137,7 +143,7 @@ class AD910X():
             addr: 16-bit SPI/SRAM start address
             data: list of 16-bit data to be written
         """
-        tx_buf = [0] * 259
+        tx_buf = [0] * (2 * len(data) + 2)
         tx_buf[0] = ((((addr >> 8) & 0xFF) & SPI_WRITE_MASK) & 0xFF)
         tx_buf[1] = (addr & 0xFF)
         for cnt in range(len(data)):
@@ -146,7 +152,7 @@ class AD910X():
         self.pin_cs.value(0)
         self.spi.write(bytes(tx_buf))
         self.pin_cs.value(1)
-        usleep(1)
+        #usleep(1)
 
     def spi_read_registers(self, addr:int, length:int) -> list[int]:
         """
@@ -171,8 +177,42 @@ class AD910X():
         data_out = [0] * length
         for cnt in range(0, length):
             data_out[cnt] = (rx_buf[cnt * 2] << 8) | rx_buf[(cnt * 2) + 1]
-        usleep(1)
+        #usleep(1)
         return data_out
+
+    def spi_write_register_new(self, addr:int, data:int):
+        """
+        Write 16-bit data to AD910x SPI/SRAM register
+
+        Parameters:
+            addr: 16-bit SPI/SRAM address
+            data: 16-bit data to be written to register address
+        """
+        self.pin_cs.value(0)
+        addr_bytes = addr.to_bytes(2, 'big')
+        self.spi.write(addr_bytes)
+        data_bytes = data.to_bytes(2, 'big')
+        self.spi.write(data_bytes)
+        self.pin_cs.value(1)
+        usleep(1)
+
+    def spi_read_register_new(self, addr:int) -> int:
+        """
+        Read 16-bit data from AD910x SPI/SRAM register.
+
+        Parameters:
+            addr: 16-bit SPI/SRAM address.
+
+        Returns:
+            16-bit data returned by AD910x.
+        """
+        read_addr = 0x8000 + addr
+        self.pin_cs.value(0)
+        self.spi.write(read_addr.to_bytes(2, 'big'))
+        data = self.spi.read(1)
+        self.pin_cs.value(1)
+        usleep(1)
+        return int.from_bytes(data, 'big')
 
     def spi_write_register(self, addr:int, data:int):
         """
@@ -204,8 +244,9 @@ class AD910X():
         Reset AD910x SPI registers to default values
         """
         self.pin_reset.low()
-        usleep(10)
+        usleep(100)
         self.pin_reset.high()
+        usleep(100000)
 
     def trigger_high(self):
         """
@@ -219,7 +260,7 @@ class AD910X():
         """
         self.pin_trigger.low()
 
-    def print_data(addr:int, data:int):
+    def print_data(self, addr:int, data:int, addrname:str = ""):
         """
         Print register address and data in hexadecimal format
 
@@ -227,7 +268,10 @@ class AD910X():
             addr: 16-bit SPI/SRAM register address
             data: 16-bit data
         """
-        print(f'0x{addr:0>4X}, 0x{data:0>4X}')
+        if addrname == "":
+            print(f'0x{addr:0>4X}: 0x{data:0>4X} = 0b{data:0>16b}')
+        else:
+            print(f'0x{addr:0>4X} ({addrname}):\t0x{data:0>4X} = 0b{data:0>16b}')
 
     def write_sram(self, addr:int, data:list[int]):
         """
@@ -241,7 +285,7 @@ class AD910X():
             raise Exception("SRAM address not in range [0x6000, 0x6FFF]")
         self.spi_write_register(REG_PAT_STATUS, MEM_ACCESS_ENABLE)
         for cnt in range(0, len(data)):
-            self.spi_write_register(addr + cnt, data[cnt] << 4)
+            self.spi_write_register(addr + cnt, data[cnt] << 2)
         self.spi_write_register(REG_PAT_STATUS, MEM_ACCESS_DISABLE)
 
     def write_sram_from_start(self, data:list[int]):
@@ -252,7 +296,7 @@ class AD910X():
             data: array of 16-bit data to be written to SRAM.
         """
         if len(data) > 4096:
-            raise Exception("Pulse too large.")
+            raise Exception("SRAM data too large.")
         self.write_sram(SRAM_ADDRESS_MIN, data)
 
     def read_sram(self, addr:int, length:int) -> list[int]:
@@ -270,7 +314,7 @@ class AD910X():
         self.spi_write_register(REG_PAT_STATUS, MEM_ACCESS_ENABLE | BUF_READ)
         data = [0] * length
         for cnt in range(0, length):
-            data[cnt] = self.spi_read_register(addr + cnt) >> 4
+            data[cnt] = self.spi_read_register(addr + cnt) >> 2
         self.spi_write_register(REG_PAT_STATUS, MEM_ACCESS_DISABLE)
         return data
 
@@ -317,11 +361,8 @@ class AD910X():
         freq_tmp = int((freq / (MASTER_CLOCK / FREQ_RESOLUTION))) & 0xFFFFFFFF
         tw_msb = ((freq_tmp >> 8) & 0xFFFF)
         tw_lsb = ((freq_tmp << 8 ) & 0xFF00)
-        self.stop_pattern()
         self.spi_write_register(REG_DDS_TW32, tw_msb)
         self.spi_write_register(REG_DDS_TW1, tw_lsb)
-        self.update_settings()
-        self.start_pattern()
 
     def set_gain(self, gain:float):
         """
@@ -332,13 +373,28 @@ class AD910X():
         """
         if gain > GAIN_MAX or gain < GAIN_MIN:
             raise Exception("Gain value not supported.")
-        gain_tmp = (int((gain * GAIN_RESOLUTION)) << 4) & 0xFFFFFFFF
-        self.stop_pattern()
+        gain_tmp = (int((gain * GAIN_RESOLUTION)) << 4) & 0xFFFF
         self.spi_write_register(REG_DAC_DGAIN, gain_tmp)
-        self.update_settings()
-        self.start_pattern()
 
-    def set_pulse_output_oneshot(self, pulse_number_of_points:int):
+    def set_offset(self, offset:int):
+        """
+        Set the offset of the DAC.
+
+        Parameters:
+            offset: Offset to be set.
+        """
+        if offset < 0 or offset > 4096:
+            raise Exception("Offset value not supported.")
+        self.spi_write_register(REG_DAC_DOF, offset)
+
+    def update_sram(self, pulse_number_of_points:int):
+        self.spi_write_register(REG_START_ADDR, 0x0000) # start SRAM addr to read data from
+        stop_addr = (((pulse_number_of_points & 0x0FFF) - 1) << 4) & 0xFFF0
+        self.spi_write_register(REG_STOP_ADDR, stop_addr)  # stop SRAM addr
+        self.spi_write_register(REG_RAM_UPDATE, UPDATE_SETTINGS)
+        self.spi_write_register(REG_PAT_STATUS, START_PATTERN)
+
+    def set_pulse_output_oneshot(self):
         """
         Configure the DDS to output one defined pulse.
 
@@ -346,19 +402,12 @@ class AD910X():
             pulse: The pulse to output
         """
         # update settings
-        self.stop_pattern()
         self.spi_write_register(REG_PAT_TYPE, PATTERN_RPT_FINITE) # pattern is emitted a finite amount of times
         self.spi_write_register(REG_DAC_PAT, 0x0001) # repeat pattern once
-        self.spi_write_register(REG_WAV_CONFIG, WAV_CFG_PRESTORE_DDS)
+        self.spi_write_register(REG_WAV_CONFIG, WAV_CFG_PRESTORE_DDS) # output from DDS
         self.spi_write_register(REG_PAT_TIMEBASE, 0x0111) # HOLD = 1, PAT_PERIOD_BASE = 1, START_DELAY_BASE = 1; TODO: set the time base, TODO: HOLD = 0 for faster sampling?
-        self.spi_write_register(REG_PATTERN_DLY, 0x0000) # TODO: control this by the delay parameter
-        self.spi_write_register(REG_START_DLY, 0x0000) # TODO: OR: control this by the delay parameter
-        self.spi_write_register(REG_START_ADDR, 0x0000) # start SRAM addr to read data from
-        stop_addr = (pulse_number_of_points - 1) << 4
-        self.spi_write_register(REG_STOP_ADDR, stop_addr)  # stop SRAM addr
-        #self.spi_write_register(REG_DDS_CYC, 0x0100) # ?
-        self.spi_write_register(REG_PAT_STATUS, START_PATTERN)
-        self.spi_write_register(REG_RAM_UPDATE, UPDATE_SETTINGS)
+        #self.spi_write_register(REG_PATTERN_DLY, 0x000E) # TODO: control this by the delay parameter
+        #self.spi_write_register(REG_START_DLY, 0x0003) # TODO: OR: control this by the delay parameter
 
     def set_wave_output(self, wave:int):
         """
@@ -384,7 +433,7 @@ class AD910X():
             self.spi_write_register(REG_DDSX_CONFIG, reg_data)
         else:
             reg_data |= ((WAV_CFG_PRESTORE_SAWTOOTH | WAV_CFG_WAVE_PRESTORED))
-            self.spiw_write_register(reg_address, reg_data)
+            self.spi_write_register(reg_address, reg_data)
             reg_address = REG_SAW_CONFIG
             reg_data = self.spi_read_register(reg_address) & 0xFF00
 
@@ -397,3 +446,56 @@ class AD910X():
             self.spi_write_register(reg_address, reg_data)
         self.update_settings()
         self.start_pattern()
+        return self.spi_read_register(REG_CFG_ERROR)
+
+    def update_regs(self, data):
+        regadd = [0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d, 0x000e, 0x001f, 0x0020, 0x0022, 0x0023, 0x0024, 0x0025, 0x0026, 0x0027, 0x0028, 0x0029, 0x002a, 0x002b, 0x002c, 0x002d, 0x002e, 0x002f, 0x0030, 0x0031, 0x0032, 0x0033, 0x0034, 0x0035, 0x0036, 0x0037, 0x003e, 0x003f, 0x0040, 0x0041, 0x0042, 0x0043, 0x0044, 0x0045, 0x0047, 0x0050, 0x0051, 0x0052, 0x0053, 0x0054, 0x0055, 0x0056, 0x0057, 0x0058, 0x0059, 0x005a, 0x005b, 0x005c, 0x005d, 0x005e, 0x005f, 0x001e, 0x001d]
+        for i in range(len(regadd)):
+            self.spi_write_register(regadd[i], data[i])
+
+    def set_pulse_output_test(self):
+        #self.stop_pattern()
+        regval = [0x0000, 0x0e00, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x4000, 0x0000, 0x0000, 0x0000, 0x0000, 0x1f00, 0x0000, 0x0000, 0x0001, 0x000E, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x3030, 0x0111, 0xffff, 0x0000, 0x0101, 0x0003, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x4000, 0x0000, 0x0200, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0fa0, 0x0000, 0xfff0, 0x0100, 0x0001, 0x0001]
+        self.update_regs(regval)
+
+    def debug_registers(self):
+        self.print_data(REG_WAV_CONFIG, self.spi_read_register(REG_WAV_CONFIG), "REG_WAV_CONFIG")
+        self.print_data(REG_DDSX_CONFIG, self.spi_read_register(REG_DDSX_CONFIG), "REG_DDSX_CONFIG")
+        self.print_data(REG_DAC_DGAIN, self.spi_read_register(REG_DAC_DGAIN), "REG_DAC_DGAIN")
+        self.print_data(REG_DDS_TW32, self.spi_read_register(REG_DDS_TW32), "REG_DDS_TW32")
+        self.print_data(REG_DDS_TW1, self.spi_read_register(REG_DDS_TW1), "REG_DDS_TW1")
+        self.print_data(REG_DOUT_START_DLY, self.spi_read_register(REG_DOUT_START_DLY), "REG_DOUT_START_DLY")
+        self.print_data(REG_PATTERN_DLY, self.spi_read_register(REG_PATTERN_DLY), "REG_PATTERN_DLY")
+        self.print_data(REG_PAT_STATUS, self.spi_read_register(REG_PAT_STATUS), "REG_PAT_STATUS")
+        self.print_data(REG_RAM_UPDATE, self.spi_read_register(REG_RAM_UPDATE), "REG_RAM_UPDATE")
+        self.print_data(REG_CFG_ERROR, self.spi_read_register(REG_CFG_ERROR), "REG_CFG_ERROR")
+        print()
+
+    def set_wave_output_test(self):
+        self.pin_trigger.high()
+
+        gain = 0.5
+        gain_tmp = (int((gain * GAIN_RESOLUTION)) << 4) & 0xFFFFFFFF
+        self.spi_write_register(REG_DAC_DGAIN, gain_tmp)
+
+        freq = 1000000
+        freq_tmp = int((freq / (MASTER_CLOCK / FREQ_RESOLUTION))) & 0xFFFFFFFF
+        tw_msb = ((freq_tmp >> 8) & 0xFFFF)
+        tw_lsb = ((freq_tmp << 8 ) & 0xFF00)
+        self.spi_write_register(REG_DDS_TW32, tw_msb)
+        self.spi_write_register(REG_DDS_TW1, tw_lsb)
+
+        reg_data = self.spi_read_register(REG_WAV_CONFIG) & 0xFF00
+        reg_data |= (WAV_CFG_PRESTORE_DDS | WAV_CFG_WAVE_PRESTORED) # debug: 0x31 = 0b110001
+        self.spi_write_register(REG_WAV_CONFIG, reg_data)
+
+        reg_data = self.spi_read_register(REG_DDSX_CONFIG)
+        reg_data |= DDSX_CFG_ENABLE_COSINE
+        self.spi_write_register(REG_DDSX_CONFIG, reg_data) # debug: 0x08
+
+        self.spi_write_register(REG_RAM_UPDATE, 0x0001)
+        self.spi_write_register(REG_PAT_STATUS, 0x0001)
+        self.debug_registers()
+        self.pin_trigger.low()
+
+        return self.spi_read_register(REG_CFG_ERROR)

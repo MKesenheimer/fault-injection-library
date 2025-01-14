@@ -1,5 +1,7 @@
 {
     "hardware_version": [2, 1, 0],
-    "software_version": [0, 9, 9],
+    "software_version": [0, 9, 10],
     "mux_vinit": "3.3",
+    "ps_offset": 1.4,
+    "ps_factor": 0.83
 }
