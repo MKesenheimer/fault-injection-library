@@ -112,7 +112,7 @@ class Main():
                     self.glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 6*length)
 
             # pulse from predefined; ramp down to 1.8V than GND glitch
-            elif args.pulse_type == 1:
+            elif args.pulse_type == 4:
                 if self.calculate_constant:
                     # send full config first time
                     ps_config = {"psid": 1, "vstart": 3.3, "tramp": 4 * length, "vstep": 1.8, "tstep": 4 * length, "length": length, "vend": 3.3}
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
-    parser.add_argument("--pulse-type", required=False, help="", type=int)
+    parser.add_argument("--pulse-type", required=True, help="Choose with which method the pulse is generated. Choose one of [0, 1, 2, 3, 4].", type=int)
     parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
     args = parser.parse_args()
 
