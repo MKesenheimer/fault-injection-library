@@ -139,7 +139,7 @@ class PulseGenerator():
             self.predefined_pulse1_constant(vstart, tramp, vstep, tstep)
         pulse = self.pulse_constant.copy()
         nlength = int(length * self.points_per_ns)
-        pulse += [0] * nlength
+        pulse += [int((0 - self.offset) * self.points_per_volt)] * nlength
         pulse += [(int((vend - self.offset) * self.points_per_volt))]
         # padding with last value
         if padding:

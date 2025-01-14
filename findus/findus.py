@@ -365,8 +365,7 @@ class PicoGlitcherInterface(MicroPythonScript):
         self.pyb.exec(f'mp.arm_pulseshaping_from_lambda({delay}, {ps_lambda}, {pulse_number_of_points})')
 
     def arm_pulseshaping_from_list(self, delay:int, pulse:list[int]):
-        ret = self.pyb.exec(f'mp.arm_pulseshaping_from_list({delay}, {pulse})')
-        print(ret.decode())
+        self.pyb.exec(f'mp.arm_pulseshaping_from_list({delay}, {pulse})')
 
     def arm_pulseshaping_from_predefined(self, delay:int, ps_config:dict, recalc_constant:bool = False):
         self.pyb.exec(f'mp.arm_pulseshaping_from_predefined({delay}, {ps_config}, {recalc_constant})')

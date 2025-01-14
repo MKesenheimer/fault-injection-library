@@ -96,9 +96,9 @@ class Main():
                 ps_config = [[length, 2.0], [length, 1.0], [length, 0.0], [length, 3.0]]
                 self.glitcher.arm_pulseshaping_from_config(delay, ps_config)
 
-            # pulse from lambda; same pulse as above
+            # pulse from lambda
             elif args.pulse_type == 1:
-                ps_lambda = f"lambda t:1.8 if t<{4*length} else 0.95 if t<{8*length} else 0.0 if t<{9*length} else 3.3"
+                ps_lambda = f"lambda t:2.0 if t<{length} else 1.0 if t<{2*length} else 0.0 if t<{3*length} else 3.0"
                 self.glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 10*length)
 
             # pulse from raw list
@@ -108,19 +108,19 @@ class Main():
 
             # pulse from lambda; ramp down to 1.8V than GND glitch
             elif args.pulse_type == 3:
-                    ps_lambda = f"lambda t:-1.5/({2*length})*t+3.3 if t<{2*length} else 1.8 if t<{4*length} else 0.0 if t<{5*length} else 3.3"
+                    ps_lambda = f"lambda t:-1.0/({2*length})*t+3.0 if t<{2*length} else 2.0 if t<{4*length} else 0.0 if t<{5*length} else 3.0"
                     self.glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 6*length)
 
             # pulse from predefined; ramp down to 1.8V than GND glitch
             elif args.pulse_type == 4:
                 if self.calculate_constant:
                     # send full config first time
-                    ps_config = {"psid": 1, "vstart": 3.3, "tramp": 4 * length, "vstep": 1.8, "tstep": 4 * length, "length": length, "vend": 3.3}
+                    ps_config = {"psid": 1, "vstart": 3.0, "tramp": length, "vstep": 2.0, "tstep": length, "length": length, "vend": 3.0}
                     self.glitcher.arm_pulseshaping_from_predefined(delay, ps_config, self.calculate_constant)
                     self.calculate_constant = False
                 else:
                     # only update relevant parameters next time
-                    ps_config = {"psid": 1, "length": length, "vend": 3.3}
+                    ps_config = {"psid": 1, "length": length, "vend": 3.0}
                     self.glitcher.arm_pulseshaping_from_predefined(delay, ps_config)
 
             # reset target
