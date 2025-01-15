@@ -281,7 +281,7 @@ class AD910X():
             addr: 16-bit SPI/SRAM register start address.
             data: array of 16-bit data to be written to SRAM.
         """
-        if (addr < SRAM_ADDRESS_MIN) or (addr > SRAM_ADDRESS_MAX) or (( addr + len(data)) > (SRAM_ADDRESS_MAX + 1)):
+        if (addr < SRAM_ADDRESS_MIN) or (addr > SRAM_ADDRESS_MAX) or ((addr + len(data)) > (SRAM_ADDRESS_MAX + 1)):
             raise Exception("SRAM address not in range [0x6000, 0x6FFF]")
         self.spi_write_register(REG_PAT_STATUS, MEM_ACCESS_ENABLE)
         for cnt in range(0, len(data)):

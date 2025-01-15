@@ -123,6 +123,12 @@ class Main():
                     ps_config = {"psid": 1, "length": length, "vend": 3.0}
                     self.glitcher.arm_pulseshaping_from_predefined(delay, ps_config)
 
+            # pulse from points -> interpolation is used
+            elif args.pulse_type == 5:
+                    xpoints = [0,   100, 200, 300, 400, 500, 515, 520]
+                    ypoints = [3.0, 2.1, 2.0, 2.0, 1.7, 0.0, 2.0, 3.0]
+                    self.glitcher.arm_pulseshaping_from_spline(delay, xpoints, ypoints)
+
             # reset target
             time.sleep(0.01)
             self.glitcher.reset(0.01)

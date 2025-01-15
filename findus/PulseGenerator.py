@@ -1,4 +1,7 @@
+from Spline import Spline
+
 class PulseGenerator():
+    @micropython.native
     def __init__(self, time_resolution:int = 10, vhigh:float = 1.0, factor:float = 1.0):
         """
         TODO
@@ -12,8 +15,16 @@ class PulseGenerator():
         self.points_per_ns = 1 / self.time_resolution
         self.set_calibration(output_voltage_at_minimal_gain=vhigh, calibration_factor=factor)
         self.set_offset(offset=3.3)
+        # caching
         self.pulse_constant = []
+        self.total_pulse_duration = 0
+        self.pulse = []
 
+    @micropython.native
+    def get_points_per_ns(self):
+        return self.points_per_ns
+
+    @micropython.native
     def calculate_pulse_number_of_points(self, total_pulse_duration:int) -> int:
         """
         TODO
@@ -23,12 +34,14 @@ class PulseGenerator():
             return self.max_points
         return pulse_number_of_points
 
+    @micropython.native
     def calibration_pulse(self) -> list[int]:
         high = int((0) * self.points_per_volt)
         low = int((0 - self.offset) * self.points_per_volt)
         pulse = [high] * 1000 + [low] * 1000
         return pulse
 
+    @micropython.native
     def set_offset(self, offset:float):
         """
         TODO
@@ -38,22 +51,26 @@ class PulseGenerator():
         voltage_resolution = 4096
         self.points_per_volt = int(self.calibration_factor * voltage_resolution / self.gain)
 
+    @micropython.native
     def set_calibration(self, output_voltage_at_minimal_gain:float, calibration_factor:float):
         self.output_voltage_at_minimal_gain = output_voltage_at_minimal_gain
         self.calibration_factor = calibration_factor
 
+    @micropython.native
     def get_frequency(self):
         """
         TODO
         """
         return self.frequency
 
+    @micropython.native
     def get_max_points(self):
         """
         TODO
         """
         return self.max_points
 
+    @micropython.native
     def pulse_from_config(self, ps_config:list[list[int]], padding:bool = False) -> list[int]:
         """
         TODO
@@ -76,24 +93,42 @@ class PulseGenerator():
             raise Exception("Erroneous pulse config: pulse too large.")
         return pulse
 
+    @micropython.native
+    def pulse_from_spline(self, xpoints:list[int], ypoints:list[int], padding:bool = False) -> list[int]:
+        if len(xpoints) != len(ypoints):
+            raise Exception("xpoints and ypoints have different lengths.")
+        tpoints = [0] * len(xpoints)
+        vpoints = [0] * len(xpoints)
+        for i in range(len(xpoints)):
+            tpoints[i] = int(xpoints[i] * self.points_per_ns)
+            vpoints[i] = int((ypoints[i] - self.offset) * self.points_per_volt)
+        pulse = list(map(int, Spline.interpolate_points(tpoints, vpoints)))
+        #print(f"offset = {self.offset}")
+        #print(f"points_per_volt = {self.points_per_volt}")
+        #print(f"points_per_ns = {self.points_per_ns}")
+        return pulse
+
+    @micropython.native
     def pulse_from_lambda(self, ps_lambda, total_pulse_duration:int, padding:bool = False) -> list[int]:
         """
         TODO
         """
-        pulse_number_of_points = self.calculate_pulse_number_of_points(total_pulse_duration)
-        pulse = [0] * pulse_number_of_points
+        if self.total_pulse_duration != total_pulse_duration:
+            pulse_number_of_points = self.calculate_pulse_number_of_points(total_pulse_duration)
+            self.pulse = [0] * pulse_number_of_points
         t = 0
         dt = self.time_resolution
         for i in range(pulse_number_of_points):
-            pulse[i] = int((ps_lambda(t) - self.offset) * self.points_per_volt)
+            self.pulse[i] = int((ps_lambda(t) - self.offset) * self.points_per_volt)
             t += dt
         # padding with last value
         if padding:
             if pulse_number_of_points < self.max_points:
-                last_value = pulse[-1]
-                pulse += [last_value] * (self.max_points - pulse_number_of_points)
-        return pulse
+                last_value = self.pulse[-1]
+                self.pulse += [last_value] * (self.max_points - pulse_number_of_points)
+        return self.pulse
 
+    @micropython.native
     def pulse_from_list(self, pulse:list[int], padding:bool = False) -> list[int]:
         """
         Puls is generated from raw list without offset or gain correction applied.
@@ -109,6 +144,7 @@ class PulseGenerator():
             raise Exception("Fatal error: pulse too large.")
         return pulse
 
+    @micropython.native
     def predefined_pulse1_constant(self, vstart:float, tramp:int, vstep:float, tstep:int):
         """
         TODO
@@ -131,6 +167,7 @@ class PulseGenerator():
         pulse_constant += [value] * nstep
         self.pulse_constant = pulse_constant
 
+    @micropython.native
     def predefined_pulse1(self, vstart:float, tramp:int, vstep:float, tstep:int, length:int, vend:float, recalc_constant:bool = False, padding:bool = False) -> list[int]:
         """
         TODO
@@ -152,6 +189,7 @@ class PulseGenerator():
             raise Exception("Error: pulse too large.")
         return pulse
 
+    @micropython.native
     def pulse_from_predefined(self, ps_config:dict, recalc_const:bool = False, padding:bool = False) -> list[int]:
         """
         TODO

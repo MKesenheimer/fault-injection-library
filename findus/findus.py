@@ -361,6 +361,9 @@ class PicoGlitcherInterface(MicroPythonScript):
     def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[int]]):
         self.pyb.exec(f'mp.arm_pulseshaping_from_config({delay}, {ps_config})')
 
+    def arm_pulseshaping_from_spline(self, delay:int, xpoints:list[int], ypoints:list[int]):
+        self.pyb.exec(f'mp.arm_pulseshaping_from_spline({delay}, {xpoints}, {ypoints})')
+        
     def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda, pulse_number_of_points:int):
         self.pyb.exec(f'mp.arm_pulseshaping_from_lambda({delay}, {ps_lambda}, {pulse_number_of_points})')
 
@@ -693,6 +696,12 @@ class PicoGlitcher(Glitcher):
             ps_config = [[4*length, 1.8], [4*length, 0.95], [length, 0.0]]
         """
         return self.pico_glitcher.arm_pulseshaping_from_config(delay, ps_config)
+
+    def arm_pulseshaping_from_spline(self, delay:int, xpoints:list[int], ypoints:list[int]):
+        """
+        Example:
+        """
+        return self.pico_glitcher.arm_pulseshaping_from_spline(delay, xpoints, ypoints)
 
     def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda, pulse_number_of_points:int):
         """

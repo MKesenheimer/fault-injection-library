@@ -713,6 +713,13 @@ class MicroPythonScript():
         pulse = self.pulse_generator.pulse_from_config(ps_config)
         self.arm_pulseshaping(delay, pulse)
 
+    def arm_pulseshaping_from_spline(self, delay:int, xpoints:list[int], ypoints:list[int]):
+        """
+        TODO
+        """
+        pulse = self.pulse_generator.pulse_from_spline(xpoints, ypoints)
+        self.arm_pulseshaping(delay, pulse)
+
     def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda, pulse_number_of_points:int):
         """
         TODO
