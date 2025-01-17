@@ -237,7 +237,11 @@ class Serial():
         """
         Initializes the serial connection. Can be called again, if the connection was closed previously.
         """
-        self.ser = serial.Serial(port=self.port, baudrate=self.baudrate, timeout=self.timeout, bytesize=self.bytesize, parity=self.parity, stopbits=self.stopbits)
+        try:
+            self.ser = serial.Serial(port=self.port, baudrate=self.baudrate, timeout=self.timeout, bytesize=self.bytesize, parity=self.parity, stopbits=self.stopbits)
+        except Exception as e:
+            print("[-] Serial device not found. Aborting")
+            sys.exit(-1)
 
     def write(self, message: bytes) -> int:
         """
@@ -319,7 +323,11 @@ class MicroPythonScript():
 
     def init(self, port:str, micropy_script:str, debug:bool = False):
         self.port = port
-        self.pyb = pyboard.Pyboard(self.port)
+        try:
+            self.pyb = pyboard.Pyboard(self.port)
+        except Exception as e:
+            print("[-] Pico Glitcher not found. Aborting")
+            sys.exit(-1)
         self.pyb.enter_raw_repl()
         self.pyb.exec(f'import {micropy_script}')
         self.pyb.exec(f'mp = {micropy_script}.MicroPythonScript()')
@@ -647,8 +655,8 @@ class PicoGlitcher(Glitcher):
         try:
             pg_fw_version = self.pico_glitcher.get_firmware_version()
             fi_fw_version = list(map(int, version("findus").split('.')))
-            print(f"Version of PicoGlitcher: {pg_fw_version}")
-            print(f"Version of findus: {fi_fw_version}")
+            print(f"[+] Version of PicoGlitcher: {pg_fw_version}")
+            print(f"[+] Version of findus: {fi_fw_version}")
             if pg_fw_version != fi_fw_version:
                 raise Exception("Version mismatch")
         except Exception as _:
