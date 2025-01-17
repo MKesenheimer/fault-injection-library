@@ -1,6 +1,7 @@
 # Fast-Cubic-Spline-Python provides an implementation of 1D and 2D fast spline
 # interpolation algorithm (Habermann and Kindermann 2007) in Python.
 # Copyright (C) 2012, 2013 Joon H. Ro
+# Modified and ported to Micropython by Matthias Kesenheimer, 2025.
 
 # This file is part of Fast-Cubic-Spline-Python.
 
@@ -23,10 +24,12 @@ Cubic spline interpolation using Habermann and Kindermann (2007)'s algorithm
 
 class Spline():
     @staticmethod
+    @micropython.native
     def _init_matrix(value, dimx, dimy):
         return [[value]*(dimy) for i in range(dimx)]
 
     @staticmethod
+    @micropython.native
     def transpose(matrix):
         matrixT = Spline._init_matrix(0, len(matrix[0]), len(matrix))
         for i in range(len(matrix)):
@@ -35,6 +38,7 @@ class Spline():
         return matrixT
 
     @staticmethod
+    @micropython.native
     def Pi(t:float):
         abs_t = abs(t)
         if abs_t <= 1:
@@ -45,10 +49,12 @@ class Spline():
             return (0)
 
     @staticmethod
+    @micropython.native
     def u(x:float, k:int, a:float, h:float):
         return (Spline.Pi((x - a)/h - (k - 2)))
 
     @staticmethod
+    @micropython.native
     def interpolate(x:float, a:float, b:float, c:list[float]):
         """
         Return interpolated function value at x.
@@ -65,6 +71,7 @@ class Spline():
         return(Spline._interpolate(x, a, b, c))
 
     @staticmethod
+    @micropython.native
     def _interpolate(x:float, a:float, b:float, c:list[float]):
         n = len(c) - 3
         h = (b - a)/n
@@ -76,6 +83,7 @@ class Spline():
         return s
 
     @staticmethod
+    @micropython.native
     def interpolate_2d(x:float, y:float, a1:float, b1:float, a2:float, b2:float, c:list[list[float]]):
         """
         Return interpolated function value at x
@@ -92,6 +100,7 @@ class Spline():
         return (Spline._interpolate_2d(x, y, a1, b1, a2, b2, c))
 
     @staticmethod
+    @micropython.native
     def _interpolate_2d(x:float, y:float, a1:float, b1:float, a2:float, b2:float, c:list[list[float]]):
         n1 = len(c) - 3
         n2 = len(c[0]) - 3
@@ -110,6 +119,7 @@ class Spline():
         return s
 
     @staticmethod
+    @micropython.native
     def _solve_banded(Aa, va, up, down):
         # Copy the inputs and determine the size of the system
         A = Aa.copy()
@@ -144,7 +154,8 @@ class Spline():
         return v
 
     @staticmethod
-    def cal_coefs(a, b, y, alpha=0, beta=0):
+    @micropython.native
+    def cal_coefs(a, b, y, alpha=0, beta=0) -> list[float]:
         """
         Return spline coefficients 
 
@@ -183,6 +194,7 @@ class Spline():
         return c
 
     @staticmethod
+    @micropython.native
     def calc_grid(a, b, n):
         h = (b - a) / n
         grid = [0] * (n + 1)
@@ -191,6 +203,7 @@ class Spline():
         return grid
 
     @staticmethod
+    @micropython.native
     def interpolate_points(xpoints:list[int], ypoints:list[int]) -> list[int]:
         a = xpoints[0]
         b = xpoints[-1]

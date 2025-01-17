@@ -19,6 +19,9 @@ class PulseGenerator():
         self.pulse_constant = []
         self.total_pulse_duration = 0
         self.pulse = []
+        # coefficients for spline interpolation
+        self.coefficients = None
+        self.grid_hat = None
 
     @micropython.native
     def get_points_per_ns(self):
@@ -102,11 +105,15 @@ class PulseGenerator():
         for i in range(len(xpoints)):
             tpoints[i] = int(xpoints[i] * self.points_per_ns)
             vpoints[i] = int((ypoints[i] - self.offset) * self.points_per_volt)
-        pulse = list(map(int, Spline.interpolate_points(tpoints, vpoints)))
+        a = tpoints[0]
+        b = tpoints[-1]
+        self.coefficients = Spline.cal_coefs(a, b, vpoints)
+        self.grid_hat = Spline.calc_grid(a, b, b - a) # grid with step size one
+        self.pulse = list([int(Spline.interpolate(x, a, b, self.coefficients)) for x in self.grid_hat])
         #print(f"offset = {self.offset}")
         #print(f"points_per_volt = {self.points_per_volt}")
         #print(f"points_per_ns = {self.points_per_ns}")
-        return pulse
+        return self.pulse
 
     @micropython.native
     def pulse_from_lambda(self, ps_lambda, total_pulse_duration:int, padding:bool = False) -> list[int]:
