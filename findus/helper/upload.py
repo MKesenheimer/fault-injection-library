@@ -12,7 +12,11 @@ import os
 import sys
 
 def upload(file:str, port:str):
-    ret = subprocess.check_output(["ampy", "-p", port, "ls"])
+    try:
+        ret = subprocess.check_output(["ampy", "-p", port, "ls"])
+    except Exception as e:
+        print("[-] Pico Glitcher could not be found. Aborting.")
+        sys.exit(-1)
     filename = os.path.basename(file)
     if filename.encode() in ret:
         print(f"[+] Deleting {filename}...")
@@ -34,14 +38,18 @@ def main(argv=sys.argv):
     parser = argparse.ArgumentParser(
         description="Upload a micro python script to the Raspberry Pi Pico."
     )
-    parser.add_argument("--port", help="/dev/tty* of the Raspberry Pi Pico", required=False, default='/dev/ttyACM1')
+    parser.add_argument("--port", help="/dev/tty* of the Raspberry Pi Pico", required=True, default='/dev/ttyACM1')
     parser.add_argument("--delete-all", help="Delete all files from the Raspberry Pi Pico", required=False, action='store_true')
     parser.add_argument("--delete", help="Delete the file from the Raspberry Pi Pico", required=False, default=None)
     parser.add_argument("--file", help="File to upload to the Raspberry Pi Pico", required=False, default=None)
     parser.add_argument("--files", nargs='+', help="Files to upload to the Raspberry Pi Pico", required=False, default=None)
     args = parser.parse_args()
 
-    ret = subprocess.check_output(["ampy", "-p", args.port, "ls"])
+    try:
+        ret = subprocess.check_output(["ampy", "-p", args.port, "ls"])
+    except Exception as e:
+        print("[-] Pico Glitcher could not be found. Aborting.")
+        sys.exit(-1)
     if args.delete_all:
         print("[+] Deleting all files...")
         for filename in ret.decode().split():

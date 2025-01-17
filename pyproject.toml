@@ -20,10 +20,12 @@ dependencies = [
   "pandas",
   "dash",
   "dash_bootstrap_components",
+  "dash_ag_grid",
   "chipwhisperer",
   "minimalmodbus",
   "mkdocs",
   "mkdocstrings[python]",
+  "dataclasses-json",
 ]
 
 [project.scripts]

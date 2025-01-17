@@ -81,8 +81,8 @@ ls /dev/tty*
 Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version via the following command:
 
 ```bash
-cd findus
-upload --port /dev/tty.<rpi-tty-port> --files findus/mpGlitcher.py findus/AD910X.py findus/PulseGenerator.py findus/mpConfig_vx/config.json
+cd findus/firmware
+upload --port /dev/tty.<rpi-tty-port> --files mpGlitcher.py AD910X.py PulseGenerator.py Spline.py mpConfig_vx/config.json
 ```
 
 Your Pico Glitcher should now be ready to perform fault-injection attacks.
