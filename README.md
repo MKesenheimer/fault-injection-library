@@ -71,13 +71,15 @@ As the reset is released from the device, the trigger signal is sent.
 We install the corresponding Micropython script and the corresponding config file (must be done only once) on the Raspberry Pi Pico:
 
 ```bash
-upload --port /dev/<rpi-tty-port> --files findus/mpGlitcher.py findus/mpConfig_v1/config.json
+cd findus/firmware
+upload --port /dev/<rpi-tty-port> --files mpGlitcher.py mpConfig_v1/config.json
 ```
 
 For hardware version 2.x of the PicoGlitcher, the corresponding config file must be provided:
 
 ```bash
-upload --port /dev/tty.<rpi-tty-port> --files findus/mpGlitcher.py findus/AD910X.py findus/PulseGenerator.py findus/mpConfig_v2/config.json
+cd findus/firmware
+upload --port /dev/tty.<rpi-tty-port> --files mpGlitcher.py AD910X.py PulseGenerator.py Spline.py mpConfig_v2/config.json
 ```
 
 Although the software is based on Micropython, using the PIO functions of the Raspberry Pi Pico, very precise switching operations can be made and triggered on external signals.
@@ -118,7 +120,9 @@ In a real setup, however, the glitching line should be soldered as close as poss
 Install the Raspberry Pi Pico Micropython scripts (for hardware version 1 see below):
 
 ```bash
-upload --port /dev/tty.<rpi-tty-port> --files findus/mpGlitcher.py findus/AD910X.py findus/PulseGenerator.py findus/mpConfig_v2/config.json
+cd findus/firmware
+upload --port /dev/tty.<rpi-tty-port> --files mpGlitcher.py AD910X.py PulseGenerator.py Spline.py mpConfig_v2/config.json
+
 ```
 
 Next, change into `projects/stm32f42x-glitching` and execute the following script.
