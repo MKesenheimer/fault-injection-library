@@ -30,6 +30,7 @@ dependencies = [
 
 [project.scripts]
 analyzer = "findus.analyzer.analyzer:main"
+analyzer-new =  "findus.analyzer.analyzer_new:main"
 upload = "findus.helper.upload:main"
 power-cycle-and-read = "findus.helper.power_cycle_and_read:main"
 power-cycle = "findus.helper.power_cycle:main"

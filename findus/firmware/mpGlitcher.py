@@ -554,7 +554,7 @@ class MicroPythonScript():
         # Configure the AD9102
         self.pulse_generator.set_offset(vinit)
         self.ad910x.set_frequency(self.pulse_generator.get_frequency())
-        self.ad910x.set_gain(1)
+        self.ad910x.set_gain(1.5)
         #self.ad910x.set_offset(2048)
         # configure the AD9102 to emit a oneshot pulse
         self.ad910x.set_pulse_output_oneshot()
@@ -651,8 +651,8 @@ class MicroPythonScript():
         # state machine that emits the glitch if the trigger condition is met
         self.sm0 = StateMachine(0, glitch, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
         # push delay and length (in nano seconds) into the fifo of the statemachine
-        self.sm0.put(delay // (1_000_000_000 // self.frequency))
-        self.sm0.put(length // (1_000_000_000 // self.frequency))
+        self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
+        self.sm0.put(int(length) // (1_000_000_000 // self.frequency))
 
         self.arm_common()
 
@@ -673,7 +673,7 @@ class MicroPythonScript():
         # state machine that emits the glitch if the trigger condition is met (part 1)
         self.sm0 = StateMachine(0, multiplex, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
         # push multiplexing shape config into the fifo of the statemachine
-        self.sm0.put(delay // (1_000_000_000 // self.frequency))
+        self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
         try:
             t1 = mul_config["t1"] // (1_000_000_000 // self.frequency)
             v1 = self.voltage_map[mul_config["v1"]]
@@ -706,14 +706,14 @@ class MicroPythonScript():
 
         self.arm_common()
 
-    def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[int]]):
+    def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[float]]):
         """
         TODO
         """
         pulse = self.pulse_generator.pulse_from_config(ps_config)
         self.arm_pulseshaping(delay, pulse)
 
-    def arm_pulseshaping_from_spline(self, delay:int, xpoints:list[int], ypoints:list[int]):
+    def arm_pulseshaping_from_spline(self, delay:int, xpoints:list[int], ypoints:list[float]):
         """
         TODO
         """
@@ -760,7 +760,7 @@ class MicroPythonScript():
         # state machine that pulls the ps_trigger pin to low if the trigger condition is met
         self.sm0 = StateMachine(0, pulse_shaping, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
         # push delay (in nano seconds) into the fifo of the statemachine
-        self.sm0.put(delay // (1_000_000_000 // self.frequency))
+        self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
         maxlength = 10_000 # TODO: control this by an argument or the pulse length
         self.sm0.put(maxlength // (1_000_000_000 // self.frequency))
 

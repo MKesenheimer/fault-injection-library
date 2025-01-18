@@ -74,7 +74,7 @@ class PulseGenerator():
         return self.max_points
 
     @micropython.native
-    def pulse_from_config(self, ps_config:list[list[int]], padding:bool = False) -> list[int]:
+    def pulse_from_config(self, ps_config:list[list[float]], padding:bool = False) -> list[int]:
         """
         TODO
         """
@@ -97,7 +97,7 @@ class PulseGenerator():
         return pulse
 
     @micropython.native
-    def pulse_from_spline(self, xpoints:list[int], ypoints:list[int], padding:bool = False) -> list[int]:
+    def pulse_from_spline(self, xpoints:list[int], ypoints:list[float], padding:bool = False) -> list[int]:
         if len(xpoints) != len(ypoints):
             raise Exception("xpoints and ypoints have different lengths.")
         tpoints = [0] * len(xpoints)
@@ -107,6 +107,10 @@ class PulseGenerator():
             vpoints[i] = int((ypoints[i] - self.offset) * self.points_per_volt)
         a = tpoints[0]
         b = tpoints[-1]
+        if a == b:
+            return vpoints
+        #print(f"tpoints = {tpoints}")
+        #print(f"vpoints = {vpoints}")
         self.coefficients = Spline.cal_coefs(a, b, vpoints)
         self.grid_hat = Spline.calc_grid(a, b, b - a) # grid with step size one
         self.pulse = list([int(Spline.interpolate(x, a, b, self.coefficients)) for x in self.grid_hat])

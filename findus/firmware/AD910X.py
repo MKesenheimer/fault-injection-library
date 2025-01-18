@@ -285,6 +285,10 @@ class AD910X():
             raise Exception("SRAM address not in range [0x6000, 0x6FFF]")
         self.spi_write_register(REG_PAT_STATUS, MEM_ACCESS_ENABLE)
         for cnt in range(0, len(data)):
+            if data[cnt] > 8190:
+                data[cnt] = 8190
+            elif data[cnt] < -8190:
+                data[cnt] = -8190
             self.spi_write_register(addr + cnt, data[cnt] << 2)
         self.spi_write_register(REG_PAT_STATUS, MEM_ACCESS_DISABLE)
 

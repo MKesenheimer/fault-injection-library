@@ -364,22 +364,22 @@ class PicoGlitcherInterface(MicroPythonScript):
         self.pyb.exec(f'mp.arm({delay}, {length})')
 
     def arm_multiplexing(self, delay:int, mul_config:dict):
-        self.pyb.exec(f'mp.arm_multiplexing({delay}, {mul_config})')
+        return self.pyb.exec(f'mp.arm_multiplexing({delay}, {mul_config})')
 
     def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[int]]):
-        self.pyb.exec(f'mp.arm_pulseshaping_from_config({delay}, {ps_config})')
+        return self.pyb.exec(f'mp.arm_pulseshaping_from_config({delay}, {ps_config})')
 
     def arm_pulseshaping_from_spline(self, delay:int, xpoints:list[int], ypoints:list[int]):
-        self.pyb.exec(f'mp.arm_pulseshaping_from_spline({delay}, {xpoints}, {ypoints})')
-        
+        return self.pyb.exec(f'mp.arm_pulseshaping_from_spline({delay}, {xpoints}, {ypoints})')
+
     def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda, pulse_number_of_points:int):
-        self.pyb.exec(f'mp.arm_pulseshaping_from_lambda({delay}, {ps_lambda}, {pulse_number_of_points})')
+        return self.pyb.exec(f'mp.arm_pulseshaping_from_lambda({delay}, {ps_lambda}, {pulse_number_of_points})')
 
     def arm_pulseshaping_from_list(self, delay:int, pulse:list[int]):
-        self.pyb.exec(f'mp.arm_pulseshaping_from_list({delay}, {pulse})')
+        return self.pyb.exec(f'mp.arm_pulseshaping_from_list({delay}, {pulse})')
 
     def arm_pulseshaping_from_predefined(self, delay:int, ps_config:dict, recalc_constant:bool = False):
-        self.pyb.exec(f'mp.arm_pulseshaping_from_predefined({delay}, {ps_config}, {recalc_constant})')
+        return self.pyb.exec(f'mp.arm_pulseshaping_from_predefined({delay}, {ps_config}, {recalc_constant})')
 
     def reset_target(self):
         self.pyb.exec('mp.reset_target()')
@@ -1627,8 +1627,13 @@ class Helper():
         return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 class Parameterspace():
-    def __init__(self, parameter_boundaries:list[tuple[int, int]], parameter_divisions:list[int]):
-        # TODO: sanity checks!
+    def __init__(self, parameter_boundaries:list[tuple[float, float]], parameter_divisions:list[int]):
+        # sanity checks
+        if len(parameter_boundaries) != len(parameter_divisions):
+            raise Exception(f"Error: parameter_boundaries and parameter_divisions have different lengths ({len(parameter_boundaries)} vs. {len(parameter_divisions)}).")
+        for tup in parameter_boundaries:
+            if tup[0] > tup[1]:
+                raise Exception(f"Error: Upper bound {tup[1]} is lower than lower bound {tup[0]}.")
         self.parameter_boundaries = parameter_boundaries
         self.parameter_divisions = parameter_divisions
         self.cardinality = 1
@@ -1639,21 +1644,21 @@ class Parameterspace():
     def get_cardinality(self):
         return self.cardinality
 
-    def get_bin_assignment(self, *parameter:int) -> list[int]:
+    def get_bin_assignment(self, *parameter:float) -> list[int]:
         fact = 1
         bina = 0
         for i in range(len(self.parameter_divisions)):
             division =  self.parameter_divisions[i]
             # xdelta = (xmax - xmin) / xdiv
             delta = (self.parameter_boundaries[i][1] - self.parameter_boundaries[i][0]) / division
-            bin_number = int((parameter[i] - self.parameter_boundaries[i][0]) // delta)
+            bin_number = int((parameter[i] - self.parameter_boundaries[i][0]) / delta)
             #print(f"par = {parameter[i]}, delta = {delta}, bina = {bin_number}")
             if i > 0:
                 fact *= self.parameter_divisions[i - 1]
             bina += fact * bin_number
         return bina
 
-    def add_experiment(self, weight:int, *parameter:int):
+    def add_experiment(self, weight:int, *parameter:float):
         for i in range(len(self.parameter_divisions)):
             if parameter[i] < self.parameter_boundaries[i][0] or parameter[i] >= self.parameter_boundaries[i][1]:
                 print("[-] Error: parameter out of bounds. Skipping.")
@@ -1673,29 +1678,28 @@ class Parameterspace():
         reversed_parameter_divisions = list(reversed(self.parameter_divisions))
         fact = self.cardinality
         if bin_assignment > fact:
-            print("[-] Error: bin number exceeds total number of bins.")
-            return
+            raise Exception("Error: bin number exceeds total number of bins.")
         for div in reversed_parameter_divisions:
-            c = (fact // div)
-            b = int(bin_assignment // c)
-            #print(f"bin_assignment = {bin_assignment}, fact = {fact}, div = {div}, (fact // div) = {c}, bin_number = {b}")
+            c = (fact / div)
+            b = int(bin_assignment / c)
+            #print(f"bin_assignment = {bin_assignment}, fact = {fact}, div = {div}, (fact / div) = {c}, bin_number = {b}")
             bin_numbers.append(b)
             fact /= div
-            bin_assignment -= b * c
+            bin_assignment -= int(b * c)
         return list(reversed(bin_numbers))
 
-    def get_boundaries_from_coordinates(self, coordinates:list[int]) -> list[tuple[int, int]]:
+    def get_boundaries_from_coordinates(self, coordinates:list[float]) -> list[tuple[float, float]]:
         boundaries = []
         for i in range(len(self.parameter_divisions)):
             division =  self.parameter_divisions[i]
             delta = (self.parameter_boundaries[i][1] - self.parameter_boundaries[i][0]) / division
             lower = self.parameter_boundaries[i][0] + delta * coordinates[i]
             upper = self.parameter_boundaries[i][0] + delta * (coordinates[i] + 1)
-            tup = (int(lower), int(upper))
+            tup = (lower, upper)
             boundaries.append(tup)
         return boundaries
 
-    def get_boundaries(self, bin_assignment:int) -> list[tuple[int, int]]:
+    def get_boundaries(self, bin_assignment:int) -> list[tuple[float, float]]:
         bin_numbers = self.get_coordinates(bin_assignment)
         return self.get_boundaries_from_coordinates(bin_numbers)
 
@@ -1730,8 +1734,7 @@ class Individual():
 class Population():
     def __init__(self, number_of_individuals:int, length_of_genom:int):
         if number_of_individuals < 10:
-            print("[-] Error: Population too small.")
-            sys.exit(-1)
+            raise Exception("Error: Population too small.")
 
         self.number_of_individuals = number_of_individuals
         self.length_of_genom = length_of_genom
@@ -1953,7 +1956,7 @@ class OptimizationController():
 
         random_numbers = []
         for b in boundaries:
-            random_numbers.append(random.randint(b[0], b[1]))
+            random_numbers.append(random.uniform(b[0], b[1]))
 
         # next bin
         self.i_current_bin += 1

@@ -74,8 +74,8 @@ class Spline():
     @micropython.native
     def _interpolate(x:float, a:float, b:float, c:list[float]):
         n = len(c) - 3
-        h = (b - a)/n
-        ll = int(((x - a)//h) + 1)
+        h = (b - a) / n
+        ll = int(((x - a) // h) + 1)
         m = int(min(ll + 3, n + 3))
         s = 0
         for i1 in range(ll, m + 1):
@@ -171,7 +171,7 @@ class Spline():
          out: Array of coefficients.
         """
         n = len(y) - 1
-        h = (b - a)/n
+        h = (b - a) / n
         c = [0] * (n + 3)
 
         c[1] = 1/6 * (y[0] - (alpha * h**2)/6)
@@ -196,8 +196,10 @@ class Spline():
     @staticmethod
     @micropython.native
     def calc_grid(a, b, n):
-        h = (b - a) / n
-        grid = [0] * (n + 1)
+        h = 1
+        if n > 0:
+            h = (b - a) / n
+        grid = [0] * int(n + 1)
         for i in range(n + 1):
             grid[i] = i * h + a
         return grid
