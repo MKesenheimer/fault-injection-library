@@ -21,6 +21,7 @@ import time
 # import custom libraries
 from findus import Database, PicoGlitcher, Serial
 from findus import OptimizationController
+from findus.firmware import Spline
 
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(PicoGlitcher):
@@ -111,6 +112,7 @@ class Main():
             #print(f"tpoints = {tpoints}")
             #print(f"vpoints = {vpoints}")
             self.glitcher.arm_pulseshaping_from_spline(delay, tpoints, vpoints)
+            Spline.interpolate_and_plot(tpoints, vpoints)
             #print(ret.decode())
 
             # initialize the loop on the ESP32

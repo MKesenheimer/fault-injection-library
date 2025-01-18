@@ -22,6 +22,10 @@
 Cubic spline interpolation using Habermann and Kindermann (2007)'s algorithm 
 """
 
+import platform
+if platform.system() == 'Darwin' or platform.system() == 'Linux':
+    from decorators import micropython
+
 class Spline():
     @staticmethod
     @micropython.native
@@ -214,6 +218,21 @@ class Spline():
         fhat = list([Spline.interpolate(x, a, b, c) for x in grid_hat])
         return fhat
 
+    @staticmethod
+    def interpolate_and_plot(xpoints:list[int], ypoints:list[int]) -> list[int]:
+        pulse = Spline.interpolate_points(xpoints, ypoints)
+        from matplotlib import pyplot as plt
+        a = xpoints[0]
+        b = xpoints[-1]
+        grid_hat = Spline.calc_grid(a, b, b - a)
+        plt.clf()
+        line_approx = plt.plot(grid_hat, pulse, '-', label='pulse')
+        plt.pause(0.001)
+        plt.setp(line_approx, linewidth=2, linestyle='-')
+        plt.legend()
+        plt.show(block=False)
+        return pulse
+
 
 def one_dimensional():
     # 1D interpolation
@@ -254,9 +273,9 @@ def interpolation_test():
     plt.legend()
     plt.show()
 
-def pulse_test():
+def pulse_test(i):
     xpoints = [0,   100, 200, 300, 400, 500, 515]
-    ypoints = [3.0, 2.0, 2.0, 2.0, 2.0, 0.0, 3.0]
+    ypoints = [3.0 + i, 2.0, 2.0, 2.0, 2.0, 0.0, 3.0]
     offset = 3.0
     points_per_volt = 1365
     points_per_ns = 0.1
@@ -265,20 +284,13 @@ def pulse_test():
     for i in range(len(xpoints)):
         tpoints[i] = int(xpoints[i] * points_per_ns)
         vpoints[i] = int((ypoints[i] - offset) * points_per_volt)
-    pulse = Spline.interpolate_points(tpoints, vpoints)
+    pulse = Spline.interpolate_and_plot(tpoints, vpoints)
     print(pulse)
-
-    # plot
-    from matplotlib import pyplot as plt
-    a = tpoints[0]
-    b = tpoints[-1]
-    grid_hat = Spline.calc_grid(a, b, b - a)
-    line_approx = plt.plot(grid_hat, pulse, '-.', label='interpolated')
-    plt.setp(line_approx, linewidth=2, linestyle='-.')
-    plt.legend()
-    plt.show()
 
 if __name__ == '__main__':
     #one_dimensional()
     #interpolation_test()
-    pulse_test()
+    #for i in range(200):
+    #    pulse_test(i)
+    pulse_test(0)
+    input("Press enter to continue.")
