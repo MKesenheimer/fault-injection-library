@@ -25,3 +25,9 @@ plugins:
           options:
             show_source: false
   - autorefs
+#  - api-docs:
+#      modules:
+#        - findus
+#  - autoapi:
+#      dirs: ["findus", "findus/firmware"]
+#      include: ["*.py"]
