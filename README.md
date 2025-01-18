@@ -9,7 +9,7 @@ More information about the ChipWhisperer Pro and the ChipWhisperer Husky can be 
 
 ## Purchasing the Pico Glitcher
 
-The Pico Glitcher can be purchased via the tindie online store: [https://www.tindie.com/products/faulty-hardware/picoglitcher-v21/](https://www.tindie.com/products/faulty-hardware/picoglitcher-v21/).
+The Pico Glitcher can be purchased from the tindie online store: [https://www.tindie.com/products/faulty-hardware/picoglitcher-v21/](https://www.tindie.com/products/faulty-hardware/picoglitcher-v21/). If you have questions or special requests, please feel free to contact me.
 
 ## Documentation
 
