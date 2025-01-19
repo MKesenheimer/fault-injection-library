@@ -78,42 +78,24 @@ class Main():
         vmin = 0.0 # this voltage is capped at that what the DAC can provide.
         s_delay = self.args.delay[0]
         e_delay = self.args.delay[1]
-        #s_t1 = 0
-        #e_t1 = 400
-        #s_v1 = vmin
-        #e_v1 = self.vinit
-        #s_t2 = 0
-        #e_t2 = 400
-        #s_v2 = vmin
-        #e_v2 = self.vinit
-        #s_t3 = 0
-        #e_t3 = 400
-        #s_v3 = vmin
-        #e_v3 = self.vinit
-        #s_t4 = 0
-        #e_t4 = 400
-
-        # bin = 72631: [(10.0, 20.0), (240.0, 320.0), (0.84, 1.26), (0.0, 80.0), (1.26, 1.68), (80.0, 160.0), (0.84, 1.26), (0.0, 80.0)]
-        s_t1 = 240
-        e_t1 = 320
-        s_v1 = 0.84
-        e_v1 = 1.26
-        s_t2 = 0
-        e_t2 = 80
-        s_v2 = 1.26
-        e_v2 = 1.68
-        s_t3 = 80
-        e_t3 = 160
-        s_v3 = 0.84
-        e_v3 = 1.26
-        s_t4 = 0
-        e_t4 = 80
-
+        s_t1 = 10
+        e_t1 = 70
+        s_v1 = vmin
+        e_v1 = self.vinit
+        s_t2 = 10
+        e_t2 = 70
+        s_v2 = vmin
+        e_v2 = self.vinit
+        s_t3 = 10
+        e_t3 = 70
+        s_v3 = vmin
+        e_v3 = self.vinit
+        s_t4 = 10
+        e_t4 = 70
 
         # Genetic Algorithm to search for the best performing bin
         boundaries = [(s_delay, e_delay), (s_t1, e_t1), (s_v1, e_v1), (s_t2, e_t2), (s_v2, e_v2), (s_t3, e_t3), (s_v3, e_v3), (s_t4, e_t4)]
-        #divisions = [10, 5, 5, 5, 5, 5, 5, 5]
-        divisions = [1, 1, 1, 1, 1, 1, 1, 1]
+        divisions = [10, 5, 5, 5, 5, 5, 5, 5]
         opt = OptimizationController(parameter_boundaries=boundaries, parameter_divisions=divisions, number_of_individuals=10, length_of_genom=20, malus_factor_for_equal_bins
         =1)
 
@@ -130,7 +112,7 @@ class Main():
             #print(f"tpoints = {tpoints}")
             #print(f"vpoints = {vpoints}")
             self.glitcher.arm_pulseshaping_from_spline(delay, tpoints, vpoints)
-            Spline.interpolate_and_plot(tpoints, vpoints)
+            #Spline.interpolate_and_plot(tpoints, vpoints)
             #print(ret.decode())
 
             # initialize the loop on the ESP32
@@ -143,7 +125,7 @@ class Main():
             except Exception as _:
                 print("[-] Timeout received in block(). Continuing.")
                 self.glitcher.reset(0.01)
-                #time.sleep(0.01)
+                time.sleep(0.01)
                 #self.target.flush_v2()
                 self.target.read(1024)
                 response = b'Timeout'
