@@ -29,6 +29,9 @@ An even more advanced methode is the pulse shaping methode, first described [her
 The key idea here is to use a Digital Direct Synthesis (DDS) to generate an arbitrary pulse form that is amplified and applied to the target.
 The advantages of this method are obvious: almost any voltage curve with any intermediate voltages can be defined and generated. The overshoots when switching the voltage through the crowbar transistors or with the multiplexing stage are also eliminated, which ensures a cleaner voltage curve.
 
---- TODO: figures of pulse-shaping ---
+![](images/pulse-shaping/ps-200n-1.bmp)
+![](images/pulse-shaping/ps-100n-1.bmp)
+![](images/pulse-shaping/ps-100n-2.bmp)
+![](images/pulse-shaping/ps-500n-step.bmp)
 
 The disadvantages of this method are that it requires complicated and high-frequency power electronics with very specialised components. See section [pulse-shaping](pulse_shaping.md) for more details.
