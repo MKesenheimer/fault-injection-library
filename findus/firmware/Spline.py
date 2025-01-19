@@ -22,9 +22,12 @@
 Cubic spline interpolation using Habermann and Kindermann (2007)'s algorithm 
 """
 
-import platform
-if platform.system() == 'Darwin' or platform.system() == 'Linux':
-    from decorators import micropython
+try:
+    import platform
+    if platform.system() == 'Darwin' or platform.system() == 'Linux':
+        from findus.firmware.decorators import micropython
+except Exception as _:
+    pass
 
 class Spline():
     @staticmethod
@@ -199,7 +202,8 @@ class Spline():
 
     @staticmethod
     @micropython.native
-    def calc_grid(a, b, n):
+    def calc_grid(a, b, n:int):
+        n = int(n)
         h = 1
         if n > 0:
             h = (b - a) / n

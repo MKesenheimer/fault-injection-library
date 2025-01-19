@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["findus", "findus.analyzer", "findus.helper"]
+packages = ["findus", "findus.analyzer", "findus.helper", "findus.firmware"]
 
 [project]
 name = "findus"
