@@ -262,8 +262,8 @@ def one_dimensional():
     plt.show()
 
 def interpolation_test():
-    xpoints = [0, 10, 20]
-    ypoints = [1, 0, 1]
+    xpoints = [0, 10, 20, 100]
+    ypoints = [1, 0, 1, 1]
     fhat = Spline.interpolate_points(xpoints, ypoints)
     print(fhat)
 
@@ -293,8 +293,8 @@ def pulse_test(i):
 
 if __name__ == '__main__':
     #one_dimensional()
-    #interpolation_test()
+    interpolation_test()
     #for i in range(200):
     #    pulse_test(i)
-    pulse_test(0)
-    input("Press enter to continue.")
+    #pulse_test(0)
+    #input("Press enter to continue.")
