@@ -114,9 +114,11 @@ class PulseGenerator():
         #print(f"vpoints = {vpoints}")
         #print(f"a = {a}")
         #print(f"b = {b}")
-        self.coefficients = Spline.cal_coefs(a, b, vpoints)
+        #self.coefficients = Spline.cal_coefs(a, b, vpoints)
         self.grid_hat = Spline.calc_grid(a, b, b - a) # grid with step size one
-        self.pulse = list([int(Spline.interpolate(x, a, b, self.coefficients)) for x in self.grid_hat])
+        #self.pulse = list([int(Spline.interpolate(x, a, b, self.coefficients)) for x in self.grid_hat])
+        self.pulse = Spline.pchip_interpolate(tpoints, vpoints, self.grid_hat)
+        self.pulse = list(map(int, self.pulse))
         #print(f"offset = {self.offset}")
         #print(f"points_per_volt = {self.points_per_volt}")
         #print(f"points_per_ns = {self.points_per_ns}")
