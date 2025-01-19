@@ -21,6 +21,8 @@ import time
 
 # import custom libraries
 from findus import Database, PicoGlitcher
+from findus.InteractivePchipEditor import InteractivePchipEditor
+from findus.firmware.Spline import Spline
 
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(PicoGlitcher):
@@ -72,6 +74,10 @@ class Main():
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
         self.start_time = int(time.time())
+
+        # load the interactive piecewise cubic hermite interpolating polynomial editor
+        if args.pulse_type == 6:
+            self.editor = InteractivePchipEditor()
 
     def run(self):
         # log execution
@@ -127,9 +133,13 @@ class Main():
             elif args.pulse_type == 5:
                     xpoints = [0,   100, 200, 300, 400, 500, 515, 520]
                     ypoints = [3.0, 2.1, 2.0, 2.0, 1.7, 0.0, 2.0, 3.0]
-                    #xpoints = [0,   length / 2, length]
-                    #ypoints = [3.0, 0, 3.0]
                     self.glitcher.arm_pulseshaping_from_spline(delay, xpoints, ypoints)
+
+            # pulse defined from interactive editor
+            elif args.pulse_type == 6:
+                self.editor.show(block=False)
+                xpoints, ypoints = self.editor.get_points()
+                self.glitcher.arm_pulseshaping_from_spline(delay, xpoints, ypoints)
 
             # reset target
             time.sleep(0.01)

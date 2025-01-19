@@ -92,9 +92,17 @@ class InteractivePchipEditor:
         except Exception as _:
             print(output)
 
+    def get_points(self):
+        return [float(x) for x in self.xpoints], [float(x) for x in self.ypoints]
+
+    def show(self, block=True):
+        plt.show(block=block)
+        plt.pause(0.001)
+
 def main():
     editor = InteractivePchipEditor()
-    plt.show()
+    editor.show()
+    editor.get_points()
 
 if __name__ == "__main__":
     main()

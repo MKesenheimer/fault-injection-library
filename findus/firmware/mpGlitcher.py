@@ -765,7 +765,7 @@ class MicroPythonScript():
         self.sm0.put(maxlength // (1_000_000_000 // self.frequency))
 
         self.arm_common()
-        #print(pulse)
+        print(pulse)
 
     def block(self, timeout:float):
         """

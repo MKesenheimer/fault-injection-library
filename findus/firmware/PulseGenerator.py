@@ -109,8 +109,11 @@ class PulseGenerator():
         b = tpoints[-1]
         if a == b:
             return vpoints
+        #print(f"frequency = {self.frequency}")
         #print(f"tpoints = {tpoints}")
         #print(f"vpoints = {vpoints}")
+        #print(f"a = {a}")
+        #print(f"b = {b}")
         self.coefficients = Spline.cal_coefs(a, b, vpoints)
         self.grid_hat = Spline.calc_grid(a, b, b - a) # grid with step size one
         self.pulse = list([int(Spline.interpolate(x, a, b, self.coefficients)) for x in self.grid_hat])
