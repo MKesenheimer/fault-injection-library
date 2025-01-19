@@ -123,7 +123,9 @@ class Spline():
 
         # Interpolation function
         def hermite(x_val, i):
-            t = (x_val - x[i]) / h[i]
+            t = 0
+            if h[i] != 0:
+                t = (x_val - x[i]) / h[i]
             h_i = h[i]
             t2 = t * t
             t3 = t2 * t

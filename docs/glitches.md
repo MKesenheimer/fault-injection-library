@@ -32,6 +32,6 @@ The advantages of this method are obvious: almost any voltage curve with any int
 ![](images/pulse-shaping/ps-200n-1.bmp)
 ![](images/pulse-shaping/ps-100n-1.bmp)
 ![](images/pulse-shaping/ps-100n-2.bmp)
-![](images/pulse-shaping/ps-200n-step.bmp)
+![](images/pulse-shaping/ps-100n-step.bmp)
 
 The disadvantages of this method are that it requires complicated and high-frequency power electronics with very specialised components. See section [pulse-shaping](pulse_shaping.md) for more details.
