@@ -19,6 +19,9 @@ class PulseGenerator():
         self.pulse_constant = []
         self.total_pulse_duration = 0
         self.pulse = []
+        # coefficients for spline interpolation
+        self.coefficients = None
+        self.grid_hat = None
 
     @micropython.native
     def get_points_per_ns(self):
@@ -71,7 +74,7 @@ class PulseGenerator():
         return self.max_points
 
     @micropython.native
-    def pulse_from_config(self, ps_config:list[list[int]], padding:bool = False) -> list[int]:
+    def pulse_from_config(self, ps_config:list[list[float]], padding:bool = False) -> list[int]:
         """
         TODO
         """
@@ -94,7 +97,7 @@ class PulseGenerator():
         return pulse
 
     @micropython.native
-    def pulse_from_spline(self, xpoints:list[int], ypoints:list[int], padding:bool = False) -> list[int]:
+    def pulse_from_spline(self, xpoints:list[int], ypoints:list[float], padding:bool = False) -> list[int]:
         if len(xpoints) != len(ypoints):
             raise Exception("xpoints and ypoints have different lengths.")
         tpoints = [0] * len(xpoints)
@@ -102,11 +105,24 @@ class PulseGenerator():
         for i in range(len(xpoints)):
             tpoints[i] = int(xpoints[i] * self.points_per_ns)
             vpoints[i] = int((ypoints[i] - self.offset) * self.points_per_volt)
-        pulse = list(map(int, Spline.interpolate_points(tpoints, vpoints)))
+        a = tpoints[0]
+        b = tpoints[-1]
+        if a == b:
+            return vpoints
+        #print(f"frequency = {self.frequency}")
+        #print(f"tpoints = {tpoints}")
+        #print(f"vpoints = {vpoints}")
+        #print(f"a = {a}")
+        #print(f"b = {b}")
+        #self.coefficients = Spline.cal_coefs(a, b, vpoints)
+        self.grid_hat = Spline.calc_grid(a, b, b - a) # grid with step size one
+        #self.pulse = list([int(Spline.interpolate(x, a, b, self.coefficients)) for x in self.grid_hat])
+        self.pulse = Spline.pchip_interpolate(tpoints, vpoints, self.grid_hat)
+        self.pulse = list(map(int, self.pulse))
         #print(f"offset = {self.offset}")
         #print(f"points_per_volt = {self.points_per_volt}")
         #print(f"points_per_ns = {self.points_per_ns}")
-        return pulse
+        return self.pulse
 
     @micropython.native
     def pulse_from_lambda(self, ps_lambda, total_pulse_duration:int, padding:bool = False) -> list[int]:
