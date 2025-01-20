@@ -213,7 +213,9 @@ class BootloaderCom:
             s = self.ser.read(1)
             if s == self.ACK:
                 return GlitchState.OK.rdp_inactive
-        return GlitchState.Expected.rdp_active
+            elif s == self.NACK:
+                return GlitchState.Expected.rdp_active
+        return GlitchState.Error.no_response
 
     # returns "dump_ok" if glitch and memory read was successful
     # returns "dump_error" if glitch was successful, however memory read yielded eroneous results
