@@ -17,20 +17,23 @@ except Exception as _:
 
 class InteractivePchipEditor:
     def __init__(self):
-        self.xpoints = [0, 48, 101, 139, 185, 229, 263, 399]
-        self.ypoints = [3.0, 3.0, 1.5, 1.5, 0.0, 1.9, 2.5, 3.0]
-        #self.xpoints = [0, 50, 75, 100, 139, 185, 229, 263, 400, 500, 600]
-        #self.ypoints = [3.0, 3.0, 2.0, 1.5, 1.5, 0.0, 1.9, 2.5, 3.0, 3.0, 3.0]
+        self.xpoints = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1050]
+        self.ypoints = [3.0, 2.7, 2.7, 0.0, 2.7, 0.0, 2.7, 0.0, 2.7, 3.0, 3.0]
 
         self.fig, self.ax = plt.subplots()
         plt.subplots_adjust(bottom=0.3)
         self.selected_point = None
+        self.annotations = []  # To store annotation objects for the points
 
         self.curve_line, = self.ax.plot([], [], label="PCHIP Curve", color="blue")
         self.point_scatter = self.ax.scatter(self.xpoints, self.ypoints, color="red", s=50, label="Control Points", picker=True)
 
-        self.ax.set_xlim(-50, 1000)
-        self.ax.set_ylim(-0.5, 3.5)
+        # Set axis limits and finer ticks
+        self.ax.set_xlim(-50, 1550)
+        self.ax.set_ylim(-0.2, 3.5)
+        self.ax.set_xticks(np.arange(0, 1550, 50))  # X-axis gridlines at 50 ns
+        self.ax.set_yticks(np.arange(0, 3.4, 0.1))  # Y-axis gridlines at 0.1 V
+
         self.ax.set_xlabel("Time (ns)")
         self.ax.set_ylabel("Voltage (V)")
         self.ax.legend()
@@ -41,19 +44,10 @@ class InteractivePchipEditor:
         self.save_button.on_clicked(self.save_points)
 
         self.update_curve()
+        self.update_annotations()  # Initialize annotations
         self.cid_click = self.fig.canvas.mpl_connect('button_press_event', self.on_click)
         self.cid_release = self.fig.canvas.mpl_connect('button_release_event', self.on_release)
         self.cid_motion = self.fig.canvas.mpl_connect('motion_notify_event', self.on_motion)
-
-    def create_text_window(self, output):
-        self.root = tk.Tk()
-        self.root.title("Saved Points")
-        self.text_output = ScrolledText(self.root, wrap=tk.WORD, width=40, height=10, font=("Courier", 10))
-        self.text_output.pack(fill=tk.BOTH, expand=True)
-        self.text_output.insert(tk.END, output)
-        self.text_output.configure(state='normal')  # Enable copying
-        self.root.attributes("-topmost", True)  # Keep window on top
-        self.root.mainloop()
 
     def update_curve(self):
         interpolator = PchipInterpolator(self.xpoints, self.ypoints)
@@ -61,6 +55,27 @@ class InteractivePchipEditor:
         y_smooth = interpolator(x_smooth)
         self.curve_line.set_data(x_smooth, y_smooth)
         self.point_scatter.set_offsets(np.c_[self.xpoints, self.ypoints])
+        self.fig.canvas.draw_idle()
+
+    def update_annotations(self):
+        # Clear existing annotations
+        for annotation in self.annotations:
+            annotation.remove()
+        self.annotations = []
+
+        # Add new annotations for each point
+        for x, y in zip(self.xpoints, self.ypoints):
+            annotation = self.ax.annotate(
+                f"{x:.0f}ns, {y:.1f}V",
+                (x, y),
+                textcoords="offset points",
+                xytext=(5, 5),  # Offset to prevent overlap
+                ha="center",
+                fontsize=8,
+                color="black",
+                bbox=dict(boxstyle="round,pad=0.3", edgecolor="gray", facecolor="white", alpha=0.8),
+            )
+            self.annotations.append(annotation)
         self.fig.canvas.draw_idle()
 
     def on_click(self, event):
@@ -77,13 +92,19 @@ class InteractivePchipEditor:
         if self.selected_point is None or event.inaxes != self.ax:
             return
 
-        new_x = np.clip(event.xdata, 0, 1000)
+        # Update point position
+        new_x = np.clip(event.xdata, 0, 1500)
         new_y = np.clip(event.ydata, 0, 3.3)
         self.xpoints[self.selected_point] = new_x
         self.ypoints[self.selected_point] = new_y
 
-        self.xpoints = sorted(self.xpoints)  # Keep xpoints sorted
+        # Keep xpoints sorted
+        self.xpoints, self.ypoints = zip(*sorted(zip(self.xpoints, self.ypoints)))
+        self.xpoints, self.ypoints = list(self.xpoints), list(self.ypoints)
+
+        # Update the curve and annotations
         self.update_curve()
+        self.update_annotations()
 
     def save_points(self, event):
         xpoints_str = ", ".join(f"{x:.0f}" for x in self.xpoints)
@@ -100,6 +121,16 @@ class InteractivePchipEditor:
     def show(self, block=True):
         plt.show(block=block)
         plt.pause(0.001)
+
+    def create_text_window(self, output):
+        self.root = tk.Tk()
+        self.root.title("Saved Points")
+        self.text_output = ScrolledText(self.root, wrap=tk.WORD, width=80, height=5, font=("Courier", 10))
+        self.text_output.pack(fill=tk.BOTH, expand=True)
+        self.text_output.insert(tk.END, output)
+        self.text_output.configure(state='normal')  # Enable copying
+        self.root.attributes("-topmost", True)  # Keep window on top
+        self.root.mainloop()
 
 def main():
     editor = InteractivePchipEditor()
