@@ -18,7 +18,7 @@ except Exception as _:
 class InteractivePchipEditor:
     def __init__(self):
         self.xpoints = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1050]
-        self.ypoints = [3.0, 2.7, 2.7, 0.0, 2.7, 0.0, 2.7, 0.0, 2.7, 3.0, 3.0]
+        self.ypoints = [3.3, 2.7, 2.7, 0.0, 2.7, 0.0, 2.7, 0.0, 2.7, 3.0, 3.3]
 
         self.fig, self.ax = plt.subplots()
         plt.subplots_adjust(bottom=0.3)

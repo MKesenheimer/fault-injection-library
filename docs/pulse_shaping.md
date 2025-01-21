@@ -12,11 +12,113 @@ The following test setup can be used to test the pulse-shaping expansion board o
 
 ## Using the pulse-shaping stage
 
---- TODO ---
+```python
+from findus import PicoGlitcher
 
-## Example of voltage profiles
+glitcher = PicoGlitcher()
+glitcher.init(port='/dev/ttyACM0')
 
---- TODO ---
+glitcher.rising_edge_trigger()
+
+# choose pulse-form glitching
+glitcher.set_pulseshaping(vinit=3.3)
+```
+
+```python
+tpoints = [  0,  20, 40,  60,  80]
+vpoints = [3.3, 2.7,  0, 2.7, 3.3]
+glitcher.arm_pulseshaping_from_spline(delay, tpoints, vpoints)
+```
+
+## Other examples
+See `fault-injection-library/example/pico-glitcher-pulse-shaping.py`:
+
+```python
+# pulse shaping with config (without interpolation, like multiplexing)
+ps_config = [[length, 2.0], [length, 1.0], [length, 0.0], [length, 3.3]]
+glitcher.arm_pulseshaping_from_config(delay, ps_config)
+```
+--- TODO: picture of pulse ---
+
+```python
+# pulse from lambda
+ps_lambda = f"lambda t:2.0 if t<{length} else 1.0 if t<{2*length} else 0.0 if t<{3*length} else 3.0"
+glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 10*length)
+```
+--- TODO: picture of pulse ---
+
+```python
+# pulse from lambda; ramp down to 1.8V than GND glitch
+ps_lambda = f"lambda t:-1.0/({2*length})*t+3.0 if t<{2*length} else 2.0 if t<{4*length} else 0.0 if t<{5*length} else 3.0"
+glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 6*length)
+```
+--- TODO: picture of pulse ---
+
+```python
+# pulse from raw list
+pulse = [-0x1fff] * 50 + [-0x0fff] * 50 + [-0x07ff] * 50 + [0x0000] * 50
+glitcher.arm_pulseshaping_from_list(delay, pulse)
+```
+--- TODO: picture of pulse ---
+
+```python
+# pulse from predefined; ramp down to 1.8V than GND glitch
+calculate_constant = True
+[...]
+
+if calculate_constant:
+        # send full config first time
+        ps_config = {"psid": 1, "vstart": 3.0, "tramp": length, "vstep": 2.0, "tstep": length, "length": length, "vend": 3.0}
+        glitcher.arm_pulseshaping_from_predefined(delay, ps_config, calculate_constant)
+        calculate_constant = False
+    else:
+        # only update relevant parameters next time
+        ps_config = {"psid": 1, "length": length, "vend": 3.0}
+        glitcher.arm_pulseshaping_from_predefined(delay, ps_config)
+```
+--- TODO: picture of pulse ---
+
+```python
+xpoints = [0,   100, 200, 300, 400, 500, 515, 520]
+ypoints = [3.0, 2.1, 2.0, 2.0, 1.7, 0.0, 2.0, 3.0]
+glitcher.arm_pulseshaping_from_spline(delay, xpoints, ypoints)
+```
+--- TODO: picture of pulse ---
+
+## Plotting requested pulses in real time
+
+```python
+from findus.firmware.Spline import Spline
+[...]
+
+xpoints = [0,   100, 200, 300, 400, 500, 515, 520]
+ypoints = [3.0, 2.1, 2.0, 2.0, 1.7, 0.0, 2.0, 3.0]
+glitcher.arm_pulseshaping_from_spline(delay, xpoints, ypoints)
+Spline.interpolate_and_plot(xpoints, ypoints)
+```
+--- TODO: picture of actual pulse and requested pulse ---
+
+## Calibration
+
+--- TODO: make calibration script available as cli tool ---
+```python
+calibrate
+```
+
+## Interactive PCHIP Editor
+
+![](images/pulse-shaping/pchip-editor.png)
+![](images/pulse-shaping/pchip-editor.bmp)
+
+```python
+from findus.InteractivePchipEditor import InteractivePchipEditor
+editor = InteractivePchipEditor()
+[...]
+
+editor.show(block=False)
+xpoints, ypoints = editor.get_points()
+glitcher.arm_pulseshaping_from_spline(delay, xpoints, ypoints)
+```
 
 ## Technical details
 

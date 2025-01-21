@@ -790,7 +790,7 @@ class MicroPythonScript():
             res = self.sm1.get()
             print(res)
 
-    def change_config(self, key, value):
+    def change_config(self, key:str, value:int|float|str):
         """
         Change the content of the configuration file `config.json`. Note that the value to be changed must already exist.
 
@@ -812,7 +812,7 @@ class MicroPythonScript():
             config = ujson.load(file)
         print(config)
 
-    def change_config_and_reset(self, key, value):
+    def change_config_and_reset(self, key:str, value:int|float|str):
         """
         Change the content of the configuration file `config.json`. Note that the value to be changed must already exist. Reset the Pico Glitcher.
 

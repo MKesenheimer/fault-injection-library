@@ -851,7 +851,7 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.set_multiplexing()
 
-    def set_pulseshaping(self, vinit=1.8):
+    def set_pulseshaping(self, vinit:float=1.8):
         """
         Enables the pulse-shaping mode of the PicoGlitcher version 2 to apply a voltage profile to the target's supply voltage.
 
@@ -917,7 +917,7 @@ class PicoGlitcher(Glitcher):
         """
         return self.pico_glitcher.get_frequency()
 
-    def change_config_and_reset(self, key, value):
+    def change_config_and_reset(self, key:str, value:int|float|str):
         """
         Change the content of the configuration file `config.json`. Note that the value to be changed must already exist. After calling this function, the Pico Glitcher must be re-initialized.
 

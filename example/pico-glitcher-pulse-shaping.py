@@ -97,7 +97,7 @@ class Main():
             delay = random.randint(s_delay, e_delay)
 
             # arm
-            # pulse shaping with config
+            # pulse shaping with config (without interpolation, like multiplexing)
             if args.pulse_type == 0:
                 ps_config = [[length, 2.0], [length, 1.0], [length, 0.0], [length, 3.0]]
                 self.glitcher.arm_pulseshaping_from_config(delay, ps_config)

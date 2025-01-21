@@ -7822,25 +7822,25 @@
 		)
 		(uuid "32107b6d-1cfe-4863-8629-e023065e1377")
 	)
-	(text "I = +-2.5V * (1 + (R22 + RV1) / R19) / 50Ω\n  = +-2.5V * [2, 4] / 50Ω\n  = [100mA, 200mA]"
+	(text "V = +-4mA * (120Ω + 560Ω) + 2.5mA * (560Ω - 120Ω) = -1.6V / + 3.8V"
 		(exclude_from_sim no)
-		(at 252.222 89.662 0)
+		(at 177.292 86.36 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 		)
-		(uuid "e6f3e6b5-c5f8-4e74-be68-579bd3e674aa")
+		(uuid "7894106a-1ef4-4d2d-a8c2-64e4de0561ae")
 	)
-	(text "V = +-4mA * (200Ω + 420Ω) = +-2.5V"
+	(text "I = V_INTERM * (1 + (R12 + RV1) / R9) / 50Ω\n  = V_INTERM * [2, 4] / 50Ω"
 		(exclude_from_sim no)
-		(at 163.83 93.726 0)
+		(at 253.746 90.424 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 		)
-		(uuid "ec86d7d5-a31e-49da-93ed-23826c213ce3")
+		(uuid "d449ec99-6cd1-4821-a2ca-05a0f2f38fb9")
 	)
 	(text "Crystal Oscilator\nLVDS config"
 		(exclude_from_sim no)
@@ -11345,7 +11345,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "430"
+		(property "Value" "560"
 			(at 101.6 105.4099 0)
 			(effects
 				(font
