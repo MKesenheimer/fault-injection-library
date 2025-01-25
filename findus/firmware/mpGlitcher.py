@@ -149,7 +149,9 @@ def multiplex(MUX_PIO_INIT=MUX_PIO_INIT):
     set(x, 2)
     label("two_pulses")
     out(y, 14) # t = OSR >> 14
+    #set(pindirs, 0b00) # disable pinout while shifting
     out(pins, 2) # v = OSR >> 2
+    #set(pindirs, 0b11) # enable pinout again
     label("length_loop")
     jmp(y_dec, "length_loop")
     jmp(x_dec, "two_pulses")
@@ -161,7 +163,9 @@ def multiplex(MUX_PIO_INIT=MUX_PIO_INIT):
     set(x, 2)
     label("two_pulses2")
     out(y, 14) # t = OSR >> 14
+    #set(pindirs, 0b00) # disable pinout while shifting
     out(pins, 2) # v = OSR >> 2
+    #set(pindirs, 0b11) # enable pinout again
     label("length_loop2")
     jmp(y_dec, "length_loop2")
     jmp(x_dec, "two_pulses2")
@@ -679,13 +683,13 @@ class MicroPythonScript():
             v1 = self.voltage_map[mul_config["v1"]]
         except Exception as _:
             t1 = 0
-            v1 = 0b00
+            v1 = MUX_PIO_INIT
         try:
             t2 = mul_config["t2"] // (1_000_000_000 // self.frequency)
             v2 = self.voltage_map[mul_config["v2"]]
         except Exception as _:
             t2 = 0
-            v2 = 0b00
+            v2 = MUX_PIO_INIT
         config = v2 << 30 | t2 << 16 | v1 << 14 | t1
         self.sm0.put(config)
         # push the next multiplexing shape config into the fifo of the statemachine
@@ -694,13 +698,13 @@ class MicroPythonScript():
             v3 = self.voltage_map[mul_config["v3"]]
         except Exception as _:
             t3 = 0
-            v3 = 0b00
+            v3 = MUX_PIO_INIT
         try:
             t4 = mul_config["t4"] // (1_000_000_000 // self.frequency)
             v4 = self.voltage_map[mul_config["v4"]]
         except Exception as _:
             t4 = 0
-            v4 = 0b00
+            v4 = MUX_PIO_INIT
         config = v4 << 30 | t4 << 16 | v3 << 14 | t3
         self.sm0.put(config)
 
