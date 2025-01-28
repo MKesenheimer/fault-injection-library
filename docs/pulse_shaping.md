@@ -38,28 +38,35 @@ See `fault-injection-library/example/pico-glitcher-pulse-shaping.py`:
 ps_config = [[length, 2.0], [length, 1.0], [length, 0.0], [length, 3.3]]
 glitcher.arm_pulseshaping_from_config(delay, ps_config)
 ```
---- TODO: picture of pulse ---
+
+![Alt text](images/pulse-shaping/0-1000ns.bmp)
+![Alt text](images/pulse-shaping/0-100ns.bmp)
 
 ```python
 # pulse from lambda
 ps_lambda = f"lambda t:2.0 if t<{length} else 1.0 if t<{2*length} else 0.0 if t<{3*length} else 3.0"
 glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 10*length)
 ```
---- TODO: picture of pulse ---
+
+![Alt text](images/pulse-shaping/1-1000ns.bmp)
+![Alt text](images/pulse-shaping/1-100ns.bmp)
 
 ```python
 # pulse from lambda; ramp down to 1.8V than GND glitch
 ps_lambda = f"lambda t:-1.0/({2*length})*t+3.0 if t<{2*length} else 2.0 if t<{4*length} else 0.0 if t<{5*length} else 3.0"
 glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 6*length)
 ```
---- TODO: picture of pulse ---
+
+![Alt text](images/pulse-shaping/3-1000ns.bmp)
+![Alt text](images/pulse-shaping/3-100ns.bmp)
 
 ```python
 # pulse from raw list
 pulse = [-0x1fff] * 50 + [-0x0fff] * 50 + [-0x07ff] * 50 + [0x0000] * 50
 glitcher.arm_pulseshaping_from_list(delay, pulse)
 ```
---- TODO: picture of pulse ---
+
+![Alt text](images/pulse-shaping/2.bmp)
 
 ```python
 # pulse from predefined; ramp down to 1.8V than GND glitch
@@ -76,14 +83,17 @@ if calculate_constant:
         ps_config = {"psid": 1, "length": length, "vend": 3.0}
         glitcher.arm_pulseshaping_from_predefined(delay, ps_config)
 ```
---- TODO: picture of pulse ---
+
+![Alt text](images/pulse-shaping/4-1000ns.bmp)
+![Alt text](images/pulse-shaping/4-100ns.bmp)
+
 
 ```python
 xpoints = [0,   100, 200, 300, 400, 500, 515, 520]
 ypoints = [3.0, 2.1, 2.0, 2.0, 1.7, 0.0, 2.0, 3.0]
 glitcher.arm_pulseshaping_from_spline(delay, xpoints, ypoints)
 ```
---- TODO: picture of pulse ---
+![Alt text](images/pulse-shaping/5.bmp)
 
 ## Plotting requested pulses in real time
 
@@ -96,7 +106,6 @@ ypoints = [3.0, 2.1, 2.0, 2.0, 1.7, 0.0, 2.0, 3.0]
 glitcher.arm_pulseshaping_from_spline(delay, xpoints, ypoints)
 Spline.interpolate_and_plot(xpoints, ypoints)
 ```
---- TODO: picture of actual pulse and requested pulse ---
 
 ## Calibration
 
@@ -107,8 +116,11 @@ calibrate
 
 ## Interactive PCHIP Editor
 
-![](images/pulse-shaping/pchip-editor.png)
-![](images/pulse-shaping/pchip-editor.bmp)
+![Alt text](images/pulse-shaping/6-1.png)
+![Alt text](images/pulse-shaping/6-1.bmp)
+
+![Alt text](images/pulse-shaping/6-2.png)
+![Alt text](images/pulse-shaping/6-2.bmp)
 
 ```python
 from findus.InteractivePchipEditor import InteractivePchipEditor

@@ -18,6 +18,7 @@ import logging
 import random
 import sys
 import time
+import subprocess
 
 # import custom libraries
 from findus import Database, PicoGlitcher
@@ -25,17 +26,26 @@ from findus import Database, PicoGlitcher
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(PicoGlitcher):
     def classify(self, response):
-        if b'Trigger ok' in response:
+        if b'Failed to connect' in response:
             color = 'G'
         elif b'Error' in response:
             color = 'M'
-        elif b'Fatal exception' in response:
+        elif b'Fatal' in response:
             color = 'M'
         elif b'Timeout' in response:
             color = 'Y'
         else:
             color = 'R'
         return color
+
+def test_jtag():
+    subout = subprocess.run(['openocd',
+                          '-f', 'interface/jlink.cfg',
+                          '-f', 'target/rp2040.cfg',
+                          '-c', 'adapter speed 4000'],
+                          check=False, capture_output=True)
+    response = subout.stdout + subout.stderr
+    return response
 
 class Main():
     def __init__(self, args):
@@ -61,11 +71,9 @@ class Main():
         self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
         #self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input, dead_time=0.01, pin_condition="reset")
 
-        # choose multiplexing, pulse-shaping or crowbar glitching
+        # choose multiplexing or crowbar glitching
         if args.multiplexing:
             self.glitcher.set_multiplexing()
-        elif args.pulse_shaping:
-            self.glitcher.set_pulseshaping(vinit=3.0)
         else:
             self.glitcher.set_lpglitch()
 
@@ -92,29 +100,19 @@ class Main():
 
             # arm
             if args.multiplexing:
-                mul_config = {"t1": length, "v1": "1.8", "t2": length, "v2": "VCC", "t3": length, "v3": "GND"}
+                mul_config = {"t1": length, "v1": "GND", "t2": length, "v2": "1.8"}
                 #mul_config = {"t1": length, "v1": "GND"}
                 self.glitcher.arm_multiplexing(delay, mul_config)
-            elif args.pulse_shaping:
-                # pulse from lambda; ramp down to 1.8V than GND glitch
-                ps_lambda = f"lambda t:-1.5/({2*length})*t+3.3 if t<{2*length} else 1.8 if t<{4*length} else 0.0 if t<{5*length} else 3.3"
-                self.glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 6*length)
             else:
                 self.glitcher.arm(delay, length)
 
-            # power cycle target
-            #self.glitcher.power_cycle_target(0.1)
-
-            # reset target
-            time.sleep(0.01)
+            # reset target and power cycle target
             self.glitcher.reset(0.01)
 
             # block until glitch
             try:
-                self.glitcher.block(timeout=2)
-                # Manually set the response to a reasonable value.
-                # In a real scenario, this would be filled by the response of the microcontroller (UART, SWD, etc.)
-                response = b'Trigger ok'
+                self.glitcher.block(timeout=0.2)
+                response = test_jtag()
             except Exception as _:
                 print("[-] Timeout received in block(). Continuing.")
                 self.glitcher.power_cycle_target(power_cycle_time=1)
@@ -144,7 +142,6 @@ if __name__ == "__main__":
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
     parser.add_argument("--multiplexing", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with multiplexing between different voltages (requires PicoGlitcher v2).")
-    parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with a predefined voltage profile (requires PicoGlitcher v2).")
     parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
     args = parser.parse_args()
 
