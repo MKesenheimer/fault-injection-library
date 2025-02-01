@@ -72,6 +72,8 @@ elif config["hardware_version"][0] == 2:
         MUX_PIO_INIT = 0b10
     import AD910X
     from PulseGenerator import PulseGenerator
+    from FastADC import FastADC
+    import _thread
 
 @asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
 def glitch():
@@ -382,6 +384,12 @@ class MicroPythonScript():
             self.ad910x.init()
             self.pin_ps_trigger = self.ad910x.get_trigger_pin()
             self.pulse_generator = PulseGenerator(vhigh=self.config["ps_offset"], factor=self.config["ps_factor"])
+            # analog digital converter
+            #self.adc = machine.ADC(Pin(ADC0))
+            #self.samples = []
+            self.fastadc = FastADC()
+            self.fastsamples = self.fastadc.init_array()
+            self.core1_stopped = True
 
     def waveform_generator(self, frequency:int = AD910X.DEFAULT_FREQUENCY, gain:float = AD910X.DEFAULT_GAIN, waveid:int = AD910X.WAVE_TRIANGLE):
         if self.config["hardware_version"][0] < 2:
@@ -786,6 +794,7 @@ class MicroPythonScript():
             if time.time() - start_time >= timeout:
                 self.sm0.active(0)
                 self.pin_glitch_en.low()
+                self.core1_stopped = True
                 raise Exception("Function execution timed out!")
 
     def get_sm1_output(self):
@@ -827,3 +836,30 @@ class MicroPythonScript():
         self.change_config(key, value)
         machine.soft_reset()
         #machine.reset()
+
+    @micropython.native
+    def poll_fast_adc(self):
+        self.core1_stopped = False
+        while self.pin_trigger.value() == 1 and not self.core1_stopped:
+            pass
+        while self.pin_trigger.value() == 0 and not self.core1_stopped:
+            pass
+        # this code runs with ~2us per sample -> 450 ksps
+        self.fastsamples = self.fastadc.read()
+        self.core1_stopped = True
+
+    def arm_adc(self):
+        if self.core1_stopped:
+            _thread.start_new_thread(self.poll_fast_adc, ())
+
+    def get_adc_samples(self):
+        #while not self.core1_stopped:
+        #    pass
+        self.core1_stopped = True
+        print(self.fastsamples)
+
+    def configure_adc(self, number_of_samples:int = 1024, sampling_freq:int = 500_000):
+        self.fastadc.configure_adc(number_of_samples, sampling_freq)
+
+    def stop_core1(self):
+        self.core1_stopped = True

@@ -21,6 +21,7 @@ import time
 
 # import custom libraries
 from findus import Database, PicoGlitcher
+from findus import AnalogPlot
 
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(PicoGlitcher):
@@ -73,6 +74,12 @@ class Main():
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
         self.start_time = int(time.time())
 
+        # plot the voltage trace while glitching
+        self.number_of_samples = 1024
+        self.sampling_freq = 450_000
+        self.glitcher.configure_adc(number_of_samples=self.number_of_samples, sampling_freq=self.sampling_freq)
+        self.plotter = AnalogPlot(number_of_samples=self.number_of_samples, sampling_freq=self.sampling_freq)
+
     def run(self):
         # log execution
         logging.info(" ".join(sys.argv))
@@ -93,7 +100,6 @@ class Main():
             # arm
             if args.multiplexing:
                 mul_config = {"t1": length, "v1": "1.8", "t2": length, "v2": "VCC", "t3": length, "v3": "GND"}
-                #mul_config = {"t1": length, "v1": "GND"}
                 self.glitcher.arm_multiplexing(delay, mul_config)
             elif args.pulse_shaping:
                 # pulse from lambda; ramp down to 1.8V than GND glitch
@@ -101,6 +107,8 @@ class Main():
                 self.glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 6*length)
             else:
                 self.glitcher.arm(delay, length)
+
+            self.glitcher.arm_adc()
 
             # power cycle target
             #self.glitcher.power_cycle_target(0.1)
@@ -111,10 +119,12 @@ class Main():
 
             # block until glitch
             try:
-                self.glitcher.block(timeout=2)
+                self.glitcher.block(timeout=1)
                 # Manually set the response to a reasonable value.
                 # In a real scenario, this would be filled by the response of the microcontroller (UART, SWD, etc.)
                 response = b'Trigger ok'
+                samples = self.glitcher.get_adc_samples()
+                self.plotter.update_curve(samples)
             except Exception as _:
                 print("[-] Timeout received in block(). Continuing.")
                 self.glitcher.power_cycle_target(power_cycle_time=1)
@@ -134,6 +144,10 @@ class Main():
 
             # increase experiment id
             experiment_id += 1
+
+    def __del__(self):
+        print("[+] Terminating gracefully.")
+        self.glitcher.stop_core1()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

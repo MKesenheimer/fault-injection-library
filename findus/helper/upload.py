@@ -21,18 +21,15 @@ def upload(file:str, port:str):
     if filename.encode() in ret:
         print(f"[+] Deleting {filename}...")
         subprocess.call(["ampy", "-p", port, "rm", filename])
-        print("[+] Done.")
 
     # upload the new script
     print(f"[+] Uploading {file}...")
     subprocess.call(["ampy", "-p", port, "put", file])
-    print("[+] Done.")
 
 def reset(port:str):
     # resetting
     print("[+] Resetting Raspberry Pi Pico...")
     subprocess.call(["ampy", "-p", port, "reset"])
-    print("[+] Done.")
 
 def main(argv=sys.argv):
     parser = argparse.ArgumentParser(
@@ -45,23 +42,24 @@ def main(argv=sys.argv):
     parser.add_argument("--files", nargs='+', help="Files to upload to the Raspberry Pi Pico", required=False, default=None)
     args = parser.parse_args()
 
+    # reset before tasks to have a well defined state
+    reset(args.port)
+
     try:
         ret = subprocess.check_output(["ampy", "-p", args.port, "ls"])
-    except Exception as e:
+    except Exception as _:
         print("[-] Pico Glitcher could not be found. Aborting.")
         sys.exit(-1)
     if args.delete_all:
         print("[+] Deleting all files...")
         for filename in ret.decode().split():
             subprocess.call(["ampy", "-p", args.port, "rm", filename[1:]])
-        print("[+] Done.")
 
     if args.delete:
         filename = os.path.basename(args.delete)
         if filename.encode() in ret:
             print(f"[+] Deleting {filename}...")
             subprocess.call(["ampy", "-p", args.port, "rm", filename])
-            print("[+] Done.")
 
     if args.file is not None:
         upload(args.files, args.port)

@@ -33,6 +33,8 @@ except Exception as _:
     rd6006_available = False
 from importlib.metadata import version
 import random
+import matplotlib.pyplot as plt
+import numpy as np
 
 class Database():
     """
@@ -239,7 +241,7 @@ class Serial():
         """
         try:
             self.ser = serial.Serial(port=self.port, baudrate=self.baudrate, timeout=self.timeout, bytesize=self.bytesize, parity=self.parity, stopbits=self.stopbits)
-        except Exception as e:
+        except Exception as _:
             print("[-] Serial device not found. Aborting")
             sys.exit(-1)
 
@@ -325,7 +327,7 @@ class MicroPythonScript():
         self.port = port
         try:
             self.pyb = pyboard.Pyboard(self.port)
-        except Exception as e:
+        except Exception as _:
             print("[-] Pico Glitcher not found. Aborting")
             sys.exit(-1)
         self.pyb.enter_raw_repl()
@@ -428,6 +430,18 @@ class PicoGlitcherInterface(MicroPythonScript):
 
     def change_config_and_reset(self, key, value) -> str:
         return self.pyb.exec(f'mp.change_config_and_reset("{key}", "{value}")')
+
+    def arm_adc(self):
+        self.pyb.exec('mp.arm_adc()')
+
+    def get_adc_samples(self) -> list[int]:
+        return self.pyb.exec('mp.get_adc_samples()')
+
+    def configure_adc(self, number_of_samples:int = 1024, sampling_freq:int = 500_000):
+        self.pyb.exec(f'mp.configure_adc({number_of_samples}, {sampling_freq})')
+
+    def stop_core1(self):
+        self.pyb.exec('mp.stop_core1()')
 
 class ExternalPowerSupply:
     """
@@ -932,6 +946,32 @@ class PicoGlitcher(Glitcher):
         TODO
         """
         self.pico_glitcher.waveform_generator(frequency, gain, waveid)
+
+    def arm_adc(self):
+        """
+        TODO
+        """
+        self.pico_glitcher.arm_adc()
+
+    def get_adc_samples(self) -> list[int]:
+        """
+        TODO
+        """
+        samples = self.pico_glitcher.get_adc_samples()
+        #print(samples)
+        decoded_str = samples.decode().strip()
+        num_str = decoded_str.split("[")[1].split("]")[0]
+        int_list = [int(x) for x in num_str.split(",")]
+        return int_list
+
+    def configure_adc(self, number_of_samples:int = 1024, sampling_freq:int = 500_000):
+        """
+        TODO
+        """
+        self.pico_glitcher.configure_adc(number_of_samples, sampling_freq)
+
+    def stop_core1(self):
+        self.pico_glitcher.stop_core1()
 
 class HuskyGlitcher(Glitcher):
     """
@@ -1980,3 +2020,43 @@ class OptimizationController():
             parameter: list of parameters that were used for the experiment.
         """
         self.par.add_experiment(weight, *parameter)
+
+class AnalogPlot():
+    """
+    TODO
+    """
+    def __init__(self, number_of_samples:int, vref:float = 3.3, sampling_freq = 500_000):
+        self.number_of_samples = number_of_samples
+        self.vref = vref
+        self.sampling_freq = sampling_freq
+
+        self.fig, self.ax = plt.subplots()
+        plt.subplots_adjust(bottom=0.3)
+
+        self.curve_line, = self.ax.plot([], [], label="Analog measurement", color="blue")
+
+        x_end = 1_000_000_000 * self.number_of_samples / self.sampling_freq
+        self.xpoints = np.linspace(0, x_end, self.number_of_samples)
+        self.ypoints = np.zeros(self.number_of_samples)
+
+        # Set axis limits and finer ticks
+        self.ax.set_xlim(-1, x_end)
+        self.ax.set_ylim(-0.2, 3.5)
+        self.ax.set_xticks(np.arange(0, x_end, x_end / 10))
+        self.ax.set_yticks(np.arange(0, 3.4, 0.5))
+
+        self.ax.set_xlabel("Time [ns]")
+        self.ax.set_ylabel("Voltage [V]")
+        self.ax.legend()
+        self.ax.grid(True)
+
+        self.update_curve(self.ypoints)
+
+    def show(self):
+        plt.show(block=False)
+        plt.pause(0.001)
+
+    def update_curve(self, y:list):
+        self.ypoints = np.array(y) / 4096 * self.vref
+        self.curve_line.set_data(self.xpoints, self.ypoints)
+        self.show()
