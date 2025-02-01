@@ -14,6 +14,7 @@ nav:
   - Pulse Shaping with the Pico Glitcher v2 and extension board: pulse_shaping.md
   - Schmitt Trigger inputs of the Pico Glitcher v2: schmitt.md
   - Genetic algorithm: genetic.md
+  - Using the analog digital converter: adc.md
 theme: readthedocs
 plugins:
   - search
