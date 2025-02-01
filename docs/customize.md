@@ -75,5 +75,5 @@ Add your modifications to `mpGlitcher.py` ([https://github.com/MKesenheimer/faul
 
 ```bash
 cd findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files mpGlitcher.py AD910X.py PulseGenerator.py Spline.py mpConfig_vx/config.json
+upload --port /dev/tty.<rpi-tty-port> --files mpGlitcher.py AD910X.py PulseGenerator.py Spline.py FastADC.py mpConfig_vx/config.json
 ```

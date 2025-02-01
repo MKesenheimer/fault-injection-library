@@ -83,7 +83,7 @@ For hardware version 2.x of the PicoGlitcher, the corresponding config file must
 
 ```bash
 cd findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files mpGlitcher.py AD910X.py PulseGenerator.py Spline.py mpConfig_v2/config.json
+upload --port /dev/tty.<rpi-tty-port> --files mpGlitcher.py AD910X.py PulseGenerator.py Spline.py FastADC.py mpConfig_v2/config.json
 ```
 
 Although the software is based on Micropython, using the PIO functions of the Raspberry Pi Pico, very precise switching operations can be made and triggered on external signals.
@@ -125,7 +125,7 @@ Install the Raspberry Pi Pico Micropython scripts (for hardware version 1 see be
 
 ```bash
 cd findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files mpGlitcher.py AD910X.py PulseGenerator.py Spline.py mpConfig_v2/config.json
+upload --port /dev/tty.<rpi-tty-port> --files mpGlitcher.py AD910X.py PulseGenerator.py Spline.py FastADC.py mpConfig_v2/config.json
 
 ```
 

@@ -11,3 +11,4 @@ minimalmodbus
 mkdocs
 mkdocstrings[python]
 dataclasses-json
+matplotlib
