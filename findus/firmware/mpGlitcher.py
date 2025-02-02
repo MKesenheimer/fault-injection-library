@@ -101,6 +101,7 @@ def glitch():
     set(pins, 0b0).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
+    irq(clear, 7)
     push(block)
 
 @asm_pio(set_init=(PIO.OUT_HIGH), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
@@ -129,6 +130,7 @@ def pulse_shaping():
     set(pins, 0b1).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
+    irq(clear, 7)
     push(block)
 
 @asm_pio(set_init=(MUX0_PIO_INIT, MUX1_PIO_INIT), out_init=(MUX0_PIO_INIT, MUX1_PIO_INIT), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
@@ -283,6 +285,23 @@ def uart_trigger():
 
     # wrap around
     jmp("start")
+
+@micropython.asm_thumb
+def wait_irq7():
+    # mov 0xE000E200 to r0
+    mov(r1, 0xE0)
+    mov(r2, 16)
+    lsl(r1, r2) # r0 = 0xE00000
+    mov(r2, 0xE2)
+    orr(r1, r2) # r0 = 0xE000E2
+    mov(r2, 8)
+    lsl(r1, r2) # r0 = 0xE000E200
+
+    label(loop)
+    ldr(r0, [r1, 0]) # Load NVIC_ISPR (interrupt pending register)
+    mov(r2, 0x08) # irq7 is bit 3 of NVIC_ISPR
+    tst(r0, r2) # r0 & r2
+    beq(loop) # if r0 & r2 == 0 -> IRQ7 bit not set
 
 class MicroPythonScript():
     """
@@ -840,10 +859,8 @@ class MicroPythonScript():
     @micropython.native
     def poll_fast_adc(self):
         self.core1_stopped = False
-        while self.pin_trigger.value() == 1 and not self.core1_stopped:
-            pass
-        while self.pin_trigger.value() == 0 and not self.core1_stopped:
-            pass
+        # wait for trigger condition
+        wait_irq7()
         # this code runs with ~2us per sample -> 450 ksps
         self.fastsamples = self.fastadc.read()
         self.core1_stopped = True
@@ -853,6 +870,13 @@ class MicroPythonScript():
             _thread.start_new_thread(self.poll_fast_adc, ())
 
     def get_adc_samples(self):
+        timeout = 1
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            if self.core1_stopped:
+                break
+        if time.time() - start_time >= timeout:
+            raise Exception("ADC timed out!")
         #while not self.core1_stopped:
         #    pass
         self.core1_stopped = True
@@ -860,6 +884,7 @@ class MicroPythonScript():
 
     def configure_adc(self, number_of_samples:int = 1024, sampling_freq:int = 500_000):
         self.fastadc.configure_adc(number_of_samples, sampling_freq)
+        self.fastsamples = self.fastadc.init_array()
 
     def stop_core1(self):
         self.core1_stopped = True
