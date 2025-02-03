@@ -27,6 +27,7 @@ dependencies = [
   "mkdocstrings[python]",
   "dataclasses-json",
   "matplotlib",
+  "scipy",
 ]
 
 [project.scripts]

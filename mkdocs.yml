@@ -5,9 +5,6 @@ nav:
   - Getting started: getting_started.md
   - Examples: examples.md
   - Command line tools: cli.md
-  - Findus: findus.md
-  - BootloaderCom: bootloadercom.md
-  - mpGlitcher: mpglitcher.md
   - Customize your Pico Glitcher: customize.md
   - Comparing different glitching modes: glitches.md
   - Multiplexing with the Pico Glitcher v2: multiplexing.md
@@ -15,6 +12,9 @@ nav:
   - Schmitt Trigger inputs of the Pico Glitcher v2: schmitt.md
   - Genetic algorithm: genetic.md
   - Using the analog digital converter: adc.md
+  - Findus: findus.md
+  - BootloaderCom: bootloadercom.md
+  - mpGlitcher: mpglitcher.md
 theme: readthedocs
 plugins:
   - search
