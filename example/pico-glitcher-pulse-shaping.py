@@ -134,6 +134,7 @@ class Main():
                     xpoints = [0,   100, 200, 300, 400, 500, 515, 520]
                     ypoints = [3.0, 2.1, 2.0, 2.0, 1.7, 0.0, 2.0, 3.0]
                     self.glitcher.arm_pulseshaping_from_spline(delay, xpoints, ypoints)
+                    Spline.interpolate_and_plot(xpoints, ypoints)
 
             # pulse defined from interactive editor
             elif args.pulse_type == 6:

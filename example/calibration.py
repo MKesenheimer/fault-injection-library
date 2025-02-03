@@ -20,8 +20,8 @@ class Main():
         print("[+] Connect TRIGGER and RESET.")
         print("[+] Turn gain potentiometer of Pulse Shaping Expansion board all the way to the left (lowest gain).")
         print("[+] Connect your oscilloscope to pulse output of the Pulse Shaping Expansion board and to TRIGGER for triggering.")
-        print("[+] Observer pulse.")
-        print("[+] Measure maximum and minimum voltage of the measured pulse (vhigh and vlow). Take note and abort execution.")
+        print("[+] Observe pulse.")
+        print("[+] Measure maximum and minimum voltage of the generated pulse (vhigh and vlow). Take note and abort execution.")
         print("[+] Execute this script again with the found values for vhigh and vlow and check if the pulse aligns with 0V.")
         print("[+] Note that the found calibration values are stored on the Pico Glitcher persistently if this script is called with values for vlow and vhigh.")
 
