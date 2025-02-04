@@ -111,8 +111,8 @@ Spline.interpolate_and_plot(xpoints, ypoints)
 
 Run the script `fault-injection-library/examples/pico-glitcher-pulse-shaping.py` with the following parameters:
 
-```
-python pico-glitcher-pulse-shaping.py --rpico /dev/tty.usbmodem11101 --delay 10 10 --length 100 100 --pulse-type 5
+```bash
+python pico-glitcher-pulse-shaping.py --rpico /dev/tty.<rpi-tty-port> --delay 10 10 --length 100 100 --pulse-type 5
 ```
 
 ## Interactive PCHIP Editor
@@ -144,7 +144,7 @@ See `fault-injection-library/examples/pico-glitcher-pulse-shaping.py` for more d
 The above example can be executed by running:
 
 ```bash
-python pico-glitcher-pulse-shaping.py --rpico /dev/tty.usbmodem11101 --delay 10 10 --length 100 100 --pulse-type 6
+python pico-glitcher-pulse-shaping.py --rpico /dev/tty.<rpi-tty-port> --delay 10 10 --length 100 100 --pulse-type 6
 ```
 
 ## Calibration
@@ -154,7 +154,7 @@ Since the gain of the amplifier of the pulse-shaping expansion board depends on 
 This can be done by executing the command-line tool `pulse-calibration` (should be installed with findus) and by measuring the voltage trace with an oscilloscope:
 
 ```bash
-pulse-calibration --rpico /dev/tty.usbmodem11101
+pulse-calibration --rpico /dev/tty.<rpi-tty-port>
 ```
 
 To perform a calibration routine
@@ -169,7 +169,7 @@ To perform a calibration routine
 
 For example, to apply and store the calibration, execute:
 ```bash
-python calibration.py --rpico /dev/tty.usbmodem11401 --vhigh 1.5 --vlow -0.5
+pulse-calibration --rpico /dev/tty.<rpi-tty-port> --vhigh 1.5 --vlow -0.5
 ```
 
 ## Technical details
@@ -193,6 +193,5 @@ The requirements to the power amplifier are as follows:
 - High slew rate for clean and steep signals: >7000 V/μs.
 - Wide bandwidth of up to 200MHz.
 - High output current to supply the target with power: >±200 mA
-
 
 ![](images/pulse-shaping/expansion-brd.png)
