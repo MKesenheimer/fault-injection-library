@@ -69,7 +69,6 @@ class Main():
 
         # pulse-shape glitching
         self.glitcher.set_pulseshaping(vinit=3.0)
-        self.calculate_constant = True
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
@@ -116,18 +115,6 @@ class Main():
             elif args.pulse_type == 3:
                     ps_lambda = f"lambda t:-1.0/({2*length})*t+3.0 if t<{2*length} else 2.0 if t<{4*length} else 0.0 if t<{5*length} else 3.0"
                     self.glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 6*length)
-
-            # pulse from predefined; ramp down to 1.8V than GND glitch
-            elif args.pulse_type == 4:
-                if self.calculate_constant:
-                    # send full config first time
-                    ps_config = {"psid": 1, "vstart": 3.0, "tramp": length, "vstep": 2.0, "tstep": length, "length": length, "vend": 3.0}
-                    self.glitcher.arm_pulseshaping_from_predefined(delay, ps_config, self.calculate_constant)
-                    self.calculate_constant = False
-                else:
-                    # only update relevant parameters next time
-                    ps_config = {"psid": 1, "length": length, "vend": 3.0}
-                    self.glitcher.arm_pulseshaping_from_predefined(delay, ps_config)
 
             # pulse from points -> interpolation is used
             elif args.pulse_type == 5:

@@ -1,3 +1,0 @@
-# mpGlitcher
-
-::: findus.firmware.mpGlitcher

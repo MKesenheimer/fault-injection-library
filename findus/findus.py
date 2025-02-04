@@ -332,7 +332,7 @@ class MicroPythonScript():
             sys.exit(-1)
         self.pyb.enter_raw_repl()
         self.pyb.exec(f'import {micropy_script}')
-        self.pyb.exec(f'mp = {micropy_script}.MicroPythonScript()')
+        self.pyb.exec(f'mp = {micropy_script}.{micropy_script}()')
 
 # inherit functionality and overwrite some functions
 class PicoGlitcherInterface(MicroPythonScript):
@@ -371,17 +371,14 @@ class PicoGlitcherInterface(MicroPythonScript):
     def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[int]]):
         return self.pyb.exec(f'mp.arm_pulseshaping_from_config({delay}, {ps_config})')
 
-    def arm_pulseshaping_from_spline(self, delay:int, xpoints:list[int], ypoints:list[int]):
+    def arm_pulseshaping_from_spline(self, delay:int, xpoints:list[int], ypoints:list[float]):
         return self.pyb.exec(f'mp.arm_pulseshaping_from_spline({delay}, {xpoints}, {ypoints})')
 
-    def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda, pulse_number_of_points:int):
+    def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda:str, pulse_number_of_points:int):
         return self.pyb.exec(f'mp.arm_pulseshaping_from_lambda({delay}, {ps_lambda}, {pulse_number_of_points})')
 
     def arm_pulseshaping_from_list(self, delay:int, pulse:list[int]):
         return self.pyb.exec(f'mp.arm_pulseshaping_from_list({delay}, {pulse})')
-
-    def arm_pulseshaping_from_predefined(self, delay:int, ps_config:dict, recalc_constant:bool = False):
-        return self.pyb.exec(f'mp.arm_pulseshaping_from_predefined({delay}, {ps_config}, {recalc_constant})')
 
     def reset_target(self):
         self.pyb.exec('mp.reset_target()')
@@ -442,6 +439,9 @@ class PicoGlitcherInterface(MicroPythonScript):
 
     def stop_core1(self):
         self.pyb.exec('mp.stop_core1()')
+
+    def hard_reset(self):
+        self.pyb.exec('mp.hard_reset()')
 
 class ExternalPowerSupply:
     """
@@ -649,6 +649,11 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher = None
 
+    def __del__(self):
+        print("[+] Terminating gracefully.")
+        self.stop_core1()
+        self.hard_reset()
+
     def init(self, port:str, ext_power:str = None, ext_power_voltage:float = 3.3):
         """
         Default initialization procedure of the PicoGlitcher. Default configuration is:
@@ -663,7 +668,7 @@ class PicoGlitcher(Glitcher):
             ext_power_voltage: Supply voltage of the external power supply. Must be used in combination with `ext_power`. You can not control the supply voltage `VTARGET` of the PicoGlitcher with this parameter.
         """
         self.pico_glitcher = PicoGlitcherInterface()
-        self.pico_glitcher.init(port, 'mpGlitcher')
+        self.pico_glitcher.init(port, 'PicoGlitcher')
 
         # check compatibility
         try:
@@ -703,7 +708,7 @@ class PicoGlitcher(Glitcher):
 
     def arm_multiplexing(self, delay:int, mul_config:dict):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later of the PicoGlitcher.
+        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -713,35 +718,66 @@ class PicoGlitcher(Glitcher):
 
     def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[int]]):
         """
+        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later. Additionally, the Pulse Shaping Expansion board is needed.
+
+        Parameters:
+            delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            ps_config: The pulse configuration given as a list of time deltas and voltage values.
+
         Example:
 
             ps_config = [[4*length, 1.8], [4*length, 0.95], [length, 0.0]]
+            glitcher.arm_pulseshaping_from_config(delay, ps_config)
         """
         return self.pico_glitcher.arm_pulseshaping_from_config(delay, ps_config)
 
-    def arm_pulseshaping_from_spline(self, delay:int, xpoints:list[int], ypoints:list[int]):
+    def arm_pulseshaping_from_spline(self, delay:int, xpoints:list[int], ypoints:list[float]):
         """
+        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later. Additionally, the Pulse Shaping Expansion board is needed.
+
+        Parameters:
+            delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            xpoints: A list of time points (in nanoseconds) where voltage changes occur.
+            ypoints: The corresponding voltage levels at each time point.
+
         Example:
+
+            xpoints = [0,   100, 200, 300, 400, 500, 515, 520]
+            ypoints = [3.0, 2.1, 2.0, 2.0, 1.7, 0.0, 2.0, 3.0]
+            glitcher.arm_pulseshaping_from_spline(delay, xpoints, ypoints)
         """
         return self.pico_glitcher.arm_pulseshaping_from_spline(delay, xpoints, ypoints)
 
-    def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda, pulse_number_of_points:int):
+    def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda:str, pulse_number_of_points:int):
         """
-        TODO
+        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later. Additionally, the Pulse Shaping Expansion board is needed.
+
+        Parameters:
+            delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            ps_lambda: A lambda function that defines the glitch at certain times. Must be given as string which is processed by the Pico Glitcher at runtime.
+            pulse_number_of_points: The approximate length of the pulse. This is needed to constrain the pulse and to save computing time.
+
+        Example:
+
+            ps_lambda = f"lambda t:-1.0/({2*length})*t+3.0 if t<{2*length} else 2.0 if t<{4*length} else 0.0 if t<{5*length} else 3.0"
+            glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 6*length)
         """
         return self.pico_glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, pulse_number_of_points)
 
     def arm_pulseshaping_from_list(self, delay:int, pulse:list[int]):
         """
-        TODO
+        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later. Additionally, the Pulse Shaping Expansion board is needed.
+
+        Parameters:
+            delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            pulse: A raw list of points that define the pulse. No calibration and no constraints are applied to the list. The list is forwarded directly to the DAC.
+
+        Example:
+
+            pulse = [-0x1fff] * 50 + [-0x0fff] * 50 + [-0x07ff] * 50 + [0x0000] * 50
+            glitcher.arm_pulseshaping_from_list(delay, pulse)
         """
         return self.pico_glitcher.arm_pulseshaping_from_list(delay, pulse)
-
-    def arm_pulseshaping_from_predefined(self, delay:int, ps_config:dict, recalc_const:bool = False):
-        """
-        TODO
-        """
-        return self.pico_glitcher.arm_pulseshaping_from_predefined(delay, ps_config, recalc_const)
 
     def block(self, timeout:float = 1.0):
         """
@@ -876,13 +912,21 @@ class PicoGlitcher(Glitcher):
 
     def do_calibration(self, vhigh:float):
         """
-        TODO
+        Emit a calibration pulse with the Pico Glitcher Pulse Shaping expansion board to determine `vhigh` and `vlow`. These parameters are used to calculate the offset and gain parameters of the DAC.
+
+        Parameters:
+            vhigh: The initial voltage to perform the calibration with. Default is `1V`.
         """
         self.pico_glitcher.do_calibration(vhigh)
 
     def apply_calibration(self, vhigh:float, vlow:float, store:bool = True):
         """
-        TODO
+        Calculate and store the offset and gain parameters that were determined by the calibration routine. These values are stored in `config.json` and must be re-calculated if the config is overwritten.
+
+        Parameters:
+            vhigh: The maximum voltage of the calibration voltage trace.
+            vlow: The minimum voltage of the calibration voltage trace.
+            store: wether to store the offset and gain factor in the Pico Glitcher configuration.
         """
         self.pico_glitcher.apply_calibration(vhigh, vlow, store)
 
@@ -943,19 +987,30 @@ class PicoGlitcher(Glitcher):
 
     def waveform_generator(self, frequency:int, gain:float, waveid:int):
         """
-        TODO
+        The Pulse Shaping expansion board of the Pico Glitcher v2 can be used to generate arbitrary and continous waveforms as well.
+
+        Parameters:
+            frequency: The frequency of the signal.
+            gain: The gain (overall amplitude) of the signal.
+            waveid: This determines the signal type, that is, what signal should be generated.
+
+        - sine wave: `waveid = 0`
+        - cosine wave: `waveid = 1`
+        - triangle: `waveid = 2`
+        - positive sawtooth: `waveid = 3`
+        - negative sawtooth: `waveid = 4`
         """
         self.pico_glitcher.waveform_generator(frequency, gain, waveid)
 
     def arm_adc(self):
         """
-        TODO
+        Arm the ADC on pin 26 and capture ADC samples if the trigger condition is met. On Pico Glitcher hardware version 1, the separate SMA connector labeled `Analog` can be used to measure analog voltage traces. On revision 2, the analog input is directly connected to the `GLITCH` line.
         """
         self.pico_glitcher.arm_adc()
 
     def get_adc_samples(self) -> list[int]:
         """
-        TODO
+        Read back the captured ADC samples.
         """
         samples = self.pico_glitcher.get_adc_samples()
         #print(samples)
@@ -966,12 +1021,22 @@ class PicoGlitcher(Glitcher):
 
     def configure_adc(self, number_of_samples:int = 1024, sampling_freq:int = 500_000):
         """
-        TODO
+        Configure the onboard ADC of the Pico Glitcher.
+
+        Parameters:
+            number_of_samples: The number of samples to capture after triggering.
+            sampling_freq: The sampling frequency of the ADC. `500 kSPS` is the maximum.
         """
         self.pico_glitcher.configure_adc(number_of_samples, sampling_freq)
 
     def stop_core1(self):
         self.pico_glitcher.stop_core1()
+
+    def hard_reset(self):
+        try:
+            self.pico_glitcher.hard_reset()
+        except Exception as _:
+            pass
 
 class HuskyGlitcher(Glitcher):
     """
@@ -2023,7 +2088,17 @@ class OptimizationController():
 
 class AnalogPlot():
     """
-    TODO
+    Class to easily plot captured voltage traces with the ADC.
+
+    Example usage:
+
+        glitcher.configure_adc(number_of_samples=1024, sampling_freq=450_000)
+        plotter = AnalogPlot(number_of_samples=1024, sampling_freq=450_000)
+        ...
+        glitcher.arm_adc()
+        ...
+        samples = glitcher.get_adc_samples()
+        plotter.update_curve(samples)
     """
     def __init__(self, number_of_samples:int, vref:float = 3.3, sampling_freq = 500_000):
         self.number_of_samples = number_of_samples

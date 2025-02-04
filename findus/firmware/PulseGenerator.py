@@ -16,7 +16,6 @@ class PulseGenerator():
         self.set_calibration(output_voltage_at_minimal_gain=vhigh, calibration_factor=factor)
         self.set_offset(offset=3.3)
         # caching
-        self.pulse_constant = []
         self.total_pulse_duration = 0
         self.pulse = []
         # coefficients for spline interpolation
@@ -158,62 +157,4 @@ class PulseGenerator():
         # sanity check
         if len(pulse) > self.max_points:
             raise Exception("Fatal error: pulse too large.")
-        return pulse
-
-    @micropython.native
-    def predefined_pulse1_constant(self, vstart:float, tramp:int, vstep:float, tstep:int):
-        """
-        TODO
-        """
-        # this part of the pulse must be calculated only once and can be stored
-        pulse_constant = []
-        if tramp > 0:
-            # trunk-ignore(ruff/E731)
-            ramp_lambda = lambda t: (vstep - vstart) / tramp * t + vstart
-            nramp = self.calculate_pulse_number_of_points(tramp)
-            ramp = [0] * nramp
-            t = 0
-            dt = self.time_resolution
-            for i in range(nramp):
-                ramp[i] = int((ramp_lambda(t) - self.offset) * self.points_per_volt)
-                t += dt
-            pulse_constant += ramp
-        nstep = int(tstep * self.points_per_ns)
-        value = int((vstep - self.offset) * self.points_per_volt)
-        pulse_constant += [value] * nstep
-        self.pulse_constant = pulse_constant
-
-    @micropython.native
-    def predefined_pulse1(self, vstart:float, tramp:int, vstep:float, tstep:int, length:int, vend:float, recalc_constant:bool = False, padding:bool = False) -> list[int]:
-        """
-        TODO
-        """
-        if self.pulse_constant == [] or recalc_constant:
-            self.predefined_pulse1_constant(vstart, tramp, vstep, tstep)
-        pulse = self.pulse_constant.copy()
-        nlength = int(length * self.points_per_ns)
-        pulse += [int((0 - self.offset) * self.points_per_volt)] * nlength
-        pulse += [(int((vend - self.offset) * self.points_per_volt))]
-        # padding with last value
-        if padding:
-            length = len(pulse)
-            if length < self.max_points:
-                last_value = pulse[-1]
-                pulse += [last_value] * (self.max_points - length)
-        # sanity check
-        if len(pulse) > self.max_points:
-            raise Exception("Error: pulse too large.")
-        return pulse
-
-    @micropython.native
-    def pulse_from_predefined(self, ps_config:dict, recalc_const:bool = False, padding:bool = False) -> list[int]:
-        """
-        TODO
-        """
-        pulse = []
-        if ps_config["psid"] == 1:
-            if self.pulse_constant == [] or recalc_const:
-                pulse = self.predefined_pulse1(ps_config["vstart"], ps_config["tramp"], ps_config["vstep"], ps_config["tstep"], ps_config["length"], ps_config["vend"], True, padding)
-            else:
-                pulse = self.predefined_pulse1(0.0, 0, 0.0, 0, ps_config["length"], ps_config["vend"], False, padding)
         return pulse

@@ -14,7 +14,7 @@ nav:
   - Using the analog digital converter: adc.md
   - Findus: findus.md
   - BootloaderCom: bootloadercom.md
-  - mpGlitcher: mpglitcher.md
+  - PicoGlitcher: picoglitcher.md
 theme: readthedocs
 plugins:
   - search

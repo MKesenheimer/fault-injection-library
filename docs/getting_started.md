@@ -46,9 +46,9 @@ More information about setting up the Raspberry Pi Pico can be found [here](http
 
 ### Step 2: Download the Pico Glitcher firmware
 
-Together with the findus library comes the MicroPython script (the "Pico Glitcher firmware"), which must be installed on the Pico Glitcher. Download the latest Pico Glitcher firmware here: [https://github.com/MKesenheimer/fault-injection-library/blob/master/findus/mpGlitcher.py](https://github.com/MKesenheimer/fault-injection-library/blob/master/findus/mpGlitcher.py).
+Together with the findus library comes the MicroPython script (the "Pico Glitcher firmware"), which must be installed on the Pico Glitcher. Download the latest Pico Glitcher firmware here: [https://github.com/MKesenheimer/fault-injection-library/blob/master/findus/firmware/PicoGlitcher.py](https://github.com/MKesenheimer/fault-injection-library/blob/master/findus/firmware/PicoGlitcher.py).
 
-Alternatively, if you installed findus from source (see [here](#building-from-source)), the Pico Glitcher firmware can be found at `fault-injection-library/findus/mpGlitcher.py`.
+Alternatively, if you installed findus from source (see [here](#building-from-source)), the Pico Glitcher firmware can be found at `fault-injection-library/findus/firmware/PicoGlitcher.py`.
 
 ### Step 3: Install the findus library
 
@@ -82,7 +82,7 @@ Take note of the device path. Next upload the Pico Glitcher firmware and the spe
 
 ```bash
 cd findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files mpGlitcher.py AD910X.py PulseGenerator.py Spline.py FastADC.py mpConfig_vx/config.json
+upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py config_vx/config.json
 ```
 
 Your Pico Glitcher should now be ready to perform fault-injection attacks.

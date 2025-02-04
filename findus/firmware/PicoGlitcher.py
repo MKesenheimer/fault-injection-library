@@ -5,9 +5,9 @@
 # If not, please write to: m.kesenheimer@gmx.net.
 
 """
-This is the documentation of the mpGlitcher module and all its classes.
+This is the documentation of the PicoGlitcher module and all its classes.
 
-Upload this module onto your PicoGlitcher. The classes and methods will become available through the pyboard interface.
+Upload this module onto your Pico Glitcher. The classes and methods will become available through the pyboard interface.
 """
 
 import machine
@@ -15,6 +15,8 @@ from rp2 import asm_pio, PIO, StateMachine
 from machine import Pin
 import time
 import ujson
+from FastADC import FastADC
+import _thread
 
 # load config
 with open("config.json", "r") as file:
@@ -72,8 +74,6 @@ elif config["hardware_version"][0] == 2:
         MUX_PIO_INIT = 0b10
     import AD910X
     from PulseGenerator import PulseGenerator
-    from FastADC import FastADC
-    import _thread
 
 @asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
 def glitch():
@@ -303,33 +303,9 @@ def wait_irq7():
     tst(r0, r2) # r0 & r2
     beq(loop) # if r0 & r2 == 0 -> IRQ7 bit not set
 
-class MicroPythonScript():
+class PicoGlitcher():
     """
-    MicroPython class that contains the code to access the hardware of the PicoGlitcher.
-
-    Methods:
-        __init__: Default constructor. Initializes the PicoGlitcher with the default configuration.
-        get_firmware_version: Get the current firmware version. Can be used to check if the current version is compatible with findus.
-        set_frequency: Set the CPU frequency of the Raspberry Pi Pico.
-        get_frequency: Get the current CPU frequency of the Raspberry Pi Pico.
-        set_trigger: Configures the PicoGlitcher which triggger condition to use.
-        set_baudrate: Set the baudrate of the UART communication in UART-trigger mode.
-        set_number_of_bits: Set the number of bits of the UART communication in UART-trigger mode.
-        set_pattern_match: Configure the PicoGlitcher to trigger when a specific byte pattern is observed on the RX line (`TRIGGER` pin).
-        enable_vtarget: Enable `VTARGET` output. Activates the PicoGlitcher's power supply for the target.
-        disable_vtarget: Disables `VTARGET` output. Disables the PicoGlitcher's power supply for the target.
-        power_cycle_target: Power cycle the target via the PicoGlitcher `VTARGET` output.
-        reset_target: Reset the target via the PicoGlitcher's `RESET` output.
-        release_reset: Release the reset on the target via the PicoGlitcher's `RESET` output.
-        reset: Reset the target via the PicoGlitcher's `RESET` output, release the reset on the target after a certain time.
-        set_lpglitch: Enable the low-power crowbar MOSFET for glitch generation.
-        set_hpglitch: Enable the high-power crowbar MOSFET for glitch generation.
-        set_multiplexing: Enables the multiplexing mode of the PicoGlitcher version 2 to switch between different voltage levels.
-        set_dead_zone: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
-        arm: Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. 
-        arm_multiplexing: 
-        block: Block until trigger condition is met. Raises an exception if times out.
-        change_config_and_reset: Change the content of the configuration file `config.json`. Can for example be used to change the initial voltage for multiplexing.
+    Class that contains the code to access the hardware of the PicoGlitcher.
     """
     def __init__(self):
         """
@@ -404,8 +380,6 @@ class MicroPythonScript():
             self.pin_ps_trigger = self.ad910x.get_trigger_pin()
             self.pulse_generator = PulseGenerator(vhigh=self.config["ps_offset"], factor=self.config["ps_factor"])
             # analog digital converter
-            #self.adc = machine.ADC(Pin(ADC0))
-            #self.samples = []
             self.fastadc = FastADC()
             self.fastsamples = self.fastadc.init_array()
             self.core1_stopped = True
@@ -587,12 +561,15 @@ class MicroPythonScript():
         self.ad910x.set_frequency(self.pulse_generator.get_frequency())
         self.ad910x.set_gain(1.5)
         #self.ad910x.set_offset(2048)
-        # configure the AD9102 to emit a oneshot pulse
+        # configure the AD9102 to emit an oneshot pulse
         self.ad910x.set_pulse_output_oneshot()
 
     def do_calibration(self, vhigh:float):
         """
-        TODO
+        Emit a calibration pulse with that can be used to determine `vhigh` and `vlow`. These parameters are used to calculate the offset and gain parameters of the DAC.
+
+        Parameters:
+            vhigh: The initial voltage to perform the calibration with. Default is `1V`.
         """
         self.set_pulseshaping(vhigh)
         pulse = self.pulse_generator.calibration_pulse()
@@ -601,7 +578,12 @@ class MicroPythonScript():
 
     def apply_calibration(self, vhigh:float, vlow:float, store:bool = True):
         """
-        TODO
+        Calculate and store the offset and gain parameters that were determined by the calibration routine. These values are stored in `config.json` and must be re-calculated if the config is overwritten.
+
+        Parameters:
+            vhigh: The maximum voltage of the calibration voltage trace.
+            vlow: The minimum voltage of the calibration voltage trace.
+            store: wether to store the offset and gain factor in the Pico Glitcher configuration.
         """
         factor = 1/(vhigh - vlow)
         self.pulse_generator.set_calibration(vhigh, factor)
@@ -768,13 +750,6 @@ class MicroPythonScript():
         pulse = self.pulse_generator.pulse_from_list(pulse)
         self.arm_pulseshaping(delay, pulse)
 
-    def arm_pulseshaping_from_predefined(self, delay:int, ps_config:dict, recalc_const:bool = False):
-        """
-        TODO
-        """
-        pulse = self.pulse_generator.pulse_from_predefined(ps_config, recalc_const)
-        self.arm_pulseshaping(delay, pulse)
-
     def arm_pulseshaping(self, delay:int, pulse:list[int]):
         """
         TODO
@@ -855,6 +830,12 @@ class MicroPythonScript():
         self.change_config(key, value)
         machine.soft_reset()
         #machine.reset()
+
+    def hard_reset(self):
+        """
+        Performs a hard reset of the Pico Glitcher.
+        """
+        machine.reset()
 
     @micropython.native
     def poll_fast_adc(self):

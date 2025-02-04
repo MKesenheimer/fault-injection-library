@@ -71,9 +71,9 @@ The output pins with level-shifting are `GPIO4` - `GPIO9`. For inputs with level
 
 ## Modify the MicroPython script
 
-Add your modifications to `mpGlitcher.py` ([https://github.com/MKesenheimer/fault-injection-library/blob/master/findus/mpGlitcher.py](https://github.com/MKesenheimer/fault-injection-library/blob/master/findus/mpGlitcher.py), or `fault-injection-library/findus/mpGlitcher.py` if you cloned the whole repository) and upload the MicroPython script to the Raspberry Pi Pico:
+Add your modifications to `PicoGlitcher.py` ([https://github.com/MKesenheimer/fault-injection-library/blob/master/findus/firmware/PicoGlitcher.py](https://github.com/MKesenheimer/fault-injection-library/blob/master/findus/firmware/PicoGlitcher.py), or `fault-injection-library/findus/firmware/PicoGlitcher.py` if you cloned the whole repository) and upload the MicroPython script to the Raspberry Pi Pico:
 
 ```bash
 cd findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files mpGlitcher.py AD910X.py PulseGenerator.py Spline.py FastADC.py mpConfig_vx/config.json
+upload --port /dev/tty.<rpi-tty-port> --files PicoGlitcher.py AD910X.py PulseGenerator.py Spline.py FastADC.py config_vx/config.json
 ```

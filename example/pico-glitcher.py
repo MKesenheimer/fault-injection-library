@@ -145,10 +145,6 @@ class Main():
             # increase experiment id
             experiment_id += 1
 
-    def __del__(self):
-        print("[+] Terminating gracefully.")
-        self.glitcher.stop_core1()
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--rpico", required=False, help="rpico port", default="/dev/ttyACM0")

@@ -76,14 +76,14 @@ We install the corresponding Micropython script and the corresponding config fil
 
 ```bash
 cd findus/firmware
-upload --port /dev/<rpi-tty-port> --files mpGlitcher.py mpConfig_v1/config.json
+upload --port /dev/<rpi-tty-port> --files FastADC.py PicoGlitcher.py config_v1/config.json
 ```
 
 For hardware version 2.x of the PicoGlitcher, the corresponding config file must be provided:
 
 ```bash
 cd findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files mpGlitcher.py AD910X.py PulseGenerator.py Spline.py FastADC.py mpConfig_v2/config.json
+upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py config_v2/config.json
 ```
 
 Although the software is based on Micropython, using the PIO functions of the Raspberry Pi Pico, very precise switching operations can be made and triggered on external signals.
@@ -92,7 +92,7 @@ Next, we switch to the directory `example` and execute the script which controls
 
 ```bash
 cd example
-python pico-glitcher.py --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port> --delay 1_000 2_000 --length 100 150
+python pico-glitcher.py --target /dev/tty.<target-tty-port> --rpico /dev/<rpi-tty-port> --delay 1_000 2_000 --length 100 150
 ```
 
 The script resets the target, arms the pico glitcher, waits for the external trigger (reset high) and emits a glitch of a given length after a certain delay.
@@ -125,8 +125,7 @@ Install the Raspberry Pi Pico Micropython scripts (for hardware version 1 see be
 
 ```bash
 cd findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files mpGlitcher.py AD910X.py PulseGenerator.py Spline.py FastADC.py mpConfig_v2/config.json
-
+upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py config_v2/config.json
 ```
 
 Next, change into `projects/stm32f42x-glitching` and execute the following script.
