@@ -7,7 +7,7 @@
 # If not, please write to: m.kesenheimer@gmx.net.
 
 """
-Findus is a Python library to perform fault-injection attacks on embedded devices. It was developed for the PicoGlitcher, however, the ChipWhisperer Pro and the ChipWhisperer Husky is also supported.
+Findus is a Python library to perform fault-injection attacks on embedded devices. It was developed for the Pico Glitcher, however, the ChipWhisperer Pro and the ChipWhisperer Husky is also supported.
 
 This is the documentation of the findus module and all its classes.
 """
@@ -280,7 +280,7 @@ class Serial():
 
     def reset(self, debug:bool = False) -> bool:
         """
-        Reset target via DTR pin and flush data lines. Can be used alternatively to the reset lines of the PicoGlitcher (or ChipWhisperer Husky, or ChipWhisperer Pro) to reset the target.
+        Reset target via DTR pin and flush data lines. Can be used alternatively to the reset lines of the Pico Glitcher (or ChipWhisperer Husky, or ChipWhisperer Pro) to reset the target.
 
         Parameters:
             debug: If set to true, garbage on the serial interface is plotted to tty.
@@ -598,8 +598,8 @@ class Glitcher():
 
 class PicoGlitcher(Glitcher):
     """
-    Class giving access to the functions of the PicoGlitcher. Derived from Glitcher class.
-    For an example, connect the PicoGlitcher as follows:
+    Class giving access to the functions of the Pico Glitcher. Derived from Glitcher class.
+    For an example, connect the Pico Glitcher as follows:
 
     - Remove any capacitors on your target device that could infere with the glitch.
     - Set the desired output voltage `VTARGET` with the micro switch.
@@ -628,18 +628,18 @@ class PicoGlitcher(Glitcher):
     Methods:
         __init__: Default constructor. Does nothing in this case.
         init: Default initialization procedure.
-        arm: Arm the PicoGlitcher and wait for trigger condition.
+        arm: Arm the Pico Glitcher and wait for trigger condition.
         block: Block the main script until trigger condition is met. Times out.
-        reset: Reset the target via the PicoGlitcher's `RESET` output.
-        release_reset: Release the reset to the target via the PicoGlitcher's `RESET` output.
-        power_cycle_target: Power cycle the target via the PicoGlitcher `VTARGET` output.
-        power_cycle_reset: Power cycle and reset the target via the PicoGlitcher `RESET` and `VTARGET` output. 
+        reset: Reset the target via the Pico Glitcher's `RESET` output.
+        release_reset: Release the reset to the target via the Pico Glitcher's `RESET` output.
+        power_cycle_target: Power cycle the target via the Pico Glitcher `VTARGET` output.
+        power_cycle_reset: Power cycle and reset the target via the Pico Glitcher `RESET` and `VTARGET` output. 
         reset_and_eat_it_all: Reset the target and flush the serial buffers.
         reset_wait: Reset the target and read from serial.
         set_lpglitch: Enable low-power MOSFET for glitch generation.
         set_hpglitch: Enable high-power MOSFET for glitch generation.
-        rising_edge_trigger: Configure the PicoGlitcher to trigger on a rising edge on the `TRIGGER` line.
-        uart_trigger: Configure the PicoGlitcher to trigger when a specific byte pattern is observed on the `TRIGGER` line.
+        rising_edge_trigger: Configure the Pico Glitcher to trigger on a rising edge on the `TRIGGER` line.
+        uart_trigger: Configure the Pico Glitcher to trigger when a specific byte pattern is observed on the `TRIGGER` line.
         set_cpu_frequency: Set the CPU frequency of the Raspberry Pi Pico.
         get_cpu_frequency: Get the current CPU frequency of the Raspberry Pi Pico.
     """
@@ -656,16 +656,16 @@ class PicoGlitcher(Glitcher):
 
     def init(self, port:str, ext_power:str = None, ext_power_voltage:float = 3.3):
         """
-        Default initialization procedure of the PicoGlitcher. Default configuration is:
+        Default initialization procedure of the Pico Glitcher. Default configuration is:
 
         - Set the trigger input to rising-edge trigger on `TRIGGER` input and assume triggering when the reset is released.
         - Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions.
         - Use the high-power crowbar MOSFET.
 
         Parameters:
-            port: Port identifier of the PicoGlitcher.
-            ext_power: Port identifier of the external power supply (RD6006). If None, target is assumed to be supplied by `VTARGET` of the PicoGlitcher.
-            ext_power_voltage: Supply voltage of the external power supply. Must be used in combination with `ext_power`. You can not control the supply voltage `VTARGET` of the PicoGlitcher with this parameter.
+            port: Port identifier of the Pico Glitcher.
+            ext_power: Port identifier of the external power supply (RD6006). If None, target is assumed to be supplied by `VTARGET` of the Pico Glitcher.
+            ext_power_voltage: Supply voltage of the external power supply. Must be used in combination with `ext_power`. You can not control the supply voltage `VTARGET` of the Pico Glitcher with this parameter.
         """
         self.pico_glitcher = PicoGlitcherInterface()
         self.pico_glitcher.init(port, 'PicoGlitcher')
@@ -674,13 +674,13 @@ class PicoGlitcher(Glitcher):
         try:
             pg_fw_version = self.pico_glitcher.get_firmware_version()
             fi_fw_version = list(map(int, version("findus").split('.')))
-            print(f"[+] Version of PicoGlitcher: {pg_fw_version}")
+            print(f"[+] Version of Pico Glitcher: {pg_fw_version}")
             print(f"[+] Version of findus: {fi_fw_version}")
             if pg_fw_version != fi_fw_version:
                 raise Exception("Version mismatch")
         except Exception as _:
-            print("[-] Fatal error: Versions of findus and PicoGlitcher do not match.")
-            print("[-] Update the PicoGlitcher firmware and findus software. See README.md.")
+            print("[-] Fatal error: Versions of findus and Pico Glitcher do not match.")
+            print("[-] Update the Pico Glitcher firmware and findus software. See README.md.")
             sys.exit(-1)
 
         self.pico_glitcher.set_trigger("tio", "default")
@@ -698,7 +698,7 @@ class PicoGlitcher(Glitcher):
 
     def arm(self, delay:int, length:int):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.
+        Arm the Pico Glitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -708,7 +708,7 @@ class PicoGlitcher(Glitcher):
 
     def arm_multiplexing(self, delay:int, mul_config:dict):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later.
+        Arm the Pico Glitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -718,7 +718,7 @@ class PicoGlitcher(Glitcher):
 
     def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[int]]):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later. Additionally, the Pulse Shaping Expansion board is needed.
+        Arm the Pico Glitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later. Additionally, the Pulse Shaping Expansion board is needed.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -733,7 +733,7 @@ class PicoGlitcher(Glitcher):
 
     def arm_pulseshaping_from_spline(self, delay:int, xpoints:list[int], ypoints:list[float]):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The pulse definition is given by time and voltage points. Intermediate values are interpolated.
+        Arm the Pico Glitcher and wait for the trigger condition. The pulse definition is given by time and voltage points. Intermediate values are interpolated.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -750,7 +750,7 @@ class PicoGlitcher(Glitcher):
 
     def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda:str, pulse_number_of_points:int):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. Generate the pulse from a lambda function depending on the time.
+        Arm the Pico Glitcher and wait for the trigger condition. Generate the pulse from a lambda function depending on the time.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -766,7 +766,7 @@ class PicoGlitcher(Glitcher):
 
     def arm_pulseshaping_from_list(self, delay:int, pulse:list[int]):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. Genereate the pulse from a raw array of values.
+        Arm the Pico Glitcher and wait for the trigger condition. Genereate the pulse from a raw array of values.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -793,7 +793,7 @@ class PicoGlitcher(Glitcher):
 
     def reset(self, reset_time:float = 0.2):
         """
-        Reset the target via the PicoGlitcher's `RESET` output.
+        Reset the target via the Pico Glitcher's `RESET` output.
         
         Parameters:
             reset_time: Time how long the target is held in reset.
@@ -802,13 +802,13 @@ class PicoGlitcher(Glitcher):
 
     def release_reset(self):
         """
-        Release the reset to the target via the PicoGlitcher's `RESET` output.
+        Release the reset to the target via the Pico Glitcher's `RESET` output.
         """
         self.pico_glitcher.release_reset()
 
     def power_cycle_target(self, power_cycle_time:float = 0.2):
         """
-        Power cycle the target via the PicoGlitcher `VTARGET` output.
+        Power cycle the target via the Pico Glitcher `VTARGET` output.
         If available, target is power-cycled by the external power supply RD6006.
         
         Parameters:
@@ -821,7 +821,7 @@ class PicoGlitcher(Glitcher):
 
     def power_cycle_reset(self, power_cycle_time:float = 0.2):
         """
-        Power cycle and reset the target via the PicoGlitcher `VTARGET` and `RESET` output. Can also be used to define sharper trigger conditions via the `RESET` line.
+        Power cycle and reset the target via the Pico Glitcher `VTARGET` and `RESET` output. Can also be used to define sharper trigger conditions via the `RESET` line.
         
         Parameters:
             power_cycle_time: Time how long the power supply is cut. If `ext_power` is defined, the external power supply is cycled.
@@ -841,7 +841,7 @@ class PicoGlitcher(Glitcher):
 
     def reset_and_eat_it_all(self, target:serial.Serial, target_timeout:float = 0.3):
         """
-        Reset the target via the PicoGlitcher's `RESET` output and flush the serial buffers.
+        Reset the target via the Pico Glitcher's `RESET` output and flush the serial buffers.
         
         Parameters:
             target: Serial communication object (usually defined as `target = serial.Serial(...)`).
@@ -855,7 +855,7 @@ class PicoGlitcher(Glitcher):
 
     def reset_wait(self, target:serial.Serial, token:bytes, reset_time:float = 0.2, debug:bool = False) -> bytes:
         """
-        Reset the target via the PicoGlitchers's `RESET` output and wait until the target responds (read from serial).
+        Reset the target via the Pico Glitchers's `RESET` output and wait until the target responds (read from serial).
 
         Parameters:
             target: Serial communication object (usually defined as `target = serial.Serial(...)`).
@@ -897,13 +897,13 @@ class PicoGlitcher(Glitcher):
 
     def set_multiplexing(self):
         """
-        Enables the multiplexing mode of the PicoGlitcher version 2 to quickly switch between different voltage levels.
+        Enables the multiplexing mode of the Pico Glitcher version 2 to quickly switch between different voltage levels.
         """
         self.pico_glitcher.set_multiplexing()
 
     def set_pulseshaping(self, vinit:float=1.8):
         """
-        Enables the pulse-shaping mode of the PicoGlitcher version 2 to apply a voltage profile to the target's supply voltage.
+        Enables the pulse-shaping mode of the Pico Glitcher version 2 to apply a voltage profile to the target's supply voltage.
 
         Parameters:
             vinit: The initial voltage (voltage offset) to base the calculations on. This does not change the output voltage of the pulse shaping expansion board. However, this parameter is used to calculate the correct offsets and scaling of the pulse.
@@ -932,19 +932,19 @@ class PicoGlitcher(Glitcher):
 
     def rising_edge_trigger(self, pin_trigger:str = "default", dead_time:float = 0, pin_condition:str = "default"):
         """
-        Configure the PicoGlitcher to trigger on a rising edge on the `TRIGGER` line.
+        Configure the Pico Glitcher to trigger on a rising edge on the `TRIGGER` line.
         
         Parameters:
             pin_trigger: The trigger pin to use. Can be either "default" or "alt". For hardware version 2 options "ext1" or "ext2" can also be chosen.
             dead_time: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
-            pin_condition: The rejection time is generated internally by measuring the state of the `power` or `reset` pin of the PicoGlitcher. If you want to trigger on the reset condition, set `pin_condition = 'reset'`, else if you want to trigger on the target power set `pin_condition = 'power'`. If `dead_time` is set to zero and `pin_condition = 'default'`, this parameter is ignored.
+            pin_condition: The rejection time is generated internally by measuring the state of the `power` or `reset` pin of the Pico Glitcher. If you want to trigger on the reset condition, set `pin_condition = 'reset'`, else if you want to trigger on the target power set `pin_condition = 'power'`. If `dead_time` is set to zero and `pin_condition = 'default'`, this parameter is ignored.
         """
         self.pico_glitcher.set_trigger("tio", pin_trigger)
         self.pico_glitcher.set_dead_zone(dead_time, pin_condition)
 
     def uart_trigger(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8, pin_trigger:str = "default"):
         """
-        Configure the PicoGlitcher to trigger when a specific byte pattern is observed on the `TRIGGER` line.
+        Configure the Pico Glitcher to trigger when a specific byte pattern is observed on the `TRIGGER` line.
         
         Parameters:
             pattern: Byte pattern that is transmitted on the serial lines to trigger on. For example `0x11`.
@@ -1617,7 +1617,7 @@ class ProGlitcher(Glitcher):
 
     def rising_edge_trigger(self, pin_trigger:str = "default", dead_time:float = 0, pin:str = ""):
         """
-        Configure the PicoGlitcher to trigger on a rising edge on the `TRIGGER` line (`tio4` pin).
+        Configure the Pico Glitcher to trigger on a rising edge on the `TRIGGER` line (`tio4` pin).
         Note: `dead_time` and `pin` have no functions here (see `PicoGlitcher.rising_edge_trigger`).
 
         Parameters:

@@ -305,15 +305,15 @@ def wait_irq7():
 
 class PicoGlitcher():
     """
-    Class that contains the code to access the hardware of the PicoGlitcher.
+    Class that contains the code to access the hardware of the Pico Glitcher.
     """
     def __init__(self):
         """
         Default constructor.
-        Initializes the PicoGlitcher with the default configuration.
+        Initializes the Pico Glitcher with the default configuration.
         - Disables `VTARGET`
         - Enables the low-power MOSFET for glitching
-        - Configures the PicoGlitcher to use the rising-edge triggger condition.
+        - Configures the Pico Glitcher to use the rising-edge triggger condition.
         """
         self.sm0 = None
         self.sm1 = None
@@ -425,9 +425,9 @@ class PicoGlitcher():
 
     def set_trigger(self, mode:str = "tio", pin_trigger:str = "default"):
         """
-        Configures the PicoGlitcher which triggger mode to use.
-        In "tio"-mode, the PicoGlitcher triggers on a rising edge on the `TRIGGER` pin.
-        If "uart"-mode is chosen, the PicoGlitcher listens on the `TRIGGER` pin and triggers if a specific byte pattern in the serial communication is observed.
+        Configures the Pico Glitcher which triggger mode to use.
+        In "tio"-mode, the Pico Glitcher triggers on a rising edge on the `TRIGGER` pin.
+        If "uart"-mode is chosen, the Pico Glitcher listens on the `TRIGGER` pin and triggers if a specific byte pattern in the serial communication is observed.
 
         Parameters:
             mode: The trigger mode to use. Either "tio" or "uart".
@@ -467,7 +467,7 @@ class PicoGlitcher():
 
     def set_pattern_match(self, pattern:int):
         """
-        Configure the PicoGlitcher to trigger when a specific byte pattern is observed on the RX line (`TRIGGER` pin).
+        Configure the Pico Glitcher to trigger when a specific byte pattern is observed on the RX line (`TRIGGER` pin).
 
         Parameters:
             pattern: Byte pattern that is transmitted on the serial lines to trigger on. For example `0x11`.
@@ -476,19 +476,19 @@ class PicoGlitcher():
 
     def enable_vtarget(self):
         """
-        Enable `VTARGET` output. Activates the PicoGlitcher's power supply for the target.
+        Enable `VTARGET` output. Activates the Pico Glitcher's power supply for the target.
         """
         self.pin_vtarget_en.low()
 
     def disable_vtarget(self):
         """
-        Disables `VTARGET` output. Disables the PicoGlitcher's power supply for the target.
+        Disables `VTARGET` output. Disables the Pico Glitcher's power supply for the target.
         """
         self.pin_vtarget_en.high()
 
     def power_cycle_target(self, power_cycle_time:float = 0.2):
         """
-        Power cycle the target via the PicoGlitcher `VTARGET` output.
+        Power cycle the target via the Pico Glitcher `VTARGET` output.
         
         Parameters:
             power_cycle_time: Time how long the power supply is cut.
@@ -499,19 +499,19 @@ class PicoGlitcher():
 
     def reset_target(self):
         """
-        Reset the target via the PicoGlitcher's `RESET` output.
+        Reset the target via the Pico Glitcher's `RESET` output.
         """
         self.pin_reset.low()
 
     def release_reset(self):
         """
-        Release the reset on the target via the PicoGlitcher's `RESET` output.
+        Release the reset on the target via the Pico Glitcher's `RESET` output.
         """
         self.pin_reset.high()
 
     def reset(self, reset_time:float = 0.01):
         """
-        Reset the target via the PicoGlitcher's `RESET` output, release the reset on the target after a certain time.
+        Reset the target via the Pico Glitcher's `RESET` output, release the reset on the target after a certain time.
         
         Parameters:
             reset_time: Time how long the target is held in reset.
@@ -540,7 +540,7 @@ class PicoGlitcher():
 
     def set_multiplexing(self):
         """
-        Enables the multiplexing mode of the PicoGlitcher version 2 to switch between different voltage levels.
+        Enables the multiplexing mode of the Pico Glitcher version 2 to switch between different voltage levels.
         """
         if self.config["hardware_version"][0] < 2:
             raise Exception("Multiplexing not implemented in hardware version 1.")
@@ -549,7 +549,7 @@ class PicoGlitcher():
 
     def set_pulseshaping(self, vinit=1.8):
         """
-        Enables the pulse-shaping mode of the PicoGlitcher version 2 to emit a pre-defined voltage pulse on the Pulse Shaping expansion board.
+        Enables the pulse-shaping mode of the Pico Glitcher version 2 to emit a pre-defined voltage pulse on the Pulse Shaping expansion board.
         """
         if self.config["hardware_version"][0] < 2:
             raise Exception("Pulse-shaping not implemented in hardware version 1.")
@@ -651,7 +651,7 @@ class PicoGlitcher():
 
     def arm(self, delay:int, length:int):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.
+        Arm the Pico Glitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -671,7 +671,7 @@ class PicoGlitcher():
 
     def arm_multiplexing(self, delay:int, mul_config:dict):
         """
-        Arm the PicoGlitcher in multiplexing mode and wait for the trigger condition. 
+        Arm the Pico Glitcher in multiplexing mode and wait for the trigger condition.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -721,7 +721,7 @@ class PicoGlitcher():
 
     def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[float]]):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The pulse is defined via a configuration similar to multiplexing (without interpolation):
+        Arm the Pico Glitcher and wait for the trigger condition. The pulse is defined via a configuration similar to multiplexing (without interpolation):
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -732,7 +732,7 @@ class PicoGlitcher():
 
     def arm_pulseshaping_from_spline(self, delay:int, xpoints:list[int], ypoints:list[float]):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The pulse definition is given by time and voltage points. Intermediate values are interpolated.
+        Arm the Pico Glitcher and wait for the trigger condition. The pulse definition is given by time and voltage points. Intermediate values are interpolated.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -744,7 +744,7 @@ class PicoGlitcher():
 
     def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda, pulse_number_of_points:int):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. Generate the pulse from a lambda function depending on the time.
+        Arm the Pico Glitcher and wait for the trigger condition. Generate the pulse from a lambda function depending on the time.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -756,7 +756,7 @@ class PicoGlitcher():
 
     def arm_pulseshaping_from_list(self, delay:int, pulse:list[int]):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. Genereate the pulse from a raw array of values.
+        Arm the Pico Glitcher and wait for the trigger condition. Genereate the pulse from a raw array of values.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
