@@ -101,7 +101,6 @@ power-cycle-and-read --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port>
 power-cycle-and-read --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port> --dump
 ```
 
-
 ## power-cycle
 
 Test the power supply capabilities of your setup by executing this script.
@@ -126,4 +125,24 @@ power-cycle --rpico /dev/<rpi-tty-port>
 - Power cycle via the ChipWhisperer Pro:
 ```bash
 power-cycle
+```
+
+## pulse-calibration
+
+A small tool to calibrate the digital-to-analog converter of the Pulse Shaping expansion board.
+
+```bash
+pulse-calibration --help
+usage: pulse-calibration [-h] --rpico RPICO [--vhigh VHIGH] [--vlow VLOW]
+
+options:
+  -h, --help     show this help message and exit
+  --rpico RPICO  rpico port
+  --vhigh VHIGH
+  --vlow VLOW
+```
+
+Execute the following command and follow the notes on the command line:
+```bash
+pulse-calibration --rpico /dev/<rpi-tty-port>
 ```

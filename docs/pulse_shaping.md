@@ -151,10 +151,10 @@ python pico-glitcher-pulse-shaping.py --rpico /dev/tty.usbmodem11101 --delay 10 
 
 Since the gain of the amplifier of the pulse-shaping expansion board depends on a lot of things, the output of the expansion board has to be calibrated.
 
-This can be done by executing `fault-injection-library/example/calibration.py` and by measuring the voltage trace with an oscilloscope:
+This can be done by executing the command-line tool `pulse-calibration` (should be installed with findus) and by measuring the voltage trace with an oscilloscope:
 
 ```bash
-python calibration.py --rpico /dev/tty.usbmodem11101
+pulse-calibration --rpico /dev/tty.usbmodem11101
 ```
 
 To perform a calibration routine

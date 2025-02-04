@@ -38,6 +38,7 @@ power-cycle-and-read = "findus.helper.power_cycle_and_read:main"
 power-cycle = "findus.helper.power_cycle:main"
 bootloader-com = "findus.BootloaderCom:main"
 pulse-editor = "findus.InteractivePchipEditor:main"
+pulse-calibration = "findus.helper.pulse_shaping_calibration:main"
 
 [project.urls]
 Homepage = "https://mkesenheimer.github.io"
