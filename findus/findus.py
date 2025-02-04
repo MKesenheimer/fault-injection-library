@@ -633,7 +633,7 @@ class PicoGlitcher(Glitcher):
         reset: Reset the target via the Pico Glitcher's `RESET` output.
         release_reset: Release the reset to the target via the Pico Glitcher's `RESET` output.
         power_cycle_target: Power cycle the target via the Pico Glitcher `VTARGET` output.
-        power_cycle_reset: Power cycle and reset the target via the Pico Glitcher `RESET` and `VTARGET` output. 
+        power_cycle_reset: Power cycle and reset the target via the Pico Glitcher `RESET` and `VTARGET` output.
         reset_and_eat_it_all: Reset the target and flush the serial buffers.
         reset_wait: Reset the target and read from serial.
         set_lpglitch: Enable low-power MOSFET for glitch generation.
@@ -1030,9 +1030,15 @@ class PicoGlitcher(Glitcher):
         self.pico_glitcher.configure_adc(number_of_samples, sampling_freq)
 
     def stop_core1(self):
+        """
+        Stop execution on the second core of the Pico Glitcher (Raspberry Pi Pico).
+        """
         self.pico_glitcher.stop_core1()
 
     def hard_reset(self):
+        """
+        Perform a hard reset of the Pico Glitcher (Raspberry Pi Pico).
+        """
         try:
             self.pico_glitcher.hard_reset()
         except Exception as _:

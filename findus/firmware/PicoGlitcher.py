@@ -845,12 +845,12 @@ class PicoGlitcher():
 
     def hard_reset(self):
         """
-        Performs a hard reset of the Pico Glitcher.
+        Perform a hard reset of the Pico Glitcher (Raspberry Pi Pico).
         """
         machine.reset()
 
     @micropython.native
-    def poll_fast_adc(self):
+    def __poll_fast_adc(self):
         self.core1_stopped = False
         # wait for trigger condition
         wait_irq7()
@@ -859,10 +859,16 @@ class PicoGlitcher():
         self.core1_stopped = True
 
     def arm_adc(self):
+        """
+        Arm the ADC on pin 26 and capture ADC samples if the trigger condition is met. On Pico Glitcher hardware version 1, the separate SMA connector labeled `Analog` can be used to measure analog voltage traces. On revision 2, the analog input is directly connected to the `GLITCH` line.
+        """
         if self.core1_stopped:
-            _thread.start_new_thread(self.poll_fast_adc, ())
+            _thread.start_new_thread(self.__poll_fast_adc, ())
 
     def get_adc_samples(self):
+        """
+        Read back the captured ADC samples.
+        """
         timeout = 1
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -876,8 +882,18 @@ class PicoGlitcher():
         print(self.fastsamples)
 
     def configure_adc(self, number_of_samples:int = 1024, sampling_freq:int = 500_000):
+        """
+        Configure the onboard ADC of the Pico Glitcher.
+
+        Parameters:
+            number_of_samples: The number of samples to capture after triggering.
+            sampling_freq: The sampling frequency of the ADC. `500 kSPS` is the maximum.
+        """
         self.fastadc.configure_adc(number_of_samples, sampling_freq)
         self.fastsamples = self.fastadc.init_array()
 
     def stop_core1(self):
+        """
+        Stop execution on the second core of the Pico Glitcher (Raspberry Pi Pico).
+        """
         self.core1_stopped = True
