@@ -733,7 +733,7 @@ class PicoGlitcher(Glitcher):
 
     def arm_pulseshaping_from_spline(self, delay:int, xpoints:list[int], ypoints:list[float]):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later. Additionally, the Pulse Shaping Expansion board is needed.
+        Arm the PicoGlitcher and wait for the trigger condition. The pulse definition is given by time and voltage points. Intermediate values are interpolated.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -750,7 +750,7 @@ class PicoGlitcher(Glitcher):
 
     def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda:str, pulse_number_of_points:int):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later. Additionally, the Pulse Shaping Expansion board is needed.
+        Arm the PicoGlitcher and wait for the trigger condition. Generate the pulse from a lambda function depending on the time.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -766,7 +766,7 @@ class PicoGlitcher(Glitcher):
 
     def arm_pulseshaping_from_list(self, delay:int, pulse:list[int]):
         """
-        Arm the PicoGlitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later. Additionally, the Pulse Shaping Expansion board is needed.
+        Arm the PicoGlitcher and wait for the trigger condition. Genereate the pulse from a raw array of values.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.

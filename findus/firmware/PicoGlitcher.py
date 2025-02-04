@@ -573,7 +573,7 @@ class PicoGlitcher():
         """
         self.set_pulseshaping(vhigh)
         pulse = self.pulse_generator.calibration_pulse()
-        self.arm_pulseshaping(delay=100, pulse=pulse)
+        self.__arm_pulseshaping(delay=100, pulse=pulse)
         self.reset(0.01)
 
     def apply_calibration(self, vhigh:float, vlow:float, store:bool = True):
@@ -671,7 +671,7 @@ class PicoGlitcher():
 
     def arm_multiplexing(self, delay:int, mul_config:dict):
         """
-        Arm the PicoGlitcher in multiplexing mode and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.
+        Arm the PicoGlitcher in multiplexing mode and wait for the trigger condition. 
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
@@ -721,39 +721,51 @@ class PicoGlitcher():
 
     def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[float]]):
         """
-        TODO
+        Arm the PicoGlitcher and wait for the trigger condition. The pulse is defined via a configuration similar to multiplexing (without interpolation):
+
+        Parameters:
+            delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            ps_config: The pulse configuration given as a list of time deltas and voltage values.
         """
         pulse = self.pulse_generator.pulse_from_config(ps_config)
-        self.arm_pulseshaping(delay, pulse)
+        self.__arm_pulseshaping(delay, pulse)
 
     def arm_pulseshaping_from_spline(self, delay:int, xpoints:list[int], ypoints:list[float]):
         """
-        TODO
+        Arm the PicoGlitcher and wait for the trigger condition. The pulse definition is given by time and voltage points. Intermediate values are interpolated.
+
+        Parameters:
+            delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            xpoints: A list of time points (in nanoseconds) where voltage changes occur.
+            ypoints: The corresponding voltage levels at each time point.
         """
         pulse = self.pulse_generator.pulse_from_spline(xpoints, ypoints)
-        self.arm_pulseshaping(delay, pulse)
+        self.__arm_pulseshaping(delay, pulse)
 
     def arm_pulseshaping_from_lambda(self, delay:int, ps_lambda, pulse_number_of_points:int):
         """
-        TODO
+        Arm the PicoGlitcher and wait for the trigger condition. Generate the pulse from a lambda function depending on the time.
+
+        Parameters:
+            delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            ps_lambda: A lambda function that defines the glitch at certain times. Must be given as string which is processed by the Pico Glitcher at runtime.
+            pulse_number_of_points: The approximate length of the pulse. This is needed to constrain the pulse and to save computing time.
         """
-        # hack: pyboard can not transmit the plain lambda object over UART.
-        # Thus we have to transmit the "lambda code" and interprete it here
-        #lam = eval("lambda t: " + ps_lambda)
         pulse = self.pulse_generator.pulse_from_lambda(ps_lambda, pulse_number_of_points)
-        self.arm_pulseshaping(delay, pulse)
+        self.__arm_pulseshaping(delay, pulse)
 
     def arm_pulseshaping_from_list(self, delay:int, pulse:list[int]):
         """
-        TODO
+        Arm the PicoGlitcher and wait for the trigger condition. Genereate the pulse from a raw array of values.
+
+        Parameters:
+            delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            pulse: A raw list of points that define the pulse. No calibration and no constraints are applied to the list. The list is forwarded directly to the DAC.
         """
         pulse = self.pulse_generator.pulse_from_list(pulse)
-        self.arm_pulseshaping(delay, pulse)
+        self.__arm_pulseshaping(delay, pulse)
 
-    def arm_pulseshaping(self, delay:int, pulse:list[int]):
-        """
-        TODO
-        """
+    def __arm_pulseshaping(self, delay:int, pulse:list[int]):
         if self.config["hardware_version"][0] < 2:
             raise Exception("Multiplexing not implemented in hardware version 1.")
 

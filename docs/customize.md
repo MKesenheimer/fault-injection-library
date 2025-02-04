@@ -24,7 +24,7 @@ The GPIO pins of the Raspberry Pi Pico are connected to the following outlets:
 | 20       | VTARGET_EN: used to enable and disable the target voltage |
 | 21       | VTARGET over current input, currently unused              |
 | 22       | unused                                                    |
-| 26       | Analog input, currently unused                            |
+| 26       | Analog input                                              |
 | 27       | unused                                                    |
 | 28       | unused                                                    |
 
@@ -59,7 +59,7 @@ The GPIO pins of the Raspberry Pi Pico are connected to the following outlets:
 | 16 - 19  | unused in- and outputs (without level shifter)              |
 | 20 - 21  | unused inputs (with level shifter)                          |
 | 22       | VTARGET_EN: used to enable and disable the target voltage   |
-| 26       | Analog input connected to glitch out line, currently unused |
+| 26       | Analog input connected to glitch out line                   |
 | 27       | Analog input connected to EXT1 input, currently unused      |
 | 28       | Analog input connected to EXT2 input, currently unused      |
 
