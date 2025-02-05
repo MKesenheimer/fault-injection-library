@@ -48,7 +48,7 @@ More information about setting up the Raspberry Pi Pico can be found [here](http
 
 Together with the findus library comes the MicroPython script (the "Pico Glitcher firmware"), which must be installed on the Pico Glitcher. Download the latest Pico Glitcher firmware here: [https://github.com/MKesenheimer/fault-injection-library/blob/master/findus/firmware/PicoGlitcher.py](https://github.com/MKesenheimer/fault-injection-library/blob/master/findus/firmware/PicoGlitcher.py).
 
-Alternatively, if you installed findus from source (see [here](#building-from-source)), the Pico Glitcher firmware can be found at `fault-injection-library/findus/firmware/PicoGlitcher.py`.
+Alternatively, if you installed findus from source (see [here](#building-from-source)), the Pico Glitcher firmware can be found at `fault-injection-library/findus/firmware/`.
 
 ### Step 3: Install the findus library
 
@@ -78,11 +78,11 @@ Connect the Pico Glitcher to your computer and check which serial device comes u
 ls /dev/tty*
 ```
 
-Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version via the following command:
+Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version (either `config_v1/config.json` or `config_v2/config.json`) via the following command:
 
 ```bash
-cd findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py config_vx/config.json
+cd .venv/lib/python3.12/site-packages/findus/firmware
+upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py <config-path>/config.json
 ```
 
 Your Pico Glitcher should now be ready to perform fault-injection attacks.
@@ -102,6 +102,13 @@ cd fault-injection-library
 pip install .
 cd rd6006
 pip install .
+```
+
+Then:
+
+```bash
+cd findus/firmware
+upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py <config-path>/config.json
 ```
 
 The next step is to copy an existing glitching script and to adapt it to your needs.

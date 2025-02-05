@@ -3,12 +3,16 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
+include-package-data = true
 packages = ["findus", "findus.analyzer", "findus.helper", "findus.firmware"]
+
+[tool.setuptools.package-data]
+"findus.firmware" = ["config_v1/config.json", "config_v2/config.json"]
 
 [project]
 name = "findus"
 description = "Library to perform fault injection attacks with the PicoGlitcher, Chipwhisperer Husky or Chipwhisperer Pro"
-version = "0.9.12"
+version = "0.9.13"
 license = {file = "LICENSE"}
 authors = [{name = "Matthias Kesenheimer", email = "m.kesenheimer@gmx.net"}]
 dependencies = [
