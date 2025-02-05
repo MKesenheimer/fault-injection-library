@@ -588,8 +588,8 @@ class PicoGlitcher():
         factor = 1/(vhigh - vlow)
         self.pulse_generator.set_calibration(vhigh, factor)
         if store:
-            self.change_config("ps_offset", vhigh)
-            self.change_config("ps_factor", factor)
+            self.__change_config("ps_offset", vhigh)
+            self.__change_config("ps_factor", factor)
 
     def set_dead_zone(self, dead_time:float = 0, pin_condition:str = "default"):
         """
@@ -613,7 +613,7 @@ class PicoGlitcher():
             self.condition = 0
         self.dead_time = dead_time
 
-    def arm_common(self):
+    def __arm_common(self):
         if self.trigger_mode == "tio":
             sm1_func = None
             if not self.trigger_inverting:
@@ -667,7 +667,7 @@ class PicoGlitcher():
         self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
         self.sm0.put(int(length) // (1_000_000_000 // self.frequency))
 
-        self.arm_common()
+        self.__arm_common()
 
     def arm_multiplexing(self, delay:int, mul_config:dict):
         """
@@ -717,7 +717,7 @@ class PicoGlitcher():
         config = v4 << 30 | t4 << 16 | v3 << 14 | t3
         self.sm0.put(config)
 
-        self.arm_common()
+        self.__arm_common()
 
     def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[float]]):
         """
@@ -782,7 +782,7 @@ class PicoGlitcher():
         maxlength = 10_000 # TODO: control this by an argument or the pulse length
         self.sm0.put(maxlength // (1_000_000_000 // self.frequency))
 
-        self.arm_common()
+        self.__arm_common()
         print(pulse)
 
     def block(self, timeout:float):
@@ -809,7 +809,7 @@ class PicoGlitcher():
             res = self.sm1.get()
             print(res)
 
-    def change_config(self, key:str, value:int|float|str):
+    def __change_config(self, key:str, value:int|float|str):
         """
         Change the content of the configuration file `config.json`. Note that the value to be changed must already exist.
 
@@ -839,7 +839,7 @@ class PicoGlitcher():
             key: Key of value to be replaced.
             value: Value to be set.
         """
-        self.change_config(key, value)
+        self.__change_config(key, value)
         machine.soft_reset()
         #machine.reset()
 
