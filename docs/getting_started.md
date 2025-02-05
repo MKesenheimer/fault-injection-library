@@ -104,6 +104,13 @@ cd rd6006
 pip install .
 ```
 
+Then:
+
+```bash
+cd findus/firmware
+upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py <config-path>/config.json
+```
+
 The next step is to copy an existing glitching script and to adapt it to your needs.
 Start by copying `fault-injection-library/example/pico-glitcher.py`. More example projects are located at `fault-injection-library/projects`.
 
