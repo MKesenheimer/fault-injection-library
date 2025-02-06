@@ -44,13 +44,7 @@ Your Pico Glitcher should come with the latest firmware already installed. If no
 Download the MicroPython firmware from [https://micropython.org/download/RPI_PICO/](https://micropython.org/download/RPI_PICO/). Unplug the Pico Glitcher from your computer, press and hold the 'BOOTSEL' button on the Raspberry Pi Pico and connect it back to your computer. The Raspberry Pi Pico should come up as a flash-storage device. Copy the MicroPython firmware ('RPI_PICO-xxxxxxxx-vx.xx.x.uf2') to this drive and wait until the Raspberry Pi Pico disconnects automatically.
 More information about setting up the Raspberry Pi Pico can be found [here](https://projects.raspberrypi.org/en/projects/getting-started-with-the-pico).
 
-### Step 2: Download the Pico Glitcher firmware
-
-Together with the findus library comes the MicroPython script (the "Pico Glitcher firmware"), which must be installed on the Pico Glitcher. Download the latest Pico Glitcher firmware here: [https://github.com/MKesenheimer/fault-injection-library/blob/master/findus/firmware/PicoGlitcher.py](https://github.com/MKesenheimer/fault-injection-library/blob/master/findus/firmware/PicoGlitcher.py).
-
-Alternatively, if you installed findus from source (see [here](#building-from-source)), the Pico Glitcher firmware can be found at `fault-injection-library/findus/firmware/`.
-
-### Step 3: Install the findus library
+### Step 2: Install the findus library
 
 Skip this step, if you already installed findus previously (see [here](#installing-findus)).
 
@@ -69,7 +63,7 @@ Make sure to have pip [installed](https://docs.python.org/3/library/ensurepip.ht
 pip install findus
 ```
 
-### Step 4: Upload the Pico Glitcher MicroPython script
+### Step 3: Upload the Pico Glitcher MicroPython script
 
 If everything went well, you should have the `upload` script available for execution in your command-line environment.
 Connect the Pico Glitcher to your computer and check which serial device comes up:
@@ -87,7 +81,7 @@ upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.
 
 Your Pico Glitcher should now be ready to perform fault-injection attacks.
 
-## Building from source
+## Installing from source
 
 If you want to get involved in the development or to have access to all the resources of this repository, clone the findus library:
 
