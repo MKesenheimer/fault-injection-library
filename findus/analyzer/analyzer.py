@@ -88,11 +88,8 @@ def get_databases(directory):
 
     return databases_new
 
-def run(directory, port, debug=False):
+def run(directory, ip="127.0.0.1", port=8080, debug=False):
     DATABASE_DIRECTORY = directory
-
-    if port == None:
-        port = 8080
 
     app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
     app.css.config.serve_locally = True
@@ -440,7 +437,7 @@ def run(directory, port, debug=False):
         return fig,data
 
     # start server on localhost
-    app.run_server(host='127.0.0.1', port=port, debug=True)
+    app.run_server(host=ip, port=port, debug=True)
 
 def main(argv=sys.argv):
     __version__ = "0.1"
@@ -449,11 +446,12 @@ def main(argv=sys.argv):
         description="analyzer.py v%s - Fault Injection Analyzer" % __version__,
         prog="analyzer"
     ) 
-    parser.add_argument("--directory",help="Database directory", required=True)
-    parser.add_argument("--port",help="Server port")
+    parser.add_argument("--directory", help="Database directory", required=True)
+    parser.add_argument("--port", help="Server port", required=False, default=8080)
+    parser.add_argument("--ip", help="Server address", required=False, default='127.0.0.1')
 
     args = parser.parse_args()
-    run(args.directory, args.port,debug=True)
+    run(args.directory, args.ip, args.port, debug=True)
 
 if __name__ == "__main__":
     main()
