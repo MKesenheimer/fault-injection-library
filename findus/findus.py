@@ -19,7 +19,6 @@ import serial
 import sys
 import chipwhisperer as cw
 import datetime
-from termcolor import colored
 import os
 import glob
 from . import pyboard
@@ -562,23 +561,38 @@ class Glitcher():
 
     def colorize(self, s:str, color:str) -> str:
         """
-        Returns a colorized string depending on a color identifier (G, Y, R, M, C, B).
+        Returns a colorized string depending on a color identifier (G, Y, R, M, C, B, O, Z).
         
         Parameters:
             s: The string you want to colorize.
-            color: Color identifier, one of 'G', 'Y', 'R', 'M', 'C', 'B'.
+            color: Color identifier, one of 'G', 'Y', 'R', 'M', 'C', 'B', 'O', 'Z' (black).
         Returns:
             Returns the colorized string.
         """
         colors = {
-            'G': 'green',
-            'Y': 'yellow',
-            'R': 'red',
-            'M': 'magenta',
-            'C': 'cyan',
-            'B': 'blue',
+            'G': [182, 214, 168],
+            'Y': [232, 237, 164],
+            'R': [228, 145, 167],
+            'M': [234, 192, 226],
+            'C': [113, 198, 177],
+            'B': [109, 174, 217],
+            'O': [197, 148, 124],
+            'Z': [31, 31, 31]
         }
-        return colored(s, colors[color])
+        #colors = {
+        #    'G': [0, 255, 0],
+        #    'Y': [255, 255, 0],
+        #    'R': [170, 0, 0],
+        #    'M': [255, 0, 255],
+        #    'C': [0, 255, 255],
+        #    'B': [0, 0, 255],
+        #    'O': [255, 100, 50],
+        #    'Z': [0, 0, 0]
+        #}
+        r = colors[color][0]
+        g = colors[color][1]
+        b = colors[color][2]
+        return f"\033[38;2;{r};{g};{b}m{s}\033[0m"
 
     def get_speed(self, start_time:int, number_of_experiments:int) -> int:
         """
@@ -834,14 +848,14 @@ class PicoGlitcher(Glitcher):
             self.power_supply.disable_vtarget()
             self.pico_glitcher.reset_target()
             time.sleep(power_cycle_time)
-            self.pico_glitcher.release_reset()
             self.power_supply.enable_vtarget()
+            self.pico_glitcher.release_reset()
         else:
             self.pico_glitcher.disable_vtarget()
             self.pico_glitcher.reset_target()
             time.sleep(power_cycle_time)
-            self.pico_glitcher.release_reset()
             self.pico_glitcher.enable_vtarget()
+            self.pico_glitcher.release_reset()
 
     def reset_and_eat_it_all(self, target:serial.Serial, target_timeout:float = 0.3):
         """
@@ -1222,8 +1236,8 @@ class HuskyGlitcher(Glitcher):
             self.power_supply.disable_vtarget()
             self.scope.io.tio3 = 'gpio_low'
             time.sleep(power_cycle_time)
-            self.scope.io.tio3 = 'gpio_high'
             self.power_supply.enable_vtarget()
+            self.scope.io.tio3 = 'gpio_high'
         else:
             print("[-] External power supply not available.")
 
@@ -1558,14 +1572,14 @@ class ProGlitcher(Glitcher):
             self.power_supply.disable_vtarget()
             self.scope.io.nrst = False
             time.sleep(power_cycle_time)
-            self.scope.io.nrst = "high_z"
             self.power_supply.enable_vtarget()
+            self.scope.io.nrst = "high_z"
         else:
             self.scope.io.target_pwr = False
             self.scope.io.nrst = False
             time.sleep(power_cycle_time)
-            self.scope.io.nrst = "high_z"
             self.scope.io.target_pwr = True
+            self.scope.io.nrst = "high_z"
 
     def reset_and_eat_it_all(self, target:serial.Serial, target_timeout:float = 0.3):
         """

@@ -1,6 +1,5 @@
 adafruit-ampy
 pyserial
-termcolor
 plotly
 pandas
 dash

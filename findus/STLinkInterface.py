@@ -44,9 +44,8 @@ class _Error(ErrorType):
     default = 0
     nack = 1
     no_response = 2
-    bootloader_not_available = 3
-    bootloader_error = 4
-    id_error = 5
+    reconnect = 3
+    no_connection = 4
 
 class _Warning(WarningType):
     """
@@ -191,7 +190,9 @@ class STLinkInterface():
             '-c', 'exit'
             ], text=True, capture_output=True)
         response = result.stdout + result.stderr
-        #print(response)
+        print(response)
+        if "Error: init mode failed (unable to connect to the target)" in response:
+            return GlitchState.Error.no_connection, None
         match = re.search(fr'{hex(address)[2:]}:\s*([0-9A-Fa-f]+)', response)
         if match:
             if match.group(1) != "00000000":
@@ -217,7 +218,7 @@ class STLinkInterface():
         self.socket.settimeout(1)
         self.socket.connect(('localhost', 4444))
         # receive start messages
-        time.sleep(0.001)
+        time.sleep(0.1)
         self.socket.recv(4096)
 
     def detach(self):
@@ -238,7 +239,10 @@ class STLinkInterface():
     def telnet_read_address(self, address:int):
         command = f"mdw {hex(address)}"
         response = self.telnet_interact(command)
-        #print(response)
+        if "Previous state query failed, trying to reconnect" in response:
+            response += self.telnet_interact(command)
+            #return GlitchState.Error.reconnect, None
+        print(response)
         match = re.search(fr'{hex(address)[2:]}:\s*([0-9A-Fa-f]+)', response)
         if match:
             if match.group(1) != "00000000":
