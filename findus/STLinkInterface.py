@@ -193,6 +193,10 @@ class STLinkInterface():
         print(response)
         if "Error: init mode failed (unable to connect to the target)" in response:
             return GlitchState.Error.no_connection, None
+        elif "Error" in response:
+            return GlitchState.Error.default, response
+        elif "Warning" in response:
+            return GlitchState.Warning.default, response
         match = re.search(fr'{hex(address)[2:]}:\s*([0-9A-Fa-f]+)', response)
         if match:
             if match.group(1) != "00000000":
