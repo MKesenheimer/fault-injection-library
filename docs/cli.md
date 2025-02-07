@@ -73,6 +73,24 @@ Example:
 bootloader-com /dev/<target-tty-port>
 ```
 
+## power-on
+
+Enable `VTARGET` with this simple script. Can be necessary, for example, to supply the target with power for debugging purposes.
+
+```bash
+power-on --help
+usage: power-on [-h] [--rpico RPICO]
+
+options:
+  -h, --help     show this help message and exit
+  --rpico RPICO  rpico port
+```
+
+Example:
+```bash
+power-on --rpico /dev/<rpi-tty-port>
+```
+
 ## power-cycle-and-read
 
 Test the power supply capabilities of your setup by executing this script. The target's response is read over UART after power-cycle.

@@ -642,6 +642,7 @@ class PicoGlitcher(Glitcher):
         uart_trigger: Configure the Pico Glitcher to trigger when a specific byte pattern is observed on the `TRIGGER` line.
         set_cpu_frequency: Set the CPU frequency of the Raspberry Pi Pico.
         get_cpu_frequency: Get the current CPU frequency of the Raspberry Pi Pico.
+        __del__: Default deconstructor. Disconnects Pico Glitcher.
     """
     def __init__(self):
         """
@@ -651,8 +652,11 @@ class PicoGlitcher(Glitcher):
 
     def __del__(self):
         print("[+] Terminating gracefully.")
-        self.stop_core1()
-        self.hard_reset()
+        try:
+            self.stop_core1()
+            self.hard_reset()
+        except Exception as _:
+            pass
 
     def init(self, port:str, ext_power:str = None, ext_power_voltage:float = 3.3):
         """
@@ -935,7 +939,7 @@ class PicoGlitcher(Glitcher):
         Configure the Pico Glitcher to trigger on a rising edge on the `TRIGGER` line.
         
         Parameters:
-            pin_trigger: The trigger pin to use. Can be either "default" or "alt". For hardware version 2 options "ext1" or "ext2" can also be chosen.
+            pin_trigger: The trigger pin to use. Can either be "default" (default `TRIGGER` input) or "alt" (alternative trigger input `TRIGGER1`). For hardware version 2 options "ext1" or "ext2" are also available.
             dead_time: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
             pin_condition: The rejection time is generated internally by measuring the state of the `power` or `reset` pin of the Pico Glitcher. If you want to trigger on the reset condition, set `pin_condition = 'reset'`, else if you want to trigger on the target power set `pin_condition = 'power'`. If `dead_time` is set to zero and `pin_condition = 'default'`, this parameter is ignored.
         """

@@ -17,7 +17,7 @@ import time
 import subprocess
 
 # import custom libraries
-from findus import Database, PicoGlitcher, ProGlitcher
+from findus import Database, PicoGlitcher
 
 def test_jtag():
     subout = subprocess.run(['openocd',
