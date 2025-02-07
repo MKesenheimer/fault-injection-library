@@ -53,6 +53,7 @@ options:
   --directory DIRECTORY
                         Database directory
   --port PORT           Server port
+  --ip IP               Server address
 ```
 
 Example:
@@ -63,6 +64,13 @@ analyzer --directory databases
 
 Visit `http://127.0.0.1:8080` in your web browser to access the analyzer web application.
 ![Parameter space web application](images/parameterspace-pico-glitcher.png)
+
+Alternatively, you can spin up the web application on all network interfaces to access it from other hosts:
+
+```bash
+cd projects/airtag-glitching
+analyzer --directory databases --ip 0.0.0.0
+```
 
 ## bootloader-com
 
