@@ -10,7 +10,7 @@ More information about the ChipWhisperer Pro and the ChipWhisperer Husky can be 
 ## Table of contents
 
 - [Purchasing the Pico Glitcher](#purchasing-the-pico-glitcher)
-- [Documentation](documentation)
+- [Documentation](#documentation)
 - [Installing findus](#installing-findus)
 - [Updating the Pico Glitcher firmware](#updating-the-pico-glitcher-firmware)
     - [Step 1: MicroPython firmware](#step-1-microPython-firmware)
