@@ -153,22 +153,6 @@ If everything goes as expected, a successful run should look something like this
 
 Refer to the README at `projects/stm32f42x-glitching` for more details.
 
-## Further handy features and notes
-
-One can resume inserting datapoints into the database of the most recent run by supplying the `resume` flag:
-
-```bash
-python pico-glitcher.py ... --resume
-```
-
-If the datapoints should not be inserted into the database, the flag `no-store` can be used instead:
-
-```bash
-python pico-glitcher.py ... --no-store
-```
-
-The flags `resume` and `no-store` can be combined.
-
 ## Pico Glitcher v1 hardware
 
 As mentioned above, only a Raspberry Pi Pico and a few other components are required to use this software.
@@ -183,8 +167,9 @@ To power the target board, it is supplied with power via the `VTARGET` connectio
 The output of this voltage source can be controlled via the fault-injection-library, i.e. the target can be completely disconnected from power by executing the `helper/power-cycle-target.py` command.
 This allows a cold start of the target to be carried out in the event of error states that cannot be eliminated by a reset.
 
-The assembled and fully functional board is shown in the following figure:
 ![Assembled Pico Glitcher v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/finished.JPG)
+
+The Pico Glitcher can be purchased [here](https://www.tindie.com/products/faulty-hardware/picoglitcher-v21/).
 
 ## Star History
 
