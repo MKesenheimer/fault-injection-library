@@ -698,7 +698,10 @@ class PicoGlitcher(Glitcher):
                 raise Exception("Version mismatch")
         except Exception as _:
             print("[-] Fatal error: Versions of findus and Pico Glitcher do not match.")
-            print("[-] Update the Pico Glitcher firmware and findus software. See README.md.")
+            print("[*] Update the Pico Glitcher firmware and findus software. See README.md.")
+            print("[*] pip install --upgrade findus")
+            print("[*] cd .venv/lib/python3.12/site-packages/findus/firmware")
+            print("[*] upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py <config-path>/config.json")
             sys.exit(-1)
 
         self.pico_glitcher.set_trigger("tio", "default")
