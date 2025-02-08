@@ -9,7 +9,19 @@ More information about the ChipWhisperer Pro and the ChipWhisperer Husky can be 
 
 ## Table of contents
 
-[Purchasing the Pico Glitcher](#purchasing-the-pico-glitcher)
+- [Purchasing the Pico Glitcher](#purchasing-the-pico-glitcher)
+- [Documentation](documentation)
+- [Installing findus](#installing-findus)
+- [Updating the Pico Glitcher firmware](#updating-the-pico-glitcher-firmware)
+    - [Step 1: MicroPython firmware](#step-1-microPython-firmware)
+    - [Step 2: Install the findus library](#step-2-install-the-findus-library)
+    - [Step 3: Upload the Pico Glitcher MicroPython script](#step-3-upload-the-pico-glitcher-micropython-script)
+- [Installing from source](#installing-from-source)
+- [Test the functionality of your Pico Glitcher](#test-the-functionality-of-your-pico-glitcher)
+- [UART Trigger](#uart-trigger)
+- [More Examples](#more-examples)
+- [Analyzer](#analyzer)
+- [Star History](#star-history)
 
 ## Purchasing the Pico Glitcher
 
