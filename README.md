@@ -179,6 +179,10 @@ python pico-glitcher-uart.py --rpico /dev/<rpi-tty-port> --target /dev/<target-t
 You should now be able to observe the glitches with an oscilloscope on the 10 Ohm resistor.
 Measure the expected delay and glitch length with the oscilloscope.
 
+## More Examples
+
+More examples can be found on [https://fault-injection-library.readthedocs.io/en/latest/examples/#](https://fault-injection-library.readthedocs.io/en/latest/examples/#) or under `fault-injection-library/projects`.
+
 ## Analyzer
 
 During your glitching campaign, run the `analyzer` script in a separate terminal window:
