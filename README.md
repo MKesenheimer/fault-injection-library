@@ -75,7 +75,7 @@ More information about setting up the Raspberry Pi Pico can be found [here](http
 
 ### Step 2: Install the findus library
 
-Skip this step, if you already installed findus previously (see [here](#installing-findus)).
+Skip this step, if you already installed findus previously.
 
 If you want to make sure that the libraries to be installed do not collide with your local Python environment, use a virtual environment.
 Set it up by generating a new virtual environment and by activating it:
@@ -141,50 +141,55 @@ The next step is to copy an existing glitching script and to adapt it to your ne
 Start by copying `fault-injection-library/example/pico-glitcher.py`. More example projects are located at `fault-injection-library/projects`.
 
 
+## Test the functionality of your Pico Glitcher
 
-## Executing Raspberry Pi Pico glitcher example implementation
+The following  setup can be used to test the Pico Glitcher.
 
-To carry out a fault injection attack with the Raspberry Pi Pico on another microcontroller, the following setup can be used.
+- Connect 'TRIGGER' input with 'RESET'.
+- Between 'GLITCH' and 'VTARGET', connect a 10 Ohm resistor (this is the test target in this case).
+- Optionally connect channel 1 of an oscilloscope to 'RESET' and channel 2 to 'GLITCH'.
 
-First, we connect the Pico Glitcher and a target as follows:
-![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/fritzing/esp32-glitching.png)
-Note that the trigger input is connected directly to the reset line.
-As the reset is released from the device, the trigger signal is sent.
+![Example setup](https://github.com/MKesenheimer/fault-injection-library/blob/master/docs/images/test-example.png)
 
-We install the corresponding Micropython script and the corresponding config file (must be done only once) on the Raspberry Pi Pico:
-
-```bash
-cd findus/firmware
-upload --port /dev/<rpi-tty-port> --files FastADC.py PicoGlitcher.py config_v1/config.json
-```
-
-For hardware version 2.x of the Pico Glitcher, the corresponding config file must be provided:
-
-```bash
-cd findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py config_v2/config.json
-```
-
-Although the software is based on Micropython, using the PIO functions of the Raspberry Pi Pico, very precise switching operations can be made and triggered on external signals.
-
-Next, we switch to the directory `example` and execute the script which controls our attack.
+Next, run the test script `pico-glitcher.py` located in `fault-injection-library/example`:
 
 ```bash
 cd example
-python pico-glitcher.py --target /dev/tty.<target-tty-port> --rpico /dev/<rpi-tty-port> --delay 1_000 2_000 --length 100 150
+python pico-glitcher.py --rpico /dev/<rpi-tty-port> --delay 1000 1000 --length 100 100
 ```
 
-The script resets the target, arms the pico glitcher, waits for the external trigger (reset high) and emits a glitch of a given length after a certain delay.
-The response of the target is then read and classified.
-The results are entered into a database, which can be processed in the browser using the command:
+You should now be able to observe the glitches with an oscilloscope on the 10 Ohm resistor.
+Measure the expected delay and glitch length with the oscilloscope.
+
+## UART Trigger
+
+- Connect 'TRIGGER' input to 'RX' and 'TX' of a USB-to-UART adapter
+- Between 'GLITCH' and 'VTARGET', connect a 10 Ohm resistor (this is the test target in this case).
+- Optionally connect channel 1 of an oscilloscope to 'RESET' and channel 2 to 'GLITCH'.
+
+![Example setup](https://github.com/MKesenheimer/fault-injection-library/blob/master/docs/images/test-example-uart.png)
+
+Next, run the test script `pico-glitcher-uart.py` located in `fault-injection-library/example`:
+
+```bash
+cd example
+python pico-glitcher-uart.py --rpico /dev/<rpi-tty-port> --target /dev/<target-tty-port> --delay 1000 1000 --length 100 100
+```
+
+You should now be able to observe the glitches with an oscilloscope on the 10 Ohm resistor.
+Measure the expected delay and glitch length with the oscilloscope.
+
+## Analyzer
+
+During your glitching campaign, run the `analyzer` script in a separate terminal window:
 
 ```bash
 analyzer --directory databases
 ```
 
-This attack can be used, for example, to bypass the read-out protection (RDP) of Apple Airtags and to download the firmware of these devices.
-See [the video by stacksmashing](https://www.youtube.com/watch?v=_E0PWQvW-14) for more details.
+This spins up a local web application on [http://127.0.0.1:8080](http://127.0.0.1:8080) which can be used to observe the current progress.
 
+![Parameter space web application](https://github.com/MKesenheimer/fault-injection-library/blob/master/docs/images/parameterspace-pico-glitcher.png)
 
 ## Star History
 
