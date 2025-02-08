@@ -7,6 +7,10 @@ With the provided and easy to use functions and classes, fault-injection project
 Findus supports the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/), the [ChipWhisperer Husky](https://rtfm.newae.com/Capture/ChipWhisperer-Husky/) and the PicoGlitcher.
 More information about the ChipWhisperer Pro and the ChipWhisperer Husky can be found on [https://chipwhisperer.readthedocs.io/en/latest/index.html](https://chipwhisperer.readthedocs.io/en/latest/index.html).
 
+## Table of contents
+
+[Purchasing the Pico Glitcher](#purchasing-the-pico-glitcher)
+
 ## Purchasing the Pico Glitcher
 
 Only a Raspberry Pi Pico and a few other components are required to use this software.
