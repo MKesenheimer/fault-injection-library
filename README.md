@@ -9,6 +9,20 @@ More information about the ChipWhisperer Pro and the ChipWhisperer Husky can be 
 
 ## Purchasing the Pico Glitcher
 
+Only a Raspberry Pi Pico and a few other components are required to use this software.
+However, in order to achieve the best results, a circuit board was developed that was adapted directly for the fault-injection-library.
+
+The board consists of a Raspberry Pi Pico, two level shifters for in- and outputs with any voltage, and glitching transistors that can switch up to 66 amps.
+A multiplexing stage to quickly switch between up to four different voltage levels was added in revision 2.
+
+There are several connection options for different voltage sources, from 1.8V, 3.3V to 5V.
+The Pico Glitcher can also be supplied with any external voltage via `VCC_EXTERN`.
+To power the target board, it is supplied with power via the `VTARGET` connection.
+The output of this voltage source can be controlled via software, i.e. the target can be completely disconnected from power by executing the `power_cycle_target()` command.
+This allows a cold start of the target to be carried out in the event of error states that cannot be eliminated by a reset.
+
+![Assembled Pico Glitcher v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/finished.JPG)
+
 The Pico Glitcher can be purchased from the tindie online store: [https://www.tindie.com/products/faulty-hardware/picoglitcher-v21/](https://www.tindie.com/products/faulty-hardware/picoglitcher-v21/). If you have questions or special requests, please feel free to contact me.
 
 ## Documentation
@@ -79,7 +93,7 @@ cd findus/firmware
 upload --port /dev/<rpi-tty-port> --files FastADC.py PicoGlitcher.py config_v1/config.json
 ```
 
-For hardware version 2.x of the PicoGlitcher, the corresponding config file must be provided:
+For hardware version 2.x of the Pico Glitcher, the corresponding config file must be provided:
 
 ```bash
 cd findus/firmware
@@ -106,70 +120,6 @@ analyzer --directory databases
 This attack can be used, for example, to bypass the read-out protection (RDP) of Apple Airtags and to download the firmware of these devices.
 See [the video by stacksmashing](https://www.youtube.com/watch?v=_E0PWQvW-14) for more details.
 
-
-## Attacking a STM32 bootloader via the Raspberry Pi Pico glitcher
-
-A more advanced attack is, for example, a fault injection attack against the STM32 bootloader and bypassing the read-out protection of these chips.
-This attack has been first described by [SEC consult](https://sec-consult.com/blog/detail/secglitcher-part-1-reproducible-voltage-glitching-on-stm32-microcontrollers/) and uses the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/) for the injection controller.
-However, to glitch these devices successully, no expensive hardware is necessary, as it is demonstrated with the following scripts.
-
-Connect the Pico Glitcher and the STM32 target according to the following schematic:
-![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/fritzing/stm32-glitching.png)
-Here, the trigger line is connected to the UART-TX line, since we want to trigger on a specific UART word that is sent during the bootloader stage.
-Furthermore, "Boot0" pin of the STM32 needs to be pulled high in order to activate the bootloader.
-This pin is exposed on the Nucleo header.
-In addition, due to the inherent limitations of the drawing program Fritzing, the glitching line was connected directly to 3.3V of the target in the schematics.
-In a real setup, however, the glitching line should be soldered as close as possible to the power supply of the STM32 and the capacitors should be removed nearby.
-
-Install the Raspberry Pi Pico Micropython scripts (for hardware version 1 see below):
-
-```bash
-cd findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py config_v2/config.json
-```
-
-Next, change into `projects/stm32f42x-glitching` and execute the following script.
-
-```bash
-cd projects/stm32f42x-glitching
-python pico-glitcher.py --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port> --delay 100_000 200_000 --length 100 150
-```
-
-Or make use of the ChipWhisperer Pro by executing:
-
-```bash
-cd projects/stm32f42x-glitching
-python pro-glitcher.py --target /dev/<target-tty-port> --delay 100_000 200_000 --length 100 150
-```
-
-Again, use the following command to analyze the collected datapoints:
-
-```bash
-analyzer --directory databases
-```
-
-If everything goes as expected, a successful run should look something like this:
-![Bootloader glitching](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f42x-glitching/images/cw-pro-bootloader-glitching.png)
-
-Refer to the README at `projects/stm32f42x-glitching` for more details.
-
-## Pico Glitcher v1 hardware
-
-As mentioned above, only a Raspberry Pi Pico and a few other components are required to use this software.
-However, in order to achieve the best results, a circuit board was developed that was adapted directly for the fault-injection-library. 
-
-The board consists of a Raspberry Pi Pico, two level shifters for in- and outputs with any voltage, and glitching transistors that can switch up to 66 amps.
-![Pico Glichter v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/kicad/pico-glitcher-v1/pico-glitcher-v1.1_sch.png)
-
-There are several connection options for different voltage sources, from 1.8V, 3.3V to 5V.
-The Pico Glitcher v1 can also be supplied with any external voltage via `VCC_EXTERN`.
-To power the target board, it is supplied with power via the `VTARGET` connection.
-The output of this voltage source can be controlled via the fault-injection-library, i.e. the target can be completely disconnected from power by executing the `helper/power-cycle-target.py` command.
-This allows a cold start of the target to be carried out in the event of error states that cannot be eliminated by a reset.
-
-![Assembled Pico Glitcher v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/finished.JPG)
-
-The Pico Glitcher can be purchased [here](https://www.tindie.com/products/faulty-hardware/picoglitcher-v21/).
 
 ## Star History
 
