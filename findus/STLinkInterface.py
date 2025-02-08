@@ -104,10 +104,11 @@ class GlitchState():
     Success = _Success
 
 class STLinkInterface():
-    def __init__(self, processor:str = "stm32l0"):
+    def __init__(self, tool:str = "stlink", processor:str = "stm32l0"):
         self.process = None
         self.processor_name = processor
         self.socket = None
+        self.tool = tool
 
     def program_target(self, glitcher, elf_image:str = "program.elf", rdp_level:int = 0):
         glitcher.reset(0.01)
@@ -130,7 +131,7 @@ class STLinkInterface():
         # trunk-ignore(bandit/B603)
         result = subprocess.run([
             'openocd',
-            '-f', 'interface/stlink.cfg',
+            '-f', f'interface/{self.tool}.cfg',
             '-c', 'transport select hla_swd',
             '-f', f'target/{self.processor_name}.cfg',
             '-c', f'init; halt; {self.processor_name}x unlock 0; exit'
@@ -143,7 +144,7 @@ class STLinkInterface():
         # trunk-ignore(bandit/B603)
         result = subprocess.run([
             'openocd',
-            '-f', 'interface/stlink.cfg',
+            '-f', f'interface/{self.tool}.cfg',
             '-c', 'transport select hla_swd',
             '-f', f'target/{self.processor_name}.cfg',
             '-c', f'init; halt; {self.processor_name}x lock 0; sleep 1000; reset run; shutdown;'
@@ -156,7 +157,7 @@ class STLinkInterface():
         # trunk-ignore(bandit/B603)
         result = subprocess.run([
             'openocd',
-            '-f', 'interface/stlink.cfg',
+            '-f', f'interface/{self.tool}.cfg',
             '-c', 'transport select hla_swd',
             '-f', f'target/{self.processor_name}.cfg',
             '-c', f'init; halt; program {elf_image} verify reset exit;'
@@ -169,7 +170,7 @@ class STLinkInterface():
         # trunk-ignore(bandit/B603)
         result = subprocess.run([
             'openocd',
-            '-f', 'interface/stlink.cfg',
+            '-f', f'interface/{self.tool}.cfg',
             '-c', 'transport select hla_swd',
             '-f', f'target/{self.processor_name}.cfg',
             '-c', f'init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; exit'
@@ -177,12 +178,24 @@ class STLinkInterface():
         print(result.stdout)
         print(result.stderr)
 
+    def test_connection(self):
+        # trunk-ignore(bandit/B607)
+        # trunk-ignore(bandit/B603)
+        result = subprocess.run([
+            'openocd',
+            '-f', f'interface/{self.tool}.cfg',
+            '-c', 'transport select hla_swd',
+            '-f', f'target/{self.processor_name}.cfg'
+            ], text=True, capture_output=True)
+        response = result.stdout + result.stderr
+        print(response)
+
     def read_address(self, address:int):
         # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
         result = subprocess.run([
             'openocd',
-            '-f', 'interface/stlink.cfg',
+            '-f', f'interface/{self.tool}.cfg',
             '-c', 'transport select hla_swd',
             '-f', f'target/{self.processor_name}.cfg',
             '-c', 'init',
@@ -210,7 +223,7 @@ class STLinkInterface():
         # trunk-ignore(bandit/B603)
         self.process = subprocess.Popen([
             'openocd',
-            '-f', 'interface/stlink.cfg',
+            '-f', f'interface/{self.tool}.cfg',
             '-c', 'transport select hla_swd',
             '-f', f'target/{self.processor_name}.cfg',
             '-c', 'init'

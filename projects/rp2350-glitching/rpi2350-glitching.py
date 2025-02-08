@@ -26,23 +26,27 @@ from findus import Database, PicoGlitcher
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(PicoGlitcher):
     def classify(self, response):
-        if b'Failed to connect' in response:
-            color = 'G'
-        elif b'Error' in response:
-            color = 'M'
-        elif b'Fatal' in response:
+        if b'Error: could not get configuration descriptor' in response:
+            color = 'O'
+        elif b'unavailable' in response:
             color = 'M'
         elif b'Timeout' in response:
             color = 'Y'
-        else:
+        elif b'0022c0ff' in response:
             color = 'R'
+        elif b'Error: Target not examined' in response:
+            color = 'G'
         return color
 
 def test_jtag():
     subout = subprocess.run(['openocd',
-                          '-f', 'interface/jlink.cfg',
-                          '-f', 'target/rp2040.cfg',
-                          '-c', 'adapter speed 4000'],
+                          '-f', 'interface/cmsis-dap.cfg',
+                          '-c', 'adapter speed 4000',
+                          '-c', 'set USE_CORE 0',
+                          '-f', 'target/rp2350-riscv.cfg',
+                          '-c', 'init',
+                          '-c', 'mdw 0x40137020 8',
+                          '-c', 'exit'],
                           check=False, capture_output=True)
     response = subout.stdout + subout.stderr
     return response
@@ -58,8 +62,11 @@ class Main():
         self.glitcher = DerivedGlitcher()
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
+
         # choose rising edge trigger with dead time of 0 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
+        self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
+        #self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input, dead_time=0.01, pin_condition="reset")
 
         # the initial voltage for multiplexing must be hard-coded and can only be applied
         # if the raspberry pi pico is reset and re-initialized.
@@ -67,9 +74,6 @@ class Main():
             self.glitcher.change_config_and_reset("mux_vinit", "3.3")
             self.glitcher = DerivedGlitcher()
             self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
-
-        self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
-        #self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input, dead_time=0.01, pin_condition="reset")
 
         # choose multiplexing or crowbar glitching
         if args.multiplexing:
@@ -113,7 +117,8 @@ class Main():
             try:
                 self.glitcher.block(timeout=0.2)
                 response = test_jtag()
-            except Exception as _:
+            except Exception as e:
+                print(e)
                 print("[-] Timeout received in block(). Continuing.")
                 self.glitcher.power_cycle_target(power_cycle_time=1)
                 time.sleep(0.2)

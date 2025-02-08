@@ -185,3 +185,7 @@ This allows a cold start of the target to be carried out in the event of error s
 
 The assembled and fully functional board is shown in the following figure:
 ![Assembled Pico Glitcher v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/finished.JPG)
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=MKesenheimer/fault-injection-library&type=Date)](https://star-history.com/#MKesenheimer/fault-injection-library&Date)
