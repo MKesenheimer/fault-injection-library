@@ -25,20 +25,57 @@ This allows a cold start of the target to be carried out in the event of error s
 
 The Pico Glitcher can be purchased from the tindie online store: [https://www.tindie.com/products/faulty-hardware/picoglitcher-v21/](https://www.tindie.com/products/faulty-hardware/picoglitcher-v21/). If you have questions or special requests, please feel free to contact me.
 
+
 ## Documentation
 
 The documentation of the source code and how to use the library and the hardware can be found on [https://fault-injection-library.readthedocs.io/](https://fault-injection-library.readthedocs.io/).
 
-## Cloning
 
-Set up the project by cloning it:
+## Installing findus
+
+If you just want to get started quickly and don't want to bother with the source code of findus, findus can be installed via pip. The findus library can be found on [https://pypi.org/project/findus/](https://pypi.org/project/findus/) and can be installed locally in a Python environment using the following command:
 
 ```bash
-git clone --depth 1 --recurse-submodules https://github.com/MKesenheimer/fault-injection-library.git
-cd fault-injection-lib
+mkdir my-fi-project && cd my-fi-project
+python -m venv .venv
+source .venv/bin/activate
+pip install findus
 ```
 
-## Setting up a virtual environment
+Install the optional RD6006 python bindings if you have a RK6006 or a RD6006 power supply from Riden:
+
+```bash
+pip install rd6006
+```
+
+This external power supply can be used optionally to supply the target with power. It is possible to control the RD6006 power supply via the findus library using the power supply's USB interface. Suitable functions for this are implemented in the findus library.
+Don't worry if you don't have this power supply. The Pico Glitcher can also supply the target with voltage.
+
+Now you can use findus:
+
+```bash
+python
+>>> from findus import Database, PicoGlitcher
+...
+```
+
+The next step is to copy an existing glitching script and to adapt it to your needs.
+Start by copying [https://github.com/MKesenheimer/fault-injection-library/blob/master/example/pico-glitcher.py](https://github.com/MKesenheimer/fault-injection-library/blob/master/example/pico-glitcher.py). More example projects are located at [https://github.com/MKesenheimer/fault-injection-library/tree/master/projects](https://github.com/MKesenheimer/fault-injection-library/tree/master/projects).
+
+See [examples](examples.md) for more information how to use findus and the Pico Glitcher.
+
+## Updating the Pico Glitcher firmware
+
+Your Pico Glitcher should come with the latest firmware already installed. If not, follow the following procedure to update the software on the Pico Glitcher.
+
+### Step 1: MicroPython firmware
+
+Download the MicroPython firmware from [https://micropython.org/download/RPI_PICO/](https://micropython.org/download/RPI_PICO/). Unplug the Pico Glitcher from your computer, press and hold the 'BOOTSEL' button on the Raspberry Pi Pico and connect it back to your computer. The Raspberry Pi Pico should come up as a flash-storage device. Copy the MicroPython firmware ('RPI_PICO-xxxxxxxx-vx.xx.x.uf2') to this drive and wait until the Raspberry Pi Pico disconnects automatically.
+More information about setting up the Raspberry Pi Pico can be found [here](https://projects.raspberrypi.org/en/projects/getting-started-with-the-pico).
+
+### Step 2: Install the findus library
+
+Skip this step, if you already installed findus previously (see [here](#installing-findus)).
 
 If you want to make sure that the libraries to be installed do not collide with your local Python environment, use a virtual environment.
 Set it up by generating a new virtual environment and by activating it:
@@ -48,34 +85,62 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-## Installing
-
-After these steps we have to install `findus` (aka `fault-injection-library`).
+After these steps we have to install findus (aka fault-injection-library).
 Make sure to have pip [installed](https://docs.python.org/3/library/ensurepip.html).
 
 ```bash
-pip install .
+pip install findus
 ```
 
-If you use the rk6006 power supply and want to power-cycle the target via software, install the rd6006 library (supplied as submodule):
+### Step 3: Upload the Pico Glitcher MicroPython script
+
+If everything went well, you should have the `upload` script available for execution in your command-line environment.
+Connect the Pico Glitcher to your computer and check which serial device comes up:
 
 ```bash
+ls /dev/tty*
+```
+
+Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version (either `config_v1/config.json` or `config_v2/config.json`) via the following command:
+
+```bash
+cd .venv/lib/python3.12/site-packages/findus/firmware
+upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py \ 
+    PulseGenerator.py Spline.py <config-path>/config.json
+```
+
+Your Pico Glitcher should now be ready to perform fault-injection attacks.
+
+## Installing from source
+
+If you want to get involved in the development or to have access to all the resources of this repository, clone the findus library:
+
+```bash
+git clone --depth 1 --recurse-submodules \ 
+    https://github.com/MKesenheimer/fault-injection-library.git
+```
+
+Install the findus and the optional rd6006 library:
+
+```bash
+cd fault-injection-library
+pip install .
 cd rd6006
 pip install .
 ```
 
-However, usage of the rk6006 power supply is optional.
-The Pico Glitcher is also capable of power-cycling the target via software.
-
-## Installing micropython scripts on the Raspberry Pi Pico
-
-Now we have to prepare the Raspberry Pi Pico.
-Add the [Micropython firmware](https://projects.raspberrypi.org/en/projects/getting-started-with-the-pico).
-In general the following script can be used to upload Micropython scripts to the Raspberry Pi Pico.
+Then:
 
 ```bash
-upload --port /dev/<rpi-tty-port> --file[s] <file.py> [files...]
+cd findus/firmware
+upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py \ 
+    PulseGenerator.py Spline.py <config-path>/config.json
 ```
+
+The next step is to copy an existing glitching script and to adapt it to your needs.
+Start by copying `fault-injection-library/example/pico-glitcher.py`. More example projects are located at `fault-injection-library/projects`.
+
+
 
 ## Executing Raspberry Pi Pico glitcher example implementation
 
