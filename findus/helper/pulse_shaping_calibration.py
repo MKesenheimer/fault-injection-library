@@ -26,9 +26,9 @@ class Calibration():
         print("[+] Note that the found calibration values are stored on the Pico Glitcher persistently if this script is called with values for vlow and vhigh.")
 
         if self.args.vhigh != 1.0 and self.args.vlow != 0.0:
-            self.glitcher.apply_calibration(self.args.vhigh, self.args.vlow, store=False)
-        else:
             self.glitcher.apply_calibration(self.args.vhigh, self.args.vlow, store=True)
+        else:
+            self.glitcher.apply_calibration(self.args.vhigh, self.args.vlow, store=False)
 
         while True:
             self.glitcher.do_calibration(self.args.vhigh)
@@ -45,6 +45,8 @@ def main():
     try:
         cal.run()
     except KeyboardInterrupt:
+        if args.vhigh != 1.0 and args.vlow != 0.0:
+            print("[+] Calibration saved.")
         print("\nExitting...")
         sys.exit(1)
 

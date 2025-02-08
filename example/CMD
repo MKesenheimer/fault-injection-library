@@ -1,5 +1,11 @@
+# Crowbar glitching
 python pico-glitcher.py --rpico /dev/tty.usbmodem1101 --delay 10 10 --length 100 100
+
+# Multiplexing
 python pico-glitcher.py --rpico /dev/tty.usbmodem101 --delay 10 10 --length 100 100 --multiplexing
 
+# UART trigger test
 python pico-glitcher-uart-trigger.py --rpico /dev/tty.usbmodem1101 --target /dev/tty.usbserial-A50285BI  --delay 10 10 --length 100 100
 
+# Pulse shaping
+python pico-glitcher-pulse-shaping.py --rpico /dev/tty.usbmodem1101 --delay 10 10 --length 100 100 --pulse-type 6

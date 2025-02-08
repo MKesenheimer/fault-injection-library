@@ -68,7 +68,7 @@ class Main():
         self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
 
         # pulse-shape glitching
-        self.glitcher.set_pulseshaping(vinit=3.0)
+        self.glitcher.set_pulseshaping(vinit=3.3)
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
@@ -119,7 +119,7 @@ class Main():
             # pulse from points -> interpolation is used
             elif args.pulse_type == 5:
                     xpoints = [0,   100, 200, 300, 400, 500, 515, 520]
-                    ypoints = [3.0, 2.1, 2.0, 2.0, 1.7, 0.0, 2.0, 3.0]
+                    ypoints = [3.3, 2.1, 2.0, 2.0, 1.7, 0.0, 2.0, 3.3]
                     self.glitcher.arm_pulseshaping_from_spline(delay, xpoints, ypoints)
                     Spline.interpolate_and_plot(xpoints, ypoints)
 
