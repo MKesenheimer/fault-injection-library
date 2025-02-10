@@ -15,3 +15,11 @@ Furthermore, this library supports the [ChipWhisperer Pro](https://rtfm.newae.co
 
 The database functionality has been expanded to a certain extent, too.
 With this implementation, e.g. one can add experiments to a previous measurement campaign.
+
+## Links and further resources
+
+If you have feature requests or issues, please contact me:
+
+- twitter: [@BartimaeusvUruk](https://x.com/BartimaeusvUruk)
+- mastodon: [@mkesenheimer@mastodon.social](https://mastodon.social/@mkesenheimer)
+- discord: [https://discord.gg/8mqEVPG6k7](https://discord.gg/8mqEVPG6k7)
