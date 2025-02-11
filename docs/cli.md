@@ -44,7 +44,7 @@ Script that spins up a web application during a glitching campaign to observe th
 
 ```bash
 $ analyzer --help
-usage: analyzer [-h] --directory DIRECTORY [--port PORT]
+usage: analyzer [-h] --directory DIRECTORY [--port PORT] [--ip IP] [-x X] [-y Y]
 
 analyzer.py v0.1 - Fault Injection Analyzer
 
