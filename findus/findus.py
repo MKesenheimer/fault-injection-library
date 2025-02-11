@@ -126,12 +126,12 @@ class Database():
         Method to insert datapoints into the SQLite database.
 
         Parameters:
-            experiment_id: ID of the experiment to insert into the database.
             dataset: Dataset consisting of experiment_id, delay, length, [additional parameters, ...], color and response.
-            delay: Time from trigger until the glitch is set (in nano seconds).
-            length: Length of glitch (in nano seconds).
-            color: Color with which the parameter point (delay, length) is to be displayed in the graph.
-            response: Byte string of target response. 
+                - experiment_id: ID of the experiment to insert into the database.
+                - delay: Time from trigger until the glitch is set (in nano seconds).
+                - length: Length of glitch (in nano seconds).
+                - color: Color with which the parameter point (delay, length) is to be displayed in the graph.
+                - response: Byte string of target response. 
         """
         if len(dataset) < 4:
             raise Exception("Database.insert: Too less arguments given.")
