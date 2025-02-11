@@ -68,19 +68,19 @@ class Main():
         print(self.target.read(1024))
 
         # set up the database
-        self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
+        self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store, column_names=["delay", "t1", "length"])
         self.start_time = int(time.time())
 
     def run(self):
         # log execution
         logging.info(" ".join(sys.argv))
 
-        s_length = self.args.length[0]
-        e_length = self.args.length[1]
         s_delay = self.args.delay[0]
         e_delay = self.args.delay[1]
         s_t1 = 0
         e_t1 = 2000
+        s_length = self.args.length[0]
+        e_length = self.args.length[1]
 
         # Genetic Algorithm to search for the best performing bin
         boundaries = [(s_delay, e_delay), (s_t1, e_t1), (s_length, e_length)]
@@ -121,7 +121,7 @@ class Main():
             color, weight = self.glitcher.classify(response)
 
             # add to database
-            self.database.insert(experiment_id, delay, length, color, response)
+            self.database.insert(experiment_id, delay, t1, length, color, response)
 
             # add experiment to parameterspace of genetic algorithm
             opt.add_experiment(weight, delay, t1, length)
@@ -130,7 +130,7 @@ class Main():
             # monitor
             speed = self.glitcher.get_speed(self.start_time, experiment_id)
             experiment_base_id = self.database.get_base_experiments_count()
-            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{length}\t{delay}\t{color}\t{response}", color))
+            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{delay}\t{t1}\t{length}\t{color}\t{response}", color))
 
             # increase experiment id
             experiment_id += 1

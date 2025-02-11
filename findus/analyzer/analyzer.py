@@ -3,14 +3,12 @@
 import argparse
 import plotly.express as px
 import pandas as pd
-import random
 import datetime
 import sqlite3
 import time
 import re
 import sys
 from operator import itemgetter
-import datetime
 import shutil
 
 from os import listdir
@@ -32,7 +30,7 @@ def update_legend_labels(fig,labels):
 def get_number_of_experiments(directory, database):
     conn = sqlite3.connect(f"file:{directory}/{database}?mode=ro", uri=True)
     cursor = conn.cursor()
-    query = f"SELECT COUNT(*) FROM experiments"
+    query = "SELECT COUNT(*) FROM experiments"
     cursor.execute(query)
     result = cursor.fetchone()
     row_count = result[0]
@@ -42,7 +40,7 @@ def get_number_of_experiments(directory, database):
 def get_start_time(directory, database):
     conn = sqlite3.connect(f"file:{directory}/{database}?mode=ro", uri=True)
     cursor = conn.cursor()
-    query = f"SELECT stime_seconds FROM metadata"
+    query = "SELECT stime_seconds FROM metadata"
     cursor.execute(query)
     result = cursor.fetchone()
     seconds = result[0]
@@ -50,27 +48,24 @@ def get_start_time(directory, database):
     return seconds
 
 def update_metadata(directory, database):
-
     AS['directory'] = directory
     AS['database'] = database
-
     conn = sqlite3.connect(f"file:{directory}/{database}?mode=ro", uri=True)
     cursor = conn.cursor()
-    query = f"SELECT * FROM metadata"
+    query = "SELECT * FROM metadata"
     cursor.execute(query)
     result = cursor.fetchone()
     AS['start_time'] = result[0]
     conn.close()
-    
     try:
         conn = sqlite3.connect(f"file:{directory}/{database}?mode=ro", uri=True)
         cursor = conn.cursor()    
-        query = f"SELECT argv FROM metadata"
+        query = "SELECT argv FROM metadata"
         cursor.execute(query)
         result = cursor.fetchone()
         AS['argv'] = result[0]
         conn.close()
-    except:
+    except Exception as _:
         AS['argv'] = 'Missing from database'
 
 def get_databases(directory):
@@ -80,35 +75,31 @@ def get_databases(directory):
         if re.search('^.*\\.sqlite$',file):
             databases.append(file)
     databases.sort(reverse=True)
-
     # add number of experiments
     databases_new = []
     for index in range(len(databases)):
         databases_new.append('%s (%d)' %(databases[index], get_number_of_experiments(directory, databases[index])))
-
     return databases_new
 
-def run(directory, ip="127.0.0.1", port=8080, debug=False):
+def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", debug=False):
     DATABASE_DIRECTORY = directory
-
     app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
     app.css.config.serve_locally = True
     app.scripts.config.serve_locally = True
-
     app.layout = html.Div([
             html.Div([
                 html.H4('Fault Injection Analysis'),
             ],style={'width':'80%','border-style':'none','margin':'0 auto'}),               
             html.Div([
-                html.Button(f"Update", id='update-button', n_clicks=0, style={'width':'20%'}),
+                html.Button("Update", id='update-button', n_clicks=0, style={'width':'20%'}),
                 html.Datalist(id="examples", children=[
                     html.Option(value="match_string(response, 'ets')"),
                     html.Option(value="match_hex(response, '661b')"),
                     html.Option(value="color = 'G'"),
-                    html.Option(value="delay > 100"),
-                    html.Option(value="length > 100"),
+                    html.Option(value=f"{y_axis} > 100"),
+                    html.Option(value=f"{x_axis} > 100"),
                 ]),
-                dcc.Input(id='query-input', type="text", list='examples', style={'width':'80%','display': 'inline-block'}, placeholder=f"SELECT * FROM experiments WHERE"),
+                dcc.Input(id='query-input', type="text", list='examples', style={'width':'80%','display': 'inline-block'}, placeholder="SELECT * FROM experiments WHERE"),
                 dcc.Dropdown(id='graph-dropdown', style={'width':'100%'}),
                 html.Center([
                     dcc.Graph(id='graph', style={'width':'80%'}),
@@ -175,7 +166,7 @@ def run(directory, ip="127.0.0.1", port=8080, debug=False):
             return False
 
     def recolor(regex, response):
-        if regex == None or len(regex) == 0:
+        if regex is None or len(regex) == 0:
             return False
         elif re.search(regex.encode(), response):
             return True
@@ -229,10 +220,10 @@ def run(directory, ip="127.0.0.1", port=8080, debug=False):
         update_metadata(DATABASE_DIRECTORY, database)
 
         # perform the query based on the query extension
-        if query != None and query != '':
+        if query is not None and query != '':
             query = f'SELECT * FROM experiments WHERE %s;' %(query)
         else:
-            query = f'SELECT * FROM experiments;'
+            query = 'SELECT * FROM experiments;'
 
         # read stuff from database
         df = pd.read_sql(query, con)
@@ -267,11 +258,11 @@ def run(directory, ip="127.0.0.1", port=8080, debug=False):
         # output plot
         fig = px.scatter(
             df,
-            x = "delay", 
-            y = "length",
+            x = x_axis,
+            y = y_axis,
             render_mode = "webgl",
             color = "color", 
-            labels = {"color":f"Classification ({nr_of_current_experiments:,})",'delay':'delay (ns)','length':'length (ns)'},
+            labels = {"color":f"Classification ({nr_of_current_experiments:,})",y_axis:y_axis,x_axis:x_axis},
             color_discrete_map = { 
                 "G": "green",
                 "Y": "yellow", 
@@ -319,7 +310,7 @@ def run(directory, ip="127.0.0.1", port=8080, debug=False):
         # output data
         records = df.to_dict('records')
 
-        delay_min = delay_max = length_min = length_max = 0
+        y_min = y_max = x_min = x_max = 0
 
         # TODO: rewrite this code
         if combine == 'Yes':
@@ -336,38 +327,38 @@ def run(directory, ip="127.0.0.1", port=8080, debug=False):
                     if combined_records[index]['response'] == response:
                         combined_records[index]['amount'] += 1
                         
-                        if record['delay'] < combined_records[index]['delayMin']:
-                            combined_records[index]['delayMin'] = record['delay']
+                        if record[y_axis] < combined_records[index]['yMin']:
+                            combined_records[index]['yMin'] = record[y_axis]
 
-                        if record['delay'] > combined_records[index]['delayMax']:
-                            combined_records[index]['delayMax'] = record['delay']
+                        if record[y_axis] > combined_records[index]['yMax']:
+                            combined_records[index]['yMax'] = record[y_axis]
 
-                        if record['length'] < combined_records[index]['lengthMin']:
-                            combined_records[index]['lengthMin'] = record['length']
+                        if record[x_axis] < combined_records[index]['xMin']:
+                            combined_records[index]['xMin'] = record[x_axis]
 
-                        if record['length'] > combined_records[index]['lengthMax']:
-                            combined_records[index]['lengthMax'] = record['length']
+                        if record[x_axis] > combined_records[index]['xMax']:
+                            combined_records[index]['xMax'] = record[x_axis]
                         break
                 else:
       
 
-                    delay_min = delay_max = record['delay']
-                    length_min = length_max = record['length']
+                    y_min = y_max = record[y_axis]
+                    x_min = x_max = record[x_axis]
 
-                    combined_records.append({'amount': 1, 'color': record['color'], 'delayMin': delay_min, 'delayMax': delay_max, 'lengthMin': length_min, 'lengthMax': length_max, 'response': response, 'response_hex': response_hex})
+                    combined_records.append({'amount': 1, 'color': record['color'], 'yMin': y_min, 'yMax': y_max, 'xMin': x_min, 'xMax': x_max, 'response': response, 'response_hex': response_hex})
 
             # sort new list based on occurrences 
             combined_records = sorted(combined_records, key=itemgetter('amount'), reverse=True)
 
-            columns = ['amount', 'color', 'delayMin', 'delayMax', 'lengthMin', 'lengthMax', 'response', 'response_hex' ]
+            columns = ['amount', 'color', 'yMin', 'yMax', 'xMin', 'xMax', 'response', 'response_hex' ]
 
             cell_style = [
                 {'if': {'column_id': 'amount'},     'textAlign': 'center','width':'100px'},
                 {'if': {'column_id': 'color'},      'textAlign': 'center','width':'100px'},
-                {'if': {'column_id': 'delayMin'},   'textAlign': 'center','width':'100px'},
-                {'if': {'column_id': 'delayMax'},   'textAlign': 'center','width':'100px'},
-                {'if': {'column_id': 'lengthMin'},  'textAlign': 'center','width':'100px'},
-                {'if': {'column_id': 'lengthMax'},  'textAlign': 'center','width':'100px'},
+                {'if': {'column_id': 'yMin'},   'textAlign': 'center','width':'100px'},
+                {'if': {'column_id': 'yMax'},   'textAlign': 'center','width':'100px'},
+                {'if': {'column_id': 'xMin'},  'textAlign': 'center','width':'100px'},
+                {'if': {'column_id': 'xMax'},  'textAlign': 'center','width':'100px'},
                 {'if': {'column_id': 'response'},   'textAlign': 'left'},
                 {'if': {'column_id': 'response_hex'},     'textAlign': 'left'}
             ]
@@ -377,15 +368,15 @@ def run(directory, ip="127.0.0.1", port=8080, debug=False):
             records = combined_records
  
         else:
-            columns = ['id', 'color', 'delay', 'length', 'rlen', 'response','response_hex']
+            columns = ['id', 'color', y_axis, x_axis, 'rlen', 'response','response_hex']
 
             all_records = []
 
             for record in records:
                 new_record = {}
                 new_record['id'] = record['id']
-                new_record['delay'] = record['delay']
-                new_record['length'] = record['length']
+                new_record[y_axis] = record[y_axis]
+                new_record[x_axis] = record[x_axis]
                 new_record['color'] = record['color']
                 new_record['rlen'] = len(record['response'])
                 new_record['response'] = record['response'].decode('utf-8', errors='replace')
@@ -394,8 +385,8 @@ def run(directory, ip="127.0.0.1", port=8080, debug=False):
 
             cell_style = [
                 {'if': {'column_id': 'id'},         'textAlign': 'center','width':'100px', 'minWidth':'100px'},
-                {'if': {'column_id': 'delay'},      'textAlign': 'center','width':'100px', 'minWidth':'100px'},
-                {'if': {'column_id': 'length'},     'textAlign': 'center','width':'100px', 'minWidth':'100px'},
+                {'if': {'column_id': y_axis},      'textAlign': 'center','width':'100px', 'minWidth':'100px'},
+                {'if': {'column_id': x_axis},     'textAlign': 'center','width':'100px', 'minWidth':'100px'},
                 {'if': {'column_id': 'color'},      'textAlign': 'center','width':'100px', 'minWidth':'100px'},
                 {'if': {'column_id': 'rlen'},     'textAlign': 'center','width':'100px', 'minWidth':'100px'},
                 {'if': {'column_id': 'response'},   'textAlign': 'left'},
@@ -449,9 +440,11 @@ def main(argv=sys.argv):
     parser.add_argument("--directory", help="Database directory", required=True)
     parser.add_argument("--port", help="Server port", required=False, default=8080)
     parser.add_argument("--ip", help="Server address", required=False, default='127.0.0.1')
+    parser.add_argument("-x", help="parameter to plot on the x-axis", required=False, default='delay')
+    parser.add_argument("-y", help="parameter to plot on the y-axis", required=False, default='length')
 
     args = parser.parse_args()
-    run(args.directory, args.ip, args.port, debug=True)
+    run(args.directory, args.ip, args.port, args.x, args.y, debug=True)
 
 if __name__ == "__main__":
     main()

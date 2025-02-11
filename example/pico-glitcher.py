@@ -92,9 +92,9 @@ class Main():
         while True:
             # set up glitch parameters (in nano seconds) and arm glitcher
             # trunk-ignore(bandit/B311)
-            length = random.randint(s_length, e_length)
-            # trunk-ignore(bandit/B311)
             delay = random.randint(s_delay, e_delay)
+            # trunk-ignore(bandit/B311)
+            length = random.randint(s_length, e_length)
 
             # arm
             if args.multiplexing:

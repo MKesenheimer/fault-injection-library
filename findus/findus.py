@@ -66,7 +66,7 @@ class Database():
         close: Close the connection to the database.
     """
 
-    def __init__(self, argv: list[str], dbname: str = None, resume: bool = False, nostore: bool = False):
+    def __init__(self, argv: list[str], dbname: str = None, resume: bool = False, nostore: bool = False, column_names = None):
         """
         Default constructor of the Database class.
 
@@ -94,8 +94,12 @@ class Database():
         self.con = sqlite3.connect("databases/" + self.dbname)
         self.cur = self.con.cursor()
         self.argv = argv
+        self.column_names = column_names
+        if column_names is None:
+            self.column_names = ["delay", "length"]
         if not resume and dbname is None:
-            self.cur.execute("CREATE TABLE experiments(id integer, delay integer, length integer, color text, response blob)")
+            columns = ", ".join(f"{col} integer" for col in self.column_names)
+            self.cur.execute(f"CREATE TABLE experiments(id integer, {columns}, color text, response blob)")
             self.cur.execute("CREATE TABLE metadata (stime_seconds integer, argv blob)")
 
         self.base_row_count = self.get_latest_experiment_id()
@@ -104,22 +108,38 @@ class Database():
         if resume or dbname is not None:
             print(f"[+] Number of experiments in previous database: {self.base_row_count}")
 
-    def insert(self, experiment_id: int, delay: int, length: int, color: str, response: bytes):
+    def insert(self, *dataset):
         """
         Method to insert datapoints into the SQLite database.
 
         Parameters:
             experiment_id: ID of the experiment to insert into the database.
+            dataset: Dataset consisting of experiment_id, delay, length, [additional parameters, ...], color and response.
             delay: Time from trigger until the glitch is set (in nano seconds).
             length: Length of glitch (in nano seconds).
             color: Color with which the parameter point (delay, length) is to be displayed in the graph.
             response: Byte string of target response. 
         """
+        if len(dataset) < 4:
+            raise Exception("Database.insert: Too less arguments given.")
+        experiment_id = dataset[0]
         if not self.nostore:
             if (experiment_id + self.base_row_count) == 0:
                 s_argv = ' '.join(self.argv[1:])
                 self.cur.execute("INSERT INTO metadata (stime_seconds,argv) VALUES (?,?)", [int(time.time()), s_argv])
-            self.cur.execute("INSERT INTO experiments (id,delay,length,color,response) VALUES (?,?,?,?,?)", [experiment_id + self.base_row_count, delay, length, color, response])
+            parameters = dataset[1:-2]
+            color = dataset[-2]
+            response = dataset[-1]
+            #print(f"{experiment_id}, {parameters}, {color}, {response}")
+            columns = ",".join(f"{col}" for col in self.column_names)
+            values = [experiment_id + self.base_row_count, color, response]
+            # insert the parameters after position 1
+            values[1:1] = parameters
+            #print(values)
+            qmarks = ",".join("?" for _ in range(len(values)))
+            #print(qmarks)
+            #print(f"INSERT INTO experiments (id,{columns},color,response) VALUES ({qmarks})")
+            self.cur.execute(f"INSERT INTO experiments (id,{columns},color,response) VALUES ({qmarks})", values)
             self.con.commit()
 
     def get_parameters_of_experiment(self, experiment_id: int) -> list:

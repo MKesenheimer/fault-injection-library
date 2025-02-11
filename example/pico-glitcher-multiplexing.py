@@ -20,15 +20,14 @@ import sys
 import time
 
 # import custom libraries
-from findus import Database, PicoGlitcher, Serial
+from findus import Database, PicoGlitcher
+from findus import AnalogPlot
 
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(PicoGlitcher):
     def classify(self, response):
-        if b'XXX256YYY256ZZZ\r\n' in response:
+        if b'Trigger ok' in response:
             color = 'G'
-        elif b'' == response:
-            color = 'M'
         elif b'Error' in response:
             color = 'M'
         elif b'Fatal exception' in response:
@@ -50,19 +49,22 @@ class Main():
         self.glitcher = DerivedGlitcher()
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
-        #self.glitcher.init(ext_power=args.power, ext_power_voltage=3.3)
         # choose rising edge trigger with dead time of 0 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
+
+        # the initial voltage for multiplexing must be hard-coded and can only be applied
+        # if the raspberry pi pico is reset and re-initialized.
+        self.glitcher.change_config_and_reset("mux_vinit", "3.3")
+        self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
+
+        # rising edge trigger on trigger input
         self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
 
-        # choose multiplexing or crowbar glitching
-        if args.multiplexing:
-            self.glitcher.set_multiplexing()
-        else:
-            self.glitcher.set_lpglitch()
+        # choose multiplexing
+        self.glitcher.set_multiplexing()
 
         # set up the database
-        self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
+        self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store, column_names=["delay", "length", "t1"])
         self.start_time = int(time.time())
 
     def run(self):
@@ -73,65 +75,64 @@ class Main():
         e_delay = self.args.delay[1]
         s_length = self.args.length[0]
         e_length = self.args.length[1]
+        s_t1 = 0
+        e_t1 = 2000
 
         experiment_id = 0
         while True:
-            # get the next parameter set
+            # set up glitch parameters (in nano seconds) and arm glitcher
+            # trunk-ignore(bandit/B311)
             delay = random.randint(s_delay, e_delay)
+            # trunk-ignore(bandit/B311)
             length = random.randint(s_length, e_length)
+            # trunk-ignore(bandit/B311)
+            t1 = random.randint(s_t1, e_t1)
 
             # arm
-            if args.multiplexing:
-                mul_config = {"t1": 1000, "v1": "1.8", "t2": length, "v2": "GND"}
-                self.glitcher.arm_multiplexing(delay, mul_config)
-            else:
-                self.glitcher.arm(delay, length)
+            mul_config = {"t1": t1, "v1": "1.8", "t2": length, "v2": "GND"}
+            self.glitcher.arm_multiplexing(delay, mul_config)
 
-            # initialize the loop on the rp2040
+            # power cycle target
+            #self.glitcher.power_cycle_target(0.1)
+
+            # reset target
+            time.sleep(0.01)
             self.glitcher.reset(0.01)
-            #self.target.write(b'A\r\n')
 
-            # block until glitch and read response
+            # block until glitch
             try:
-                self.glitcher.block(timeout=0.5)
-                # TODO: check target response
-                #response = self.target.readline()
-                response = b'XXX256YYY256ZZZ\r\n'
+                self.glitcher.block(timeout=1)
+                # Manually set the response to a reasonable value.
+                # In a real scenario, this would be filled by the response of the microcontroller (UART, SWD, etc.)
+                response = b'Trigger ok'
             except Exception as _:
                 print("[-] Timeout received in block(). Continuing.")
-                self.glitcher.reset(0.1)
-                time.sleep(0.1)
+                self.glitcher.power_cycle_target(power_cycle_time=1)
+                time.sleep(0.2)
                 response = b'Timeout'
 
             # classify response
             color = self.glitcher.classify(response)
 
             # add to database
-            self.database.insert(experiment_id, delay, length, color, response)
+            self.database.insert(experiment_id, delay, length, t1, color, response)
 
             # monitor
             speed = self.glitcher.get_speed(self.start_time, experiment_id)
             experiment_base_id = self.database.get_base_experiments_count()
-            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{delay}\t{length}\t{color}\t{response}", color))
+            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{delay}\t{length}\t{t1}\t{color}\t{response}", color))
 
             # increase experiment id
             experiment_id += 1
 
-            # stop after enough data captured
-            #if experiment_id >= 5000:
-            #    break
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--target", required=False, help="target port", default="/dev/ttyUSB1")
     parser.add_argument("--rpico", required=False, help="rpico port", default="/dev/ttyACM0")
     parser.add_argument("--power", required=False, help="rk6006 port", default=None)
     parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
-    parser.add_argument("--multiplexing", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with multiplexing between different voltages (requires PicoGlitcher v2).")
     parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
     args = parser.parse_args()
 

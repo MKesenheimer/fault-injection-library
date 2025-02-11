@@ -68,7 +68,7 @@ class Main():
         print(self.target.read(1024))
 
         # set up the database
-        self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
+        self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store, column_names=["delay", "t1", "v1", "t2", "v2", "t3", "v3", "t4"])
         self.start_time = int(time.time())
 
     def run(self):
@@ -134,7 +134,7 @@ class Main():
             color, weight = self.glitcher.classify(response)
 
             # add to database
-            self.database.insert(experiment_id, delay, t1 + t2 + t3 + t4, color, response)
+            self.database.insert(experiment_id, delay, t1, v1, t2, v2, t3, v3, t4, color, response)
 
             # add experiment to parameterspace of genetic algorithm
             opt.add_experiment(weight, delay, t1, v1, t2, v2, t3, v3, t4)
@@ -143,7 +143,7 @@ class Main():
             # monitor
             speed = self.glitcher.get_speed(self.start_time, experiment_id)
             experiment_base_id = self.database.get_base_experiments_count()
-            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{int(t1 + t2 + t3 + t4)}\t{int(delay)}\t{color}\t{response}", color))
+            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{int(delay)}\t{int(t1)}\t{int(v1)}\t{int(t2)}\t{int(v2)}\t{int(t3)}\t{int(v3)}\t{int(t4)}\t{color}\t{response}", color))
 
             # increase experiment id
             experiment_id += 1
