@@ -54,12 +54,14 @@ options:
                         Database directory
   --port PORT           Server port
   --ip IP               Server address
+  -x X                  parameter to plot on the x-axis
+  -y Y                  parameter to plot on the y-axis
 ```
 
 Example:
 ```bash
 cd projects/airtag-glitching
-analyzer --directory databases
+analyzer --directory databases -x delay -y length
 ```
 
 Visit `http://127.0.0.1:8080` in your web browser to access the analyzer web application.

@@ -52,6 +52,19 @@ class Database():
         ...
         database.insert(experiment_id, delay, length, color, response)
 
+    Example usage for multi dimensional parameter space:
+
+        # import Database from findus
+        from findus import Database
+        ...
+        database = Database(argv=argv, column_names=["delay", "length", "t1"])
+        ...
+        database.insert(experiment_id, delay, length, t1, color, response)
+
+    If you want to plot the (length, t1) slice, you can call the `analyzer` script as follows:
+
+        analyzer --directory databases -x length -y t1
+
     If `dbname` is not provided, a name will automatically generated based on `argv`.
 
     Methods:
