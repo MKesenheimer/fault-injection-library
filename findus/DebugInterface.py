@@ -86,7 +86,7 @@ class GlitchState():
 
     Example usage:
 
-        from findus.STLinkInterface import STLinkInterface, GlitchState
+        from findus.DebugInterface import DebugInterface, GlitchState
         from findus.GlitchState import OKType, ExpectedType
 
         def return_ok():
@@ -103,12 +103,13 @@ class GlitchState():
     Expected = _Expected
     Success = _Success
 
-class STLinkInterface():
-    def __init__(self, tool:str = "stlink", processor:str = "stm32l0"):
+class DebugInterface():
+    def __init__(self, tool:str = "stlink", processor:str = "stm32l0", transport:str = "hla_swd"):
         self.process = None
         self.processor_name = processor
         self.socket = None
         self.tool = tool
+        self.transport = transport
 
     def program_target(self, glitcher, elf_image:str = "program.elf", rdp_level:int = 0):
         glitcher.reset(0.01)
@@ -132,7 +133,7 @@ class STLinkInterface():
         result = subprocess.run([
             'openocd',
             '-f', f'interface/{self.tool}.cfg',
-            '-c', 'transport select hla_swd',
+            '-c', f'transport select {self.transport}',
             '-f', f'target/{self.processor_name}.cfg',
             '-c', f'init; halt; {self.processor_name}x unlock 0; exit'
             ], text=True, capture_output=True)
@@ -145,7 +146,7 @@ class STLinkInterface():
         result = subprocess.run([
             'openocd',
             '-f', f'interface/{self.tool}.cfg',
-            '-c', 'transport select hla_swd',
+            '-c', f'transport select {self.transport}',
             '-f', f'target/{self.processor_name}.cfg',
             '-c', f'init; halt; {self.processor_name}x lock 0; sleep 1000; reset run; shutdown;'
             ], text=True, capture_output=True)
@@ -158,7 +159,7 @@ class STLinkInterface():
         result = subprocess.run([
             'openocd',
             '-f', f'interface/{self.tool}.cfg',
-            '-c', 'transport select hla_swd',
+            '-c', f'transport select {self.transport}',
             '-f', f'target/{self.processor_name}.cfg',
             '-c', f'init; halt; program {elf_image} verify reset exit;'
             ], text=True, capture_output=True)
@@ -171,7 +172,7 @@ class STLinkInterface():
         result = subprocess.run([
             'openocd',
             '-f', f'interface/{self.tool}.cfg',
-            '-c', 'transport select hla_swd',
+            '-c', f'transport select {self.transport}',
             '-f', f'target/{self.processor_name}.cfg',
             '-c', f'init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; exit'
             ], text=True, capture_output=True)
@@ -184,7 +185,7 @@ class STLinkInterface():
         result = subprocess.run([
             'openocd',
             '-f', f'interface/{self.tool}.cfg',
-            '-c', 'transport select hla_swd',
+            '-c', f'transport select {self.transport}',
             '-f', f'target/{self.processor_name}.cfg'
             ], text=True, capture_output=True)
         response = result.stdout + result.stderr
@@ -196,7 +197,7 @@ class STLinkInterface():
         result = subprocess.run([
             'openocd',
             '-f', f'interface/{self.tool}.cfg',
-            '-c', 'transport select hla_swd',
+            '-c', f'transport select {self.transport}',
             '-f', f'target/{self.processor_name}.cfg',
             '-c', 'init',
             '-c', f'mdw {hex(address)}',
@@ -206,9 +207,9 @@ class STLinkInterface():
         if verbose:
             print(response)
         if "Error: init mode failed (unable to connect to the target)" in response:
-            return GlitchState.Error.no_connection, None
-        elif "Error" in response:
-            return GlitchState.Error.default, response
+            return GlitchState.Error.no_connection, response
+        elif "Error: Failed to read memory at" in response:
+            return GlitchState.Expected.rdp_active, response
         elif "Warning" in response:
             return GlitchState.Warning.default, response
         match = re.search(fr'{hex(address)[2:]}:\s*([0-9A-Fa-f]+)', response)
@@ -216,8 +217,8 @@ class STLinkInterface():
             if match.group(1) != "00000000":
                 return GlitchState.OK.rdp_inactive, match.group(1)
             else:
-                return GlitchState.Expected.rdp_active, None
-        return GlitchState.Error.no_response, None
+                return GlitchState.Expected.rdp_active, response
+        return GlitchState.Error.no_response, response
 
     def attach(self):
         # trunk-ignore(bandit/B607)
@@ -225,7 +226,7 @@ class STLinkInterface():
         self.process = subprocess.Popen([
             'openocd',
             '-f', f'interface/{self.tool}.cfg',
-            '-c', 'transport select hla_swd',
+            '-c', f'transport select {self.transport}',
             '-f', f'target/{self.processor_name}.cfg',
             '-c', 'init'
             ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, start_new_session=True)
