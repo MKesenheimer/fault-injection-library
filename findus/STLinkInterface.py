@@ -190,7 +190,7 @@ class STLinkInterface():
         response = result.stdout + result.stderr
         print(response)
 
-    def read_address(self, address:int):
+    def read_address(self, address:int, verbose=False):
         # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
         result = subprocess.run([
@@ -203,7 +203,8 @@ class STLinkInterface():
             '-c', 'exit'
             ], text=True, capture_output=True)
         response = result.stdout + result.stderr
-        print(response)
+        if verbose:
+            print(response)
         if "Error: init mode failed (unable to connect to the target)" in response:
             return GlitchState.Error.no_connection, None
         elif "Error" in response:
