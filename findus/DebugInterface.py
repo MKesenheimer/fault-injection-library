@@ -54,6 +54,7 @@ class _Warning(WarningType):
     default = 0
     flash_reset = 1
     timeout = 2
+    polling_failed = 3
 
 class _OK(OKType):
     """
@@ -174,7 +175,7 @@ class DebugInterface():
             '-f', f'interface/{self.tool}.cfg',
             '-c', f'transport select {self.transport}',
             '-f', f'target/{self.processor_name}.cfg',
-            '-c', f'init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; exit'
+            '-c', f'init; dump_ipolling_failedmage {bin_image} {hex(start_addr)} {hex(length)}; exit'
             ], text=True, capture_output=True)
         print(result.stdout)
         print(result.stderr)
@@ -209,6 +210,8 @@ class DebugInterface():
         if "Error: init mode failed (unable to connect to the target)" in response:
             return GlitchState.Error.no_connection, response
         elif "Error: Failed to read memory at" in response:
+            if "Polling target" in response:
+                return GlitchState.Warning.polling_failed, response
             return GlitchState.Expected.rdp_active, response
         elif "Warning" in response:
             return GlitchState.Warning.default, response
