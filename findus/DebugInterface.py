@@ -55,6 +55,7 @@ class _Warning(WarningType):
     flash_reset = 1
     timeout = 2
     polling_failed = 3
+    lockup = 4
 
 class _OK(OKType):
     """
@@ -64,7 +65,8 @@ class _OK(OKType):
     ack = 1
     bootloader_ok = 2
     rdp_inactive = 3
-    dump_error = 4
+    read_zero = 4
+    dump_error = 5
 
 class _Success(SuccessType):
     """
@@ -205,23 +207,7 @@ class DebugInterface():
             '-c', 'exit'
             ], text=True, capture_output=True)
         response = result.stdout + result.stderr
-        if verbose:
-            print(response)
-        if "Error: init mode failed (unable to connect to the target)" in response:
-            return GlitchState.Error.no_connection, response
-        elif "Error: Failed to read memory at" in response:
-            if "Polling target" in response:
-                return GlitchState.Warning.polling_failed, response
-            return GlitchState.Expected.rdp_active, response
-        elif "Warning" in response:
-            return GlitchState.Warning.default, response
-        match = re.search(fr'{hex(address)[2:]}:\s*([0-9A-Fa-f]+)', response)
-        if match:
-            if match.group(1) != "00000000":
-                return GlitchState.OK.rdp_inactive, match.group(1)
-            else:
-                return GlitchState.Expected.rdp_active, response
-        return GlitchState.Error.no_response, response
+        return self.characterize(response, address, verbose)
 
     def attach(self):
         # trunk-ignore(bandit/B607)
@@ -264,14 +250,37 @@ class DebugInterface():
         if "Previous state query failed, trying to reconnect" in response:
             response += self.telnet_interact(command)
             #return GlitchState.Error.reconnect, None
-        print(response)
-        match = re.search(fr'{hex(address)[2:]}:\s*([0-9A-Fa-f]+)', response)
-        if match:
-            if match.group(1) != "00000000":
-                return GlitchState.OK.rdp_inactive, match.group(1)
-            else:
-                return GlitchState.Expected.rdp_active, None
-        return GlitchState.Error.no_response, None
+        return self.characterize(response, address)
+
+    def characterize(self, response:str, address:int = 0x00, verbose:bool = False):
+        if verbose:
+            print(response)
+
+        # possibly ok
+        if not "Error: Failed to read memory at" in response:
+            match = re.search(fr'{hex(address)[2:]}:\s*([0-9A-Fa-f]+)', response)
+            if match:
+                if match.group(1) != "00000000":
+                    return GlitchState.OK.rdp_inactive, match.group(1)
+                else:
+                    return GlitchState.OK.read_zero, response
+        # Error: no connection
+        elif "Error: init mode failed (unable to connect to the target)" in response:
+            return GlitchState.Error.no_connection, response
+        # Warning: Polling failed
+        elif "Polling target" in response:
+            return GlitchState.Warning.polling_failed, response
+        # Warning: Device lockup
+        if "clearing lockup after double fault" in response:
+            return GlitchState.Warning.lockup, response
+        # Warning: else
+        elif "Warning" in response:
+            return GlitchState.Warning.default, response
+        # expected state
+        elif "Error: Failed to read memory at" in response:
+            return GlitchState.Expected.rdp_active, response
+        # no response
+        return GlitchState.Error.no_response, response
 
     def telnet_read_image(self, bin_image:str = "memory_dump.bin", start_addr:int = 0x08000000, length:int = 0x400):
         command = f"init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; exit"

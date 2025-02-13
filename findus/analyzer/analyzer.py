@@ -81,7 +81,7 @@ def get_databases(directory):
         databases_new.append('%s (%d)' %(databases[index], get_number_of_experiments(directory, databases[index])))
     return databases_new
 
-def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", debug=False):
+def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", aspect_ratio=0.38, debug=False):
     DATABASE_DIRECTORY = directory
     app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
     app.css.config.serve_locally = True
@@ -96,8 +96,9 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", d
                     html.Option(value="match_string(response, 'ets')"),
                     html.Option(value="match_hex(response, '661b')"),
                     html.Option(value="color = 'G'"),
-                    html.Option(value=f"{y_axis} > 100"),
-                    html.Option(value=f"{x_axis} > 100"),
+                    html.Option(value=f"length > 100"),
+                    html.Option(value=f"delay > 100"),
+                    html.Option(value=f"voltage = 400"),
                 ]),
                 dcc.Input(id='query-input', type="text", list='examples', style={'width':'80%','display': 'inline-block'}, placeholder="SELECT * FROM experiments WHERE"),
                 dcc.Dropdown(id='graph-dropdown', style={'width':'100%'}),
@@ -129,6 +130,13 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", d
                 html.Div(id='data',style={'width':'100%', 'height':'80%', 'border-style':'none'}),
                 html.Label('Arguments:'),
                 html.Label('lalala', id='argv'),
+
+                # timer for update_graph callback
+                dcc.Interval(
+                    id="interval-component",
+                    interval=1000,
+                    n_intervals=0
+                )
             ],style={'width':'80%','border-style':'none','margin':'0 auto'}),
         ],style={'width':'100%', 'border-style':'none', 'margin-top':'100px','margin-bottom':'100px'})
 
@@ -179,6 +187,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", d
         Output('data','children'),
         Input('update-button', 'n_clicks'),
         Input('graph-dropdown', 'value'),
+        Input('interval-component', 'n_intervals'),
         State('query-input', 'value'),
         State('recolor-green', 'value'),
         State('recolor-green-label', 'value'),
@@ -196,9 +205,9 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", d
         State('recolor-black-label', 'value'),
         State('recolor-red', 'value'),
         State('recolor-red-label', 'value'),
-        State('combine-data', 'value')
+        State('combine-data', 'value'),
     )
-    def update_graph(nr_of_clicks, database, query, green, greenlabel, yellow, yellowlabel, magenta, magentalabel, orange, orangelabel, cyan, cyanlabel, blue, bluelabel, black, blacklabel, red, redlabel, combine):
+    def update_graph(nr_of_clicks, database, interval, query, green, greenlabel, yellow, yellowlabel, magenta, magentalabel, orange, orangelabel, cyan, cyanlabel, blue, bluelabel, black, blacklabel, red, redlabel, combine):
         if debug:
             now = round(time.time() * 1000)
         
@@ -262,7 +271,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", d
             y = y_axis,
             render_mode = "webgl",
             color = "color", 
-            labels = {"color":f"Classification ({nr_of_current_experiments:,})",y_axis:y_axis,x_axis:x_axis},
+            labels = {"color":f"Classification ({nr_of_current_experiments:,})",y_axis:y_axis, x_axis:x_axis},
             color_discrete_map = { 
                 "G": "green",
                 "Y": "yellow", 
@@ -275,7 +284,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", d
             },
             category_orders = {
                 "color" : ["G","Y","M","O","C","B","R"]
-            }
+            },
         )
 
         # compute elapsed time
@@ -285,7 +294,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", d
         
         # update title of graph
         # fig.update_layout(title_text=f"{database[:-7]} (running for {elapsed_time} @ {nr_of_experiments_per_second} per second)\n", title_x=0.5)
-        fig.update_layout(title_text=f"{database[:-7]}", title_x=0.5)
+        fig.update_layout(title_text=f"{database[:-7]}", title_x=0.5, yaxis=dict(scaleanchor="x", scaleratio=aspect_ratio))
 
         # update labels in legenda
         def make_label(color, label, df):
@@ -442,9 +451,10 @@ def main(argv=sys.argv):
     parser.add_argument("--ip", help="Server address", required=False, default='127.0.0.1')
     parser.add_argument("-x", help="parameter to plot on the x-axis", required=False, default='delay')
     parser.add_argument("-y", help="parameter to plot on the y-axis", required=False, default='length')
+    parser.add_argument("--aspect-ratio", help="aspect ratio of the plot relative to x-axis", required=False, default=0.38, type=float)
 
     args = parser.parse_args()
-    run(args.directory, args.ip, args.port, args.x, args.y, debug=True)
+    run(directory=args.directory, ip=args.ip, port=args.port, x_axis=args.x, y_axis=args.y, aspect_ratio=args.aspect_ratio, debug=True)
 
 if __name__ == "__main__":
     main()
