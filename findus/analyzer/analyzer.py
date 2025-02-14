@@ -81,7 +81,7 @@ def get_databases(directory):
         databases_new.append('%s (%d)' %(databases[index], get_number_of_experiments(directory, databases[index])))
     return databases_new
 
-def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", aspect_ratio=0.38, debug=False):
+def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", aspect_ratio=0.38, auto_update_interval=0, debug=False):
     DATABASE_DIRECTORY = directory
     app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
     app.css.config.serve_locally = True
@@ -134,8 +134,9 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
                 # timer for update_graph callback
                 dcc.Interval(
                     id="interval-component",
-                    interval=1000,
-                    n_intervals=0
+                    interval=auto_update_interval * 1000,
+                    n_intervals=0,
+                    disabled=auto_update_interval == 0
                 )
             ],style={'width':'80%','border-style':'none','margin':'0 auto'}),
         ],style={'width':'100%', 'border-style':'none', 'margin-top':'100px','margin-bottom':'100px'})
@@ -452,9 +453,12 @@ def main(argv=sys.argv):
     parser.add_argument("-x", help="parameter to plot on the x-axis", required=False, default='delay')
     parser.add_argument("-y", help="parameter to plot on the y-axis", required=False, default='length')
     parser.add_argument("--aspect-ratio", help="aspect ratio of the plot relative to x-axis", required=False, default=0.38, type=float)
+    parser.add_argument("--auto-update", help="Whether to update the plot automatically. Optionally pass the update interval in seconds.", required=False, default=1, type=int, nargs='?', const=1)
+
+
 
     args = parser.parse_args()
-    run(directory=args.directory, ip=args.ip, port=args.port, x_axis=args.x, y_axis=args.y, aspect_ratio=args.aspect_ratio, debug=True)
+    run(directory=args.directory, ip=args.ip, port=args.port, x_axis=args.x, y_axis=args.y, aspect_ratio=args.aspect_ratio, auto_update_interval=args.auto_update, debug=True)
 
 if __name__ == "__main__":
     main()
