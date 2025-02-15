@@ -1,8 +1,8 @@
 # Pulse-Shaping
 
-The pulse-shaping stage of the Pico Glitcher allows for fine-tuned control over glitch waveforms by defining voltage transitions over time. This technique is useful for more sophisticated fault injection attacks where simple square-wave glitches might not be effective.
+The pulse-shaping expansion board for the Pico Glitcher allows for fine-tuned control over glitch waveforms by defining voltage transitions over time. This technique is useful for more sophisticated fault injection attacks where simple square-wave glitches might not be effective.
 
-As described previously in section [comparing different glitching modes](glitches.md), pulse-shaping is the method of generating arbitrary voltage profiles that are appplied to the power rail of the target device.
+As described previously in section [comparing different glitching modes](glitches.md), pulse-shaping is the method of generating arbitrary voltage profiles that are applied to the power rail of the target device. This board gives you very fine control over the voltage curve with which the target device is supplied. Not only that, but unwanted oscillations after the transitions between two voltage levels can also be suppressed, resulting in cleaner voltage curves.
 
 This method was introduced to the Pico Glitcher v2 with a special expansion board and is described briefly in the following.
 

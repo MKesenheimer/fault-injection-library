@@ -242,7 +242,6 @@ class LPC1343_Glitcher:
     def write_to_ram(self):
         # first send "OK" to the target device
         resp = self.send_target_command(self.OK, 1, True, b"\r\n")
-        
         cmd = "R {} 32".format(i * 32).encode("utf-8")
 
     def run(self):
