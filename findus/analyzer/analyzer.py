@@ -455,7 +455,7 @@ def main(argv=sys.argv):
     parser.add_argument("--ip", help="Server address", required=False, default='127.0.0.1')
     parser.add_argument("-x", help="parameter to plot on the x-axis", required=False, default='delay')
     parser.add_argument("-y", help="parameter to plot on the y-axis", required=False, default='length')
-    parser.add_argument("--aspect-ratio", help="aspect ratio of the plot relative to x-axis", required=False, default=0.38, type=float)
+    parser.add_argument("--aspect-ratio", help="aspect ratio of the plot relative to x-axis", required=False, default=0, type=float)
     parser.add_argument("--auto-update", help="Whether to update the plot automatically. Optionally pass the update interval in seconds.", required=False, default=0, type=int, nargs='?', const=1)
 
     args = parser.parse_args()
