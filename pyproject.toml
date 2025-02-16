@@ -12,7 +12,7 @@ packages = ["findus", "findus.analyzer", "findus.helper", "findus.firmware"]
 [project]
 name = "findus"
 description = "Library to perform fault injection attacks with the PicoGlitcher, Chipwhisperer Husky or Chipwhisperer Pro"
-version = "0.9.15"
+version = "0.9.16"
 license = {file = "LICENSE"}
 authors = [{name = "Matthias Kesenheimer", email = "m.kesenheimer@gmx.net"}]
 dependencies = [
