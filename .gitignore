@@ -28,3 +28,4 @@ schematics/kicad/pico-glitcher-v2-simulation
 schematics/kicad/pico-glitcher-v2-extension/production
 **/*backups
 schematics/product
+*.pdf
