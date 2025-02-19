@@ -7,7 +7,7 @@
 
 # programming
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x unlock 0; exit"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program read-out-protection-test-STM32L0.elf verify reset exit;"
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; sleep 1000; reset run; shutdown"
 # -> power cycle the target!
 
@@ -16,7 +16,7 @@
 
 # debugging (install arm-none-eabi-gdb!)
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init"
-# > arm-none-eabi-gdb read-out-protection-test-CW308_STM32L0.elf
+# > arm-none-eabi-gdb read-out-protection-test-STM32L0.elf
 # (gdb) target extended-remote localhost:3333
 # (gdb) x 0x08000000
 ## or
@@ -220,15 +220,6 @@ class DebugInterface():
             '-c', 'init'
             ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, start_new_session=True)
 
-        # generate a connection to the openocd telnet server
-        time.sleep(1)
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(1)
-        self.socket.connect(('localhost', 4444))
-        # receive start messages
-        time.sleep(0.1)
-        self.socket.recv(4096)
-
     def detach(self):
         if self.process is not None:
             self.process.terminate()
@@ -236,6 +227,15 @@ class DebugInterface():
         if self.socket is not None:
             self.socket.close()
             self.socket = None
+
+    def telnet_init(self):
+        # generate a connection to the openocd telnet server
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(1)
+        self.socket.connect(('localhost', 4444))
+        # receive start messages
+        time.sleep(0.1)
+        self.socket.recv(4096)
 
     def telnet_interact(self, command:str):
         command += "\n"
@@ -251,6 +251,12 @@ class DebugInterface():
             response += self.telnet_interact(command)
             #return GlitchState.Error.reconnect, None
         return self.characterize(response, address)
+
+    def telnet_read_image(self, bin_image:str = "memory_dump.bin", start_addr:int = 0x08000000, length:int = 0x400):
+        command = f"init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; exit"
+        response = self.telnet_interact(command)
+        print(response)
+        #return response
 
     def characterize(self, response:str, address:int = 0x00, verbose:bool = False):
         if verbose:
@@ -281,12 +287,6 @@ class DebugInterface():
             return GlitchState.Expected.rdp_active, response
         # no response
         return GlitchState.Error.no_response, response
-
-    def telnet_read_image(self, bin_image:str = "memory_dump.bin", start_addr:int = 0x08000000, length:int = 0x400):
-        command = f"init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; exit"
-        response = self.telnet_interact(command)
-        print(response)
-        #return response
 
     def __del__(self):
         print("[+] Detaching debugger.")
