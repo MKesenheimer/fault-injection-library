@@ -114,17 +114,19 @@ class DebugInterface():
         self.tool = tool
         self.transport = transport
 
-    def program_target(self, glitcher, elf_image:str = "program.elf", rdp_level:int = 0):
-        glitcher.reset(0.01)
-        time.sleep(0.005)
-        self.unlock_target()
-        glitcher.power_cycle_target()
-        time.sleep(0.1)
+    def program_target(self, glitcher, elf_image:str = "program.elf", unlock:bool = True, rdp_level:int = 0):
+        if unlock:
+            glitcher.reset(0.01)
+            time.sleep(0.005)
+            self.unlock_target()
+            glitcher.power_cycle_target()
+            time.sleep(0.1)
         self.write_image(elf_image=elf_image)
         if rdp_level == 1:
             self.lock_target()
-        glitcher.power_cycle_target()
-        time.sleep(0.1)
+            # changes in the RDP level become active after a power-cycle
+            glitcher.power_cycle_reset()
+            time.sleep(0.1)
 
     def unlock_target(self):
         """
@@ -151,7 +153,9 @@ class DebugInterface():
             '-f', f'interface/{self.tool}.cfg',
             '-c', f'transport select {self.transport}',
             '-f', f'target/{self.processor_name}.cfg',
-            '-c', f'init; halt; {self.processor_name}x lock 0; sleep 1000; reset run; shutdown;'
+            # TODO: check
+            #'-c', f'init; halt; {self.processor_name}x lock 0; sleep 1000; reset run; shutdown;'
+            '-c', f'init; halt; {self.processor_name}x lock 0; exit'
             ], text=True, capture_output=True)
         print(result.stdout)
         print(result.stderr)
@@ -164,7 +168,9 @@ class DebugInterface():
             '-f', f'interface/{self.tool}.cfg',
             '-c', f'transport select {self.transport}',
             '-f', f'target/{self.processor_name}.cfg',
-            '-c', f'init; halt; program {elf_image} verify reset exit;'
+            # TODO: check
+            #'-c', f'init; halt; program {elf_image} verify reset exit;'
+            '-c', f'init; halt; program {elf_image}; run; exit'
             ], text=True, capture_output=True)
         print(result.stdout)
         print(result.stderr)
