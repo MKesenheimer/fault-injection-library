@@ -3,4 +3,4 @@
 	url = https://github.com/MKesenheimer/rd6006.git
 [submodule "projects/rp2350-glitching/rp2350_hacking_challenge"]
 	path = projects/rp2350-glitching/rp2350_hacking_challenge
-	url = https://github.com/raspberrypi/rp2350_hacking_challenge.git
+	url = https://github.com/MKesenheimer/rp2350_hacking_challenge.git

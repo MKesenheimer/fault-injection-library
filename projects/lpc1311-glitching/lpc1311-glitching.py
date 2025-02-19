@@ -73,11 +73,16 @@ class LPC1343_Glitcher:
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
 
+        # multiplexing
+        self.glitcher.change_config_and_reset("mux_vinit", "3.3")
+        self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
+
         # set trigger on rising edge of reset line (RESET and GLITCH_EN are connected)
         self.glitcher.rising_edge_trigger(pin_condition='reset')
 
         # choose multiplexing or crowbar glitching
         self.glitcher.set_lpglitch()
+        #self.glitcher.set_multiplexing()
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
@@ -93,7 +98,6 @@ class LPC1343_Glitcher:
 
         # initialize serial port
         self.serial = serial.Serial(port=args.target, baudrate=115200, timeout=0.1, bytesize=8, parity=serial.PARITY_NONE)
-
 
     def synchronize(self):
         """UART synchronization with auto baudrate detection"""
@@ -132,7 +136,6 @@ class LPC1343_Glitcher:
             return False
 
         return True
-
 
     def read_command_response(self, response_count, echo=True, terminator=b"\r\n"):
         """Read command response from target device"""
@@ -200,7 +203,6 @@ class LPC1343_Glitcher:
 
         return result
 
-
     def send_target_command(self, command, response_count=0, echo=True, terminator=b"\r\n"):
         """Send command to target device"""
 
@@ -212,7 +214,6 @@ class LPC1343_Glitcher:
         response = self.read_command_response(response_count, echo, terminator)
 
         return response
-
 
     def dump_memory(self):
         """Dump the target device memory"""
@@ -238,13 +239,6 @@ class LPC1343_Glitcher:
 
         print("[*] Dumped memory written to '{}'".format(self.DUMP_FILE))
 
-
-    def write_to_ram(self):
-        # first send "OK" to the target device
-        resp = self.send_target_command(self.OK, 1, True, b"\r\n")
-        
-        cmd = "R {} 32".format(i * 32).encode("utf-8")
-
     def run(self):
         # log execution
         logging.info(" ".join(sys.argv))
@@ -262,6 +256,8 @@ class LPC1343_Glitcher:
             delay = random.randint(s_delay, e_delay)
             length = random.randint(s_length, e_length)
             self.glitcher.arm(delay, length)
+            #mul_config = {"t1": 10000, "v1": "1.8", "t2": length, "v2": "GND"}
+            #self.glitcher.arm_multiplexing(delay, mul_config)
 
             # reset target
             self.glitcher.reset(0.02)
