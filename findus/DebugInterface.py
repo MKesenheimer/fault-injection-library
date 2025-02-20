@@ -82,6 +82,7 @@ class _OK(OKType):
     """
     default = 0
     read_zero = 1
+    rdp_changed = 2
 
 class _Success(SuccessType):
     """
@@ -123,12 +124,13 @@ class GlitchState():
     Success = _Success
 
 class DebugInterface():
-    def __init__(self, tool:str = "stlink", processor:str = "stm32l0", transport:str = "hla_swd"):
+    def __init__(self, tool:str = "stlink", processor:str = "stm32l0", transport:str = "hla_swd", gdb_exec:str = "arm-none-eabi-gdb"):
         self.openocd_process = None
         self.gdb_process = None
         self.processor_name = processor
         self.socket = None
         self.tool = tool
+        self.gdb_exec = gdb_exec
         self.transport = transport
 
     def program_target(self, glitcher, elf_image:str = "program.elf", unlock:bool = True, rdp_level:int = 0, verbose:bool = False):
@@ -336,7 +338,7 @@ class DebugInterface():
         # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
         self.gdb_process = subprocess.Popen([
-            'arm-none-eabi-gdb',
+            f'{self.gdb_exec}',
             '--interpreter=mi2',
             f'{elf_image}'
             ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
