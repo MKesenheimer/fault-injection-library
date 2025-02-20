@@ -44,7 +44,6 @@ class _OK(OKType):
     default = 0
     ack = 1
     bootloader_ok = 2
-    rdp_inactive = 3
     dump_error = 4
 
 class _Success(SuccessType):
@@ -52,9 +51,10 @@ class _Success(SuccessType):
     Enum class for success states (glitching was successful).
     """
     default = 0
-    dump_ok = 1
-    dump_successful = 2
-    dump_finished = 3
+    rdp_inactive = 1
+    dump_ok = 2
+    dump_successful = 3
+    dump_finished = 4
 
 class GlitchState():
     """
@@ -205,14 +205,14 @@ class BootloaderCom:
             read: Whether to read the response or not.
 
         Returns:
-            Returns `GlitchState.Expected.rdp_active` if RDP is active (expected), or `GlitchState.OK.rdp_inactive` if glitch was successful
+            Returns `GlitchState.Expected.rdp_active` if RDP is active (expected), or `GlitchState.Success.rdp_inactive` if glitch was successful
         """
         # read memory (x11: read memory, xee: crc)
         self.ser.write(b'\x11\xee')
         if read:
             s = self.ser.read(1)
             if s == self.ACK:
-                return GlitchState.OK.rdp_inactive
+                return GlitchState.Success.rdp_inactive
             elif s == self.NACK:
                 return GlitchState.Expected.rdp_active
         return GlitchState.Error.no_response
@@ -289,7 +289,7 @@ class BootloaderCom:
                 return GlitchState.OK.dump_error, mem
 
         if s == self.ACK:
-            return GlitchState.OK.rdp_inactive, mem
+            return GlitchState.Sucess.rdp_inactive, mem
 
         return GlitchState.Expected.rdp_active, mem
 
