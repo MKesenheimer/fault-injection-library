@@ -246,7 +246,7 @@ class DebugInterface():
             ], text=True, capture_output=True)
         print(result.stdout + result.stderr)
 
-    def _read_address(self, address):
+    def read_address(self, address):
         # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
         result = subprocess.run([
@@ -256,38 +256,32 @@ class DebugInterface():
             '-f', f'target/{self.processor_name}.cfg',
             '-c', 'init',
             '-c', f'mdw {hex(address)}',
-            '-c', 'resume',
             '-c', 'exit'
             ], text=True, capture_output=True)
         response = result.stdout + result.stderr
-        return response
+        return self.extract_memory_content(response=response, address=address), response
 
     def read_option_bytes(self):
-        response = self._read_address(0x4002201c)
-        match = re.search(r'4002201c:\s*([0-9A-Fa-f]+)', response)
-        if match:
-            return int(match.group(1), 16)
-        return 0x00
+        mem, response = self.read_address(0x4002201c)
+        if mem is not None:
+            return mem, response
+        return 0x00, response
 
     def read_pcrop(self):
-        optbytes = self.read_option_bytes()
+        optbytes, _ = self.read_option_bytes()
         pcrop = (optbytes & 0x100) >> 8
         return pcrop
 
     def read_rdp(self):
-        optbytes = self.read_option_bytes()
+        optbytes, _ = self.read_option_bytes()
         rdp = (optbytes & 0xff)
         return rdp
 
     def read_rdp_and_pgrop(self):
-        optbytes = self.read_option_bytes()
+        optbytes, _ = self.read_option_bytes()
         pcrop = (optbytes & 0x100) >> 8
         rdp = (optbytes & 0xff)
         return rdp, pcrop
-
-    def read_address(self, address:int, verbose=False):
-        response = self._read_address(address=address)
-        return self.characterize(response, address, verbose)
 
     def kill_process(self, port:int = 3333):
         # Find process using the port
@@ -377,8 +371,7 @@ class DebugInterface():
         response = self.telnet_interact(command)
         if "Previous state query failed, trying to reconnect" in response:
             response += self.telnet_interact(command)
-            #return GlitchState.Error.reconnect, None
-        return self.characterize(response, address)
+        return self.extract_memory_content(response=response, address=address), response
 
     def telnet_read_image(self, bin_image:str = "memory_dump.bin", start_addr:int = 0x08000000, length:int = 0x400, verbose:bool = False):
         command = f"init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; exit"
@@ -386,37 +379,38 @@ class DebugInterface():
         if verbose:
             print(response)
 
-    def characterize(self, response:str, address:int = 0x00, verbose:bool = False):
-        if verbose:
-            print(response)
-        # possibly ok
+    def extract_memory_content(self, response:str, address:int = 0x00):
         if "Error: Failed to read memory at" not in response:
             match = re.search(fr'{hex(address)[2:]}:\s*([0-9A-Fa-f]+)', response)
             if match:
-                if match.group(1) != "00000000":
-                    return GlitchState.Success.rdp_inactive, match.group(1)
-                else:
-                    # for stm32l0-readmemory.py and stm32l0-boot*.py
-                    #return GlitchState.OK.read_zero, match.group(1)
-                    # for stm32l0-rdp-downgrade.py
-                    return GlitchState.Expected.read_zero, match.group(1)
+                return int(match.group(1), 16)
+            else:
+                return None
+
+    def characterize(self, response:str, mem:int):
+        # possibly ok
+        if mem is not None:
+            if mem != 0x00:
+                return GlitchState.Success.rdp_inactive
+            else:
+                return GlitchState.OK.read_zero
         # Error: no connection
         elif "Error: init mode failed (unable to connect to the target)" in response:
-            return GlitchState.Error.no_connection, None
+            return GlitchState.Error.no_connection
         # Warning: Polling failed
         elif "Polling target" in response:
-            return GlitchState.Warning.polling_failed, None
+            return GlitchState.Warning.polling_failed
         # Warning: Device lockup
         if "clearing lockup after double fault" in response:
-            return GlitchState.Warning.lockup, None
+            return GlitchState.Warning.lockup
         # Warning: else
         elif "Warning" in response:
-            return GlitchState.Warning.default, None
+            return GlitchState.Warning.default
         # expected state
         elif "Error: Failed to read memory at" in response:
-            return GlitchState.Expected.rdp_active, None
+            return GlitchState.Expected.rdp_active
         # no response
-        return GlitchState.Error.no_response, None
+        return GlitchState.Error.no_response
 
     def __del__(self):
         print("[+] Detaching debugger.")
