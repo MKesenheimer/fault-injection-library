@@ -18,11 +18,9 @@ import logging
 import random
 import sys
 import time
-import subprocess
 
 # import custom libraries
 from findus.BootloaderCom import BootloaderCom, GlitchState
-from findus.GlitchState import OKType, ExpectedType
 from findus import Database, PicoGlitcher, Helper
 
 class Main:

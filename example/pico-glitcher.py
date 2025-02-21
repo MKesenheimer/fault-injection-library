@@ -49,8 +49,6 @@ class Main():
         self.glitcher = DerivedGlitcher()
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
-        # choose rising edge trigger with dead time of 0 seconds after power down
-        # note that you still have to physically connect the trigger input with vtarget
 
         # the initial voltage for multiplexing must be hard-coded and can only be applied
         # if the raspberry pi pico is reset and re-initialized.
@@ -58,6 +56,8 @@ class Main():
             self.glitcher.change_config_and_reset("mux_vinit", "3.3")
             self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
 
+        # choose rising edge trigger with dead time of 0 seconds after power down
+        # note that you still have to physically connect the trigger input with vtarget
         self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
         #self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input, dead_time=0.01, pin_condition="reset")
 
@@ -124,8 +124,9 @@ class Main():
                 response = b'Trigger ok'
                 samples = self.glitcher.get_adc_samples()
                 self.plotter.update_curve(samples)
-            except Exception as _:
+            except Exception as e:
                 print("[-] Timeout received in block(). Continuing.")
+                print(e)
                 self.glitcher.power_cycle_target(power_cycle_time=1)
                 time.sleep(0.2)
                 response = b'Timeout'

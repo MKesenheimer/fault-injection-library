@@ -25,7 +25,8 @@ import subprocess
 # import custom libraries
 from findus.BootloaderCom import BootloaderCom, GlitchState
 from findus.GlitchState import OKType, ExpectedType
-from findus import Database, ProGlitcher, Helper
+from findus import Database, Helper
+from findus.ProGlitcher import ProGlitcher
 
 def program_target():
     result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32f4x.cfg', '-c', 'init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;'], text=True, capture_output=True)
