@@ -727,7 +727,8 @@ class PicoGlitcher(Glitcher):
             fi_fw_version = list(map(int, version("findus").split('.')))
             print(f"[+] Version of Pico Glitcher: {pg_fw_version}")
             print(f"[+] Version of findus: {fi_fw_version}")
-            if pg_fw_version != fi_fw_version:
+            # check only major and minor version, but not the build number
+            if pg_fw_version[:2] != fi_fw_version[:2]:
                 raise Exception("Version mismatch")
         except Exception as _:
             print("[-] Fatal error: Versions of findus and Pico Glitcher do not match.")
