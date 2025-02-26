@@ -453,8 +453,8 @@ class PicoGlitcherInterface(MicroPythonScript):
     def waveform_generator(self, frequency:int, gain:float, waveid:int):
         return self.pyb.exec(f'mp.waveform_generator({frequency}, {gain}, {waveid})')
 
-    def set_dead_zone(self, dead_time:float, pin_condition:str):
-        self.pyb.exec(f'mp.set_dead_zone({dead_time}, "{pin_condition}")')
+    def set_dead_zone(self, dead_time:float, pin_condition:str, condition:str):
+        self.pyb.exec(f'mp.set_dead_zone({dead_time}, "{pin_condition}", "{condition}")')
 
     def change_config_and_reset(self, key, value) -> str:
         return self.pyb.exec(f'mp.change_config_and_reset("{key}", "{value}")')
@@ -738,7 +738,7 @@ class PicoGlitcher(Glitcher):
             sys.exit(-1)
 
         self.pico_glitcher.set_trigger("tio", "default")
-        self.pico_glitcher.set_dead_zone(0, "default")
+        self.pico_glitcher.set_dead_zone(0, "default", "rising")
         self.pico_glitcher.set_frequency(200_000_000)
         self.pico_glitcher.set_hpglitch()
         if rd6006_available and ext_power is not None:
@@ -984,7 +984,7 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.apply_calibration(vhigh, vlow, store)
 
-    def rising_edge_trigger(self, pin_trigger:str = "default", dead_time:float = 0, pin_condition:str = "default"):
+    def rising_edge_trigger(self, pin_trigger:str = "default", dead_time:float = 0, pin_condition:str = "default", condition:str = "rising"):
         """
         Configure the Pico Glitcher to trigger on a rising edge on the `TRIGGER` line.
         
@@ -992,9 +992,10 @@ class PicoGlitcher(Glitcher):
             pin_trigger: The trigger pin to use. Can either be "default" (default `TRIGGER` input) or "alt" (alternative trigger input `TRIGGER1`). For hardware version 2 options "ext1" or "ext2" are also available.
             dead_time: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
             pin_condition: The rejection time is generated internally by measuring the state of the `power` or `reset` pin of the Pico Glitcher. If you want to trigger on the reset condition, set `pin_condition = 'reset'`, else if you want to trigger on the target power set `pin_condition = 'power'`. If `dead_time` is set to zero and `pin_condition = 'default'`, this parameter is ignored.
+            condition: Can either be "falling" or "rising". The `dead_time` is measured on the pin `pin_condition` after the specified condition (falling- or rising edge). For example, a good choice is "rising" for the "default" configuration, "rising" for the "power" configuration and "falling" for the "reset" configuration.
         """
         self.pico_glitcher.set_trigger("tio", pin_trigger)
-        self.pico_glitcher.set_dead_zone(dead_time, pin_condition)
+        self.pico_glitcher.set_dead_zone(dead_time, pin_condition, condition)
 
     def uart_trigger(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8, pin_trigger:str = "default"):
         """

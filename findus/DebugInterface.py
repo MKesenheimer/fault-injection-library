@@ -328,7 +328,7 @@ class DebugInterface():
             self.gdb_process.terminate()
             self.gdb_process = None
 
-    def gdb_load_exec(self, elf_image:str = "program.elf", timeout=0.3):
+    def gdb_load_exec(self, elf_image:str = "program.elf", timeout=0.3, verbose=False):
         # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
         self.gdb_process = subprocess.Popen([
@@ -339,13 +339,17 @@ class DebugInterface():
         self.gdb_process.stdin.write("target remote localhost:3333\n")
         self.gdb_process.stdin.write(f"load {elf_image}\n")
         self.gdb_process.stdin.write("continue\n")
+        self.gdb_process.stdin.write("detach\n")
         self.gdb_process.stdin.write("quit\n")
         self.gdb_process.stdin.flush()
+        output = ""
         try:
             output, _ = self.gdb_process.communicate(timeout=timeout)
-            print(output)
         except Exception as _:
             pass
+        finally:
+            if verbose:
+                print(output)
         self.gdb_process.terminate()
 
     def telnet_init(self):

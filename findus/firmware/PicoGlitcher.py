@@ -359,7 +359,7 @@ class PicoGlitcher():
         # standard dead zone after power down
         self.dead_time = 0.0
         self.pin_condition = self.pin_vtarget_en
-        self.condition = 0
+        self.condition = "rising"
         # pins for multiplexing and pulse-shaping (only hardware version 2)
         if self.config["hardware_version"][0] >= 2:
             self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
@@ -591,27 +591,23 @@ class PicoGlitcher():
             self.__change_config("ps_offset", vhigh)
             self.__change_config("ps_factor", factor)
 
-    def set_dead_zone(self, dead_time:float = 0, pin_condition:str = "default"):
+    def set_dead_zone(self, dead_time:float = 0, pin_condition:str = "default", condition:str = "rising"):
         """
         Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
         
         Parameters:
             dead_time: Rejection time during triggering is disabled.
             pin_condition: Can either be "default", "power" or "reset". In "power" mode, the `TRIGGER` input is connected to the target's power and the rejection time is measured after power doen. In "reset" mode, the `TRIGGER` input is connected to the `RESET` line and the rejection time is measured after the device is reset. These modes imply different internal conditions to configure the dead time. If "default" is chosen, effectively no dead time is active.
+            condition: Can either be "falling" or "rising". The `dead_time` is measured on the pin `pin_condition` after the specified condition (falling- or rising edge). For example, a good choice is "rising" for the "default" configuration, "rising" for the "power" configuration and "falling" for the "reset" configuration.
         """
         if pin_condition == "default":
             self.pin_condition = self.pin_glitch_en
-            # wait until GLITCH_EN is high (if armed)
-            self.condition = 1
         elif pin_condition == "power":
             self.pin_condition = self.pin_vtarget_en
-            # wait until VTARGET_EN is high (meaning VTARGET is disabled)
-            self.condition = 1
         elif pin_condition == "reset":
             self.pin_condition = self.pin_reset
-            # wait until RESET is low
-            self.condition = 0
         self.dead_time = dead_time
+        self.condition = condition
 
     def __arm_common(self):
         if self.trigger_mode == "tio":
@@ -625,7 +621,7 @@ class PicoGlitcher():
 
             # state machine that blocks for a specific time after a certain condition (dead time)
             sm2_func = None
-            if self.condition == 1:
+            if self.condition == "rising":
                 sm2_func = block_rising_condition
             else:
                 sm2_func = block_falling_condition

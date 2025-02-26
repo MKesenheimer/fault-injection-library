@@ -207,7 +207,7 @@ class BootloaderCom:
         Returns:
             Returns `GlitchState.Expected.rdp_active` if RDP is active (expected), or `GlitchState.Success.rdp_inactive` if glitch was successful
         """
-        # read memory (x11: read memory, xee: crc)
+        # read memory command (x11: read memory, xee: crc)
         self.ser.write(b'\x11\xee')
         if read:
             s = self.ser.read(1)
