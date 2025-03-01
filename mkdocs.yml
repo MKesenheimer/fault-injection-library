@@ -13,7 +13,6 @@ nav:
   - Genetic algorithm: genetic.md
   - Using the analog digital converter: adc.md
   - Findus: findus.md
-  - BootloaderCom: bootloadercom.md
   - PicoGlitcher: picoglitcher.md
 theme: readthedocs
 plugins:

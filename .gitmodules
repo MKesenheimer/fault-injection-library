@@ -1,6 +1,3 @@
-[submodule "rd6006"]
-	path = rd6006
-	url = https://github.com/MKesenheimer/rd6006.git
 [submodule "projects/rp2350-glitching/rp2350_hacking_challenge"]
 	path = projects/rp2350-glitching/rp2350_hacking_challenge
 	url = https://github.com/MKesenheimer/rp2350_hacking_challenge.git

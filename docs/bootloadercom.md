@@ -1,3 +1,0 @@
-# BootloaderCom
-
-::: findus.BootloaderCom

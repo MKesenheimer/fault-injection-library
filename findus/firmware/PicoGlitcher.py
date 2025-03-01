@@ -684,13 +684,13 @@ class PicoGlitcher():
         # push multiplexing shape config into the fifo of the statemachine
         self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
         try:
-            t1 = mul_config["t1"] // (1_000_000_000 // self.frequency)
+            t1 = int(mul_config["t1"]) // (1_000_000_000 // self.frequency)
             v1 = self.voltage_map[mul_config["v1"]]
         except Exception as _:
             t1 = 0
             v1 = MUX_PIO_INIT
         try:
-            t2 = mul_config["t2"] // (1_000_000_000 // self.frequency)
+            t2 = int(mul_config["t2"]) // (1_000_000_000 // self.frequency)
             v2 = self.voltage_map[mul_config["v2"]]
         except Exception as _:
             t2 = 0
@@ -699,13 +699,13 @@ class PicoGlitcher():
         self.sm0.put(config)
         # push the next multiplexing shape config into the fifo of the statemachine
         try:
-            t3 = mul_config["t3"] // (1_000_000_000 // self.frequency)
+            t3 = int(mul_config["t3"]) // (1_000_000_000 // self.frequency)
             v3 = self.voltage_map[mul_config["v3"]]
         except Exception as _:
             t3 = 0
             v3 = MUX_PIO_INIT
         try:
-            t4 = mul_config["t4"] // (1_000_000_000 // self.frequency)
+            t4 = int(mul_config["t4"]) // (1_000_000_000 // self.frequency)
             v4 = self.voltage_map[mul_config["v4"]]
         except Exception as _:
             t4 = 0
@@ -779,7 +779,7 @@ class PicoGlitcher():
         self.sm0.put(maxlength // (1_000_000_000 // self.frequency))
 
         self.__arm_common()
-        print(pulse)
+        #print(pulse)
 
     def block(self, timeout:float):
         """

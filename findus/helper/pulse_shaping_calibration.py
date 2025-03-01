@@ -9,7 +9,6 @@ import argparse
 import sys
 from findus import PicoGlitcher
 
-
 class Calibration():
     def __init__(self, args):
         self.args = args

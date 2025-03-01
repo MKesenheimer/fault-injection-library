@@ -10,8 +10,9 @@ import sys
 import time
 
 # import custom libraries
-from findus import ProGlitcher, PicoGlitcher, Helper
-from findus.BootloaderCom import BootloaderCom, GlitchState
+from findus import PicoGlitcher, Helper
+from findus.ProGlitcher import ProGlitcher
+from findus.STM32Bootloader import STM32Bootloader, GlitchState
 from findus.GlitchState import OKType
 
 class PowerCycler:
@@ -27,7 +28,7 @@ class PowerCycler:
             self.glitcher = PicoGlitcher()
             self.glitcher.init(port=args.rpico)
 
-        self.bootcom = BootloaderCom(port=self.args.target)
+        self.bootcom = STM32Bootloader(port=self.args.target)
         self.dump_filename = f"{Helper.timestamp()}_memory_dump.bin"
 
     def run(self):

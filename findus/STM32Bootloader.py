@@ -8,7 +8,7 @@
 import serial
 from functools import reduce
 import sys
-from .GlitchState import ErrorType, WarningType, OKType, ExpectedType, SuccessType
+from findus.GlitchState import ErrorType, WarningType, OKType, ExpectedType, SuccessType
 import time
 
 class _Expected(ExpectedType):
@@ -68,7 +68,7 @@ class GlitchState():
 
     Example usage:
 
-        from findus.BootloaderCom import GlitchState
+        from findus.STM32Bootloader import GlitchState
         from findus.GlitchState import OKType
 
         def return_ok():
@@ -85,13 +85,13 @@ class GlitchState():
     Expected = _Expected
     Success = _Success
 
-class BootloaderCom:
+class STM32Bootloader:
     """
     Class that contains methods to communicate with STM32 processors in bootloader mode.
     Example usage:
     
-        from findus.BootloaderCom import BootloaderCom
-        bootcom = BootloaderCom(port="/dev/ttyACM1")
+        from findus.STM32Bootloader import STM32Bootloader
+        bootcom = STM32Bootloader(port="/dev/ttyACM1")
         response = bootcom.init_bootloader()
         response = bootcom.setup_memread()
         response, mem = self.bootcom.read_memory(0x08000000, 0xFF)
@@ -355,7 +355,7 @@ class BootloaderCom:
         self.ser.close()
 
 def main(argv=sys.argv):
-    com = BootloaderCom(port=sys.argv[1])
+    com = STM32Bootloader(port=sys.argv[1])
     ret = com.init_get_id()
     print(ret)
     if ret != 0:
