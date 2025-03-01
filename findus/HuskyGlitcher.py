@@ -10,25 +10,20 @@ import sys
 import time
 import serial
 
-from . import Glitcher, ExternalPowerSupply
+from findus import Glitcher
 try:
     import chipwhisperer as cw
 except Exception as _:
-    print("[-] Warning: Library chipwhisperer not installed. Functions to interface the ChipWhisperer Pro and ChipWhisperer Husky not available.")
+    print("[-] Error: Library chipwhisperer not installed. Functions to interface the ChipWhisperer Pro and ChipWhisperer Husky not available.")
     print("    Install the chipwhisperer package with 'pip install chipwhisperer'")
-try:
-    from rd6006 import RD6006
-    rd6006_available = True
-except Exception as _:
-    print("[-] Warning: Library RD6006 not installed. Functions to control the external power supply not available.")
-    rd6006_available = False
+    sys.exit(1)
 
 class HuskyGlitcher(Glitcher):
     """
     Class giving access to the functions of the Chipwhisperer Husky. Derived from Glitcher class.
     Code snippet:
 
-        from findus import HuskyGlitcher
+        from findus.HuskyGlitcher import HuskyGlitcher
         glitcher = HuskyGlitcher()
         glitcher.init(ext_power="/dev/ttyACM1", ext_power_voltage=3.3)
         # set up database, define delay and length
@@ -107,7 +102,8 @@ class HuskyGlitcher(Glitcher):
         self.scope.glitch.output             = 'enable_only'
         self.scope.glitch.trigger_src        = 'ext_single'
         self.scope.glitch.num_glitches       = 1
-        if rd6006_available and ext_power is not None:
+        if ext_power is not None:
+            from findus.ExternalPowerSupply import ExternalPowerSupply
             self.power_supply = ExternalPowerSupply(port=ext_power)
             self.power_supply.set_voltage(ext_power_voltage)
             print(self.power_supply.status())

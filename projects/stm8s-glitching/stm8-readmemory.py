@@ -17,22 +17,7 @@ import time
 
 # import custom libraries
 from findus import Database, PicoGlitcher
-from STM8Programmer import STM8Programmer
-
-class DerivedPicoGlitcher(PicoGlitcher):
-    def classify(self, state:bytes):
-        color = 'C'
-        if state == b'error: sending read memory command failed':
-            color = 'G'
-        elif b'error' in state:
-            color = 'M'
-        elif b'warning' in state:
-            color = 'O'
-        elif b'timeout' in state:
-            color = 'Y'
-        elif b'success' in state:
-            color = 'R'
-        return color
+from findus.STM8Programmer import STM8Programmer
 
 class Main:
     def __init__(self, args):
@@ -42,7 +27,7 @@ class Main:
         logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
 
         # glitcher
-        self.glitcher = DerivedPicoGlitcher()
+        self.glitcher = PicoGlitcher()
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico)
 

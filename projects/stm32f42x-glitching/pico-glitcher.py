@@ -23,7 +23,7 @@ import time
 import subprocess
 
 # import custom libraries
-from findus.BootloaderCom import BootloaderCom, GlitchState
+from findus.STM32Bootloader import STM32Bootloader, GlitchState
 from findus.GlitchState import OKType, ExpectedType
 from findus import Database, PicoGlitcher, Helper
 
@@ -64,7 +64,7 @@ class Main:
         self.fail_gate_close = 0
 
         # memory read settings
-        self.bootcom = BootloaderCom(port=self.args.target, dump_address=0x08000000, dump_len=0x2000)
+        self.bootcom = STM32Bootloader(port=self.args.target, dump_address=0x08000000, dump_len=0x2000)
         self.dump_filename = f"{Helper.timestamp()}_memory_dump.bin"
 
     def run(self):

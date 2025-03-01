@@ -8,7 +8,8 @@
 import argparse
 import sys
 import time
-from findus import ProGlitcher, PicoGlitcher, Helper
+from findus import PicoGlitcher, Helper
+from findus.ProGlitcher import ProGlitcher
 
 class PowerCycler:
     def __init__(self, args):

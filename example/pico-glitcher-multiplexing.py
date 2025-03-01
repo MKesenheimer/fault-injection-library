@@ -21,7 +21,6 @@ import time
 
 # import custom libraries
 from findus import Database, PicoGlitcher
-from findus import AnalogPlot
 
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(PicoGlitcher):

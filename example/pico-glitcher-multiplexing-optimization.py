@@ -15,28 +15,27 @@
 
 import argparse
 import logging
-import random
 import sys
 import time
 
 # import custom libraries
 from findus import Database, PicoGlitcher
-from findus.AnalogPlot import AnalogPlot
+from findus.GeneticAlgorithm import OptimizationController
 
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(PicoGlitcher):
     def classify(self, response):
         if b'Trigger ok' in response:
-            color = 'G'
+            color, weight = 'G', 0
         elif b'Error' in response:
-            color = 'M'
+            color, weight = 'M', 0
         elif b'Fatal exception' in response:
-            color = 'M'
+            color, weight = 'M', 0
         elif b'Timeout' in response:
-            color = 'Y'
+            color, weight = 'Y', -1
         else:
-            color = 'R'
-        return color
+            color, weight = 'R', 2
+        return color, weight
 
 class Main():
     def __init__(self, args):
@@ -52,62 +51,47 @@ class Main():
 
         # the initial voltage for multiplexing must be hard-coded and can only be applied
         # if the raspberry pi pico is reset and re-initialized.
-        if args.multiplexing:
-            self.glitcher.change_config_and_reset("mux_vinit", "3.3")
-            self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
+        self.glitcher.change_config_and_reset("mux_vinit", "3.3")
+        self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
 
         # choose rising edge trigger with dead time of 0 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
         self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
-        #self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input, dead_time=0.01, pin_condition="reset")
 
-        # choose multiplexing, pulse-shaping or crowbar glitching
-        if args.multiplexing:
-            self.glitcher.set_multiplexing()
-        elif args.pulse_shaping:
-            self.glitcher.set_pulseshaping(vinit=3.0)
-        else:
-            self.glitcher.set_lpglitch()
+        # choose multiplexing
+        self.glitcher.set_multiplexing()
 
         # set up the database
-        self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
+        self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store, column_names=["delay", "length", "t1"])
         self.start_time = int(time.time())
-
-        # plot the voltage trace while glitching
-        self.number_of_samples = 1024
-        self.sampling_freq = 450_000
-        self.glitcher.configure_adc(number_of_samples=self.number_of_samples, sampling_freq=self.sampling_freq)
-        self.plotter = AnalogPlot(number_of_samples=self.number_of_samples, sampling_freq=self.sampling_freq)
 
     def run(self):
         # log execution
         logging.info(" ".join(sys.argv))
 
-        s_length = self.args.length[0]
-        e_length = self.args.length[1]
         s_delay = self.args.delay[0]
         e_delay = self.args.delay[1]
+        s_length = self.args.length[0]
+        e_length = self.args.length[1]
+        s_t1 = 0
+        e_t1 = 2000
+
+        # Genetic Algorithm to search for the best performing bin
+        boundaries = [(s_delay, e_delay), (s_t1, e_t1), (s_length, e_length)]
+        divisions = [10, 10, 5]
+        opt = OptimizationController(parameter_boundaries=boundaries, parameter_divisions=divisions, number_of_individuals=10, length_of_genom=20, malus_factor_for_equal_bins
+        =1)
 
         experiment_id = 0
         while True:
-            # set up glitch parameters (in nano seconds) and arm glitcher
-            # trunk-ignore(bandit/B311)
-            delay = random.randint(s_delay, e_delay)
-            # trunk-ignore(bandit/B311)
-            length = random.randint(s_length, e_length)
+            # get the next parameter set
+            delay, t1, length = opt.step()
+            if experiment_id % 100 == 0:
+                opt.print_best_performing_bins()
 
             # arm
-            if args.multiplexing:
-                mul_config = {"t1": length, "v1": "1.8", "t2": length, "v2": "VCC", "t3": length, "v3": "GND"}
-                self.glitcher.arm_multiplexing(delay, mul_config)
-            elif args.pulse_shaping:
-                # pulse from lambda; ramp down to 1.8V than GND glitch
-                ps_lambda = f"lambda t:-1.5/({2*length})*t+3.3 if t<{2*length} else 1.8 if t<{4*length} else 0.0 if t<{5*length} else 3.3"
-                self.glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 6*length)
-            else:
-                self.glitcher.arm(delay, length)
-
-            self.glitcher.arm_adc()
+            mul_config = {"t1": t1, "v1": "1.8", "t2": length, "v2": "GND"}
+            self.glitcher.arm_multiplexing(delay, mul_config)
 
             # power cycle target
             #self.glitcher.power_cycle_target(0.1)
@@ -122,8 +106,6 @@ class Main():
                 # Manually set the response to a reasonable value.
                 # In a real scenario, this would be filled by the response of the microcontroller (UART, SWD, etc.)
                 response = b'Trigger ok'
-                samples = self.glitcher.get_adc_samples()
-                self.plotter.update_curve(samples)
             except Exception as _:
                 print("[-] Timeout received in block(). Continuing.")
                 self.glitcher.power_cycle_target(power_cycle_time=1)
@@ -131,15 +113,18 @@ class Main():
                 response = b'Timeout'
 
             # classify response
-            color = self.glitcher.classify(response)
+            color, weight = self.glitcher.classify(response)
 
             # add to database
-            self.database.insert(experiment_id, delay, length, color, response)
+            self.database.insert(experiment_id, delay, length, t1, color, response)
+
+            # add experiment to parameterspace of genetic algorithm
+            opt.add_experiment(weight, delay, t1, length)
 
             # monitor
             speed = self.glitcher.get_speed(self.start_time, experiment_id)
             experiment_base_id = self.database.get_base_experiments_count()
-            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{length}\t{delay}\t{color}\t{response}", color))
+            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{delay}\t{length}\t{t1}\t{color}\t{response}", color))
 
             # increase experiment id
             experiment_id += 1
@@ -152,8 +137,6 @@ if __name__ == "__main__":
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
-    parser.add_argument("--multiplexing", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with multiplexing between different voltages (requires PicoGlitcher v2).")
-    parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with a predefined voltage profile (requires PicoGlitcher v2).")
     parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
     args = parser.parse_args()
 

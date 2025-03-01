@@ -3,9 +3,19 @@ python pico-glitcher.py --rpico /dev/tty.usbmodem1101 --delay 10 10 --length 100
 
 # Multiplexing
 python pico-glitcher.py --rpico /dev/tty.usbmodem101 --delay 10 10 --length 100 100 --multiplexing
+python pico-glitcher-multiplexing.py --rpico /dev/tty.usbmodem11301 --delay 10 10 --length 100 100
+
+# Multiplexing with optimization
+python pico-glitcher-multiplexing-optimization.py --rpico /dev/tty.usbmodem11301 --delay 1000 2000 --length 100 200
 
 # UART trigger test
 python pico-glitcher-uart-trigger.py --rpico /dev/tty.usbmodem1101 --target /dev/tty.usbserial-A50285BI  --delay 10 10 --length 100 100
 
 # Pulse shaping
 python pico-glitcher-pulse-shaping.py --rpico /dev/tty.usbmodem1101 --delay 10 10 --length 100 100 --pulse-type 6
+
+# Pulse shaping with optimization
+python pico-glitcher-pulse-shaping-optimization.py --rpico /dev/tty.usbmodem11301 --delay 1000 2000 --length 100 200
+
+# Analog measurement
+python pico-glitcher.py --rpico /dev/tty.usbmodem11301 --delay 100_000 100_000 --length 10_000 10_000

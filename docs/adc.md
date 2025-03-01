@@ -10,7 +10,7 @@ The ADC input is connected to the glitch-out line. For the test setup, connect a
 First, import the necessary module and initialize the glitcher:
 
 ```python
-from findus import AnalogPlot
+from findus.AnalogPlot import AnalogPlot
 
 # initialization
 glitcher = DerivedGlitcher()
