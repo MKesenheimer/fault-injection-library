@@ -48,81 +48,6 @@ import subprocess
 import re
 import socket
 
-from .GlitchState import ErrorType, WarningType, OKType, ExpectedType, SuccessType
-
-class _Expected(ExpectedType):
-    """
-    Enum class for expected states.
-    """
-    default = 0
-    rdp_active = 1
-    read_zero = 2
-
-class _Error(ErrorType):
-    """
-    Enum class for error states.
-    """
-    default = 0
-    no_response = 2
-    reconnect = 3
-    no_connection = 4
-
-class _Warning(WarningType):
-    """
-    Enum class for warning states.
-    """
-    default = 0
-    timeout = 2
-    polling_failed = 3
-    lockup = 4
-
-class _OK(OKType):
-    """
-    Enum class for ok states (no errors).
-    """
-    default = 0
-    read_zero = 1
-    rdp_changed = 2
-
-class _Success(SuccessType):
-    """
-    Enum class for success states (glitching was successful).
-    """
-    default = 0
-    rdp_inactive = 1
-    dump_ok = 2
-    dump_successful = 3
-    dump_finished = 4
-
-class GlitchState():
-    """
-    Class that combines subclasses for different states. Can be used to classify different responses.
-
-    - Error: Enum class for error states.
-    - Warning: Enum class for warning states.
-    - OK: Enum class for ok states (no errors).
-    - Expected: Enum class for expected states.
-    - Success: Enum class for success states (glitching was successful).
-
-    Example usage:
-
-        from findus.DebugInterface import DebugInterface, GlitchState
-        from findus.GlitchState import SuccessType
-
-        def return_success():
-            return GlitchState.Success.rdp_inactive
-
-        def main():
-            response = return_success()
-            if issubclass(type(response), SuccessType):
-                print("Glitch success.")
-    """
-    Error = _Error
-    Warning = _Warning
-    OK = _OK
-    Expected = _Expected
-    Success = _Success
-
 class DebugInterface():
     def __init__(self, tool:str = "stlink", processor:str = "stm32l0", transport:str = "hla_swd", gdb_exec:str = "arm-none-eabi-gdb"):
         self.openocd_process = None
@@ -329,7 +254,6 @@ class DebugInterface():
             self.gdb_process = None
 
     def gdb_load_exec(self, elf_image:str = "program.elf", timeout=0.3, verbose=False):
-        # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
         self.gdb_process = subprocess.Popen([
             f'{self.gdb_exec}',
@@ -395,26 +319,26 @@ class DebugInterface():
         # possibly ok
         if mem is not None:
             if mem != 0x00:
-                return GlitchState.Success.rdp_inactive
+                return b'success: RDP inactive'
             else:
-                return GlitchState.OK.read_zero
+                return b'ok: read zero'
         # Error: no connection
         elif "Error: init mode failed (unable to connect to the target)" in response:
-            return GlitchState.Error.no_connection
+            return b'error: no connection'
         # Warning: Polling failed
         elif "Polling target" in response:
-            return GlitchState.Warning.polling_failed
+            return b'warning: polling failed'
         # Warning: Device lockup
         if "clearing lockup after double fault" in response:
-            return GlitchState.Warning.lockup
+            return b'warning: lock-up'
         # Warning: else
         elif "Warning" in response:
-            return GlitchState.Warning.default
+            return b'warning: default warning'
         # expected state
         elif "Error: Failed to read memory at" in response:
-            return GlitchState.Expected.rdp_active
+            return b'expected: RDP active'
         # no response
-        return GlitchState.Error.no_response
+        return b'error: no response'
 
     def __del__(self):
         print("[+] Detaching debugger.")

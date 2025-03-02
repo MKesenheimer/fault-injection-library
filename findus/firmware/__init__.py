@@ -1,1 +1,1 @@
-#from .PicoGlitcher import *
+#from findus.findus import PicoGlitcher

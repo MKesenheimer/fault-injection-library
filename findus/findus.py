@@ -484,7 +484,7 @@ class Glitcher():
         Template method to classify an output state. Overload this class if you want to customize the targets response classification. Alternatively, use the built-in class `GlitchState` to characterize the targets responses. Remember to define certain response states depending on the possible responses. See class `STM32Bootloader` for an example.
 
             from findus import PicoGlitcher
-            from findus.STM32Bootloader import STM32Bootloader, GlitchState
+            from findus.STM32Bootloader import STM32Bootloader
             glitcher = PicoGlitcher()
             ...
             programmer = STM8Programmer(port=self.args.target, baud=115200)
@@ -494,7 +494,7 @@ class Glitcher():
             glitcher.classify(state)
         """
         color = 'C'
-        if state == b'error: sending read memory command failed':
+        if b'expected' in state:
             color = 'G'
         elif b'error' in state:
             color = 'M'
@@ -502,6 +502,8 @@ class Glitcher():
             color = 'O'
         elif b'timeout' in state:
             color = 'Y'
+        elif b'ok' in state:
+            color = 'C'
         elif b'success' in state:
             color = 'R'
         return color
@@ -1035,3 +1037,53 @@ class Helper():
             Returns the current timestamp in the format %Y-%m-%d_%H-%M-%S.
         """
         return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+    def linspace(start, stop, num, endpoint=True) -> list:
+        """
+        Generate equidistant points from a start to a stop point. Equivalent to numpy's linspace function.
+
+        Parameters:
+            start: Start point of the interval.
+            stop: End point of the interval.
+            num: Number of points to divide the interval into.
+            endpoint: Whether the stop point should be part of the interval.
+
+        Returns:
+            List of integer or real numbers.
+        """
+        if num <= 0:
+            return []
+        if endpoint:
+            step = (stop - start) / (num - 1)
+        else:
+            step = (stop - start) / num
+        return [start + i * step for i in range(num)]
+
+    def arange(start, stop=None, step=1.0) -> list:
+        """
+        Return evenly spaced values within a given interval. Equivalent to numpy's arange function.
+
+        Parameters:
+            start: Start of interval. The interval includes this value. The default start value is 0.
+            stop: End of interval. The interval does not include this value, except in some cases where step is not an integer and floating point round-off affects the length of out.
+            step: Spacing between values. For any output out, this is the distance between two adjacent values, `out[i+1] - out[i]`. The default step size is 1. If step is specified as a position argument, start must also be given.
+
+        Returns:
+            List of integer or real numbers.
+        """
+        if stop is None:  # If only one argument is provided, treat it as stop
+            stop = start
+            start = 0.0
+        if step == 0:
+            raise ValueError("step argument must not be zero")
+        result = []
+        i = start
+        if step > 0:
+            while i < stop:
+                result.append(round(i, 10))  # Rounding to avoid floating-point precision issues
+                i += step
+        else:
+            while i > stop:
+                result.append(round(i, 10))
+                i += step
+        return result
