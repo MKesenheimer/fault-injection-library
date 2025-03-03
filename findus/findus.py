@@ -175,6 +175,16 @@ class Database():
         Parameters:
             experiment_id: ID of the experiment to insert into the database.
         """
+        self.cur.execute("DELETE FROM experiments WHERE id = (?);", [experiment_id])
+        self.con.commit()
+
+    def remove_rel(self, experiment_id: int):
+        """
+        Remove a parameter point from the database by experiment_id relative to the base row count.
+
+        Parameters:
+            experiment_id: ID of the experiment to insert into the database.
+        """
         self.cur.execute("DELETE FROM experiments WHERE id = (?);", [experiment_id + self.base_row_count])
         self.con.commit()
 
