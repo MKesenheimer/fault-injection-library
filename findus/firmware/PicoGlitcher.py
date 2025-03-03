@@ -383,6 +383,8 @@ class PicoGlitcher():
             self.fastadc = FastADC()
             self.fastsamples = self.fastadc.init_array()
             self.core1_stopped = True
+            # gpio outputs
+            #self.pin_gpios = {}
 
     def waveform_generator(self, frequency:int = AD910X.DEFAULT_FREQUENCY, gain:float = AD910X.DEFAULT_GAIN, waveid:int = AD910X.WAVE_TRIANGLE):
         if self.config["hardware_version"][0] < 2:
@@ -519,6 +521,17 @@ class PicoGlitcher():
         self.reset_target()
         time.sleep(reset_time)
         self.release_reset()
+
+#    def configure_gpio_out(self, pin_number:int):
+#        # TODO: check if pin is already in use
+#        self.pin_gpios[pin_number] = Pin(pin_number, Pin.OUT, Pin.PULL_DOWN)
+#
+#    def set_gpio(self, pin_number:int, value:int):
+#        try:
+#            self.pin_gpios[pin_number].value(value)
+#        except KeyError:
+#            self.configure_gpio_out(pin_number)
+#            self.pin_gpios[pin_number].value(value)
 
     def set_lpglitch(self):
         """

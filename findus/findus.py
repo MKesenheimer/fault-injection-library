@@ -415,6 +415,9 @@ class PicoGlitcherInterface(MicroPythonScript):
     def reset(self, reset_time:float):
         self.pyb.exec(f'mp.reset({reset_time})')
 
+    def set_gpio(self, pin_number:int, value:int):
+        self.pyb.exec(f'mp.set_gpio({pin_number}, {value})')
+
     def block(self, timeout:float):
         self.pyb.exec(f'mp.block({timeout})')
 
@@ -772,6 +775,16 @@ class PicoGlitcher(Glitcher):
             reset_time: Time how long the target is held in reset.
         """
         self.pico_glitcher.reset(reset_time)
+
+    def set_gpio(self, pin_number:int, value:int):
+        """
+        Set the GPIO pin `pin_number` to a specific output value (0 or 1).
+
+        Parameters:
+            pin_number: GPIO pin number (for example 4, 5, 6).
+            value: Output value of the GPIO pin (0 or 1).
+        """
+        self.pico_glitcher.set_gpio(pin_number, value)
 
     def release_reset(self):
         """

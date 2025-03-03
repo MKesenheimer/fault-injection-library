@@ -114,7 +114,10 @@ class Main():
 
             # reset target
             time.sleep(0.01)
-            self.glitcher.reset(0.01)
+            #self.glitcher.reset(0.01)
+            #self.glitcher.set_gpio(6, 0)
+            #time.sleep(0.01)
+            #self.glitcher.set_gpio(6, 1)
 
             # block until glitch
             try:
@@ -124,7 +127,8 @@ class Main():
                 response = b'Trigger ok'
                 samples = self.glitcher.get_adc_samples()
                 self.plotter.update_curve(samples)
-            except Exception as _:
+            except Exception as e:
+                print(e)
                 print("[-] Timeout received in block(). Continuing.")
                 self.glitcher.power_cycle_target(power_cycle_time=1)
                 time.sleep(0.2)
