@@ -74,13 +74,23 @@ cd projects/airtag-glitching
 analyzer --directory databases --ip 0.0.0.0
 ```
 
-## bootloader-com
+## stm32-bootloader
 
 Communicate with a STM32 microcontroller in bootloader mode and read the flash memory (only if RDP-0 is active). If read-out protection is active, the corresponding target responses are printed.
 
 Example:
 ```bash
-bootloader-com /dev/<target-tty-port>
+stm32-bootloader /dev/<target-tty-port>
+```
+
+## stm8-programmer
+
+Communicate with a STM8 microcontroller in bootloader mode and read the flash memory (only if RDP-0 is active). If read-out protection is active, the corresponding target responses are printed.
+
+Example:
+```bash
+usage: stm8-programmer [-h] --port PORT [--baud BAUD] [--write WRITE] [--read READ] [--number-of-bytes NUMBER_OF_BYTES] [--write-option WRITE_OPTION]
+                      [--read-option [READ_OPTION]]
 ```
 
 ## power-on
@@ -101,13 +111,13 @@ Example:
 power-on --rpico /dev/<rpi-tty-port>
 ```
 
-## power-cycle-and-read
+## stm32-power-cycle-and-read
 
 Test the power supply capabilities of your setup by executing this script. The target's response is read over UART after power-cycle.
 If the argument `--rpico` is not supplied (no Pico Glitcher connected), the ChipWhisperer Pro is tried instead. 
 
 ```bash
-power-cycle-and-read --help
+stm32-power-cycle-and-read --help
 usage: power-cycle-and-read [-h] [--target TARGET] [--rpico RPICO] [--dump]
 
 options:
@@ -121,12 +131,12 @@ Example:
 
 - Power cycle and read the target's response:
 ```bash
-power-cycle-and-read --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port>
+stm32-power-cycle-and-read --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port>
 ```
 
 - Power cycle and dump the flash content of an STM32 target in bootloader mode (without read-out protection active):
 ```bash
-power-cycle-and-read --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port> --dump
+stm32-power-cycle-and-read --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port> --dump
 ```
 
 ## power-cycle

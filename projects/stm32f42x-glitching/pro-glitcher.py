@@ -23,8 +23,7 @@ import time
 import subprocess
 
 # import custom libraries
-from findus.BootloaderCom import BootloaderCom, GlitchState
-from findus.GlitchState import OKType, ExpectedType
+from findus.STM32Bootloader import STM32Bootloader
 from findus import Database, Helper
 from findus.ProGlitcher import ProGlitcher
 
@@ -65,7 +64,7 @@ class Main:
         self.fail_gate_close = 0
 
         # memory read settings
-        self.bootcom = BootloaderCom(port=self.args.target, dump_address=0x08000000, dump_len=0x2000)
+        self.bootcom = STM32Bootloader(port=self.args.target, dump_address=0x08000000, dump_len=0x2000)
         self.dump_filename = f"{Helper.timestamp()}_memory_dump.bin"
 
     def run(self):
@@ -92,7 +91,7 @@ class Main:
             # setup bootloader communication
             response = self.bootcom.init_bootloader()
             # setup memory read; this function triggers the glitch
-            if issubclass(type(response), OKType):
+            if b'ok' in response:
                 response = self.bootcom.setup_memread()
 
             # block until glitch
@@ -102,11 +101,11 @@ class Main:
                 print("[-] Timeout received in block(). Continuing.")
                 self.glitcher.power_cycle_target(power_cycle_time=1)
                 time.sleep(0.2)
-                response = GlitchState.Warning.timeout
+                response = b'warning: timeout'
 
             # dump memory
             mem = b''
-            if issubclass(type(response), OKType):
+            if b'ok' in response:
                 #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
                 #start = 0x08000000
                 start = 0x08000000 - 0*0xFF
@@ -135,12 +134,12 @@ class Main:
             # error handling
             # exit if too many successive fails (including a supposedly successful memory read)
             # open fail gate, if error occured and everything was ok previously
-            if not issubclass(type(response), ExpectedType) and not self.fail_gate_open:
+            if b'expected' not in response and not self.fail_gate_open:
                 self.fail_gate_open = True
                 self.fail_gate_close = experiment_id + 30
                 self.successive_fails = 0
             # if fail gate open and error occured, increase the fail count
-            if not issubclass(type(response), ExpectedType) and self.fail_gate_open:
+            if b'expected' not in response and self.fail_gate_open:
                 self.successive_fails += 1
             # close fail gate after 30 more experiments and check result
             if  experiment_id >= self.fail_gate_close and self.fail_gate_open:
@@ -151,7 +150,7 @@ class Main:
                         self.database.remove(eid)
                     # get parameters of first erroneous experiment and store in database with extra classification
                     _, delay, length, _, _ = self.database.get_parameters_of_experiment(experiment_id - 30)
-                    response = GlitchState.Warning.flash_reset
+                    response = b'warning: flash reset'
                     color = self.glitcher.classify(response)
                     response_str = str(response).encode("utf-8")
                     self.database.insert(experiment_id, delay, length, color, response_str)
@@ -168,7 +167,7 @@ class Main:
             experiment_id += 1
 
             # Dump finished
-            if response == GlitchState.Success.dump_finished:
+            if response == b'success: dump finished':
                 break
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ The use of this genetic algorithm will be briefly outlined below. For a detailed
 Import the class `OptimizationController` into your project:
 
 ```python
-from findus import OptimizationController
+from finds.GeneticAlgorithm import OptimizationController
 ```
 
 Since the genetic algorithm needs to classify the outcome of each bin with a numerical value (the so-called `weight`), a classify-method with additional weight factors must be implemented.

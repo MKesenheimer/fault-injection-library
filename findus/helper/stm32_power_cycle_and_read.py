@@ -10,9 +10,9 @@ import sys
 import time
 
 # import custom libraries
-from findus import ProGlitcher, PicoGlitcher, Helper
-from findus.BootloaderCom import BootloaderCom, GlitchState
-from findus.GlitchState import OKType
+from findus import PicoGlitcher, Helper
+from findus.ProGlitcher import ProGlitcher
+from findus.STM32Bootloader import STM32Bootloader
 
 class PowerCycler:
     def __init__(self, args):
@@ -27,7 +27,7 @@ class PowerCycler:
             self.glitcher = PicoGlitcher()
             self.glitcher.init(port=args.rpico)
 
-        self.bootcom = BootloaderCom(port=self.args.target)
+        self.bootcom = STM32Bootloader(port=self.args.target)
         self.dump_filename = f"{Helper.timestamp()}_memory_dump.bin"
 
     def run(self):
@@ -43,19 +43,19 @@ class PowerCycler:
             response = self.bootcom.init_bootloader()
             print(f"[+] Command init_bootloader response: {response}")
 
-            if issubclass(type(response), OKType):
+            if b'ok' in response:
                 print("[+] Setting up memory read")
                 response = self.bootcom.setup_memread()
                 print(f"[+] Command setup_memread response: {response}")
 
-            if issubclass(type(response), OKType):
+            if b'ok' in response:
                 if self.args.dump:
                     # dump memory
                     response = self.bootcom.dump_memory_to_file(self.dump_filename)
                     print(f"[+] Command dump_memory_to_file response: {response}")
 
                     # Dump finished
-                    if response == GlitchState.Success.dump_finished:
+                    if response == b'success: dump finished':
                         break
                 else:
                     start = 0x08000000

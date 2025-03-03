@@ -8,97 +8,22 @@
 import serial
 from functools import reduce
 import sys
-from .GlitchState import ErrorType, WarningType, OKType, ExpectedType, SuccessType
 import time
 
-class _Expected(ExpectedType):
-    """
-    Enum class for expected states.
-    """
-    default = 0
-    rdp_active = 1
-
-class _Error(ErrorType):
-    """
-    Enum class for error states.
-    """
-    default = 0
-    nack = 1
-    no_response = 2
-    bootloader_not_available = 3
-    bootloader_error = 4
-    id_error = 5
-
-class _Warning(WarningType):
-    """
-    Enum class for warning states.
-    """
-    default = 0
-    flash_reset = 1
-    timeout = 2
-
-class _OK(OKType):
-    """
-    Enum class for ok states (no errors).
-    """
-    default = 0
-    ack = 1
-    bootloader_ok = 2
-    dump_error = 4
-
-class _Success(SuccessType):
-    """
-    Enum class for success states (glitching was successful).
-    """
-    default = 0
-    rdp_inactive = 1
-    dump_ok = 2
-    dump_successful = 3
-    dump_finished = 4
-
-class GlitchState():
-    """
-    Class that combines subclasses for different states. Can be used to classify different responses.
-
-    - Error: Enum class for error states.
-    - Warning: Enum class for warning states.
-    - OK: Enum class for ok states (no errors).
-    - Expected: Enum class for expected states.
-    - Success: Enum class for success states (glitching was successful).
-
-    Example usage:
-
-        from findus.BootloaderCom import GlitchState
-        from findus.GlitchState import OKType
-
-        def return_ok():
-            return GlitchState.OK.ack
-
-        def main():
-            response = return_ok()
-            if issubclass(type(response), OKType):
-                print("Response was OK.")
-    """
-    Error = _Error
-    Warning = _Warning
-    OK = _OK
-    Expected = _Expected
-    Success = _Success
-
-class BootloaderCom:
+class STM32Bootloader:
     """
     Class that contains methods to communicate with STM32 processors in bootloader mode.
     Example usage:
     
-        from findus.BootloaderCom import BootloaderCom
-        bootcom = BootloaderCom(port="/dev/ttyACM1")
+        from findus.STM32Bootloader import STM32Bootloader
+        bootcom = STM32Bootloader(port="/dev/ttyACM1")
         response = bootcom.init_bootloader()
         response = bootcom.setup_memread()
         response, mem = self.bootcom.read_memory(0x08000000, 0xFF)
 
     Methods:
         __init__: Default constructor.
-        check_ack: Returns GlitchState.Error.nack or GlitchState.Error.ack depending on the bootloader response.
+        check_ack: Returns b'error: NACK' or b'ok: ACK' depending on the bootloader response.
         flush: Flush the serial buffers.
         init_get_id: Initializes the bootloader communication and asks the chip for its ID.
         init_bootloader: Initializes the bootloader communication via UART.
@@ -128,19 +53,19 @@ class BootloaderCom:
         self.current_dump_addr = dump_address
         self.current_dump_len = dump_len
 
-    def check_ack(self) -> GlitchState:
+    def check_ack(self) -> bytes:
         r"""
-        Read a byte from serial and returns `GlitchState.Error.nack` or `GlitchState.Error.ack` depending whether the device's bootloader responds with a NACK or a ACK over UART.
+        Read a byte from serial and returns `b'error: NACK'` or `b'ok: ACK'` depending whether the device's bootloader responds with a NACK or a ACK over UART.
 
         Returns:
-            Returns `GlitchState.Error.nack` if `b'\\x1f'` was received, or `GlitchState.Error.ack` if `b'\\x79'` was received. If the target did not respond, a `GlitchState.Error.no_response` is returned.
+            Returns `b'error: NACK'` if `b'\\x1f'` was received, or `b'ok: ACK'` if `b'\\x79'` was received. If the target did not respond, a `b'error: no response'` is returned.
         """
         s = self.ser.read(1)
         if s == self.NACK:
-            return GlitchState.Error.nack
+            return b'error: NACK'
         elif s == self.ACK:
-            return GlitchState.OK.ack
-        return GlitchState.Error.no_response
+            return b'ok: ACK'
+        return b'error: no response'
 
     def flush(self):
         """
@@ -151,25 +76,25 @@ class BootloaderCom:
         # read garbage and discard
         #self.ser.read(1024)
 
-    # returns "bootloader_not_available" if bootloader is unavailable
-    # returns "id_error" if reading from bootloader was not successful
-    # returns "default" else
-    def init_get_id(self) -> GlitchState:
+    # returns b'error: bootloader not available' if bootloader is unavailable
+    # returns b'error: id command error' if reading from bootloader was not successful
+    # returns b'ok' else
+    def init_get_id(self) -> bytes:
         """
         Initializes the bootloader communication and asks the chip for its ID.
         
         Returns:
-            Returns `GlitchState.Error.bootloader_not_available` if the bootloader is unavailable, `GlitchState.Error.id_error` if 'id command' was not successful, and `GlitchState.OK.default` if successful.
+            Returns `b'error: bootloader not available'` if the bootloader is unavailable, `b'error: id command error'` if 'id command' was not successful, and `b'ok'` if successful.
         """
         # init bootloader
         self.ser.write(b'\x7f')
-        if issubclass(type(self.check_ack()), ErrorType):
-            return GlitchState.Error.bootloader_not_available
+        if b'error' in self.check_ack():
+            return b'error: bootloader not available'
 
         # get chip id command (x02: chip id, xfd: crc)
         self.ser.write(b'\x02\xfd')
-        if issubclass(type(self.check_ack()), ErrorType):
-            return GlitchState.Error.id_error
+        if b'error' in self.check_ack():
+            return b'error: id command error'
         
         # read chip id
         s = self.ser.read(3)
@@ -177,27 +102,28 @@ class BootloaderCom:
 
         if self.verbose:
             print(f"[+] Chip ID: {chipid}")
-        return GlitchState.OK.default
+        return b'ok'
 
-    # returns "bootloader_ok" if bootloader setup was successful (expected)
-    # returns "bootloader_error" else
-    def init_bootloader(self) -> GlitchState:
+    # returns b'ok: bootloader ok' if bootloader setup was successful (expected)
+    # returns b'error: bootloader error' else
+    def init_bootloader(self) -> bytes:
         """
         Initializes the bootloader communication via UART.
         
         Returns:
-            Returns `GlitchState.OK.bootloader_ok` if bootloader setup was successful (expected), returns `GlitchState.Error.bootloader_error` else.
+            Returns `b'ok: bootloader ok'` if bootloader setup was successful (expected), returns `b'error: bootloader error'` else.
         """
         # init bootloader
         self.ser.write(b'\x7f')
         s = self.ser.read(1)
         if s == self.ACK:
-            return GlitchState.OK.bootloader_ok
-        return GlitchState.Error.bootloader_error
+            return b'ok: bootloader ok'
+        return b'error: bootloader error'
 
-    # returns "rdp_active" if RDP is active (expected)
-    # returns "rdp_inactive" if glitch was successful
-    def setup_memread(self, read:bool = True) -> GlitchState:
+    # returns b'expected: RDP active' if RDP is active (expected)
+    # returns b'success: RDP inactive' if glitch was successful
+    # returns b'error: no response' else
+    def setup_memread(self, read:bool = True) -> bytes:
         """
         Configures the bootloader to read memory from specific memory addresses.
 
@@ -205,22 +131,22 @@ class BootloaderCom:
             read: Whether to read the response or not.
 
         Returns:
-            Returns `GlitchState.Expected.rdp_active` if RDP is active (expected), or `GlitchState.Success.rdp_inactive` if glitch was successful
+            Returns `b'expected: RDP active'` if RDP is active (expected), or `b'success: RDP inactive'` if glitch was successful
         """
-        # read memory (x11: read memory, xee: crc)
+        # read memory command (x11: read memory, xee: crc)
         self.ser.write(b'\x11\xee')
         if read:
             s = self.ser.read(1)
             if s == self.ACK:
-                return GlitchState.Success.rdp_inactive
+                return b'success: RDP inactive'
             elif s == self.NACK:
-                return GlitchState.Expected.rdp_active
-        return GlitchState.Error.no_response
+                return b'expected: RDP active'
+        return b'error: no response'
 
-    # returns "dump_ok" if glitch and memory read was successful
-    # returns "dump_error" if glitch was successful, however memory read yielded eroneous results
+    # returns b'success: dump ok' if glitch and memory read was successful
+    # returns b'ok: dump error' if glitch was successful, however memory read yielded eroneous results
     # must be used in combination with setup_memread
-    def read_memory(self, start:int, size:int) -> [GlitchState, bytes]:
+    def read_memory(self, start:int, size:int) -> [bytes, bytes]:
         """
         Read the memory from a given memory address.
         Must be used in combination with `setup_memread`.
@@ -229,7 +155,7 @@ class BootloaderCom:
             start: Memory address to start reading from.
             size: Size of the memory to read from the device.
         Returns:
-            Returns `GlitchState.Success.dump_ok` if glitch and memory read was successful, or `GlitchState.OK.dump_error` if glitch was successful, however memory read yielded eroneous results.
+            Returns `b'success: dump ok'` if glitch and memory read was successful, or `b'ok: dump error'` if glitch was successful, however memory read yielded eroneous results.
         """
         # write memory address
         startb = start.to_bytes(4, 'big')
@@ -251,18 +177,18 @@ class BootloaderCom:
 
         print(f"[+] Length of memory dump: {len(mem)}")
         print(f"[+] Content: {mem}")
-        response = GlitchState.OK.default
+        response = b'ok'
         if len(mem) == 255 and mem != b"\x00" * 255:
-            response = GlitchState.Success.dump_ok
+            response = b'success: dump ok'
         else:
-            response = GlitchState.OK.dump_error
+            response = b'ok: dump error'
         return response, mem
 
-    # returns "rdp_active" if RDP is active (expected)
-    # returns "rdp_inactive" if glitch was successful
-    # returns "dump_error" if glitch was successful but dumped memory was eroneous
-    # returns "dump_ok" if glitch was successful and dumped memory was good
-    def dump_memory_debug(self) -> [GlitchState, bytes]:
+    # returns b'expected: RDP active' if RDP is active (expected)
+    # returns b'success: RDP inactive' if glitch was successful
+    # returns b'ok: dump error' if glitch was successful but dumped memory was eroneous
+    # returns b'success: dump ok' if glitch was successful and dumped memory was good
+    def dump_memory_debug(self) -> [bytes, bytes]:
         # read memory (x11: read memory, xee: crc)
         self.ser.write(b'\x11\xee')
         s = self.ser.read(1)
@@ -283,20 +209,20 @@ class BootloaderCom:
                 print(f"[+] Length of memory dump: {len(mem)}")
                 print(f"[+] Content: {mem}")
                 time.sleep(5)
-                return GlitchState.Success.dump_ok, mem
+                return b'success: dump ok', mem
             else:
                 time.sleep(5)
-                return GlitchState.OK.dump_error, mem
+                return b'ok: dump error', mem
 
         if s == self.ACK:
-            return GlitchState.Sucess.rdp_inactive, mem
+            return b'success: RDP inactive', mem
 
-        return GlitchState.Expected.rdp_active, mem
+        return b'expected: RDP active', mem
 
-    # returns "dump_ok" if glitch and memory read was successful
-    # returns "dump_error" if glitch was successful, however memory read yielded eroneous results
+    # returns b'success: dump ok' if glitch and memory read was successful
+    # returns b'ok: dump error' if glitch was successful, however memory read yielded eroneous results
     # must be used in combination with setup_memread
-    def read_memory_debug(self, start:int, size:int) -> [GlitchState, bytes]:
+    def read_memory_debug(self, start:int, size:int) -> [bytes, bytes]:
         # write memory address
         self.ser.write(b'\x08\x00\x00\x00\x08')
         self.ser.read(1)
@@ -309,31 +235,31 @@ class BootloaderCom:
 
         print(f"[+] Length of memory dump: {len(mem)}")
         print(f"[+] Content: {mem}")
-        response = GlitchState.OK.default
+        response = b'ok'
         if len(mem) == 255 and mem != b"\x00" * 255:
-            response = GlitchState.Success.dump_ok
+            response = b'success: dump ok'
         else:
-            response = GlitchState.OK.dump_error
+            response = b'ok: dump error'
         return response, mem
 
-    # returns "error" if memory read was eroneous
-    # returns "dump_successful" if one dump was successful
-    # returns "dump_finished" if entire memory was dummped
-    def dump_memory_to_file(self, dump_filename:str) -> [GlitchState, bytes]:
+    # returns b'error: eroneous memory read' if memory read was eroneous
+    # returns b'success: dump successful' if one dump was successful
+    # returns b'success: dump finished' if entire memory was dummped
+    def dump_memory_to_file(self, dump_filename:str) -> [bytes, bytes]:
         """
         Read the memory from a given memory range and write the memory dump to a file.
         
         Parameters:
             dump_filename: Filename to write the memory dump to.
         Returns:
-            Returns `GlitchState.OK.dump_error` if memory read was eroneous, `GlitchState.Success.dump_successful` if one dump was successful, and `GlitchState.Success.dump_finished` if entire memory was dummped.
+            Returns `b'ok: dump error'` if memory read was eroneous, `b'success: dump successful'` if one dump was successful, and `b'success: dump finished'` if entire memory was dummped.
         """
         # read memory if RDP is inactive
         len_to_dump = 0xFF if (self.current_dump_len // 0xFF) else self.current_dump_len % 0xFF
         response, mem = self.read_memory(self.current_dump_addr, len_to_dump)
 
-        if issubclass(type(response), ErrorType) or response == GlitchState.OK.dump_error:
-            return response, mem
+        if b'error' in response or response == b'ok: dump error':
+            return b'error: eroneous memory read', mem
 
         # write memory dump to file
         with open(dump_filename, 'ab+') as f:
@@ -344,8 +270,8 @@ class BootloaderCom:
 
         if self.current_dump_len <= 0:
             print("[+] Dump finished.")
-            return GlitchState.Success.dump_finished, mem
-        return GlitchState.Success.dump_successful, mem
+            return b'success: dump finished', mem
+        return b'success: dump successful', mem
 
     def __del__(self):
         """
@@ -355,7 +281,7 @@ class BootloaderCom:
         self.ser.close()
 
 def main(argv=sys.argv):
-    com = BootloaderCom(port=sys.argv[1])
+    com = STM32Bootloader(port=sys.argv[1])
     ret = com.init_get_id()
     print(ret)
     if ret != 0:

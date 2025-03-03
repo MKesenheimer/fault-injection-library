@@ -20,8 +20,23 @@ import sys
 import time
 
 # import custom libraries
-from findus.BootloaderCom import BootloaderCom, GlitchState
-from findus import Database, PicoGlitcher, Helper
+from findus import Database, PicoGlitcher
+from findus import Serial
+
+class DerivedPicoGlitcher(PicoGlitcher):
+    def classify(self, state:bytes) -> str:
+        color = 'C'
+        if state == b'success: target read ok':
+            color = 'G'
+        elif b'error' in state:
+            color = 'M'
+        elif b'warning' in state:
+            color = 'O'
+        elif b'timeout' in state:
+            color = 'Y'
+        elif b'success' in state:
+            color = 'R'
+        return color
 
 class Main:
     def __init__(self, args):
@@ -31,7 +46,7 @@ class Main:
         logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
 
         # glitcher
-        self.glitcher = PicoGlitcher()
+        self.glitcher = DerivedPicoGlitcher()
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
 
@@ -64,9 +79,8 @@ class Main:
         self.fail_gate_open = False
         self.fail_gate_close = 0
 
-        # memory read settings
-        self.bootcom = BootloaderCom(port=self.args.target, dump_address=0x08000000, dump_len=0x2000)
-        self.dump_filename = f"{Helper.timestamp()}_memory_dump.bin"
+        # uart target communication
+        self.target = Serial(port=args.target)
 
     def run(self):
         # log execution
@@ -92,31 +106,37 @@ class Main:
 
             # reset target
             self.glitcher.reset(0.01)
-            self.bootcom.flush()
 
             # setup memory read; this function triggers the glitch
-            response = self.bootcom.setup_memread(read=False)
+            self.target.write(b'\x11')
 
             # block until glitch
+            state = b'success: trigger ok'
             try:
                 self.glitcher.block(timeout=1)
             except Exception as _:
                 print("[-] Timeout received in block(). Continuing.")
                 self.glitcher.power_cycle_target(power_cycle_time=1)
                 time.sleep(0.2)
-                response = GlitchState.Warning.timeout
+                state = b'warning: trigger not observed'
+
+            if b'warning' not in state:
+                response = self.target.read(1)
+                if response == b'\x11':
+                    state = b'success: target read ok'
+                else:
+                    state = b'error: target not ok'
 
             # classify response
-            color = self.glitcher.classify(response)
+            color = self.glitcher.classify(state)
 
             # add to database
-            response_str = str(response).encode("utf-8")
-            self.database.insert(experiment_id, delay, length, color, response_str)
+            self.database.insert(experiment_id, delay, length, color, state)
 
             # monitor
             speed = self.glitcher.get_speed(self.start_time, experiment_id)
             experiment_base_id = self.database.get_base_experiments_count()
-            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{delay}\t{length}\t{color}\t{response_str}", color))
+            print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{delay}\t{length}\t{color}\t{state}", color))
 
             # increase experiment id
             experiment_id += 1

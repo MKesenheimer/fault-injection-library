@@ -101,7 +101,7 @@ def glitch():
     set(pins, 0b0).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
-    irq(clear, 7)
+    #irq(clear, 7)
     push(block)
 
 @asm_pio(set_init=(PIO.OUT_HIGH), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
@@ -130,7 +130,7 @@ def pulse_shaping():
     set(pins, 0b1).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
-    irq(clear, 7)
+    #irq(clear, 7)
     push(block)
 
 @asm_pio(set_init=(MUX0_PIO_INIT, MUX1_PIO_INIT), out_init=(MUX0_PIO_INIT, MUX1_PIO_INIT), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
@@ -178,7 +178,7 @@ def multiplex(MUX_PIO_INIT=MUX_PIO_INIT):
     set(pins, MUX_PIO_INIT).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
-    irq(clear, 7)
+    #irq(clear, 7)
     push(block)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
@@ -299,7 +299,7 @@ def wait_irq7():
 
     label(loop)
     ldr(r0, [r1, 0]) # Load NVIC_ISPR (interrupt pending register)
-    mov(r2, 0x08) # irq7 is bit 3 of NVIC_ISPR
+    mov(r2, 0b1000) # irq7 is bit 3 of NVIC_ISPR
     tst(r0, r2) # r0 & r2
     beq(loop) # if r0 & r2 == 0 -> IRQ7 bit not set
 
@@ -359,7 +359,7 @@ class PicoGlitcher():
         # standard dead zone after power down
         self.dead_time = 0.0
         self.pin_condition = self.pin_vtarget_en
-        self.condition = 0
+        self.condition = "rising"
         # pins for multiplexing and pulse-shaping (only hardware version 2)
         if self.config["hardware_version"][0] >= 2:
             self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
@@ -383,6 +383,8 @@ class PicoGlitcher():
             self.fastadc = FastADC()
             self.fastsamples = self.fastadc.init_array()
             self.core1_stopped = True
+            # gpio outputs (are configured later as required)
+            self.pin_gpios = {}
 
     def waveform_generator(self, frequency:int = AD910X.DEFAULT_FREQUENCY, gain:float = AD910X.DEFAULT_GAIN, waveid:int = AD910X.WAVE_TRIANGLE):
         if self.config["hardware_version"][0] < 2:
@@ -520,6 +522,17 @@ class PicoGlitcher():
         time.sleep(reset_time)
         self.release_reset()
 
+    def configure_gpio_out(self, pin_number:int):
+        # TODO: check if pin is already in use
+        self.pin_gpios[pin_number] = Pin(pin_number, Pin.OUT, Pin.PULL_DOWN)
+
+    def set_gpio(self, pin_number:int, value:int):
+        try:
+            self.pin_gpios[pin_number].value(value)
+        except KeyError:
+            self.configure_gpio_out(pin_number)
+            self.pin_gpios[pin_number].value(value)
+
     def set_lpglitch(self):
         """
         Enable the low-power crowbar MOSFET for glitch generation.
@@ -591,27 +604,28 @@ class PicoGlitcher():
             self.__change_config("ps_offset", vhigh)
             self.__change_config("ps_factor", factor)
 
-    def set_dead_zone(self, dead_time:float = 0, pin_condition:str = "default"):
+    def set_dead_zone(self, dead_time:float = 0, pin_condition:str = "default", condition:str = "rising"):
         """
         Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
         
         Parameters:
             dead_time: Rejection time during triggering is disabled.
-            pin_condition: Can either be "default", "power" or "reset". In "power" mode, the `TRIGGER` input is connected to the target's power and the rejection time is measured after power doen. In "reset" mode, the `TRIGGER` input is connected to the `RESET` line and the rejection time is measured after the device is reset. These modes imply different internal conditions to configure the dead time. If "default" is chosen, effectively no dead time is active.
+            pin_condition: Can either be "default", "power", "reset" or a GPIO pin number (for example "4", "5" or "6"). In "power" mode, the `TRIGGER` input is connected to the target's power and the rejection time is measured after power doen. In "reset" mode, the `TRIGGER` input is connected to the `RESET` line and the rejection time is measured after the device is reset. These modes imply different internal conditions to configure the dead time. If "default" is chosen, effectively no dead time is active.
+            condition: Can either be "falling" or "rising". The `dead_time` is measured on the pin `pin_condition` after the specified condition (falling- or rising edge). For example, a good choice is "rising" for the "default" configuration, "rising" for the "power" configuration and "falling" for the "reset" configuration.
         """
         if pin_condition == "default":
             self.pin_condition = self.pin_glitch_en
-            # wait until GLITCH_EN is high (if armed)
-            self.condition = 1
         elif pin_condition == "power":
             self.pin_condition = self.pin_vtarget_en
-            # wait until VTARGET_EN is high (meaning VTARGET is disabled)
-            self.condition = 1
         elif pin_condition == "reset":
             self.pin_condition = self.pin_reset
-            # wait until RESET is low
-            self.condition = 0
+        elif pin_condition.isdigit():
+            pin_number = int(pin_condition)
+            self.configure_gpio_out(pin_number)
+            self.pin_condition = self.pin_gpios[pin_number]
+        #print(f"self.pin_condition = {self.pin_condition}")
         self.dead_time = dead_time
+        self.condition = condition
 
     def __arm_common(self):
         if self.trigger_mode == "tio":
@@ -625,7 +639,7 @@ class PicoGlitcher():
 
             # state machine that blocks for a specific time after a certain condition (dead time)
             sm2_func = None
-            if self.condition == 1:
+            if self.condition == "rising":
                 sm2_func = block_rising_condition
             else:
                 sm2_func = block_falling_condition
@@ -688,13 +702,13 @@ class PicoGlitcher():
         # push multiplexing shape config into the fifo of the statemachine
         self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
         try:
-            t1 = mul_config["t1"] // (1_000_000_000 // self.frequency)
+            t1 = int(mul_config["t1"]) // (1_000_000_000 // self.frequency)
             v1 = self.voltage_map[mul_config["v1"]]
         except Exception as _:
             t1 = 0
             v1 = MUX_PIO_INIT
         try:
-            t2 = mul_config["t2"] // (1_000_000_000 // self.frequency)
+            t2 = int(mul_config["t2"]) // (1_000_000_000 // self.frequency)
             v2 = self.voltage_map[mul_config["v2"]]
         except Exception as _:
             t2 = 0
@@ -703,13 +717,13 @@ class PicoGlitcher():
         self.sm0.put(config)
         # push the next multiplexing shape config into the fifo of the statemachine
         try:
-            t3 = mul_config["t3"] // (1_000_000_000 // self.frequency)
+            t3 = int(mul_config["t3"]) // (1_000_000_000 // self.frequency)
             v3 = self.voltage_map[mul_config["v3"]]
         except Exception as _:
             t3 = 0
             v3 = MUX_PIO_INIT
         try:
-            t4 = mul_config["t4"] // (1_000_000_000 // self.frequency)
+            t4 = int(mul_config["t4"]) // (1_000_000_000 // self.frequency)
             v4 = self.voltage_map[mul_config["v4"]]
         except Exception as _:
             t4 = 0
@@ -783,7 +797,7 @@ class PicoGlitcher():
         self.sm0.put(maxlength // (1_000_000_000 // self.frequency))
 
         self.__arm_common()
-        print(pulse)
+        #print(pulse)
 
     def block(self, timeout:float):
         """

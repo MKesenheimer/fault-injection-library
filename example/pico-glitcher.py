@@ -21,7 +21,7 @@ import time
 
 # import custom libraries
 from findus import Database, PicoGlitcher
-from findus import AnalogPlot
+from findus.AnalogPlot import AnalogPlot
 
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(PicoGlitcher):
@@ -60,6 +60,7 @@ class Main():
         # note that you still have to physically connect the trigger input with vtarget
         self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
         #self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input, dead_time=0.01, pin_condition="reset")
+        #self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input, dead_time=0.001, pin_condition="6", condition="falling")
 
         # choose multiplexing, pulse-shaping or crowbar glitching
         if args.multiplexing:
@@ -125,8 +126,8 @@ class Main():
                 samples = self.glitcher.get_adc_samples()
                 self.plotter.update_curve(samples)
             except Exception as e:
-                print("[-] Timeout received in block(). Continuing.")
                 print(e)
+                print("[-] Timeout received in block(). Continuing.")
                 self.glitcher.power_cycle_target(power_cycle_time=1)
                 time.sleep(0.2)
                 response = b'Timeout'

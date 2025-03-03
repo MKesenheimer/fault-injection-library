@@ -12,7 +12,7 @@ packages = ["findus", "findus.analyzer", "findus.helper", "findus.firmware"]
 [project]
 name = "findus"
 description = "Library to perform fault injection attacks with the PicoGlitcher, Chipwhisperer Husky or Chipwhisperer Pro"
-version = "0.9.19"
+version = "1.2.0"
 license = {file = "LICENSE"}
 authors = [{name = "Matthias Kesenheimer", email = "m.kesenheimer@gmx.net"}]
 dependencies = [
@@ -32,10 +32,11 @@ dependencies = [
 analyzer = "findus.analyzer.analyzer:main"
 analyzer-new =  "findus.analyzer.analyzer_new:main"
 upload = "findus.helper.upload:main"
-power-cycle-and-read = "findus.helper.power_cycle_and_read:main"
 power-cycle = "findus.helper.power_cycle:main"
 power-on = "findus.helper.power_on:main"
-bootloader-com = "findus.BootloaderCom:main"
+stm32-bootloader = "findus.STM32Bootloader:main"
+stm32-power-cycle-and-read = "findus.helper.stm32_power_cycle_and_read:main"
+stm8-programmer = "findus.STM8Programmer:main"
 pulse-editor = "findus.InteractivePchipEditor:main"
 pulse-calibration = "findus.helper.pulse_shaping_calibration:main"
 
