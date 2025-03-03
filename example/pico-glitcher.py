@@ -60,6 +60,7 @@ class Main():
         # note that you still have to physically connect the trigger input with vtarget
         self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
         #self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input, dead_time=0.01, pin_condition="reset")
+        #self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input, dead_time=0.001, pin_condition="6", condition="falling")
 
         # choose multiplexing, pulse-shaping or crowbar glitching
         if args.multiplexing:
@@ -114,10 +115,7 @@ class Main():
 
             # reset target
             time.sleep(0.01)
-            #self.glitcher.reset(0.01)
-            #self.glitcher.set_gpio(6, 0)
-            #time.sleep(0.01)
-            #self.glitcher.set_gpio(6, 1)
+            self.glitcher.reset(0.01)
 
             # block until glitch
             try:

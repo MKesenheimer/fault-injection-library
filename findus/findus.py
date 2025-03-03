@@ -415,6 +415,9 @@ class PicoGlitcherInterface(MicroPythonScript):
     def reset(self, reset_time:float):
         self.pyb.exec(f'mp.reset({reset_time})')
 
+    def configure_gpio_out(self, pin_number:int):
+        self.pyb.exec(f'mp.configure_gpio_out({pin_number})')
+
     def set_gpio(self, pin_number:int, value:int):
         self.pyb.exec(f'mp.set_gpio({pin_number}, {value})')
 
@@ -786,6 +789,15 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.set_gpio(pin_number, value)
 
+    def configure_gpio_out(self, pin_number:int):
+        """
+        Configure the GPIO pin `pin_number` as an output.
+
+        Parameters:
+            pin_number: GPIO pin number (for example 4, 5, 6).
+        """
+        self.pico_glitcher.configure_gpio_out(pin_number)
+
     def release_reset(self):
         """
         Release the reset to the target via the Pico Glitcher's `RESET` output.
@@ -923,7 +935,7 @@ class PicoGlitcher(Glitcher):
         Parameters:
             pin_trigger: The trigger pin to use. Can either be "default" (default `TRIGGER` input) or "alt" (alternative trigger input `TRIGGER1`). For hardware version 2 options "ext1" or "ext2" are also available.
             dead_time: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
-            pin_condition: The rejection time is generated internally by measuring the state of the `power` or `reset` pin of the Pico Glitcher. If you want to trigger on the reset condition, set `pin_condition = 'reset'`, else if you want to trigger on the target power set `pin_condition = 'power'`. If `dead_time` is set to zero and `pin_condition = 'default'`, this parameter is ignored.
+            pin_condition: The rejection time is generated internally by measuring the state of the the given pin of the Pico Glitcher. If you want to trigger on the reset condition, set `pin_condition = 'reset'`, else if you want to trigger on the target power set `pin_condition = 'power'`. `pin_condition` can either be "default", "power", "reset" or a GPIO pin number (for example "4", "5" or "6"). If `dead_time` is set to zero and `pin_condition = 'default'`, this parameter is ignored.
             condition: Can either be "falling" or "rising". The `dead_time` is measured on the pin `pin_condition` after the specified condition (falling- or rising edge). For example, a good choice is "rising" for the "default" configuration, "rising" for the "power" configuration and "falling" for the "reset" configuration.
         """
         self.pico_glitcher.set_trigger("tio", pin_trigger)
