@@ -74,11 +74,6 @@ class Main:
         # if number of experiments get too large, remove the expected results
         #self.database.cleanup("G")
 
-        self.start_time = int(time.time())
-        self.successive_fails = 0
-        self.fail_gate_open = False
-        self.fail_gate_close = 0
-
         # uart target communication
         self.target = Serial(port=args.target)
 

@@ -1154,3 +1154,57 @@ class Helper():
             return [start]
         else:
             return Helper.arange(start, end + step, step)
+
+class ErrorHandling():
+    def __init__(self, max_fails:int = 10, look_back:int = 30, database:Database = None):
+        self.successive_fails = 0
+        self.fail_gate_open = False
+        self.fail_gate_close = 0
+        self.max_fails = max_fails
+        self.look_back = look_back
+        if self.max_fails > self.look_back:
+            self.look_back = self.max_fails
+        self.database = database
+
+    def exit_action(self):
+        # can be overwritten to suit specific needs
+        print("[-] Successive error occurred. Exiting.")
+        sys.exit(-1)
+
+    def check(self, experiment_id:int, response:bytes, expected=b'expected', user_action=None):
+        # exit if too many successive fails (including a supposedly successful memory read)
+        # open fail gate, if error occurred and everything was ok previously
+        if expected not in response and not self.fail_gate_open:
+            self.fail_gate_open = True
+            self.fail_gate_close = experiment_id + self.look_back
+            self.successive_fails = 0
+
+        # if fail gate open and error occurred, increase the fail count
+        if expected not in response and self.fail_gate_open:
+            self.successive_fails += 1
+
+        # close fail gate after max_fails more experiments and check result
+        if  experiment_id >= self.fail_gate_close and self.fail_gate_open:
+            self.fail_gate_open = False
+            if self.successive_fails >= self.max_fails:
+                # delete the erroneous data points, but not the first
+                if self.database is not None:
+                    for eid in range(experiment_id - self.max_fails + 1, experiment_id + 1):
+                        #print(f"Deleting {eid}")
+                        self.database.remove_rel(eid)
+
+                # get parameters of first erroneous experiment and store in database with extra classification
+                parameters = self.database.get_parameters_of_experiment(experiment_id - self.look_back)
+                response = b'error: successive error occurred'
+                if self.database is not None:
+                    parameters = (experiment_id - self.look_back + 1, ) + parameters[1:-2] + ('O', str(response).encode("utf-8"))
+                    self.database.insert(*parameters)
+                
+                # execute user action
+                if user_action is None:
+                    self.exit_action()
+                else:
+                    user_action()
+                self.successive_fails = 0
+
+            return response

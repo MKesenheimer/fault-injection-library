@@ -24,7 +24,7 @@ import subprocess
 
 # import custom libraries
 from findus.STM32Bootloader import STM32Bootloader
-from findus import Database, Helper
+from findus import Database, Helper, ErrorHandling
 from findus.ProGlitcher import ProGlitcher
 
 def program_target():
@@ -58,14 +58,12 @@ class Main:
         # if number of experiments get too large, remove the expected results
         #self.database.cleanup("G")
 
-        self.start_time = int(time.time())
-        self.successive_fails = 0
-        self.fail_gate_open = False
-        self.fail_gate_close = 0
-
         # memory read settings
         self.bootcom = STM32Bootloader(port=self.args.target, dump_address=0x08000000, dump_len=0x2000)
         self.dump_filename = f"{Helper.timestamp()}_memory_dump.bin"
+
+        # error handling
+        self.error_handler = ErrorHandling(max_fails=10, look_back=30, database=self.database)
 
     def run(self):
         # log execution
@@ -131,37 +129,16 @@ class Main:
             experiment_base_id = self.database.get_base_experiments_count()
             print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{delay}\t{length}\t{color}\t{response_str}", color))
 
-            # error handling
-            # exit if too many successive fails (including a supposedly successful memory read)
-            # open fail gate, if error occured and everything was ok previously
-            if b'expected' not in response and not self.fail_gate_open:
-                self.fail_gate_open = True
-                self.fail_gate_close = experiment_id + 30
-                self.successive_fails = 0
-            # if fail gate open and error occured, increase the fail count
-            if b'expected' not in response and self.fail_gate_open:
-                self.successive_fails += 1
-            # close fail gate after 30 more experiments and check result
-            if  experiment_id >= self.fail_gate_close and self.fail_gate_open:
-                self.fail_gate_open = False
-                if self.successive_fails >= 10:
-                    # delete the eroneous datapoints, but not the first
-                    for eid in range(experiment_id - 29, experiment_id):
-                        self.database.remove(eid)
-                    # get parameters of first erroneous experiment and store in database with extra classification
-                    _, delay, length, _, _ = self.database.get_parameters_of_experiment(experiment_id - 30)
-                    response = b'warning: flash reset'
-                    color = self.glitcher.classify(response)
-                    response_str = str(response).encode("utf-8")
-                    self.database.insert(experiment_id, delay, length, color, response_str)
-                    # then reprogram target and try again
-                    self.glitcher.power_cycle_target(1)
-                    time.sleep(1)
-                    self.bootcom.flush()
-                    self.successive_fails = 0
-                    # reprogram the target
-                    program_target()
-                    self.glitcher.power_cycle_target(1)
+            # check for successive errors, re-programm target if too many successive errors occur.
+            def error_action():
+                # reprogram target and try again
+                self.glitcher.power_cycle_target(1)
+                time.sleep(1)
+                self.bootcom.flush()
+                # reprogram the target
+                program_target()
+                self.glitcher.power_cycle_target(1)
+            self.error_handler.check(experiment_id=experiment_id, response=response, expected=b'expected', user_action=error_action)
 
             # increase experiment id
             experiment_id += 1
