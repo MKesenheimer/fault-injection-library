@@ -5,6 +5,7 @@ from findus.findus import PicoGlitcherInterface
 from findus.findus import Glitcher
 from findus.findus import PicoGlitcher
 from findus.findus import Helper
+from findus.findus import ErrorHandling
 
 #import sys
 #import os
