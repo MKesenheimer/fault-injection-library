@@ -75,6 +75,9 @@ elif config["hardware_version"][0] == 2:
     import AD910X
     from PulseGenerator import PulseGenerator
 
+def irq_clear(sm):
+  pass
+
 @asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
 def glitch():
     # block until delay received
@@ -101,7 +104,7 @@ def glitch():
     set(pins, 0b0).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
-    #irq(clear, 7)
+    irq(clear, 7)
     push(block)
 
 @asm_pio(set_init=(PIO.OUT_HIGH), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
@@ -130,7 +133,7 @@ def pulse_shaping():
     set(pins, 0b1).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
-    #irq(clear, 7)
+    irq(clear, 7)
     push(block)
 
 @asm_pio(set_init=(MUX0_PIO_INIT, MUX1_PIO_INIT), out_init=(MUX0_PIO_INIT, MUX1_PIO_INIT), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
@@ -178,7 +181,7 @@ def multiplex(MUX_PIO_INIT=MUX_PIO_INIT):
     set(pins, MUX_PIO_INIT).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
-    #irq(clear, 7)
+    irq(clear, 7)
     push(block)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
@@ -657,10 +660,13 @@ class PicoGlitcher():
             self.sm1.put(self.number_of_bits - 1)
 
         if self.sm0 is not None:
+            self.sm0.irq(handler=irq_clear)
             self.sm0.active(1)
         if self.sm1 is not None:
+            self.sm1.irq(handler=irq_clear)
             self.sm1.active(1)
         if self.sm2 is not None:
+            self.sm2.irq(handler=irq_clear)
             self.sm2.active(1)
 
     def arm(self, delay:int, length:int):

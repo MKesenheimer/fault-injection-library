@@ -20,6 +20,7 @@ import sys
 import datetime
 import os
 import glob
+import random
 from findus import pyboard
 from importlib.metadata import version
 
@@ -306,6 +307,20 @@ class Serial():
             The line received from the target.
         """
         response = self.ser.readline()
+        return response
+
+    def read_until(self, expected:bytes = '\n', size:int = None) -> bytes:
+        r"""
+        Read until an expected sequence is found (`\n` by default), the size is exceeded or until timeout occurs. If a timeout is set it may return fewer characters than requested. With no timeout it will block until the requested number of bytes is read.
+
+        Parameters:
+            expected: The byte string to search for.
+            size: Number of bytes to read
+
+        Returns:
+            The line received from the target.
+        """
+        response = self.ser.read_until(expected, size)
         return response
 
     def reset(self, debug:bool = False) -> bool:
@@ -1122,3 +1137,20 @@ class Helper():
                 result.append(round(i, 10))
                 i += step
         return result
+
+    def random_point(a, b, stride=0, dtype=int):
+        points = None
+        if stride > (b - a):
+            raise ValueError("Stride is larger than the interval length.")
+        elif stride == 0:
+            points = Helper.arange(a, b + 1)
+        else:
+            points = Helper.arange(a, b + stride, stride)
+        choice = random.choice(points)
+        return dtype(choice)
+
+    def range(start, end, step=1):
+        if start == end:
+            return [start]
+        else:
+            return Helper.arange(start, end + step, step)
