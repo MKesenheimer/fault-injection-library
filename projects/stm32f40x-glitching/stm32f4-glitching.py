@@ -24,7 +24,7 @@ import subprocess
 
 # import custom libraries
 from findus.STM32Bootloader import STM32Bootloader
-from findus import Database, PicoGlitcher, Helper
+from findus import Database, PicoGlitcher, Helper, ErrorHandling
 
 def program_target():
     result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32l0.cfg', '-c', 'init; halt; program blink.bin verify reset exit;'], text=True, capture_output=True)
