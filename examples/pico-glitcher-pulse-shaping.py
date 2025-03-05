@@ -21,7 +21,7 @@ import time
 
 # import custom libraries
 from findus import Database, PicoGlitcher
-from findus.InteractivePchipEditor import InteractivePchipEditor
+from findus import InteractivePchipEditor
 from findus.firmware.Spline import Spline
 
 # inherit functionality and overwrite some functions

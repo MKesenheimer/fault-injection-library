@@ -20,7 +20,7 @@ import time
 
 # import custom libraries
 from findus import Database, PicoGlitcher
-from findus.GeneticAlgorithm import OptimizationController
+from findus import OptimizationController
 
 # inherit functionality and overwrite some functions
 class DerivedGlitcher(PicoGlitcher):
