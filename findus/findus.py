@@ -386,8 +386,11 @@ class PicoGlitcherInterface(MicroPythonScript):
         decoded_str = version_bytes.decode('utf-8').strip()
         return ast.literal_eval(decoded_str)
 
-    def set_trigger(self, mode:str, pin_trigger:str):
-        self.pyb.exec(f'mp.set_trigger("{mode}", "{pin_trigger}")')
+    def set_trigger(self, mode:str, pin_trigger:str, edge_type:str):
+        self.pyb.exec(f'mp.set_trigger("{mode}", "{pin_trigger}", "{edge_type}")')
+
+    def set_number_of_edges(self, number_of_edges:int):
+        self.pyb.exec(f'mp.set_number_of_edges({number_of_edges})')
 
     def set_frequency(self, frequency:int):
         self.pyb.exec(f'mp.set_frequency({frequency})')
@@ -685,7 +688,7 @@ class PicoGlitcher(Glitcher):
             print("[*] upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py <config-version>/config.json")
             sys.exit(-1)
 
-        self.pico_glitcher.set_trigger("tio", "default")
+        self.pico_glitcher.set_trigger("tio", "default", "rising")
         self.pico_glitcher.set_dead_zone(0, "default", "rising")
         self.pico_glitcher.set_frequency(200_000_000)
         self.pico_glitcher.set_hpglitch()
@@ -953,9 +956,19 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.apply_calibration(vhigh, vlow, store)
 
+    def tio_trigger(self, pin_trigger:str = "default", edge_type="rising"):
+        """
+        Configure the Pico Glitcher to trigger on a rising or falling edge on the `TRIGGER` line.
+
+        Parameters:
+            pin_trigger: The trigger pin to use. Can either be "default" (default `TRIGGER` input) or "alt" (alternative trigger input `TRIGGER1`). For hardware version 2 options "ext1" or "ext2" are also available.
+            edge_type: Trigger on a "rising" (default) or "falling" edge.
+        """
+        self.pico_glitcher.set_trigger("tio", pin_trigger, edge_type)
+
     def rising_edge_trigger(self, pin_trigger:str = "default", dead_time:float = 0, pin_condition:str = "default", condition:str = "rising"):
         """
-        Configure the Pico Glitcher to trigger on a rising edge on the `TRIGGER` line.
+        Configure the Pico Glitcher to trigger on a rising edge on the `TRIGGER` line with optional trigger suppression (dead time).
         
         Parameters:
             pin_trigger: The trigger pin to use. Can either be "default" (default `TRIGGER` input) or "alt" (alternative trigger input `TRIGGER1`). For hardware version 2 options "ext1" or "ext2" are also available.
@@ -963,7 +976,20 @@ class PicoGlitcher(Glitcher):
             pin_condition: The rejection time is generated internally by measuring the state of the the given pin of the Pico Glitcher. If you want to trigger on the reset condition, set `pin_condition = 'reset'`, else if you want to trigger on the target power set `pin_condition = 'power'`. `pin_condition` can either be "default", "power", "reset" or a GPIO pin number (for example "4", "5" or "6"). If `dead_time` is set to zero and `pin_condition = 'default'`, this parameter is ignored.
             condition: Can either be "falling" or "rising". The `dead_time` is measured on the pin `pin_condition` after the specified condition (falling- or rising edge). For example, a good choice is "rising" for the "default" configuration, "rising" for the "power" configuration and "falling" for the "reset" configuration.
         """
-        self.pico_glitcher.set_trigger("tio", pin_trigger)
+        self.pico_glitcher.set_trigger("tio", pin_trigger, "rising")
+        self.pico_glitcher.set_dead_zone(dead_time, pin_condition, condition)
+
+    def falling_edge_trigger(self, pin_trigger:str = "default", dead_time:float = 0, pin_condition:str = "default", condition:str = "rising"):
+        """
+        Configure the Pico Glitcher to trigger on a falling edge on the `TRIGGER` line with optional trigger suppression (dead time).
+
+        Parameters:
+            pin_trigger: The trigger pin to use. Can either be "default" (default `TRIGGER` input) or "alt" (alternative trigger input `TRIGGER1`). For hardware version 2 options "ext1" or "ext2" are also available.
+            dead_time: Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
+            pin_condition: The rejection time is generated internally by measuring the state of the the given pin of the Pico Glitcher. If you want to trigger on the reset condition, set `pin_condition = 'reset'`, else if you want to trigger on the target power set `pin_condition = 'power'`. `pin_condition` can either be "default", "power", "reset" or a GPIO pin number (for example "4", "5" or "6"). If `dead_time` is set to zero and `pin_condition = 'default'`, this parameter is ignored.
+            condition: Can either be "falling" or "rising". The `dead_time` is measured on the pin `pin_condition` after the specified condition (falling- or rising edge). For example, a good choice is "rising" for the "default" configuration, "rising" for the "power" configuration and "falling" for the "reset" configuration.
+        """
+        self.pico_glitcher.set_trigger("tio", pin_trigger, "falling")
         self.pico_glitcher.set_dead_zone(dead_time, pin_condition, condition)
 
     def uart_trigger(self, pattern:int, baudrate:int = 115200, number_of_bits:int = 8, pin_trigger:str = "default"):
@@ -980,6 +1006,18 @@ class PicoGlitcher(Glitcher):
         self.pico_glitcher.set_baudrate(baudrate)
         self.pico_glitcher.set_number_of_bits(number_of_bits)
         self.pico_glitcher.set_pattern_match(pattern)
+
+    def edge_count_trigger(self, pin_trigger:str = "default", number_of_edges:int = 2, edge_type:str = "rising"):
+        """
+        Configure the Pico Glitcher to trigger after a certain number of eddges on the `TRIGGER` line.
+
+        Parameters:
+            pin_trigger: The trigger pin to use. Can either be "default" (default `TRIGGER` input) or "alt" (alternative trigger input `TRIGGER1`). For hardware version 2 options "ext1" or "ext2" are also available.
+            number_of_edges: The number of edges after which the Pico Glitcher triggers.
+            edge_type: Trigger on a "rising" (default) or "falling" edge.
+        """
+        self.pico_glitcher.set_trigger("edge", pin_trigger, edge_type)
+        self.pico_glitcher.set_number_of_edges(number_of_edges)
 
     def set_cpu_frequency(self, frequency:int = 200_000_000):
         """

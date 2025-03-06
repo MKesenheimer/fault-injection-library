@@ -211,6 +211,44 @@ def tio_trigger_with_dead_time_falling_edge():
     irq(block, 7)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
+def edge_trigger_rising_edge():
+    # block until number of edges received
+    pull(block)
+    mov(x, osr)
+
+    label("edge_count_loop")
+
+    # wait for rising edge on trigger pin
+    wait(0, pin, 0)
+    wait(1, pin, 0)
+
+    # decrease x and jump to the beginning of the loop
+    jmp(x_dec, "edge_count_loop")
+
+    # tell observed trigger
+    # TODO: should block be removed?
+    irq(block, 7)
+
+@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
+def edge_trigger_falling_edge():
+    # block until number of edges received
+    pull(block)
+    mov(x, osr)
+
+    label("edge_count_loop")
+
+    # wait for falling edge on trigger pin
+    wait(1, pin, 0)
+    wait(0, pin, 0)
+
+    # decrease x and jump to the beginning of the loop
+    jmp(x_dec, "edge_count_loop")
+
+    # tell observed trigger
+    # TODO: should block be removed?
+    irq(block, 7)
+
+@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
 def block_rising_condition():
     # block until dead time received
     pull(block)
@@ -363,6 +401,7 @@ class PicoGlitcher():
         self.dead_time = 0.0
         self.pin_condition = self.pin_vtarget_en
         self.condition = "rising"
+        self.number_of_edges = 1
         # pins for multiplexing and pulse-shaping (only hardware version 2)
         if self.config["hardware_version"][0] >= 2:
             self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
@@ -428,29 +467,51 @@ class PicoGlitcher():
         print(machine.freq())
         return machine.freq()
 
-    def set_trigger(self, mode:str = "tio", pin_trigger:str = "default"):
+    def set_trigger(self, mode:str = "tio", pin_trigger:str = "default", edge_type:str = "rising"):
         """
         Configures the Pico Glitcher which triggger mode to use.
         In "tio"-mode, the Pico Glitcher triggers on a rising edge on the `TRIGGER` pin.
-        If "uart"-mode is chosen, the Pico Glitcher listens on the `TRIGGER` pin and triggers if a specific byte pattern in the serial communication is observed.
+        If "uart"-mode is chosen, the Pico Glitcher listens on the `TRIGGER` pin and triggers if a specific byte pattern in the serial communication is observed. In "edge"-mode, the Pico Glitcher counts the number of edges and triggers if a certain number of edges were observed. The parameter `edge_type` should be ignored if "uart"-mode is selected.
 
         Parameters:
             mode: The trigger mode to use. Either "tio" or "uart".
             pin_trigger: The trigger pin to use. Can be either "default" or "alt". For hardware version 2 options "ext1" or "ext2" can also be chosen.
+            edge_type: Trigger on the "rising" (default) or "falling" edge.
         """
         self.trigger_mode = mode
         if pin_trigger == "default":
             self.pin_trigger = Pin(TRIGGER, Pin.IN, Pin.PULL_DOWN)
-            self.trigger_inverting = False
+            if edge_type == "rising":
+                self.trigger_inverting = False
+            else:
+                self.trigger_inverting = True
         elif pin_trigger == "alt":
             self.pin_trigger = Pin(ALT_TRIGGER, Pin.IN, Pin.PULL_DOWN)
-            self.trigger_inverting = False
+            if edge_type == "rising":
+                self.trigger_inverting = False
+            else:
+                self.trigger_inverting = True
         elif pin_trigger == "ext1":
             self.pin_trigger = Pin(EXT1, Pin.IN, Pin.PULL_DOWN)
-            self.trigger_inverting = True
+            if edge_type == "rising":
+                self.trigger_inverting = True
+            else:
+                self.trigger_inverting = False
         elif pin_trigger == "ext2":
             self.pin_trigger = Pin(EXT2, Pin.IN, Pin.PULL_DOWN)
-            self.trigger_inverting = True
+            if edge_type == "rising":
+                self.trigger_inverting = True
+            else:
+                self.trigger_inverting = False
+
+    def set_number_of_edges(self, number_of_edges:int = 2):
+        """
+        Set the number of edges after which the Pico Glitcher triggers in edge-counting trigger mode.
+
+        Parameters:
+            number_of_edges: The number of edges after which the Pico Glitcher triggers.
+        """
+        self.number_of_edges = number_of_edges
 
     def set_baudrate(self, baud:int = 115200):
         """
@@ -649,6 +710,16 @@ class PicoGlitcher():
             self.sm2 = StateMachine(2, sm2_func, freq=self.frequency, in_base=self.pin_condition)
             # push dead time (in seconds) into the fifo of the statemachine
             self.sm2.put(int(self.dead_time * self.frequency))
+
+        elif self.trigger_mode == "edge":
+            sm1_func = None
+            if not self.trigger_inverting:
+                sm1_func = edge_trigger_rising_edge
+            else:
+                sm1_func = edge_trigger_falling_edge
+            # state machine that checks the trigger condition
+            self.sm1 = StateMachine(1, sm1_func, freq=self.frequency, in_base=self.pin_trigger)
+            self.sm1.put(self.number_of_edges - 1)
 
         elif self.trigger_mode == "uart":
             # state machine that checks the trigger condition
