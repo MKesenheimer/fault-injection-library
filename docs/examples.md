@@ -40,6 +40,20 @@ python pico-glitcher-uart.py --rpico /dev/<rpi-tty-port> --target /dev/<target-t
 You should now be able to observe the glitches with an oscilloscope on the 10 Ohm resistor.
 Measure the expected delay and glitch length with the oscilloscope.
 
+## STM8s Glitching
+
+Difficulty: Simple
+
+If you have the STM8s target board (available [here](https://www.tindie.com/products/faulty-hardware/stm8-target-board/)), you can learn how to use the Pico Glitcher and findus.
+
+![STM8s crowbar glitching](images/stm8s/target-board-example-crowbar_bb.png)
+
+![STM8s multiplexing glitching](images/stm8s/target-board-example-multiplexing_bb.png)
+
+![Bootloader communication](images/stm8s/communication.png)
+
+![Successful glitches](images/stm8s/success.png)
+
 ## Airtag Glitching
 
 Difficulty: Simple
