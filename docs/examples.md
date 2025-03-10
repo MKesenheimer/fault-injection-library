@@ -44,15 +44,75 @@ Measure the expected delay and glitch length with the oscilloscope.
 
 Difficulty: Simple
 
-If you have the STM8s target board (available [here](https://www.tindie.com/products/faulty-hardware/stm8-target-board/)), you can learn how to use the Pico Glitcher and findus.
+If you have the STM8s target board (available [here](https://www.tindie.com/products/faulty-hardware/stm8-target-board/)), you can learn how to atttack targets with findus and the Pico Glitcher. The STM8s MCUs are very easy to glitch.
 
-![STM8s crowbar glitching](images/stm8s/target-board-example-crowbar_bb.png)
+Similar to the STM32 series, the STM8s has a configurable read-out protection (ROP), which can be used to protect the flash content from unauthorised access. However, the STM8s does not have a UART bootloader like a MCU from the STM32 series (see [STM32 glitching](#stm-black-pill-stm32f401-glitching)), meaning that an ST-Link programming adapter would be required for an example target.
 
-![STM8s multiplexing glitching](images/stm8s/target-board-example-multiplexing_bb.png)
+In order to have a simple test target and also a realistic scenario, a STM32-like UART bootloader was developed for the STM8s target board. The bootloader software can be found [on github](https://github.com/MKesenheimer/stm8-bootloader). However, it should not be necessary to install the software yourself.
+
+The bootloader implements several UART commands that can be used, for example, to read or write the flash content or to set the option bytes (configure the ROP). To read a memory area from flash, the following commands have to be sent to the STM8s MCU in bootloader mode via UART. Each command is acknowledged by an `ACK` (`0x79`) if successful or `NACK` (`0x1f`) if not.
+
+- bootloader init (`0x7f`)
+- read memory command (`0x11`), followed by the address to read from (for example `0x8000`)
+- the number of bytes to read minus one, starting from the specified address (for example `0xff` to read 256 bytes)
+
+The bootloader checks if reading from flash memory is allowed, and responds with an `ACK` on the read memory command. If flash access is not allowed (default behavior when ROP is set), the bootloader returns a `NACK` on the read memory command.
+The following C code reflects this check:
+
+```C
+inline void bootloader_enter() {
+    // ...
+    } else if (cmd == 0x11) {
+        // check if ROP is set
+        uint8_t rop = read_flash(0x4800);
+        if (rop == 0xaa) {
+            serial_send_nack();
+        } else {
+            serial_send_ack();
+            read_memory();
+        }
+    // ...
+}
+```
+
+In order to attack the bootloader and obtain the flash content, a glitch must be triggered while this check is being carried out. The script [stm8s-readmemory.py](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm8s-glitching/stm8-readmemory.py) therefore configures the Pico Glitcher to trigger on the UART word `0x11`. The following figure shows the UART communication with the bootloader. The glitch is executed after the read memory command.
 
 ![Bootloader communication](images/stm8s/communication.png)
 
+To carry out the attack on the STM8s in bootloader mode, the target board is connected to the Pico Glitcher as follows. Connect the target board also to your host computer with a USB-C cable.
+
+![STM8s crowbar glitching](images/stm8s/target-board-example-crowbar_bb.png)
+
+- red: 1.8V, supply voltage for the VCAP input of the STM8s MCU
+- black: GND
+- green: Reset line, connected to the Reset input of the target board
+- yellow: Trigger line, connected to the UART TX line. If the UART word `0x11` is observed on this line, the glitch is triggered.
+- purple: Glitch, connected to VCAP of the STM8s
+
+Next, we determine the time between the read memory command `0x11` and the response (`ACK` or `NACK`) from the microcontroller. The check whether ROP is active must happen between those two events. It turns out (and by observing the [Analog Plotter](../adc)), the glitch must be placed between 70.000 and 107.000 ns.
+
+<TODO: AnalogPlot figure>
+
+As always, the glitch length is estimated: the length must not be too long, but also not too short. A length of 200 to 300 ns turns out to be good.
+Overall, the glitching script is called with the following parameters (the tty ports can of course be different in your case).
+
+```bash
+python stm8-readmemory.py --rpico /dev/tty.usbmodem11301 \
+  --target /dev/tty.usbserial-A50285BI --delay 70_000 107_000 \
+  --length 200 300
+```
+
+After a few attempts you should observe the first positive results.
+
 ![Successful glitches](images/stm8s/success.png)
+
+### Technical deep-dive - why do we attack the VCAP line and not VCC?
+
+![VCAP input](images/stm8s/vcap.png)
+
+### Bonus: Using the multiplexing method
+
+![STM8s multiplexing glitching](images/stm8s/target-board-example-multiplexing_bb.png)
 
 ## Airtag Glitching
 

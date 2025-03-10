@@ -16,8 +16,7 @@ import sys
 import time
 
 # import custom libraries
-from findus import Database, PicoGlitcher
-from findus.STM8Programmer import STM8Programmer
+from findus import Database, PicoGlitcher, STM8Programmer
 
 class Main:
     def __init__(self, args):
