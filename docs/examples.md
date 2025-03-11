@@ -40,6 +40,10 @@ python pico-glitcher-uart.py --rpico /dev/<rpi-tty-port> --target /dev/<target-t
 You should now be able to observe the glitches with an oscilloscope on the 10 Ohm resistor.
 Measure the expected delay and glitch length with the oscilloscope.
 
+## Edge Counting Trigger
+
+<TODO>
+
 ## STM8s Glitching
 
 Difficulty: Simple
@@ -75,11 +79,11 @@ inline void bootloader_enter() {
 }
 ```
 
-In order to attack the bootloader and obtain the flash content, a glitch must be triggered while this check is being carried out. The script [stm8s-readmemory.py](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm8s-glitching/stm8-readmemory.py) therefore configures the Pico Glitcher to trigger on the UART word `0x11`. The following figure shows the UART communication with the bootloader. The glitch is executed after the read memory command.
+In order to attack the bootloader and obtain the flash content, a glitch must be triggered while this check is being carried out. The script [stm8s-readmemory.py](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm8s/stm8-readmemory.py) therefore configures the Pico Glitcher to trigger on the UART word `0x11`. The following figure shows the UART communication with the bootloader. The glitch is executed after the read memory command.
 
 ![Bootloader communication](images/stm8s/communication.png)
 
-To carry out the attack on the STM8s in bootloader mode, the target board is connected to the Pico Glitcher as follows. Connect the target board also to your host computer with a USB-C cable.
+To carry out the attack on the STM8s in bootloader mode, the target board is connected to the Pico Glitcher as follows. A USB-C cable is also used to connect the target board to the host computer which will provide the UART interface.
 
 ![STM8s crowbar glitching](images/stm8s/target-board-example-crowbar_bb.png)
 
@@ -97,6 +101,8 @@ As always, the glitch length is estimated: the length must not be too long, but 
 Overall, the glitching script is called with the following parameters (the tty ports can of course be different in your case).
 
 ```bash
+git clone https://github.com/MKesenheimer/fault-injection-library.git
+cd fault-injection-library/projects/stm8s
 python stm8-readmemory.py --rpico /dev/tty.usbmodem11301 \
   --target /dev/tty.usbserial-A50285BI --delay 70_000 107_000 \
   --length 200 300
@@ -140,14 +146,14 @@ An oscilloscope on 'VTARGET' and 'VCORE' is also used to monitor the fault-injec
 
 The magnitude of the glitch length is estimated from the processor frequency. For the nrf52832 this is 64 MHz, i.e. one CPU cycle takes approx. 16 ns. However, as other components such as capacitors or even the supply lines can change the "sharpness" of the glitch, a multiple of this duration is selected as the starting point. The glitch duration must not be too long, otherwise the microcontroller will be driven into reset. A glitch duration of 300 ns is selected initially.
 
-The script `nrf52832-glitching.py` located at `projects/nrf52832-glitching` (or [here](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/nrf52832-glitching)) is used to perform the glitching campaign. After connecting the Pico Glitcher to the Airtag according to the schematics, run the following commands to start glitching:
+The script `nrf52832-glitching.py` located at `projects/nrf52832` (or [here](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/nrf52832)) is used to perform the glitching campaign. After connecting the Pico Glitcher to the Airtag according to the schematics, run the following commands to start glitching:
 
 ```bash
-cd fault-injection-library/projects/nrf52832-glitching
+cd fault-injection-library/projects/nrf52832
 python pico-glitcher.py --rpico /dev/<rpi-tty-port> --delay 300 600 --length 3_300_000 3_600_000
 ```
 
-Note, in order to communicate with the Airtag over SWD, [openocd](https://openocd.org) must be installed. Additionally, the script [testnrf.cfg](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/nrf52832-glitching/testnrf.cfg) must be in the root directory of the script `pico-glitcher.py`.
+Note, in order to communicate with the Airtag over SWD, [openocd](https://openocd.org) must be installed. Additionally, the script [testnrf.cfg](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/nrf52832/testnrf.cfg) must be in the root directory of the script `pico-glitcher.py`.
 During the glitching campaign, run the `analyzer` script in a separate terminal window:
 
 ```bash
@@ -238,7 +244,7 @@ The bootloader of the STM32 processors offers a specific option for reading out 
 
 To read the program memory, a series of commands must be sent to the processor in bootloader mode via UART, which instruct the processor to return parts of the flash memory (see [STMicroelectronics: USART protocol used in the STM32 bootloader](https://www.st.com/resource/en/application_note/an3155-usart-protocol-used-in-the-stm32-bootloader-stmicroelectronics.pdf)). Among other things, the 'read memory' command is sent to the processor via UART, i.e. the byte 0x11. The glitcher is configured in such a way that it triggers as soon as byte 0x11 is recognized on the TX line. As the transmission of a  second checksum byte requires additional 80µs, the interesting range begins at a 'delay' of 80,000ns and ends as soon as the bootloader sends the acknowledgement approximately 20-40µs later. In practice, it turns out that a range from 95,000ns to 125,000ns must be scanned. The duration of the glitch is selected just short enough so that the microcontroller is not reset (´brown-out’) and long enough so that the glitch also has an effect. A 'length' of 25 to 35ns turns out to be good.
 
-The script to perform the glitch can be found in `projects/stm32f40x-glitching` or [here](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f40x-glitching/stm32f4-glitching.py) and is typically run with the command:
+The script to perform the glitch can be found in `projects/stm32f40x` or [here](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f40x/stm32f4-glitching.py) and is typically run with the command:
 
 ```bash
 python stm32f4-glitching.py --target /dev/tty.usbserial-A50285BI --rpico /dev/tty.usbmodem11101 --power /dev/tty.usbserial-10 --delay 95_000 125_000 --length 25 35

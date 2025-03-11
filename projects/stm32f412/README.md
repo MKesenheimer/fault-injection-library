@@ -16,7 +16,7 @@
 
 - [AN2606 Application note STM32 microcontroller system memory boot mode](https://www.st.com/resource/en/application_note/an2606-stm32-microcontroller-system-memory-boot-mode-stmicroelectronics.pdf)
 
-![Glitch insertion point](../stm32f42x-glitching/images/power_supply_scheme.png)
+![Glitch insertion point](../stm32f42x/images/power_supply_scheme.png)
 [AN4488 Application note](https://www.st.com/resource/en/application_note/an4488-getting-started-with-stm32f4xxxx-mcu-hardware-development-stmicroelectronics.pdf)
 
 ## Images

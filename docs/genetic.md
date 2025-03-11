@@ -6,7 +6,7 @@ Therefore, the search for a suitable parameter point must be done somewhat more 
 
 In the case of `findus`, a genetic algorithm has been implemented that can be used to search for the optimum parameter points.
 
-The use of this genetic algorithm will be briefly outlined below. For a detailed view into how to use this algorithm in the context of voltage glitching, see for example `projects/esp32v1.3-glitching`.
+The use of this genetic algorithm will be briefly outlined below. For a detailed view into how to use this algorithm in the context of voltage glitching, see for example `projects/esp32v1.3`.
 
 ## Implementing a genetic search algorithm when glitching
 
