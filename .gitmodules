@@ -1,6 +1,6 @@
-[submodule "projects/rp2350/rp2350_hacking_challenge"]
-	path = projects/rp2350/rp2350_hacking_challenge
-	url = https://github.com/MKesenheimer/rp2350_hacking_challenge.git
 [submodule "projects/stm8s/stm8-bootloader"]
 	path = projects/stm8s/stm8-bootloader
 	url = https://github.com/MKesenheimer/stm8-bootloader.git
+[submodule "projects/rp2350/rp2350_hacking_challenge"]
+	path = projects/rp2350/rp2350_hacking_challenge
+	url = https://github.com/MKesenheimer/rp2350_hacking_challenge.git
