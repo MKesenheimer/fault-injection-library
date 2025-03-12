@@ -1,9 +1,6 @@
 # Crowbar glitching
 python pico-glitcher.py --rpico /dev/tty.usbmodem1101 --delay 10 10 --length 100 100
 
-# "Seeing something" in the analog plot
-python pico-glitcher.py --rpico /dev/tty.usbmodem11301 --delay 100_000 100_000 --length 10_000 10_000
-
 # Multiplexing
 python pico-glitcher.py --rpico /dev/tty.usbmodem101 --delay 10 10 --length 100 100 --multiplexing
 python pico-glitcher-multiplexing.py --rpico /dev/tty.usbmodem11301 --delay 10 10 --length 100 100
