@@ -6,17 +6,37 @@ This guide should quickly prepare you to use the Pico Glitcher and the findus li
 
 If you are in a hurry and just want to execute an example script as fast as possible, follow these commands:
 
+For the Pico Glitcher v1:
+
 ```bash
 cd ~
 mkdir my-fi-project && cd my-fi-project
 python3 -m venv .venv && source .venv/bin/activate
 pip install findus
 cd .venv/lib/python3.13/site-packages/findus/firmware
-upload --port /dev/tty.usbmodem1101 --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py config_v1/config.json
+upload --port /dev/ttyACM0 --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py config_v1/config.json
 cd ~/my-fi-project
 wget https://raw.githubusercontent.com/MKesenheimer/fault-injection-library/refs/heads/master/examples/pico-glitcher.py
-python pico-glitcher.py --rpico /dev/tty.usbmodem1101 --delay 0 0 --length 100 100
+python pico-glitcher.py --rpico /dev/ttyACM0 --delay 0 0 --length 100 100
 ```
+
+For the Pico Glitcher v2:
+
+```bash
+cd ~
+mkdir my-fi-project && cd my-fi-project
+python3 -m venv .venv && source .venv/bin/activate
+pip install findus
+cd .venv/lib/python3.13/site-packages/findus/firmware
+upload --port /dev/ttyACM0 --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py config_v2/config.json
+cd ~/my-fi-project
+wget https://raw.githubusercontent.com/MKesenheimer/fault-injection-library/refs/heads/master/examples/pico-glitcher.py
+python pico-glitcher.py --rpico /dev/ttyACM0 --delay 0 0 --length 100 100
+```
+
+Note that the paths and tty names may be slightly different in your case.
+
+If these commands fail, see below for a detailed installation guide.
 
 ## Installing findus
 
