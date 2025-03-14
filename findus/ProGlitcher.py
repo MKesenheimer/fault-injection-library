@@ -9,6 +9,7 @@
 import sys
 import time
 import serial
+import numpy as np
 
 from findus import Glitcher
 try:
@@ -128,6 +129,12 @@ class ProGlitcher(Glitcher):
         self.scope.glitch.repeat = length // (int(1e9) // int(self.scope.clock.clkgen_freq))
         self.scope.arm()
 
+    def arm_adc(self):
+        """
+        Arm the ADC of the ChipWhisperer Pro. This is a dummy function, as arming is done automatically with the arm() function. Still included to ensure compatibility of scripts for the Pico Glitcher.
+        """
+        pass
+
     def capture(self) -> bool:
         """
         Captures trace. Glitcher must be armed before capturing.
@@ -140,6 +147,24 @@ class ProGlitcher(Glitcher):
         """
         return self.scope.capture()
 
+    def get_adc_samples(self) -> list[int]:
+        """
+        Read back the captured ADC samples.
+        """
+        samples = self.scope.get_last_trace().tolist()
+        return samples
+
+    def configure_adc(self, number_of_samples:int = 1024, sampling_freq:int = 100e6):
+        """
+        Configure the onboard ADC of the ChipWhisperer Pro.
+
+        Parameters:
+            number_of_samples: The number of samples to capture after triggering.
+            sampling_freq: The sampling frequency of the ADC. `100 MSPS` is the default value for the ChipWhisperer Pro. Note, that clock generation frequency depends on this value.
+        """
+        self.scope.adc.samples = number_of_samples
+        self.scope.clock.clkgen_freq = sampling_freq
+
     def block(self, timeout:float = 1):
         """
         Block until trigger condition is met. Raises an exception if times out.
@@ -149,7 +174,7 @@ class ProGlitcher(Glitcher):
         Raises:
             Timout exception.
         """
-        # TODO: set the timeout of scope.capture
+        self.scope.adc.timeout = timeout
         if self.scope.capture():
             raise Exception("Function execution timed out!")
 

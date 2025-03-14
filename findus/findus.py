@@ -485,8 +485,8 @@ class PicoGlitcherInterface(MicroPythonScript):
     def arm_adc(self):
         self.pyb.exec('mp.arm_adc()')
 
-    def get_adc_samples(self) -> list[int]:
-        return self.pyb.exec('mp.get_adc_samples()')
+    def get_adc_samples(self, timeout:float = 1.0) -> list[int]:
+        return self.pyb.exec(f'mp.get_adc_samples({timeout})')
 
     def configure_adc(self, number_of_samples:int = 1024, sampling_freq:int = 500_000):
         self.pyb.exec(f'mp.configure_adc({number_of_samples}, {sampling_freq})')
@@ -1070,11 +1070,11 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.arm_adc()
 
-    def get_adc_samples(self) -> list[int]:
+    def get_adc_samples(self, timeout:float = 1.0) -> list[int]:
         """
         Read back the captured ADC samples.
         """
-        samples = self.pico_glitcher.get_adc_samples()
+        samples = self.pico_glitcher.get_adc_samples(timeout)
         #print(samples)
         decoded_str = samples.decode().strip()
         num_str = decoded_str.split("[")[1].split("]")[0]
@@ -1087,7 +1087,7 @@ class PicoGlitcher(Glitcher):
 
         Parameters:
             number_of_samples: The number of samples to capture after triggering.
-            sampling_freq: The sampling frequency of the ADC. `500 kSPS` is the maximum.
+            sampling_freq: The sampling frequency of the ADC. `500 kSPS` is the maximum for the Pico Glitcher.
         """
         self.pico_glitcher.configure_adc(number_of_samples, sampling_freq)
 

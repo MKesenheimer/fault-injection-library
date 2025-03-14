@@ -9,7 +9,6 @@ import argparse
 import sys
 import time
 from findus import PicoGlitcher, Helper
-from findus.ProGlitcher import ProGlitcher
 
 class PowerCycler:
     def __init__(self, args):
@@ -17,6 +16,7 @@ class PowerCycler:
 
         if self.args.rpico == "":
             print("[+] Initializing ProGlitcher")
+            from findus.ProGlitcher import ProGlitcher
             self.glitcher = ProGlitcher()
             self.glitcher.init()
         else:
