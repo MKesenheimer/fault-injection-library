@@ -16,6 +16,8 @@ from machine import Pin
 import time
 import ujson
 from FastADC import FastADC
+import AD910X
+from PulseGenerator import PulseGenerator
 import _thread
 
 # load config
@@ -33,6 +35,10 @@ if config["hardware_version"][0] == 1:
     GLITCH_EN = 1
     HP_GLITCH = 16
     LP_GLITCH = 17
+    # added as dummy variables to fix undefined variable error
+    MUX0_PIO_INIT = None
+    MUX1_PIO_INIT = None
+    MUX_PIO_INIT = 0b00
 elif config["hardware_version"][0] == 2:
     TRIGGER = 14
     # alternative trigger on EXT1
@@ -72,8 +78,6 @@ elif config["hardware_version"][0] == 2:
         MUX1_PIO_INIT = PIO.OUT_HIGH
         MUX0_PIO_INIT = PIO.OUT_LOW
         MUX_PIO_INIT = 0b10
-    import AD910X
-    from PulseGenerator import PulseGenerator
 
 def irq_clear(sm):
   pass
@@ -402,6 +406,12 @@ class PicoGlitcher():
         self.pin_condition = self.pin_vtarget_en
         self.condition = "rising"
         self.number_of_edges = 1
+        # analog digital converter
+        self.fastadc = FastADC()
+        self.fastsamples = self.fastadc.init_array()
+        self.core1_stopped = True
+        # gpio outputs (are configured later as required)
+        self.pin_gpios = {}
         # pins for multiplexing and pulse-shaping (only hardware version 2)
         if self.config["hardware_version"][0] >= 2:
             self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
@@ -421,12 +431,6 @@ class PicoGlitcher():
             self.ad910x.init()
             self.pin_ps_trigger = self.ad910x.get_trigger_pin()
             self.pulse_generator = PulseGenerator(vhigh=self.config["ps_offset"], factor=self.config["ps_factor"])
-            # analog digital converter
-            self.fastadc = FastADC()
-            self.fastsamples = self.fastadc.init_array()
-            self.core1_stopped = True
-            # gpio outputs (are configured later as required)
-            self.pin_gpios = {}
 
     def waveform_generator(self, frequency:int = AD910X.DEFAULT_FREQUENCY, gain:float = AD910X.DEFAULT_GAIN, waveid:int = AD910X.WAVE_TRIANGLE):
         if self.config["hardware_version"][0] < 2:
