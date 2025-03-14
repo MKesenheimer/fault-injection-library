@@ -18,6 +18,23 @@ import time
 # import custom libraries
 from findus import Database, PicoGlitcher, STM8Programmer
 
+class DerivedPicoGlitcher(PicoGlitcher):
+    def classify(self, state:bytes) -> str:
+        color = 'C'
+        if b'error: sending read memory command failed' == state:
+            color = 'G'
+        elif b'error' in state:
+            color = 'M'
+        elif b'warning' in state:
+            color = 'O'
+        elif b'timeout' in state:
+            color = 'Y'
+        elif b'ok' in state:
+            color = 'C'
+        elif b'success' in state:
+            color = 'R'
+        return color
+
 class Main:
     def __init__(self, args):
         self.args = args
@@ -26,7 +43,7 @@ class Main:
         logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
 
         # glitcher
-        self.glitcher = PicoGlitcher()
+        self.glitcher = DerivedPicoGlitcher()
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico)
 
@@ -57,7 +74,7 @@ class Main:
         experiment_id = 0
         while True:
             # flush garbage
-            #self.bootcom.flush()
+            #self.programmer.flush()
 
             # set up glitch parameters (in nano seconds) and arm glitcher
             delay = random.randint(s_delay, e_delay)
@@ -73,6 +90,7 @@ class Main:
             state = self.programmer.bootloader_enter()
             mem = b''
             if b'success' in state:
+                # send read memory command (this triggers the glitch)
                 state, mem = self.programmer.read_memory(address=0x8000, length=0xff)
 
             # block until glitch

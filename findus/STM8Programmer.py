@@ -105,9 +105,12 @@ class STM8Programmer():
 
     def read_memory(self, address = 0x8000, length = 0xff):
         # sending read memory command
-        if self.send_and_check(bytearray(STM8Programmer.READ_MEMORY)) != b'ACK':
+        response = self.send_and_check(bytearray(STM8Programmer.READ_MEMORY))
+        if response == b'NACK':
             return b'error: sending read memory command failed', b''
-    
+        elif b'warning' in response:
+            return response, b''
+
         # sending address to read from
         address = struct.pack('>H', address)
         #print(address)
@@ -188,7 +191,7 @@ def main():
     parser.add_argument('--baud', '-b', default=115200)
     parser.add_argument('--write', '-w', required=False, help='firmware in binary format to flash to the microcontroller')
     parser.add_argument('--read', '-r', required=False, help='read bytes from address (as hex, e.g. 0x8000)', type=hex_int)
-    parser.add_argument('--number-of-bytes', '-n', required=False, help='number of bytes to read', default=0xff, type=int)
+    parser.add_argument('--number-of-bytes', '-n', required=False, help='number of bytes to read (minus one)', default=0xff, type=int)
     parser.add_argument('--write-option', '-wo', required=False, help='set the value of the rop option byte (as hex, e.g. 0x00)', type=hex_int)
     parser.add_argument('--read-option', '-ro', const='0x00', required=False, help='read the value of the rop option byte', type=hex_int, nargs='?')
     args = parser.parse_args()

@@ -386,7 +386,7 @@ class PicoGlitcherInterface(MicroPythonScript):
         decoded_str = version_bytes.decode('utf-8').strip()
         return ast.literal_eval(decoded_str)
 
-    def set_trigger(self, mode:str, pin_trigger:str, edge_type:str):
+    def set_trigger(self, mode:str, pin_trigger:str, edge_type:str = "rising"):
         self.pyb.exec(f'mp.set_trigger("{mode}", "{pin_trigger}", "{edge_type}")')
 
     def set_number_of_edges(self, number_of_edges:int):
