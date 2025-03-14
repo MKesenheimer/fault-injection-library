@@ -125,8 +125,10 @@ class ProGlitcher(Glitcher):
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 10 nano seconds.
             length: Length of the glitch in nano seconds. Expect a resolution of about 10 nano seconds.
         """
-        self.scope.glitch.ext_offset = delay // (int(1e9) // int(self.scope.clock.clkgen_freq))
-        self.scope.glitch.repeat = length // (int(1e9) // int(self.scope.clock.clkgen_freq))
+        offset = delay // (int(1e9) // int(self.scope.clock.clkgen_freq))
+        repeat = length // (int(1e9) // int(self.scope.clock.clkgen_freq))
+        self.scope.glitch.ext_offset = offset if offset > 0 else 1
+        self.scope.glitch.repeat = repeat if repeat > 0 else 1
         self.scope.arm()
 
     def arm_adc(self):
@@ -147,11 +149,13 @@ class ProGlitcher(Glitcher):
         """
         return self.scope.capture()
 
-    def get_adc_samples(self) -> list[int]:
+    def get_adc_samples(self, timeout:float = None) -> list[int]:
         """
         Read back the captured ADC samples.
         """
-        samples = self.scope.get_last_trace().tolist()
+        if timeout is not None:
+            self.scope.adc.timeout = timeout
+        samples = self.scope.get_last_trace(as_int=True).tolist()
         return samples
 
     def configure_adc(self, number_of_samples:int = 1024, sampling_freq:int = 100e6):
