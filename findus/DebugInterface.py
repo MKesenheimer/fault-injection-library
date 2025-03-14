@@ -7,7 +7,7 @@
 
 # programming
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x unlock 0; exit"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program read-out-protection-test-STM32L0.elf; reset run; exit;"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program toggle-led-STM32L0.elf; reset run; exit;"
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; exit"
 # -> power cycle the target!
 
@@ -202,8 +202,10 @@ class DebugInterface():
         rdp = (optbytes & 0xff)
         return rdp
 
-    def read_rdp_and_pgrop(self):
-        optbytes, _ = self.read_option_bytes()
+    def read_rdp_and_pgrop(self, verbose:bool = False):
+        optbytes, response = self.read_option_bytes()
+        if verbose:
+            print(response)
         pcrop = (optbytes & 0x100) >> 8
         rdp = (optbytes & 0xff)
         return rdp, pcrop
@@ -211,7 +213,8 @@ class DebugInterface():
     def kill_process(self, port:int = 3333):
         # Find process using the port
         cmd = ["lsof", "-i", f":{port}"]
-        pattern = r"\b(\d+)\b"  # Regex for PID
+        #pattern = r"\b(\d+)\b"  # Regex for PID
+        pattern = r"openocd\s+(\d+)"  # Regex for PID
         # Run command and search for PID
         # trunk-ignore(bandit/B603)
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -245,6 +248,7 @@ class DebugInterface():
     def detach(self):
         if self.openocd_process is not None:
             self.openocd_process.terminate()
+            self.openocd_process.wait()
             self.openocd_process = None
         if self.socket is not None:
             self.socket.close()
@@ -285,13 +289,15 @@ class DebugInterface():
         time.sleep(0.1)
         self.socket.recv(4096)
 
-    def telnet_interact(self, command:str):
+    def telnet_interact(self, command:str, wait_time:float = 0.01, verbose:bool = False):
         if self.openocd_process is None or self.socket is None:
             self.telnet_init()
         command += "\n"
         self.socket.sendall(command.encode("utf-8"))
-        time.sleep(0.01)
+        time.sleep(wait_time)
         response = self.socket.recv(4096)
+        if verbose:
+            print(response.decode("utf-8"))
         return response.decode("utf-8")
 
     def telnet_read_address(self, address:int):

@@ -744,6 +744,8 @@ class PicoGlitcher():
             self.sm2.irq(handler=irq_clear)
             self.sm2.active(1)
 
+        #self.arm_adc()
+
     def arm(self, delay:int, length:int):
         """
         Arm the Pico Glitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.
@@ -752,7 +754,7 @@ class PicoGlitcher():
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
             length: Length of the glitch in nano seconds. Expect a resolution of about 5 nano seconds.
         """
-        self.release_reset()
+        #self.release_reset()
         self.pin_hpglitch.low()
         self.pin_lpglitch.low()
 
@@ -959,12 +961,12 @@ class PicoGlitcher():
         """
         if self.core1_stopped:
             _thread.start_new_thread(self.__poll_fast_adc, ())
+        time.sleep(0.001)
 
-    def get_adc_samples(self):
+    def get_adc_samples(self, timeout:float = 1.0):
         """
         Read back the captured ADC samples.
         """
-        timeout = 1
         start_time = time.time()
         while time.time() - start_time < timeout:
             if self.core1_stopped:

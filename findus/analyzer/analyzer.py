@@ -436,7 +436,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
 
         if debug:
             done = round(time.time() * 1000)
-            print('It took %d miliseconds to generate this data.' %(done - now))
+            print('It took %d milliseconds to generate this data.' %(done - now))
 
         return fig,data
 

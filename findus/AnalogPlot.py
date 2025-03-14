@@ -17,16 +17,18 @@ class AnalogPlot():
         samples = glitcher.get_adc_samples()
         plotter.update_curve(samples)
     """
-    def __init__(self, number_of_samples:int, vref:float = 3.3, sampling_freq = 500_000):
+    def __init__(self, number_of_samples:int, vref:float = 3.3, sampling_freq = 500_000, dynamic_range:int = 4096):
         self.number_of_samples = number_of_samples
         self.vref = vref
         self.sampling_freq = sampling_freq
+        self.dynamic_range = dynamic_range
 
         self.fig, self.ax = plt.subplots()
         plt.subplots_adjust(bottom=0.3)
 
         self.curve_line, = self.ax.plot([], [], label="Analog measurement", color="blue")
 
+        # x in nano seconds
         x_end = 1_000_000_000 * self.number_of_samples / self.sampling_freq
         self.xpoints = np.linspace(0, x_end, self.number_of_samples)
         self.ypoints = np.zeros(self.number_of_samples)
@@ -49,6 +51,6 @@ class AnalogPlot():
         plt.pause(0.001)
 
     def update_curve(self, y:list):
-        self.ypoints = np.array(y) / 4096 * self.vref
+        self.ypoints = np.array(y) / self.dynamic_range * self.vref
         self.curve_line.set_data(self.xpoints, self.ypoints)
         self.show()
