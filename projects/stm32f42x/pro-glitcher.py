@@ -55,6 +55,7 @@ class Main:
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
+        self.start_time = int(time.time())
         # if number of experiments get too large, remove the expected results
         #self.database.cleanup("G")
 

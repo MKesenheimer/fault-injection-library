@@ -1235,6 +1235,8 @@ class ErrorHandling():
                 parameters = self.database.get_parameters_of_experiment(experiment_id - self.look_back)
                 response = b'error: successive error occurred'
                 if self.database is not None:
+                    print(f"parameters1 = {parameters[1:-2]}")
+                    print(f"parameters2 = {(experiment_id - self.look_back + 1, )}")
                     parameters = (experiment_id - self.look_back + 1, ) + parameters[1:-2] + ('O', str(response).encode("utf-8"))
                     self.database.insert(*parameters)
                 
