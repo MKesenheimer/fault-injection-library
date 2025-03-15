@@ -99,7 +99,7 @@ class Main():
 
             # arm
             if args.multiplexing:
-                mul_config = {"t1": length, "v1": "1.8", "t2": length, "v2": "VCC", "t3": length, "v3": "GND"}
+                mul_config = {"t1": length, "v1": "1.8", "t2": length, "v2": "VCC", "t3": length, "v3": "3.3",  "t4": length, "v4": "GND"}
                 self.glitcher.arm_multiplexing(delay, mul_config)
             elif args.pulse_shaping:
                 # pulse from lambda; ramp down to 1.8V than GND glitch

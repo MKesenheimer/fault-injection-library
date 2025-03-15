@@ -57,6 +57,7 @@ class Main:
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
+        self.start_time = int(time.time())
         # if number of experiments get too large, remove the expected results
         #self.database.cleanup("G")
 
@@ -122,7 +123,7 @@ class Main:
             color = self.glitcher.classify(response)
 
             # add to database
-            response_str = str(response).encode("utf-8") + mem
+            response_str = response + mem
             self.database.insert(experiment_id, delay, length, color, response_str)
 
             # monitor

@@ -7,3 +7,4 @@
 * Replacement for TPS2041 -> lower voltage
 * pull-up resistor on /EN pin for TPS2041
 * Implement possibility to power supply the target with the MUX output and power-cycle it with this pin
+* use consistent time units for all functions.
