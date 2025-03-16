@@ -83,11 +83,11 @@ class Main():
 
             # generate three rising edges -> trigger on the last one (observe with oscilloscope)
             time.sleep(0.0001)
-            self.glitcher.reset(0.0001)
+            self.glitcher.reset_target(0.0001)
             time.sleep(0.0001)
-            self.glitcher.reset(0.0001)
+            self.glitcher.reset_target(0.0001)
             time.sleep(0.0001)
-            self.glitcher.reset(0.0001)
+            self.glitcher.reset_target(0.0001)
 
             # block until glitch
             try:

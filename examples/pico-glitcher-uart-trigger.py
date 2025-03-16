@@ -100,7 +100,7 @@ class Main:
                 self.glitcher.arm(delay, length)
 
             # reset target
-            self.glitcher.reset(0.01)
+            self.glitcher.reset_target(0.01)
 
             # setup memory read; this function triggers the glitch
             self.target.write(b'\x11')

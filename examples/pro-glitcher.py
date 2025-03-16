@@ -82,7 +82,7 @@ class Main():
 
             # reset target (this triggers the glitch)
             time.sleep(0.01)
-            self.glitcher.reset(0.01)
+            self.glitcher.reset_target(0.01)
 
             # block until glitch
             try:
