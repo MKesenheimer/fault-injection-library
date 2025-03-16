@@ -32,7 +32,7 @@ class ProGlitcher(Glitcher):
         # one shot glitching
         glitcher.arm(delay, length)
         # reset target for 0.01 seconds (the rising edge on reset line triggers the glitch)
-        glitcher.reset(0.01)
+        glitcher.reset_target(0.01)
         self.glitcher.block(timeout=1)
 
         # read the response from the device (for example UART, SWD, etc.)
@@ -197,7 +197,7 @@ class ProGlitcher(Glitcher):
         self.scope.io.glitch_hp = True
         self.scope.io.glitch_lp = False
 
-    def reset(self, reset_time:float = 0.2):
+    def reset_target(self, reset_time:float = 0.2):
         """
         Reset the target via the ChipWhisperer Pro's `nrst` output.
 
@@ -207,6 +207,15 @@ class ProGlitcher(Glitcher):
         self.scope.io.nrst = 'low'
         time.sleep(reset_time)
         self.scope.io.nrst = 'high_z'
+
+    def reset(self, reset_time:float = 0.2):
+        """
+        Reset the target via the ChipWhisperer Pro's `nrst` output. This function is the same as `reset_target`. Left in for downward compatibility.
+
+        Parameters:
+            reset_time: Time how long the target is held in reset.
+        """
+        self.reset_target(reset_time)
 
     def power_cycle_target(self, power_cycle_time:float = 0.2):
         """

@@ -567,7 +567,7 @@ class PicoGlitcher():
         time.sleep(power_cycle_time)
         self.enable_vtarget()
 
-    def reset_target(self):
+    def initiate_reset(self):
         """
         Reset the target via the Pico Glitcher's `RESET` output.
         """
@@ -579,14 +579,14 @@ class PicoGlitcher():
         """
         self.pin_reset.high()
 
-    def reset(self, reset_time:float = 0.01):
+    def reset_target(self, reset_time:float = 0.01):
         """
         Reset the target via the Pico Glitcher's `RESET` output, release the reset on the target after a certain time.
         
         Parameters:
             reset_time: Time how long the target is held in reset.
         """
-        self.reset_target()
+        self.initiate_reset()
         time.sleep(reset_time)
         self.release_reset()
 
@@ -655,7 +655,7 @@ class PicoGlitcher():
         self.set_pulseshaping(vhigh)
         pulse = self.pulse_generator.calibration_pulse()
         self.__arm_pulseshaping(delay=100, pulse=pulse)
-        self.reset(0.01)
+        self.reset_target(0.01)
 
     def apply_calibration(self, vhigh:float, vlow:float, store:bool = True):
         """
@@ -961,7 +961,7 @@ class PicoGlitcher():
         """
         if self.core1_stopped:
             _thread.start_new_thread(self.__poll_fast_adc, ())
-        time.sleep(0.001)
+            #time.sleep(0.001)
 
     def get_adc_samples(self, timeout:float = 1.0):
         """

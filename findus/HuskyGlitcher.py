@@ -33,7 +33,7 @@ class HuskyGlitcher(Glitcher):
         self.glitcher.block(timeout=1)
 
         # reset target for 0.01 seconds (the rising edge on reset line triggers the glitch)
-        glitcher.reset(0.01)
+        glitcher.reset_target(0.01)
         # read the response from the device (for example UART, SWD, etc.)
         response = ...
         # classify the response and put into database
@@ -159,7 +159,7 @@ class HuskyGlitcher(Glitcher):
         """
         self.scope.glitch.enabled = True
 
-    def reset(self, reset_time:float = 0.2):
+    def reset_target(self, reset_time:float = 0.2):
         """
         Reset the target via the ChipWhisperer Husky's `RESET` output (`tio3` pin).
 
@@ -169,6 +169,15 @@ class HuskyGlitcher(Glitcher):
         self.scope.io.tio3 = 'gpio_low'
         time.sleep(reset_time)
         self.scope.io.tio3 = 'gpio_high'
+
+    def reset(self, reset_time:float = 0.2):
+        """
+        Reset the target via the ChipWhisperer Husky's `RESET` output (`tio3` pin). This function is the same as `reset_target`. Left in for downward compatibility.
+
+        Parameters:
+            reset_time: Time how long the target is held in reset.
+        """
+        self.reset_target(reset_time)
 
     def power_cycle_target(self, power_cycle_time:float = 0.2):
         """

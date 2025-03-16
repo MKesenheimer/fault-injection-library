@@ -323,7 +323,7 @@ class Serial():
         response = self.ser.read_until(expected, size)
         return response
 
-    def reset(self, debug:bool = False) -> bool:
+    def reset_target(self, debug:bool = False) -> bool:
         """
         Reset target via DTR pin and flush data lines. Can be used alternatively to the reset lines of the Pico Glitcher (or ChipWhisperer Husky, or ChipWhisperer Pro) to reset the target.
 
@@ -338,6 +338,15 @@ class Serial():
         if debug:
             for line in response.splitlines():
                 print('\t', line.decode())
+
+    def reset(self, debug:bool = False) -> bool:
+        """
+        Reset target via DTR pin and flush data lines. Can be used alternatively to the reset lines of the Pico Glitcher (or ChipWhisperer Husky, or ChipWhisperer Pro) to reset the target. This function is the same as `reset_target`. Left in for downward compatibility.
+
+        Parameters:
+            debug: If set to true, garbage on the serial interface is plotted to tty.
+        """
+        return self.reset_target(debug)
 
     def flush(self):
         """
@@ -428,8 +437,8 @@ class PicoGlitcherInterface(MicroPythonScript):
     def arm_pulseshaping_from_list(self, delay:int, pulse:list[int]):
         return self.pyb.exec(f'mp.arm_pulseshaping_from_list({delay}, {pulse})')
 
-    def reset_target(self):
-        self.pyb.exec('mp.reset_target()')
+    def initiate_reset(self):
+        self.pyb.exec('mp.initiate_reset()')
 
     def release_reset(self):
         self.pyb.exec('mp.release_reset()')
@@ -440,8 +449,8 @@ class PicoGlitcherInterface(MicroPythonScript):
     def enable_vtarget(self):
         self.pyb.exec('mp.enable_vtarget()')
 
-    def reset(self, reset_time:float):
-        self.pyb.exec(f'mp.reset({reset_time})')
+    def reset_target(self, reset_time:float):
+        self.pyb.exec(f'mp.reset_target({reset_time})')
 
     def configure_gpio_out(self, pin_number:int):
         self.pyb.exec(f'mp.configure_gpio_out({pin_number})')
@@ -615,7 +624,7 @@ class PicoGlitcher(Glitcher):
         # one shot glitching
         glitcher.arm(delay, length)
         # reset target for 0.01 seconds (the rising edge on reset line triggers the glitch)
-        glitcher.reset(0.01)
+        glitcher.reset_target(0.01)
         # read the response from the device (for example UART, SWD, etc.)
         response = ...
         # classify the response and put into database
@@ -798,14 +807,23 @@ class PicoGlitcher(Glitcher):
     def get_sm1_output(self) -> str:
         return self.pico_glitcher.get_sm1_output()
 
-    def reset(self, reset_time:float = 0.2):
+    def reset_target(self, reset_time:float = 0.2):
         """
         Reset the target via the Pico Glitcher's `RESET` output.
+
+        Parameters:
+            reset_time: Time how long the target is held in reset.
+        """
+        self.pico_glitcher.reset_target(reset_time)
+
+    def reset(self, reset_time:float = 0.2):
+        """
+        Reset the target via the Pico Glitcher's `RESET` output. This function is the same as `reset_target`. Left in for downward compatibility.
         
         Parameters:
             reset_time: Time how long the target is held in reset.
         """
-        self.pico_glitcher.reset(reset_time)
+        self.pico_glitcher.reset_target(reset_time)
 
     def set_gpio(self, pin_number:int, value:int):
         """
@@ -854,13 +872,13 @@ class PicoGlitcher(Glitcher):
         """
         if self.power_supply is not None:
             self.power_supply.disable_vtarget()
-            self.pico_glitcher.reset_target()
+            self.pico_glitcher.initiate_reset()
             time.sleep(power_cycle_time)
             self.power_supply.enable_vtarget()
             self.pico_glitcher.release_reset()
         else:
             self.pico_glitcher.disable_vtarget()
-            self.pico_glitcher.reset_target()
+            self.pico_glitcher.initiate_reset()
             time.sleep(power_cycle_time)
             self.pico_glitcher.enable_vtarget()
             self.pico_glitcher.release_reset()
@@ -873,7 +891,7 @@ class PicoGlitcher(Glitcher):
             target: Serial communication object (usually defined as `target = serial.Serial(...)`).
             target_timeout: Time-out of the serial communication. After this time, reading from the serial connection is canceled and it is assumed that there is no more garbage on the line.
         """
-        self.pico_glitcher.reset_target()
+        self.pico_glitcher.initiate_reset()
         target.ser.timeout = target_timeout
         target.read(4096)
         target.ser.timeout = target.timeout
@@ -892,7 +910,7 @@ class PicoGlitcher(Glitcher):
         Returns:
             Returns the target's response.
         """
-        self.pico_glitcher.reset_target()
+        self.pico_glitcher.initiate_reset()
         time.sleep(reset_time)
         self.pico_glitcher.release_reset()
         response = target.read(4096)
