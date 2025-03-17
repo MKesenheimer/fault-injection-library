@@ -60,23 +60,23 @@ elif config["hardware_version"][0] == 2:
         MUX1_PIO_INIT = PIO.OUT_HIGH
         MUX0_PIO_INIT = PIO.OUT_HIGH
         MUX_PIO_INIT = 0b11
-    elif config["mux_vinit"] == "1.8":
-        MUX1_INIT = 0
-        MUX0_INIT = 1
-        MUX1_PIO_INIT = PIO.OUT_LOW
-        MUX0_PIO_INIT = PIO.OUT_HIGH
-        MUX_PIO_INIT = 0b01
-    elif config["mux_vinit"] == "VCC":
+    elif config["mux_vinit"] == "VI1" or config["mux_vinit"] == "VCC":
         MUX1_INIT = 0
         MUX0_INIT = 0
         MUX1_PIO_INIT = PIO.OUT_LOW
         MUX0_PIO_INIT = PIO.OUT_LOW
         MUX_PIO_INIT = 0b00
-    else: # 3.3V
+    elif config["mux_vinit"] == "1.8":
         MUX1_INIT = 1
         MUX0_INIT = 0
         MUX1_PIO_INIT = PIO.OUT_HIGH
         MUX0_PIO_INIT = PIO.OUT_LOW
+        MUX_PIO_INIT = 0b01
+    else: # 3.3 or VI2
+        MUX1_INIT = 0
+        MUX0_INIT = 1
+        MUX1_PIO_INIT = PIO.OUT_LOW
+        MUX0_PIO_INIT = PIO.OUT_HIGH
         MUX_PIO_INIT = 0b10
 
 def irq_clear(sm):
@@ -140,7 +140,7 @@ def pulse_shaping():
     irq(clear, 7)
     push(block)
 
-@asm_pio(set_init=(MUX0_PIO_INIT, MUX1_PIO_INIT), out_init=(MUX0_PIO_INIT, MUX1_PIO_INIT), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio(set_init=(MUX1_PIO_INIT, MUX0_PIO_INIT), out_init=(MUX1_PIO_INIT, MUX0_PIO_INIT), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
 def multiplex(MUX_PIO_INIT=MUX_PIO_INIT):
     # block until delay received
     pull(block)
@@ -186,6 +186,25 @@ def multiplex(MUX_PIO_INIT=MUX_PIO_INIT):
 
     # tell execution finished (fills the sm's fifo buffer)
     irq(clear, 7)
+    push(block)
+
+@asm_pio(set_init=(1, 1), in_shiftdir=PIO.SHIFT_RIGHT)
+def mux_power_cycle(MUX_PIO_INIT=MUX_PIO_INIT):
+    # block until delay received
+    pull(block)
+    mov(x, osr)
+
+    # power down
+    set(pins, 0b11)
+
+    # wait delay
+    label("delay_loop")
+    jmp(x_dec, "delay_loop")
+
+    # power up
+    set(pins, MUX_PIO_INIT)
+
+    # tell execution finished
     push(block)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
@@ -418,13 +437,13 @@ class PicoGlitcher():
             self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
             self.pin_mux1.value(MUX1_INIT)
             self.pin_mux0.value(MUX0_INIT)
-            # lsb: GPIO0 -> MUX1
-            # msb: GPIO1 -> MUX0
-            # 0b00: IN1 = 1: VCC
-            # 0b01: IN3 = 1: +1V8
-            # 0b10: IN2 = 1: +3V3
-            # 0b11: IN4 = 1: GND
-            self.voltage_map = {"VCC": 0b00, "1.8": 0b01, "3.3": 0b10, "GND": 0b11}
+            # msb: GPIO0 -> MUX1
+            # lsb: GPIO1 -> MUX0
+            # 0b00: VI1
+            # 0b10: VI2
+            # 0b01: +1V8
+            # 0b11: GND
+            self.voltage_map = {"VI1": 0b00, "VI2": 0b10, "1.8": 0b01, "GND": 0b11, "3.3": 0b10, "VCC": 0b00}
             # Pulse shaping expansion board related stuff
             self.ad910x = AD910X.AD910X()
             self.ad910x.reset()
@@ -544,28 +563,56 @@ class PicoGlitcher():
         """
         self.pattern = pattern
 
-    def enable_vtarget(self):
+    def enable_vtarget(self, use_mux:bool = False):
         """
         Enable `VTARGET` output. Activates the Pico Glitcher's power supply for the target.
+
+        Parameters:
+            use_mux: use the multiplexer stage to power-cycle the target. Must not be used after arm() since this would disable the statemachine for glitching.
         """
         self.pin_vtarget_en.low()
+        if use_mux and self.config["hardware_version"][0] >= 2:
+            if self.sm0 is not None:
+                # deactivate any statemachine that has access to the multiplexer
+                self.sm0.active(0)
+                #PIO(0).remove_program() # not necessary
+                # take control over the pins
+                self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
+                self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
+            self.pin_mux1.value(MUX1_INIT)
+            self.pin_mux0.value(MUX0_INIT)
 
-    def disable_vtarget(self):
+    def disable_vtarget(self, use_mux:bool = False):
         """
         Disables `VTARGET` output. Disables the Pico Glitcher's power supply for the target.
+
+        Parameters:
+            use_mux: use the multiplexer stage to power-cycle the target. Must not be used after arm() since this would disable the statemachine for glitching.
         """
         self.pin_vtarget_en.high()
+        if use_mux and self.config["hardware_version"][0] >= 2:
+            if self.sm0 is not None:
+                # deactivate any statemachine that has access to the multiplexer
+                self.sm0.active(0)
+                #PIO(0).remove_program()
+                # take control over the pins
+                self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
+                self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
+            # pull the multiplexer to GND
+            self.pin_mux1.value(1)
+            self.pin_mux0.value(1)
 
-    def power_cycle_target(self, power_cycle_time:float = 0.2):
+    def power_cycle_target(self, power_cycle_time:float = 0.2, use_mux:bool = False):
         """
         Power cycle the target via the Pico Glitcher `VTARGET` output.
         
         Parameters:
             power_cycle_time: Time how long the power supply is cut.
+            use_mux: use the multiplexer stage to power-cycle the target. Must not be used after arm() since this would disable the statemachine for glitching.
         """
-        self.disable_vtarget()
+        self.disable_vtarget(use_mux)
         time.sleep(power_cycle_time)
-        self.enable_vtarget()
+        self.enable_vtarget(use_mux)
 
     def initiate_reset(self):
         """
@@ -777,8 +824,9 @@ class PicoGlitcher():
         if self.config["hardware_version"][0] < 2:
             raise Exception("Multiplexing not implemented in hardware version 1.")
 
-        self.pin_mux1.value(MUX1_INIT)
-        self.pin_mux0.value(MUX0_INIT)
+        #self.pin_mux1.value(MUX1_INIT)
+        #self.pin_mux0.value(MUX0_INIT)
+        #PIO(0).remove_program()
 
         # state machine that emits the glitch if the trigger condition is met (part 1)
         self.sm0 = StateMachine(0, multiplex, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)

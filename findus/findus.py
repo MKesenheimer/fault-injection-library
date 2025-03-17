@@ -416,8 +416,8 @@ class PicoGlitcherInterface(MicroPythonScript):
     def set_pattern_match(self, pattern:int):
         self.pyb.exec(f'mp.set_pattern_match({pattern})')
 
-    def power_cycle_target(self, power_cycle_time:float):
-        self.pyb.exec(f'mp.power_cycle_target({power_cycle_time})')
+    def power_cycle_target(self, power_cycle_time:float, use_mux:bool = False):
+        self.pyb.exec(f'mp.power_cycle_target({power_cycle_time}, {use_mux})')
 
     def arm(self, delay:int, length:int):
         self.pyb.exec(f'mp.arm({delay}, {length})')
@@ -443,11 +443,11 @@ class PicoGlitcherInterface(MicroPythonScript):
     def release_reset(self):
         self.pyb.exec('mp.release_reset()')
 
-    def disable_vtarget(self):
-        self.pyb.exec('mp.disable_vtarget()')
+    def disable_vtarget(self, use_mux:bool = False):
+        self.pyb.exec(f'mp.disable_vtarget({use_mux})')
 
-    def enable_vtarget(self):
-        self.pyb.exec('mp.enable_vtarget()')
+    def enable_vtarget(self, use_mux:bool = False):
+        self.pyb.exec(f'mp.enable_vtarget({use_mux})')
 
     def reset_target(self, reset_time:float):
         self.pyb.exec(f'mp.reset_target({reset_time})')
@@ -638,7 +638,7 @@ class PicoGlitcher(Glitcher):
         block: Block the main script until trigger condition is met. Times out.
         reset: Reset the target via the Pico Glitcher's `RESET` output.
         release_reset: Release the reset to the target via the Pico Glitcher's `RESET` output.
-        power_cycle_target: Power cycle the target via the Pico Glitcher `VTARGET` output.
+        power_cycle_target: Power cycle the target via the Pico Glitcher `VTARGET` output or optionally via the multiplexing stage.
         power_cycle_reset: Power cycle and reset the target via the Pico Glitcher `RESET` and `VTARGET` output.
         reset_and_eat_it_all: Reset the target and flush the serial buffers.
         reset_wait: Reset the target and read from serial.
@@ -850,37 +850,39 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.release_reset()
 
-    def power_cycle_target(self, power_cycle_time:float = 0.2):
+    def power_cycle_target(self, power_cycle_time:float = 0.2, use_mux:bool = False):
         """
-        Power cycle the target via the Pico Glitcher `VTARGET` output.
+        Power cycle the target via the Pico Glitcher `VTARGET` output or optionally via the multiplexing stage.
         If available, target is power-cycled by the external power supply RD6006.
         
         Parameters:
             power_cycle_time: Time how long the power supply is cut. If `ext_power` is defined, the external power supply (RD6006) is cycled.
+            use_mux: use the multiplexer stage to power-cycle the target (ignored if external power supply is used).
         """
         if self.power_supply is not None:
             self.power_supply.power_cycle_target(power_cycle_time)
         else:
-            self.pico_glitcher.power_cycle_target(power_cycle_time)
+            self.pico_glitcher.power_cycle_target(power_cycle_time, use_mux)
 
-    def power_cycle_reset(self, power_cycle_time:float = 0.2):
+    def power_cycle_reset(self, power_cycle_time:float = 0.2, use_mux:bool = False):
         """
-        Power cycle and reset the target via the Pico Glitcher `VTARGET` and `RESET` output. Can also be used to define sharper trigger conditions via the `RESET` line.
+        Power cycle and reset the target via the Pico Glitcher `VTARGET` and `RESET` output. Optionally the multiplexing stage can be used to power-cycle the target. Can also be used to define sharper trigger conditions via the `RESET` line.
         
         Parameters:
             power_cycle_time: Time how long the power supply is cut. If `ext_power` is defined, the external power supply is cycled.
+            use_mux: use the multiplexer stage to power-cycle the target (ignored if external power supply is used).
         """
         if self.power_supply is not None:
-            self.power_supply.disable_vtarget()
+            self.power_supply.disable_vtarget(use_mux)
             self.pico_glitcher.initiate_reset()
             time.sleep(power_cycle_time)
-            self.power_supply.enable_vtarget()
+            self.power_supply.enable_vtarget(use_mux)
             self.pico_glitcher.release_reset()
         else:
-            self.pico_glitcher.disable_vtarget()
+            self.pico_glitcher.disable_vtarget(use_mux)
             self.pico_glitcher.initiate_reset()
             time.sleep(power_cycle_time)
-            self.pico_glitcher.enable_vtarget()
+            self.pico_glitcher.enable_vtarget(use_mux)
             self.pico_glitcher.release_reset()
 
     def reset_and_eat_it_all(self, target:serial.Serial, target_timeout:float = 0.3):

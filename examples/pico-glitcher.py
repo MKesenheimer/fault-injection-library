@@ -53,7 +53,7 @@ class Main():
         # the initial voltage for multiplexing must be hard-coded and can only be applied
         # if the raspberry pi pico is reset and re-initialized.
         if args.multiplexing:
-            self.glitcher.change_config_and_reset("mux_vinit", "3.3")
+            self.glitcher.change_config_and_reset("mux_vinit", "VI2")
             self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
 
         # choose rising edge trigger with dead time of 0 seconds after power down
@@ -97,9 +97,15 @@ class Main():
             # trunk-ignore(bandit/B311)
             length = random.randint(s_length, e_length)
 
+            # power-cycle the target: If power-cycling is done via the multiplexing stage
+            # this must be done before arming the Pico Glitcher, since this would disable
+            # the statemachine for glitch generation.
+            #self.glitcher.power_cycle_target(0.05, use_mux=True)
+            #time.sleep(0.05)
+
             # arm
             if args.multiplexing:
-                mul_config = {"t1": length, "v1": "1.8", "t2": length, "v2": "VCC", "t3": length, "v3": "3.3",  "t4": length, "v4": "GND"}
+                mul_config = {"t1": length, "v1": "1.8", "t2": length, "v2": "VI1", "t3": length, "v3": "VI2",  "t4": length, "v4": "GND"}
                 self.glitcher.arm_multiplexing(delay, mul_config)
             elif args.pulse_shaping:
                 # pulse from lambda; ramp down to 1.8V than GND glitch
@@ -109,9 +115,6 @@ class Main():
                 self.glitcher.arm(delay, length)
 
             self.glitcher.arm_adc()
-
-            # power cycle target
-            #self.glitcher.power_cycle_target(0.1)
 
             # reset target
             time.sleep(0.01)
