@@ -112,7 +112,7 @@ class Main:
 
             # dump memory
             mem = b''
-            if b'ok' in response:
+            if b'error' not in response:
                 #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
                 start = 0x08000000
                 #start = 0x08000000 - 0*0xFF
