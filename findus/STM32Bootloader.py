@@ -36,7 +36,7 @@ class STM32Bootloader:
     ACK  = b'\x79'
     verbose = False
 
-    def __init__(self, port:str, dump_address:int=0x08000000, dump_len:int=0x400):
+    def __init__(self, port:str, serial_timeout:float=1, dump_address:int=0x08000000, dump_len:int=0x400):
         """
         Default constructor. Initializes the serial connection to the STM32 target (in 8e1 configuration), and stores parameter for the memory dump.
         
@@ -48,7 +48,8 @@ class STM32Bootloader:
             return
         """
         print(f"[+] Opening serial port {port}.")
-        self.ser = serial.Serial(port=port, baudrate=115200, timeout=1, bytesize=8, parity="E", stopbits=1)
+        self.timeout = serial_timeout
+        self.ser = serial.Serial(port=port, baudrate=115200, timeout=serial_timeout, bytesize=8, parity="E", stopbits=1)
         # memory read settings
         self.current_dump_addr = dump_address
         self.current_dump_len = dump_len
@@ -75,6 +76,17 @@ class STM32Bootloader:
         self.ser.reset_input_buffer()
         # read garbage and discard
         #self.ser.read(1024)
+
+    def flush_v2(self, timeout:float = 0.01):
+        """
+        Flush serial data buffers with timeout.
+
+        Parameters:
+            timeout: Timeout after the serial connection stops listening. Can be tweaked to make sure all data is flushed.
+        """
+        self.ser.timeout = timeout
+        self.ser.read(8192)
+        self.ser.timeout = self.timeout
 
     # returns b'error: bootloader not available' if bootloader is unavailable
     # returns b'error: id command error' if reading from bootloader was not successful
