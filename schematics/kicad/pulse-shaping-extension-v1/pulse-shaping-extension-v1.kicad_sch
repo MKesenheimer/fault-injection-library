@@ -5,7 +5,7 @@
 	(uuid "688652bf-c811-412a-957f-886210ac2217")
 	(paper "A4")
 	(title_block
-		(title "Pico Glitcher v2.1 Pulse Shaping Extension")
+		(title "Pico Glitcher Pulse Shaping Extension v1.1")
 		(date "2024-12-27")
 		(rev "v1.0")
 		(company "Faulty Hardware")
@@ -4709,6 +4709,12 @@
 		(uuid "ee29dc0c-f851-4385-bdee-5142feb25708")
 	)
 	(junction
+		(at 227.33 158.75)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f026c39d-bd54-4197-abb4-f994fac2fd7f")
+	)
+	(junction
 		(at 124.46 130.81)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5021,6 +5027,16 @@
 			(type default)
 		)
 		(uuid "151d4fe2-5104-45f2-b811-a87b503101a6")
+	)
+	(wire
+		(pts
+			(xy 222.25 152.4) (xy 220.98 152.4)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "15a3f848-b39c-416f-ba6c-4aa5f0fb016e")
 	)
 	(wire
 		(pts
@@ -6264,6 +6280,16 @@
 	)
 	(wire
 		(pts
+			(xy 227.33 157.48) (xy 227.33 158.75)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7ad8cf42-e4a3-4bca-ac52-5e8bf17bb686")
+	)
+	(wire
+		(pts
 			(xy 48.26 184.15) (xy 48.26 185.42)
 		)
 		(stroke
@@ -6281,6 +6307,16 @@
 			(type default)
 		)
 		(uuid "7b168f4f-8718-4e3e-9aa2-b2922946a3d7")
+	)
+	(wire
+		(pts
+			(xy 220.98 158.75) (xy 227.33 158.75)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7b8a5d8d-f6e7-4aa7-a645-048b8fabca50")
 	)
 	(wire
 		(pts
@@ -6781,6 +6817,16 @@
 			(type default)
 		)
 		(uuid "a8ede83e-e701-405a-833f-801281ecf7e2")
+	)
+	(wire
+		(pts
+			(xy 220.98 152.4) (xy 220.98 158.75)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a92aa376-51eb-43f8-a6c1-a35fc384f9a0")
 	)
 	(wire
 		(pts
@@ -7371,6 +7417,16 @@
 			(type default)
 		)
 		(uuid "de077b49-1de1-4de0-97c2-2c9cdbe9bad5")
+	)
+	(wire
+		(pts
+			(xy 227.33 158.75) (xy 227.33 160.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e0502896-7551-451e-8571-974b539d85f8")
 	)
 	(wire
 		(pts
@@ -9025,6 +9081,72 @@
 			(project "pico-glitcher-v2-extension"
 				(path "/688652bf-c811-412a-957f-886210ac2217"
 					(reference "#PWR062")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 227.33 160.02 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "1999a43c-8fc3-403b-b005-d5c754095327")
+		(property "Reference" "#PWR064"
+			(at 227.33 166.37 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 227.33 165.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 227.33 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 227.33 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 227.33 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "b3f5a41b-86ea-4c82-8573-8e3a1ad73c9b")
+		)
+		(instances
+			(project "pico-glitcher-v2.1-extension"
+				(path "/688652bf-c811-412a-957f-886210ac2217"
+					(reference "#PWR064")
 					(unit 1)
 				)
 			)
@@ -13549,6 +13671,75 @@
 			(project "pico-glitcher-v2-extension"
 				(path "/688652bf-c811-412a-957f-886210ac2217"
 					(reference "#PWR040")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_Coaxial")
+		(at 227.33 152.4 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "87ed0379-0fd2-4cce-9b58-857755e34f5e")
+		(property "Reference" "J7"
+			(at 230.124 152.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "Conn_Coaxial"
+			(at 221.488 147.32 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_Coaxial:SMA_Amphenol_901-144_Vertical"
+			(at 227.33 152.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 227.33 152.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)"
+			(at 227.33 152.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "3a0cb202-4b26-42c1-be92-40401f14c23b")
+		)
+		(pin "1"
+			(uuid "9809c6d1-26ac-4ddd-915a-59f11db31cb7")
+		)
+		(instances
+			(project "pico-glitcher-v2.1-extension"
+				(path "/688652bf-c811-412a-957f-886210ac2217"
+					(reference "J7")
 					(unit 1)
 				)
 			)

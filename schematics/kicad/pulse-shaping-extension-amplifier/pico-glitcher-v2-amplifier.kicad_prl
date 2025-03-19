@@ -64,7 +64,7 @@
       39,
       40
     ],
-    "visible_layers": "800e2ff_ffffffff",
+    "visible_layers": "fffffff_ffffffff",
     "zone_display_mode": 0
   },
   "git": {
@@ -74,7 +74,7 @@
     "ssh_key": ""
   },
   "meta": {
-    "filename": "pico-glitcher-v2.1-extension.kicad_prl",
+    "filename": "pico-glitcher-v2-amplifier.kicad_prl",
     "version": 3
   },
   "project": {
