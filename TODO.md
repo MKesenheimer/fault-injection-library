@@ -4,7 +4,6 @@
 
 * AnalogPlot für das Skript stm8-readmemory.py verwenden, um den Zeitraum für den Glitch zu messen.
 * Bild von AnalogPlot für die Glitchpositionierung beim STM8s Glitchen.
-* Replacement for TPS2041 -> lower voltage
-* pull-up resistor on /EN pin for TPS2041
+* pull-down resistor on /EN pin for TPS power switch
 * Implement possibility to power supply the target with the MUX output and power-cycle it with this pin
 * use consistent time units for all functions.
