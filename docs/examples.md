@@ -95,7 +95,7 @@ To carry out the attack on the STM8s in bootloader mode, the target board is con
 
 Also, for glitching the jumper must be in the `ISP ENABLE` position.
 
-Next, we determine the time between the read memory command `0x11` and the response (`ACK` or `NACK`) from the microcontroller. The check whether ROP is active must happen between those two events. It turns out (and by observing the [Analog Plotter](../adc)), the glitch must be placed between 106.000 and 108.000 ns.
+Next, we determine the time between the read memory command `0x11` and the response (`ACK` or `NACK`) from the microcontroller. The check whether ROP is active must happen between those two events. It turns out (and by observing the [Analog Plotter](../adc)), the glitch must be placed between 106,000 and 108,000 ns.
 
 <TODO: AnalogPlot figure>
 
@@ -128,10 +128,29 @@ The VCAP line is in general more vulnerable and effective for precision attacks 
 
 ### Bonus: Using the multiplexing method
 
-The voltage glitching attack against the STM8 target board can also be carried out with the voltage multiplexing stage.
-The setup 
+The voltage glitching attack against the STM8 target board can also be performed using the voltage multiplexing stage.
+The setup is similar to glitching with the crowbar method, however, the connection to the `1.8V` supply to power the microcontroller is not required. When glitching with the multiplexing stage, power can be supplied directly from the multiplexing stage.
+Note, that this attack can only be performed with the Pico Glitcher v2 (and later versions).
 
 ![STM8s multiplexing glitching](images/stm8s/target-board-example-multiplexing_bb.png)
+
+**Important**: In order to flush the multiplexing stage and initialize the multiplexing stage with the correct voltage, the script has to be execute once before connecting to the target. Make sure the correct voltage can be measured at the `MUX` output (`1.8V`). Other voltages may damage the STM8s target board.
+
+We first try scanning over a larger parmater space with the following command.
+
+```bash
+python stm8-readmemory.py--rpico /dev/tty.usbmodem11301 \
+  --target /dev/tty.usbserial-A50285BI --delay 104_000 110_000 \
+  --length 0 100 --multiplexing
+```
+
+After a while a positive event is observed, as can be seen in the following figure.
+
+![Success with the multiplexing method](images/stm8s/multiplexing-parameterspace.png)
+
+It turns out that the timing is a little different than with the crowbar method. Now that we have found a positive experiment, we can optimize our search by homing in around the 105,000 nanosecond mark.
+
+In this case, however, the multiplexing method since less effective than the crowbar method.
 
 ### Programming the STM8s target board
 

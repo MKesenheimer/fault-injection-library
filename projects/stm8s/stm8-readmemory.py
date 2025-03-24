@@ -47,11 +47,23 @@ class Main:
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico)
 
+        # the initial voltage for multiplexing must be hard-coded and can only be applied
+        # if the raspberry pi pico is reset and re-initialized.
+        if args.multiplexing:
+            self.glitcher.change_config_and_reset("mux_vinit", "1.8")
+            self.glitcher.init(port=args.rpico)
+
         # we want to trigger on x11 with the configuration 8e1
         # since our statemachine understands only 8n1,
         # we can trigger on x22 with the configuration 9n1 instead
         # Update: Triggering on x11 in configuration 8n1 works good enough.
         self.glitcher.uart_trigger(0x11)
+
+        # choose multiplexing, pulse-shaping or crowbar glitching
+        if args.multiplexing:
+            self.glitcher.set_multiplexing()
+        else:
+            self.glitcher.set_lpglitch()
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
@@ -79,7 +91,13 @@ class Main:
             # set up glitch parameters (in nano seconds) and arm glitcher
             delay = random.randint(s_delay, e_delay)
             length = random.randint(s_length, e_length)
-            self.glitcher.arm(delay, length)
+
+            # arm
+            if args.multiplexing:
+                mul_config = {"t1": length, "v1": "GND"}
+                self.glitcher.arm_multiplexing(delay, mul_config)
+            else:
+                self.glitcher.arm(delay, length)
 
             # reset target (this triggers the glitch)
             self.glitcher.reset(0.01)
@@ -125,7 +143,7 @@ if __name__ == "__main__":
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
     parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
-    parser.add_argument("--program-target", required=False, metavar="RDP_LEVEL", type=int, default=None, help="Reprogram the target before glitching and set the RDP level.")
+    parser.add_argument("--multiplexing", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with multiplexing between different voltages (requires PicoGlitcher v2).")
     args = parser.parse_args()
 
     main = Main(args)
