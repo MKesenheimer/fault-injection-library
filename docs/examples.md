@@ -120,6 +120,28 @@ After a few attempts you should observe the first positive results.
 
 ![STM8s multiplexing glitching](images/stm8s/target-board-example-multiplexing_bb.png)
 
+### Programming the STM8s target board
+
+Setup:
+
+![Target board programming](images/stm8s/programming.jpg)
+
+To function correctly, the jumper must be on the `VCAP` position.
+
+Note, to program the STM8s target board, the program [stm8flash](https://github.com/vdudouyt/stm8flash) must be installed.
+
+```bash
+git clone https://github.com/MKesenheimer/stm8-bootloader.git && cd stm8-bootloader
+make
+make flash
+make enable-rop
+```
+
+
+
+
+
+
 ## Airtag Glitching
 
 Difficulty: Simple
