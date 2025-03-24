@@ -112,7 +112,7 @@ python stm8-readmemory.py --rpico /dev/tty.usbmodem11301 \
 
 After a few attempts you should observe the first positive results.
 
-![Successful glitches](images/stm8s/success.png)
+![Successful glitches](images/stm8s/parameterspace.png)
 
 ### Technical deep-dive - why do we attack the VCAP line and not VCC?
 
