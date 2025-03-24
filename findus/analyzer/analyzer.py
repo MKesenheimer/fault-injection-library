@@ -441,7 +441,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
         return fig,data
 
     # start server on localhost
-    app.run_server(host=ip, port=port, debug=True)
+    app.run(host=ip, port=port, debug=True)
 
 def main(argv=sys.argv):
     __version__ = "0.1"

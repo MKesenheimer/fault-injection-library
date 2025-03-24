@@ -677,7 +677,7 @@ def run_app(config):
 
         return data
 
-    app.run_server(host=config.serverip, port=config.serverport, debug=True)
+    app.run(host=config.serverip, port=config.serverport, debug=True)
 
 def run(args):
     config = AnalyzerConfig(
