@@ -93,6 +93,8 @@ To carry out the attack on the STM8s in bootloader mode, the target board is con
 - yellow: Trigger line, connected to the UART TX line. If the UART word `0x11` is observed on this line, the glitch is triggered.
 - purple: Glitch, connected to VCAP of the STM8s
 
+Also, for glitching the jumper must be in the `ISP ENABLE` position.
+
 Next, we determine the time between the read memory command `0x11` and the response (`ACK` or `NACK`) from the microcontroller. The check whether ROP is active must happen between those two events. It turns out (and by observing the [Analog Plotter](../adc)), the glitch must be placed between 70.000 and 107.000 ns.
 
 <TODO: AnalogPlot figure>
@@ -122,13 +124,15 @@ After a few attempts you should observe the first positive results.
 
 ### Programming the STM8s target board
 
-Setup:
+If something goes wrong and the memory of the STM8s is wiped (or simply if we want to flash the target with another program), we can flash the STM8s with the following steps. For this a ST-LINK V2 is needed.
+The setup is as follows:
 
 ![Target board programming](images/stm8s/programming.jpg)
 
 To function correctly, the jumper must be on the `VCAP` position.
 
 Note, to program the STM8s target board, the program [stm8flash](https://github.com/vdudouyt/stm8flash) must be installed.
+We continue by downloading the STM8s bootloader, compiling it and flashing it to the target board.
 
 ```bash
 git clone https://github.com/MKesenheimer/stm8-bootloader.git && cd stm8-bootloader
@@ -137,10 +141,33 @@ make flash
 make enable-rop
 ```
 
+Now we check if the bootloader responds correctly to the isp programmer. For that we execute the following command (we could also use the command line tool `stm8-programmer` which is part of findus):
 
+```bash
+python3 isp-programmer/STM8Programmer.py -p /dev/tty.usbserial-11140 --read 0x8000 --number-of-bytes 255
+```
 
+If everything is correct, the bootloader should respond with the memory contents via serial:
 
+```bash
+b'success: bootloader enter succeeded'
+b'success:'
+b"\x82\x00\x80\x80\xcc..."
+```
 
+We continue by enabling the read-out protection
+
+```bash
+make enable-rop
+```
+
+If we now run the above command, the bootloader should not respond with the memory contents which tells us that the read-out protection is active:
+
+```bash
+b'success: bootloader enter succeeded'
+b'error: sending read memory command failed'
+b''
+```
 
 ## Airtag Glitching
 
