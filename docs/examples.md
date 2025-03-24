@@ -95,7 +95,7 @@ To carry out the attack on the STM8s in bootloader mode, the target board is con
 
 Also, for glitching the jumper must be in the `ISP ENABLE` position.
 
-Next, we determine the time between the read memory command `0x11` and the response (`ACK` or `NACK`) from the microcontroller. The check whether ROP is active must happen between those two events. It turns out (and by observing the [Analog Plotter](../adc)), the glitch must be placed between 70.000 and 107.000 ns.
+Next, we determine the time between the read memory command `0x11` and the response (`ACK` or `NACK`) from the microcontroller. The check whether ROP is active must happen between those two events. It turns out (and by observing the [Analog Plotter](../adc)), the glitch must be placed between 106.000 and 108.000 ns.
 
 <TODO: AnalogPlot figure>
 
@@ -106,8 +106,8 @@ Overall, the glitching script is called with the following parameters (the tty p
 git clone https://github.com/MKesenheimer/fault-injection-library.git
 cd fault-injection-library/projects/stm8s
 python stm8-readmemory.py --rpico /dev/tty.usbmodem11301 \
-  --target /dev/tty.usbserial-A50285BI --delay 70_000 107_000 \
-  --length 200 300
+  --target /dev/tty.usbserial-A50285BI --delay 106_000 108_000 \
+  --length 100 200
 ```
 
 After a few attempts you should observe the first positive results.
@@ -116,9 +116,20 @@ After a few attempts you should observe the first positive results.
 
 ### Technical deep-dive - why do we attack the VCAP line and not VCC?
 
+The VCAP line of the STM8 microcontroller is targeted in voltage glitching attacks rather than the VCC line because it directly affects the internal core voltage of the microcontroller.
+
 ![VCAP input](images/stm8s/vcap.png)
 
+The VCAP pin is connected to the internal voltage regulator, which powers the CPU core. This voltage is typically lower (e.g., 1.8V) than the external supply (VCC, often 3.3V or 5V) and is more sensitive to small fluctuations. Glitching the core voltage can cause instruction corruption, bypass security checks, or cause unintended behavior.
+
+Also, the core voltage (VCAP) is isolated from the peripheral voltage (VCC). Glitching VCC may cause a system reset or disrupt external interfaces, while glitching VCAP directly targets the internal logic without affecting external components.
+
+The VCAP line is in general more vulnerable and effective for precision attacks on the core logic, while the VCC line is more resilient due to the internal voltage regulation.
+
 ### Bonus: Using the multiplexing method
+
+The voltage glitching attack against the STM8 target board can also be carried out with the voltage multiplexing stage.
+The setup 
 
 ![STM8s multiplexing glitching](images/stm8s/target-board-example-multiplexing_bb.png)
 
