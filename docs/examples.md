@@ -86,6 +86,7 @@ In order to attack the bootloader and obtain the flash content, a glitch must be
 To carry out the attack on the STM8s in bootloader mode, the target board is connected to the Pico Glitcher as follows. A USB-C cable is also used to connect the target board to the host computer which will provide the UART interface.
 
 ![STM8s crowbar glitching](images/stm8s/target-board-example-crowbar_bb.png)
+![STM8s crowbar glitching setup](images/stm8s/setup.jpg)
 
 - red: 1.8V, supply voltage for the VCAP input of the STM8s MCU
 - black: GND
