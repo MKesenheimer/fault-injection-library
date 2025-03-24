@@ -149,9 +149,7 @@ After a while a positive event is observed, as can be seen in the following figu
 
 ![Success with the multiplexing method](images/stm8s/multiplexing-parameterspace.png)
 
-It turns out that the timing is a little different than with the crowbar method. Now that we have found a positive experiment, we can optimize our search by homing in around the 105,000 nanosecond mark.
-
-In this case, however, the multiplexing method since less effective than the crowbar method.
+It turns out that the timing is a little different than with the crowbar method. Now that we have found a positive experiment, we can optimize our search by homing in around the 105,000 nanosecond mark. In this case, however, the multiplexing method appears to be less effective than the crowbar method.
 
 ### Programming the STM8s target board
 
