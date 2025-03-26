@@ -73,6 +73,7 @@ class Main:
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
         # if number of experiments get too large, remove the expected results
         #self.database.cleanup("G")
+        self.start_time = int(time.time())
 
         # uart target communication
         self.target = Serial(port=args.target)
