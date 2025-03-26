@@ -14,17 +14,18 @@
 # - UART RX: Pin 20 (PA10)
 # - SWDIO: Pin 23 (PA13)
 # - SWDCLK: Pin 24 (PA14)
+# - LED ERROR: Pin 2 (PC14)
+# - LED OK: Pin 3 (PC15)
+# - TRIGGER: Pin 22 (PA12)
 
 import argparse
 import logging
 import random
 import sys
 import time
-from enum import Enum
 
 # import custom libraries
 from findus import DebugInterface, Database, PicoGlitcher, Helper, AnalogPlot
-from findus.ProGlitcher import ProGlitcher
 
 class DerivedDebugInterface(DebugInterface):
     def characterize(self, response:str, mem:int):
@@ -61,7 +62,6 @@ class Main:
 
         # glitcher
         self.glitcher = PicoGlitcher()
-        #self.glitcher = ProGlitcher()
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
         #self.glitcher.init(ext_power=args.power, ext_power_voltage=3.3)
@@ -81,7 +81,7 @@ class Main:
         self.debugger = DerivedDebugInterface(tool="stlink", processor="stm32l0", transport="hla_swd")
 
         # programming the target
-        if args.program_target != None:
+        if args.program_target is not None:
             print("[+] Programming target.")
             self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-STM32L0.elf", rdp_level=args.program_target, verbose=True)
 
@@ -112,10 +112,10 @@ class Main:
         # - init; halt; {self.processor_name}x lock 0; exit
         # - reset and power-cycle
         if rdp == 0xaa or rdp == 0xcc:
-            print(f"[+] Warning: rdp not as expected. Programming target with test program (to flash) and enabling rdp level 1.")
+            print("[+] Warning: rdp not as expected. Programming target with test program (to flash) and enabling rdp level 1.")
             self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-STM32L0.elf", unlock=False, rdp_level=1)
         elif pcrop != 0x00:
-            print(f"[+] Warning: pcrop not as expected. Programming target with test program (to flash) and enabling rdp level 1.")
+            print("[+] Warning: pcrop not as expected. Programming target with test program (to flash) and enabling rdp level 1.")
             self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-STM32L0.elf", unlock=True, rdp_level=1)
 
         # check if programming was successful (RDP should be active)
@@ -131,7 +131,7 @@ class Main:
         # The controller executable toggles a GPIO pin which we can use to time our glitch
         # steps:
         # - init; halt; load_image {elf_image}; resume; exit
-        print(f"[+] Programming target with program to downgrade to RDP 0 (to RAM).")
+        print("[+] Programming target with program to downgrade to RDP 0 (to RAM).")
         #self.debugger.load_exec(elf_image="rdp-downgrade-STM32L0.elf", verbose=True)
         self.debugger.attach()
         self.debugger.gdb_load_exec(elf_image="rdp-downgrade-STM32L0.elf", timeout=0.7)
