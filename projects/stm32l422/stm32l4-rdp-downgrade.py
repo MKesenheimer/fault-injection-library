@@ -71,7 +71,7 @@ class Main:
         #self.glitcher.edge_count_trigger(pin_trigger=args.trigger_input, number_of_edges=1, edge_type="rising")
 
         # set up the database
-        self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
+        self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store, column_names=["delay", "length", "delay_between"])
         self.start_time = int(time.time())
         # if number of experiments get too large, remove the expected results
         #self.database.cleanup("G")
@@ -152,6 +152,8 @@ class Main:
         e_delay = self.args.delay[1]
         s_length = self.args.length[0]
         e_length = self.args.length[1]
+        s_delay_between = self.args.delay_between[0]
+        e_delay_between = self.args.delay_between[1]
 
         # bring the target to a known state
         self.glitcher.power_cycle_reset()
@@ -165,7 +167,8 @@ class Main:
             # set up glitch parameters (in nano seconds) and arm glitcher
             delay = random.randint(s_delay, e_delay)
             length = random.randint(s_length, e_length)
-            self.glitcher.arm(delay, length)
+            delay_between = random.randint(s_delay_between, e_delay_between)
+            self.glitcher.arm(delay, length, 18, delay_between)
             #self.glitcher.arm_adc()
 
             # downgrade to RDP0 (this triggers the glitch)
@@ -216,8 +219,8 @@ class Main:
             color = self.glitcher.classify(state)
 
             # add to database
-            state_str = str(state).encode("utf-8") + b": " + response.encode("utf-8")
-            self.database.insert(experiment_id, delay, length, color, state_str)
+            state_str = b"state = " + state + b", mem = " + str(hex(memory) if memory is not None else "None").encode("utf-8") + b", response = " + response.encode("utf-8")
+            self.database.insert(experiment_id, delay, length, delay_between, color, state_str)
 
             # monitor
             #print(response)
@@ -238,6 +241,7 @@ if __name__ == "__main__":
     parser.add_argument("--power", required=False, help="rk6006 port", default=None)
     parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
+    parser.add_argument("--delay-between", required=False, nargs=2, help="delay between pulses", type=int, default=100)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
     parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
