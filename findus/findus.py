@@ -419,8 +419,11 @@ class PicoGlitcherInterface(MicroPythonScript):
     def power_cycle_target(self, power_cycle_time:float, use_mux:bool = False):
         self.pyb.exec(f'mp.power_cycle_target({power_cycle_time}, {use_mux})')
 
-    def arm(self, delay:int, length:int):
-        self.pyb.exec(f'mp.arm({delay}, {length})')
+    def arm(self, delay:int, length:int, number_of_pulses:int = 1, delay_between:int = 0):
+        if number_of_pulses == 1:
+            self.pyb.exec(f'mp.arm({delay}, {length})')
+        else:
+            self.pyb.exec(f'mp.arm({delay}, {length}, {number_of_pulses}, {delay_between})')
 
     def arm_multiplexing(self, delay:int, mul_config:dict):
         return self.pyb.exec(f'mp.arm_multiplexing({delay}, {mul_config})')
@@ -712,15 +715,17 @@ class PicoGlitcher(Glitcher):
             self.pico_glitcher.enable_vtarget()
             self.power_supply = None
 
-    def arm(self, delay:int, length:int):
+    def arm(self, delay:int, length:int, number_of_pulses:int = 1, delay_between:int = 0):
         """
         Arm the Pico Glitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
             length: Length of the glitch in nano seconds. Expect a resolution of about 5 nano seconds.
+            number_of_pulses:
+            delay_between: 
         """
-        self.pico_glitcher.arm(delay, length)
+        self.pico_glitcher.arm(delay, length, number_of_pulses, delay_between)
 
     def arm_multiplexing(self, delay:int, mul_config:dict):
         """

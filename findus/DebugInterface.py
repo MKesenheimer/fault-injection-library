@@ -42,6 +42,9 @@
 # > x $sp
 ## 0x20001ff8
 
+# read RDP level
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init" -c "mdw 0x4002201c" -c "exit"
+
 
 import time
 import subprocess
@@ -49,14 +52,21 @@ import re
 import socket
 
 class DebugInterface():
-    def __init__(self, tool:str = "stlink", processor:str = "stm32l0", transport:str = "hla_swd", gdb_exec:str = "arm-none-eabi-gdb"):
+    def __init__(self, interface:str = "stlink", interface_config:str=None, target:str = "stm32l0", target_config:str=None, transport:str = "hla_swd", gdb_exec:str = "arm-none-eabi-gdb"):
         self.openocd_process = None
         self.gdb_process = None
-        self.processor_name = processor
+        self.target_name = target
         self.socket = None
-        self.tool = tool
         self.gdb_exec = gdb_exec
         self.transport = transport
+        if interface_config is None:
+            self.interface_config = f'interface/{interface}.cfg'
+        else:
+            self.interface_config = interface_config
+        if target_config is None:
+            self.target_config = f'target/{self.target_name}.cfg'
+        else:
+            self.target_config = target_config
 
     def program_target(self, glitcher, elf_image:str = "program.elf", unlock:bool = True, rdp_level:int = 0, verbose:bool = False):
         """
@@ -84,10 +94,10 @@ class DebugInterface():
         # trunk-ignore(bandit/B603)
         result = subprocess.run([
             'openocd',
-            '-f', f'interface/{self.tool}.cfg',
+            '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
-            '-f', f'target/{self.processor_name}.cfg',
-            '-c', f'init; halt; {self.processor_name}x unlock 0; exit'
+            '-f', self.target_config,
+            '-c', f'init; halt; {self.target_name}x unlock 0; exit'
             ], text=True, capture_output=True)
         if verbose:
             print(result.stdout + result.stderr)
@@ -100,10 +110,10 @@ class DebugInterface():
         # trunk-ignore(bandit/B603)
         result = subprocess.run([
             'openocd',
-            '-f', f'interface/{self.tool}.cfg',
+            '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
-            '-f', f'target/{self.processor_name}.cfg',
-            '-c', f'init; halt; {self.processor_name}x lock 0; exit'
+            '-f', self.target_config,
+            '-c', f'init; halt; {self.target_name}x lock 0; exit'
             ], text=True, capture_output=True)
         if verbose:
             print(result.stdout + result.stderr)
@@ -116,9 +126,9 @@ class DebugInterface():
         # trunk-ignore(bandit/B603)
         result = subprocess.run([
             'openocd',
-            '-f', f'interface/{self.tool}.cfg',
+            '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
-            '-f', f'target/{self.processor_name}.cfg',
+            '-f', self.target_config,
             '-c', f'init; halt; program {elf_image}; exit'
             ], text=True, capture_output=True)
         if verbose:
@@ -134,9 +144,9 @@ class DebugInterface():
         # trunk-ignore(bandit/B603)
         result = subprocess.run([
             'openocd',
-            '-f', f'interface/{self.tool}.cfg',
+            '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
-            '-f', f'target/{self.processor_name}.cfg',
+            '-f', self.target_config,
             '-c', f'init; halt; load_image {elf_image}',
             '-c', f'reg sp {hex(sp)}',
             '-c', f'reg pc {hex(pc)}',
@@ -151,10 +161,10 @@ class DebugInterface():
         # trunk-ignore(bandit/B603)
         result = subprocess.run([
             'openocd',
-            '-f', f'interface/{self.tool}.cfg',
+            '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
-            '-f', f'target/{self.processor_name}.cfg',
-            '-c', f'init; dump_ipolling_failedmage {bin_image} {hex(start_addr)} {hex(length)}; exit'
+            '-f', self.target_config,
+            '-c', f'init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; exit'
             ], text=True, capture_output=True)
         if verbose:
             print(result.stdout + result.stderr)
@@ -164,9 +174,9 @@ class DebugInterface():
         # trunk-ignore(bandit/B603)
         result = subprocess.run([
             'openocd',
-            '-f', f'interface/{self.tool}.cfg',
+            '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
-            '-f', f'target/{self.processor_name}.cfg',
+            '-f', self.target_config,
             '-c', 'init; reset run; exit'
             ], text=True, capture_output=True)
         print(result.stdout + result.stderr)
@@ -176,9 +186,9 @@ class DebugInterface():
         # trunk-ignore(bandit/B603)
         result = subprocess.run([
             'openocd',
-            '-f', f'interface/{self.tool}.cfg',
+            '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
-            '-f', f'target/{self.processor_name}.cfg',
+            '-f', self.target_config,
             '-c', 'init',
             '-c', f'mdw {hex(address)}',
             '-c', 'exit'
@@ -210,7 +220,7 @@ class DebugInterface():
         rdp = (optbytes & 0xff)
         return rdp, pcrop
 
-    def kill_process(self, port:int = 3333):
+    def kill_process(self, port:int = 3333, verbose=False):
         # Find process using the port
         cmd = ["lsof", "-i", f":{port}"]
         #pattern = r"\b(\d+)\b"  # Regex for PID
@@ -218,6 +228,8 @@ class DebugInterface():
         # Run command and search for PID
         # trunk-ignore(bandit/B603)
         result = subprocess.run(cmd, capture_output=True, text=True)
+        if verbose:
+            print(result)
         matches = re.findall(pattern, result.stdout)
         if matches:
             pid = matches[-1]  # Get the last match (PID)
@@ -238,9 +250,9 @@ class DebugInterface():
         # trunk-ignore(bandit/B603)
         self.openocd_process = subprocess.Popen([
             'openocd',
-            '-f', f'interface/{self.tool}.cfg',
+            '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
-            '-f', f'target/{self.processor_name}.cfg',
+            '-f', self.target_config,
             '-c', 'init'
             ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, start_new_session=True)
         time.sleep(delay)
@@ -270,14 +282,16 @@ class DebugInterface():
         self.gdb_process.stdin.write("detach\n")
         self.gdb_process.stdin.write("quit\n")
         self.gdb_process.stdin.flush()
-        output = ""
+        output, error = "", ""
         try:
-            output, _ = self.gdb_process.communicate(timeout=timeout)
-        except Exception as _:
+            output, error = self.gdb_process.communicate(timeout=timeout)
+        except Exception as e:
+            #print(f"[-] Exception in DebugInterface:gdb_load_exec occured:\n{e}")
             pass
         finally:
             if verbose:
                 print(output)
+                print(error)
         self.gdb_process.terminate()
 
     def telnet_init(self):

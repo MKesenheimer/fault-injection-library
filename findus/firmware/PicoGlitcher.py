@@ -111,6 +111,53 @@ def glitch():
     irq(clear, 7)
     push(block)
 
+@asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
+def glitch_burst():
+    # block until delay received
+    pull(block)
+    mov(x, osr)
+    # block until pulse config (length and delay between pulses) received, backup in isr
+    pull(block)
+    mov(isr, osr)
+    # block until number of pulses received
+    pull(block)
+    mov(y, osr)
+
+    # wait for trigger condition
+    # enable pin_glitch_en
+    wait(1, irq, 7).side(0b1)
+
+    # delay until first glitch
+    label("delay_loop")
+    jmp(x_dec, "delay_loop")
+
+    # emit a certain number of glitches
+    label("burst_loop")
+
+    # copy config into osr
+    mov(osr, isr)
+    out(x, 16) # length = OSR >> 16
+
+    # emit glitch
+    set(pins, 0b1)
+    label("length_loop")       
+    jmp(x_dec, "length_loop")
+    set(pins, 0b0)
+
+    # wait until next glitch
+    out(x, 16) # delay = OSR >> 16
+    label("delay2_loop")       
+    jmp(x_dec, "delay2_loop")
+
+    jmp(y_dec, "burst_loop")
+
+    # reset glitch_en
+    set(pins, 0b0).side(0b0)
+
+    # tell execution finished (fills the sm's fifo buffer)
+    irq(clear, 7)
+    push(block)
+
 @asm_pio(set_init=(PIO.OUT_HIGH), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
 def pulse_shaping():
     # block until delay received
@@ -793,23 +840,36 @@ class PicoGlitcher():
 
         #self.arm_adc()
 
-    def arm(self, delay:int, length:int):
+    def arm(self, delay:int, length:int, number_of_pulses:int = 1, delay_between:int = 0):
         """
         Arm the Pico Glitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
             length: Length of the glitch in nano seconds. Expect a resolution of about 5 nano seconds.
+            number_of_pulses: 
+            delay_between: 
         """
         #self.release_reset()
         self.pin_hpglitch.low()
         self.pin_lpglitch.low()
 
-        # state machine that emits the glitch if the trigger condition is met
-        self.sm0 = StateMachine(0, glitch, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
-        # push delay and length (in nano seconds) into the fifo of the statemachine
-        self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
-        self.sm0.put(int(length) // (1_000_000_000 // self.frequency))
+        if number_of_pulses == 1:
+            # state machine that emits the glitch if the trigger condition is met
+            self.sm0 = StateMachine(0, glitch, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+            # push delay and length (in nano seconds) into the fifo of the statemachine
+            self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
+            self.sm0.put(int(length) // (1_000_000_000 // self.frequency))
+        elif number_of_pulses > 1:
+            # state machine that emits the glitch if the trigger condition is met
+            self.sm0 = StateMachine(0, glitch_burst, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+            # push delay and length (in nano seconds) into the fifo of the statemachine
+            self.sm0.put(int(delay) // (1_000_000_000 // self.frequency) - 2)
+            pulse_length = int(length) // (1_000_000_000 // self.frequency)
+            delay_between = int(delay_between) // (1_000_000_000 // self.frequency)
+            config = pulse_length << 16 | delay_between
+            self.sm0.put(config)
+            self.sm0.put(number_of_pulses - 1)
 
         self.__arm_common()
 

@@ -31,10 +31,10 @@ class DerivedDebugInterface(DebugInterface):
     def characterize(self, response:str, mem:int):
         # possibly ok
         if mem is not None:
-            if mem != 0x00:
+            if mem != 0x00 and mem != 0xffffffff:
                 return b'success: RDP inactive'
             else:
-                return b'expected: read zero'
+                return b'expected: read empty flash'
         # Error: no connection
         elif "Error: init mode failed (unable to connect to the target)" in response:
             return b'error: no connection'
@@ -77,28 +77,30 @@ class Main:
         #self.database.cleanup("G")
 
         # STLink Debugger
-        #self.debugger = DerivedDebugInterface(tool="stlink", processor="stm32l0", transport="hla_swd", gdb_exec="gdb-multiarch")
-        self.debugger = DerivedDebugInterface(tool="stlink", processor="stm32l0", transport="hla_swd")
+        #self.debugger = DerivedDebugInterface(interface="stlink", target="stm32l4", transport="hla_swd", gdb_exec="gdb-multiarch")
+        self.debugger = DerivedDebugInterface(interface_config="interface/stlink.cfg", target="stm32l4", target_config="target/stm32l4x.cfg", transport="hla_swd")
 
         # programming the target
         if args.program_target is not None:
             print("[+] Programming target.")
-            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-STM32L0.elf", rdp_level=args.program_target, verbose=True)
+            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", rdp_level=args.program_target, verbose=True)
 
         # plot the voltage trace while glitching
-        self.number_of_samples = 1024 # Pico Glitcher
-        #self.number_of_samples = 98_000 # ChipWhisperer Pro, max are ~98_000
-        self.sampling_freq = 450_000 # Pico Glitcher
-        #self.sampling_freq = 9e6 # ChipWhisperer Pro
+        # Pico Glitcher
+        self.number_of_samples = 1024
+        self.sampling_freq = 450_000
         self.dynamic_range = 4096
+        # Chipwhisperer Pro
+        #self.number_of_samples = 98_000 # ChipWhisperer Pro, max are ~98_000
+        #self.sampling_freq = 9e6 # ChipWhisperer Pro
         #self.dynamic_range = 512
-        self.glitcher.configure_adc(number_of_samples=self.number_of_samples, sampling_freq=self.sampling_freq)
-        self.plotter = AnalogPlot(number_of_samples=self.number_of_samples, sampling_freq=self.sampling_freq, dynamic_range=self.dynamic_range)
+        #self.glitcher.configure_adc(number_of_samples=self.number_of_samples, sampling_freq=self.sampling_freq)
+        #self.plotter = AnalogPlot(number_of_samples=self.number_of_samples, sampling_freq=self.sampling_freq, dynamic_range=self.dynamic_range)
 
     def cleanup(self):
         self.debugger.detach()
 
-    def prepare_target(self):
+    def prepare_target(self, force=False):
         print("[+] Preparing target.")
         # check if target needs to be programmed
         rdp, pcrop = self.debugger.read_rdp_and_pgrop(verbose=False)
@@ -113,10 +115,13 @@ class Main:
         # - reset and power-cycle
         if rdp == 0xaa or rdp == 0xcc:
             print("[+] Warning: rdp not as expected. Programming target with test program (to flash) and enabling rdp level 1.")
-            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-STM32L0.elf", unlock=False, rdp_level=1)
+            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", unlock=False, rdp_level=1)
         elif pcrop != 0x00:
             print("[+] Warning: pcrop not as expected. Programming target with test program (to flash) and enabling rdp level 1.")
-            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-STM32L0.elf", unlock=True, rdp_level=1)
+            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", unlock=True, rdp_level=1)
+        elif force:
+            print("[+] Programming forced.")
+            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", unlock=True, rdp_level=1)
 
         # check if programming was successful (RDP should be active)
         rdp = self.debugger.read_rdp()
@@ -132,9 +137,11 @@ class Main:
         # steps:
         # - init; halt; load_image {elf_image}; resume; exit
         print("[+] Programming target with program to downgrade to RDP 0 (to RAM).")
-        #self.debugger.load_exec(elf_image="rdp-downgrade-STM32L0.elf", verbose=True)
-        self.debugger.attach()
-        self.debugger.gdb_load_exec(elf_image="rdp-downgrade-STM32L0.elf", timeout=0.7)
+        #self.debugger.load_exec(elf_image="rdp-downgrade-stm32l422.elf", verbose=True)
+        self.debugger.attach(delay=0.1)
+        #while 1:
+        #    time.sleep(0.1)
+        self.debugger.gdb_load_exec(elf_image="rdp-downgrade-stm32l422.elf", timeout=0.7, verbose=False)
         self.debugger.detach()
 
     def run(self):
@@ -153,13 +160,13 @@ class Main:
         while True:
             # prepare target with test program
             if self.args.program_target != 0:
-                self.prepare_target()
+                self.prepare_target(force=True)
             
             # set up glitch parameters (in nano seconds) and arm glitcher
             delay = random.randint(s_delay, e_delay)
             length = random.randint(s_length, e_length)
             self.glitcher.arm(delay, length)
-            self.glitcher.arm_adc()
+            #self.glitcher.arm_adc()
 
             # downgrade to RDP0 (this triggers the glitch)
             self.rdp_downgrade()
@@ -168,11 +175,11 @@ class Main:
             response = ""
             try:
                 self.glitcher.block(timeout=1)
-                samples = self.glitcher.get_adc_samples(timeout=1)
+                #samples = self.glitcher.get_adc_samples(timeout=1)
                 #with open("samples.dat", "a") as f:
                 #    f.write(f"{str(samples)}\n") 
                 #print(samples[0:256])
-                self.plotter.update_curve(samples)
+                #self.plotter.update_curve(samples)
                 self.glitcher.power_cycle_reset()
                 # read from protected address and characterize debugger response
                 memory, response = self.debugger.read_address(address=0x08000000)

@@ -112,7 +112,7 @@ class Main():
                 ps_lambda = f"lambda t:-1.5/({2*length})*t+3.3 if t<{2*length} else 1.8 if t<{4*length} else 0.0 if t<{5*length} else 3.3"
                 self.glitcher.arm_pulseshaping_from_lambda(delay, ps_lambda, 6*length)
             else:
-                self.glitcher.arm(delay, length)
+                self.glitcher.arm(delay, length, 10, 1000)
 
             self.glitcher.arm_adc()
 
