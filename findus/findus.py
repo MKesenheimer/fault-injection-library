@@ -722,8 +722,8 @@ class PicoGlitcher(Glitcher):
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
             length: Length of the glitch in nano seconds. Expect a resolution of about 5 nano seconds.
-            number_of_pulses:
-            delay_between: 
+            number_of_pulses: The number of pulses to emit. This can be used to emit bursts of crowbar glitches.
+            delay_between: The delay between each pulse.
         """
         self.pico_glitcher.arm(delay, length, number_of_pulses, delay_between)
 
