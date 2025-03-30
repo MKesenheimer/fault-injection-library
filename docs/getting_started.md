@@ -6,8 +6,6 @@ This guide should quickly prepare you to use the Pico Glitcher and the findus li
 
 If you are in a hurry and just want to execute an example script as fast as possible, follow these commands:
 
-For the Pico Glitcher v1:
-
 ```bash
 cd ~
 mkdir my-fi-project && cd my-fi-project
