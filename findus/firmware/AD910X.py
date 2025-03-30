@@ -107,9 +107,9 @@ def bit_not(n, numbits=8):
 
 class AD910X():
     def __init__(self):
-        self.pin_cs = Pin(PS_SPI_CS, mode=Pin.OUT, value=1)
-        self.pin_reset = Pin(PS_RESET, mode=Pin.OUT, value=1)
-        self.pin_trigger = Pin(PS_TRIGGER, mode=Pin.OUT, value=1)
+        self.pin_cs = Pin(PS_SPI_CS, mode=Pin.OUT, value=1, pull=Pin.PULL_UP)
+        self.pin_reset = Pin(PS_RESET, mode=Pin.OUT, value=1, pull=Pin.PULL_UP)
+        self.pin_trigger = Pin(PS_TRIGGER, mode=Pin.OUT, value=1, pull=Pin.PULL_UP)
         self.spi = SPI(0,
                   baudrate=1000000, # 100000 oder 1000000
                   polarity=0,

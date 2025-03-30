@@ -7,12 +7,12 @@ include-package-data = true
 packages = ["findus", "findus.analyzer", "findus.helper", "findus.firmware"]
 
 [tool.setuptools.package-data]
-"findus.firmware" = ["config_v1/config.json", "config_v2/config.json"]
+"findus.firmware" = ["config_v1/config.json", "config_v2.1-2/config.json", "config_v2.3/config.json"]
 
 [project]
 name = "findus"
 description = "Library to perform fault injection attacks with the PicoGlitcher, Chipwhisperer Husky or Chipwhisperer Pro"
-version = "1.5.0"
+version = "1.6.0"
 license = {file = "LICENSE"}
 authors = [{name = "Matthias Kesenheimer", email = "m.kesenheimer@gmx.net"}]
 dependencies = [

@@ -447,9 +447,19 @@ class PicoGlitcher():
         # LED
         self.led = Pin("LED", Pin.OUT)
         self.led.low()
-        # VTARGET_EN (active low)
-        self.pin_vtarget_en = Pin(VTARGET_EN, Pin.OUT, Pin.PULL_UP)
-        self.pin_vtarget_en.high()
+        if self.config["hardware_version"][0] == 2 and self.config["hardware_version"][1] >= 3:
+            # VTARGET_EN (active high)
+            self.pin_vtarget_en = Pin(VTARGET_EN, Pin.OUT, Pin.PULL_DOWN)
+            self.vtarget_enable = 0
+            self.vtarget_disable = 1
+        elif (self.config["hardware_version"][0] == 2 and self.config["hardware_version"][1] < 3) or self.config["hardware_version"][0] == 1:
+            # VTARGET_EN (active low)
+            self.pin_vtarget_en = Pin(VTARGET_EN, Pin.OUT, Pin.PULL_UP)
+            self.vtarget_enable = 1
+            self.vtarget_disable = 0
+        else:
+            raise Exception(f"Hardware version {self.config['hardware_version']} not implemented.")
+        self.pin_vtarget_en.value(self.vtarget_disable)
         # RESET
         self.pin_reset = Pin(RESET, Pin.OUT, Pin.PULL_UP)
         self.pin_reset.low()
@@ -457,7 +467,7 @@ class PicoGlitcher():
         self.pin_glitch_en = Pin(GLITCH_EN, Pin.OUT, Pin.PULL_DOWN)
         self.pin_glitch_en.low()
         # TRIGGER
-        self.pin_trigger = Pin(TRIGGER, Pin.IN, Pin.PULL_DOWN)
+        self.pin_trigger = Pin(TRIGGER, Pin.IN)
         self.trigger_inverting = False
         # HP_GLITCH
         self.pin_hpglitch = Pin(HP_GLITCH, Pin.OUT, Pin.PULL_DOWN)
@@ -469,7 +479,7 @@ class PicoGlitcher():
         self.pin_glitch = self.pin_lpglitch
         # standard dead zone after power down
         self.dead_time = 0.0
-        self.pin_condition = self.pin_vtarget_en
+        self.pin_condition = self.pin_glitch_en
         self.condition = "rising"
         self.number_of_edges = 1
         # analog digital converter
@@ -550,25 +560,25 @@ class PicoGlitcher():
         """
         self.trigger_mode = mode
         if pin_trigger == "default":
-            self.pin_trigger = Pin(TRIGGER, Pin.IN, Pin.PULL_DOWN)
+            self.pin_trigger = Pin(TRIGGER, Pin.IN)
             if edge_type == "rising":
                 self.trigger_inverting = False
             else:
                 self.trigger_inverting = True
         elif pin_trigger == "alt":
-            self.pin_trigger = Pin(ALT_TRIGGER, Pin.IN, Pin.PULL_DOWN)
+            self.pin_trigger = Pin(ALT_TRIGGER, Pin.IN)
             if edge_type == "rising":
                 self.trigger_inverting = False
             else:
                 self.trigger_inverting = True
         elif pin_trigger == "ext1":
-            self.pin_trigger = Pin(EXT1, Pin.IN, Pin.PULL_DOWN)
+            self.pin_trigger = Pin(EXT1, Pin.IN)
             if edge_type == "rising":
                 self.trigger_inverting = True
             else:
                 self.trigger_inverting = False
         elif pin_trigger == "ext2":
-            self.pin_trigger = Pin(EXT2, Pin.IN, Pin.PULL_DOWN)
+            self.pin_trigger = Pin(EXT2, Pin.IN)
             if edge_type == "rising":
                 self.trigger_inverting = True
             else:
@@ -617,7 +627,7 @@ class PicoGlitcher():
         Parameters:
             use_mux: use the multiplexer stage to power-cycle the target. Must not be used after arm() since this would disable the statemachine for glitching.
         """
-        self.pin_vtarget_en.low()
+        self.pin_vtarget_en.value(self.vtarget_enable)
         if use_mux and self.config["hardware_version"][0] >= 2:
             if self.sm0 is not None:
                 # deactivate any statemachine that has access to the multiplexer
@@ -636,7 +646,7 @@ class PicoGlitcher():
         Parameters:
             use_mux: use the multiplexer stage to power-cycle the target. Must not be used after arm() since this would disable the statemachine for glitching.
         """
-        self.pin_vtarget_en.high()
+        self.pin_vtarget_en.value(self.vtarget_disable)
         if use_mux and self.config["hardware_version"][0] >= 2:
             if self.sm0 is not None:
                 # deactivate any statemachine that has access to the multiplexer
@@ -772,8 +782,8 @@ class PicoGlitcher():
         
         Parameters:
             dead_time: Rejection time during triggering is disabled.
-            pin_condition: Can either be "default", "power", "reset" or a GPIO pin number (for example "4", "5" or "6"). In "power" mode, the `TRIGGER` input is connected to the target's power and the rejection time is measured after power doen. In "reset" mode, the `TRIGGER` input is connected to the `RESET` line and the rejection time is measured after the device is reset. These modes imply different internal conditions to configure the dead time. If "default" is chosen, effectively no dead time is active.
-            condition: Can either be "falling" or "rising". The `dead_time` is measured on the pin `pin_condition` after the specified condition (falling- or rising edge). For example, a good choice is "rising" for the "default" configuration, "rising" for the "power" configuration and "falling" for the "reset" configuration.
+            pin_condition: Can either be "default", "power", "reset" or a GPIO pin number (for example "4", "5" or "6"). In "power" mode, the `TRIGGER` input is connected to the target's power and the rejection time is measured after power down. In "reset" mode, the `TRIGGER` input is connected to the `RESET` line and the rejection time is measured after the device is reset. These modes imply different internal conditions to configure the dead time. If "default" is chosen, effectively no dead time is active.
+            condition: Can either be "falling" or "rising". The `dead_time` is measured on the pin `pin_condition` after the specified condition (falling- or rising-edge). For example, a good choice is "rising" for the "default" configuration and "falling" for the "reset" configuration. However, this could depend on the specific use case.
         """
         if pin_condition == "default":
             self.pin_condition = self.pin_glitch_en

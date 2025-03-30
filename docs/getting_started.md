@@ -14,25 +14,13 @@ mkdir my-fi-project && cd my-fi-project
 python3 -m venv .venv && source .venv/bin/activate
 pip install findus
 cd .venv/lib/python3.13/site-packages/findus/firmware
-upload --port /dev/ttyACM0 --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py config_v1/config.json
+upload --port /dev/ttyACM0 --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py <config-path>/config.json
 cd ~/my-fi-project
 wget https://raw.githubusercontent.com/MKesenheimer/fault-injection-library/refs/heads/master/examples/pico-glitcher.py
 python pico-glitcher.py --rpico /dev/ttyACM0 --delay 0 0 --length 100 100
 ```
 
-For the Pico Glitcher v2:
-
-```bash
-cd ~
-mkdir my-fi-project && cd my-fi-project
-python3 -m venv .venv && source .venv/bin/activate
-pip install findus
-cd .venv/lib/python3.13/site-packages/findus/firmware
-upload --port /dev/ttyACM0 --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py config_v2/config.json
-cd ~/my-fi-project
-wget https://raw.githubusercontent.com/MKesenheimer/fault-injection-library/refs/heads/master/examples/pico-glitcher.py
-python pico-glitcher.py --rpico /dev/ttyACM0 --delay 0 0 --length 100 100
-```
+Replace `<config-path>` with the hardware version you have. For example `config_v1` for the Pico Glitcher v1, `config_v2.1-2` for the versions v2.1 and v2.2, `config_v2.3` for hardware version v2.3, and so on.
 
 Note that the paths and tty names may be slightly different in your case.
 
@@ -108,7 +96,7 @@ Connect the Pico Glitcher to your computer and check which serial device comes u
 ls /dev/tty*
 ```
 
-Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version (either `config_v1/config.json` or `config_v2/config.json`) via the following command:
+Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version (`config_v1/config.json`, `config_v2.1-2/config.json` or `config_v2.3/config.json`) via the following command:
 
 ```bash
 cd .venv/lib/python3.12/site-packages/findus/firmware
