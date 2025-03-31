@@ -491,7 +491,7 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "production/",
+      "plot": "production/stm8s-target-board-v1.1/",
       "pos_files": "production",
       "specctra_dsn": "",
       "step": "",

@@ -5,9 +5,9 @@
 	(uuid "688652bf-c811-412a-957f-886210ac2217")
 	(paper "A4")
 	(title_block
-		(title "STM8S Target Board v1")
+		(title "STM8S Target Board v1.1")
 		(date "2025-02-21")
-		(rev "v1.0")
+		(rev "v1.1")
 		(company "Faulty Hardware")
 		(comment 1 "Matthias Kesenheimer")
 	)

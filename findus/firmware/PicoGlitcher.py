@@ -450,13 +450,13 @@ class PicoGlitcher():
         if self.config["hardware_version"][0] == 2 and self.config["hardware_version"][1] >= 3:
             # VTARGET_EN (active high)
             self.pin_vtarget_en = Pin(VTARGET_EN, Pin.OUT, Pin.PULL_DOWN)
-            self.vtarget_enable = 0
-            self.vtarget_disable = 1
+            self.vtarget_enable = 1
+            self.vtarget_disable = 0
         elif (self.config["hardware_version"][0] == 2 and self.config["hardware_version"][1] < 3) or self.config["hardware_version"][0] == 1:
             # VTARGET_EN (active low)
             self.pin_vtarget_en = Pin(VTARGET_EN, Pin.OUT, Pin.PULL_UP)
-            self.vtarget_enable = 1
-            self.vtarget_disable = 0
+            self.vtarget_enable = 0
+            self.vtarget_disable = 1
         else:
             raise Exception(f"Hardware version {self.config['hardware_version']} not implemented.")
         self.pin_vtarget_en.value(self.vtarget_disable)
