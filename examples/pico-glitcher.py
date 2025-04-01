@@ -75,10 +75,11 @@ class Main():
         self.start_time = int(time.time())
 
         # plot the voltage trace while glitching
-        self.number_of_samples = 1024
-        self.sampling_freq = 450_000
-        self.glitcher.configure_adc(number_of_samples=self.number_of_samples, sampling_freq=self.sampling_freq)
-        self.plotter = AnalogPlot(number_of_samples=self.number_of_samples, sampling_freq=self.sampling_freq)
+        if args.use_adc:
+            self.number_of_samples = 1024
+            self.sampling_freq = 450_000
+            self.glitcher.configure_adc(number_of_samples=self.number_of_samples, sampling_freq=self.sampling_freq)
+            self.plotter = AnalogPlot(number_of_samples=self.number_of_samples, sampling_freq=self.sampling_freq)
 
     def run(self):
         # log execution
@@ -117,7 +118,8 @@ class Main():
                 # one shot
                 self.glitcher.arm(delay, length)
 
-            self.glitcher.arm_adc()
+            if args.use_adc:
+                self.glitcher.arm_adc()
 
             # reset target
             time.sleep(0.01)
@@ -135,8 +137,9 @@ class Main():
                 # Manually set the response to a reasonable value.
                 # In a real scenario, this would be filled by the response of the microcontroller (UART, SWD, etc.)
                 response = b'Trigger ok'
-                samples = self.glitcher.get_adc_samples()
-                self.plotter.update_curve(samples)
+                if args.use_adc:
+                    samples = self.glitcher.get_adc_samples()
+                    self.plotter.update_curve(samples)
             except Exception as e:
                 print(e)
                 print("[-] Timeout received in block(). Continuing.")
@@ -169,6 +172,8 @@ if __name__ == "__main__":
     parser.add_argument("--multiplexing", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with multiplexing between different voltages (requires PicoGlitcher v2).")
     parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with a predefined voltage profile (requires PicoGlitcher v2).")
     parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
+    parser.add_argument("--use-adc", required=False, action='store_true', help="Use the onboard ADC of the Pico Glitcher to show the voltage curve during glitching.")
+
     args = parser.parse_args()
 
     main = Main(args)
