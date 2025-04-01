@@ -456,7 +456,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "pico-glitcher-v2.1-extension.kicad_pro",
+    "filename": "pulse-shaping-extension-v1.1.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -494,7 +494,7 @@
       "plot": "production/pico-glitcher-v2-extension",
       "pos_files": "production",
       "specctra_dsn": "",
-      "step": "",
+      "step": "../../../../../pulse-shaping-extension-v1.1.step",
       "svg": "",
       "vrml": ""
     },
