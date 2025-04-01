@@ -715,6 +715,15 @@ class PicoGlitcher(Glitcher):
             self.pico_glitcher.enable_vtarget()
             self.power_supply = None
 
+    def get_power_supply(self):
+        """
+        To control the external power supply in a script, the `power_supply` object is necessary.
+
+        Returns:
+            Returns the `power_supply` object if the external power supply is used.
+        """
+        return self.power_supply
+
     def arm(self, delay:int, length:int, number_of_pulses:int = 1, delay_between:int = 0):
         """
         Arm the Pico Glitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication.

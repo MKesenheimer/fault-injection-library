@@ -68,7 +68,7 @@ class DebugInterface():
         else:
             self.target_config = target_config
 
-    def program_target(self, glitcher, elf_image:str = "program.elf", unlock:bool = True, rdp_level:int = 0, verbose:bool = False):
+    def program_target(self, glitcher, elf_image:str = "program.elf", unlock:bool = True, rdp_level:int = 0, power_cycle_time:float = 0.1, verbose:bool = False):
         """
         TODO
         """
@@ -76,14 +76,14 @@ class DebugInterface():
             glitcher.reset(0.01)
             time.sleep(0.005)
             self.unlock_target(verbose)
-            glitcher.power_cycle_target()
-            time.sleep(0.1)
+            glitcher.power_cycle_reset(power_cycle_time)
+            time.sleep(power_cycle_time)
         self.write_image(elf_image=elf_image)
         if rdp_level == 1:
             self.lock_target(verbose)
             # changes in the RDP level become active after a power-cycle
-            glitcher.power_cycle_reset()
-            time.sleep(0.1)
+            glitcher.power_cycle_reset(power_cycle_time)
+            time.sleep(power_cycle_time)
 
     def unlock_target(self, verbose:bool = False):
         """

@@ -22,9 +22,7 @@ class PowerCycler:
         else:
             print("[+] Initializing PicoGlitcher")
             self.glitcher = PicoGlitcher()
-            self.glitcher.init(port=args.rpico)
-
-        self.dump_filename = f"{Helper.timestamp()}_memory_dump.bin"
+            self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
 
     def run(self):
         print("[+] Enabling VTARGET. Press Ctrl-C to disable.")
@@ -37,6 +35,7 @@ class PowerCycler:
 def main(argv=sys.argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("--rpico", required=False, help="rpico port", default="")
+    parser.add_argument("--power", required=False, help="rk6006 port", default=None)
     args = parser.parse_args()
 
     pc = PowerCycler(args)

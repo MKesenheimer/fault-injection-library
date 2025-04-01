@@ -61,9 +61,9 @@ class ExternalPowerSupply:
             voltage: Desired output voltage.
         """
         try:
-            self.r.enable = False
+            #self.r.enable = False
             self.r.voltage = voltage
-            self.r.enable = True
+            #self.r.enable = True
         except Exception as _:
             pass
 

