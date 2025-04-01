@@ -878,10 +878,10 @@ class PicoGlitcher(Glitcher):
             use_mux: use the multiplexer stage to power-cycle the target (ignored if external power supply is used).
         """
         if self.power_supply is not None:
-            self.power_supply.disable_vtarget(use_mux)
+            self.power_supply.disable_vtarget()
             self.pico_glitcher.initiate_reset()
             time.sleep(power_cycle_time)
-            self.power_supply.enable_vtarget(use_mux)
+            self.power_supply.enable_vtarget()
             self.pico_glitcher.release_reset()
         else:
             self.pico_glitcher.disable_vtarget(use_mux)
