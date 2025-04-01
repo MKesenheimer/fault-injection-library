@@ -12,14 +12,14 @@ python pro-glitcher.py --target /dev/<target-tty-port> --delay 90_500 91_500 --l
 - Bootloader code (address 0x1fff0000) can be dumped and reverse engineered.
 - [AN2606 Application note STM32 microcontroller system memory boot mode](https://www.st.com/resource/en/application_note/an2606-stm32-microcontroller-system-memory-boot-mode-stmicroelectronics.pdf)
 
-![Glitch insertion point](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32f42x/images/power_supply_scheme.png)
+![Glitch insertion point](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f42x/images/power_supply_scheme.png)
 [AN4488 Application note](https://www.st.com/resource/en/application_note/an4488-getting-started-with-stm32f4xxxx-mcu-hardware-development-stmicroelectronics.pdf)
 
-![](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32f42x/images/memory_dump.png)
+![](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f42x/images/memory_dump.png)
 
-![](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32f42x/images/programmed_memory.png)
+![](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f42x/images/programmed_memory.png)
 
-![](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32f42x/images/cw-pro-bootloader-glitching.png)
+![](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f42x/images/cw-pro-bootloader-glitching.png)
 
 ## TODO
 - [ ] Screenshot of set PCROP register
