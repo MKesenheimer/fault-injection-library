@@ -248,8 +248,8 @@ class Main:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rpico", required=False, help="rpico port", default="/dev/ttyUSB2")
-    parser.add_argument("--power", required=False, help="rk6006 port", default=None)
+    parser.add_argument("--rpico", required=True, help="rpico port", default="/dev/ttyUSB2")
+    parser.add_argument("--power", required=True, help="rk6006 port", default=None)
     parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--delay-between", required=False, nargs=2, help="delay between pulses", type=int, default=100)
