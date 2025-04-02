@@ -65,7 +65,8 @@ class Main:
         self.glitcher = PicoGlitcher()
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
-        self.ext_power_supply = self.glitcher.get_power_supply()
+        if args.power is not None:
+            self.ext_power_supply = self.glitcher.get_power_supply()
         #self.glitcher.init(ext_power=args.power, ext_power_voltage=3.3)
 
         # trigger on the rising edge of the reset signal
@@ -85,7 +86,8 @@ class Main:
         # programming the target
         if args.program_target is not None:
             print("[+] Programming target.")
-            self.ext_power_supply.set_voltage(3.3)
+            if args.power is not None:
+                self.ext_power_supply.set_voltage(3.3)
             self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", rdp_level=args.program_target, power_cycle_time=self.power_cycle_time, verbose=True)
 
         # plot the voltage trace while glitching
@@ -118,15 +120,18 @@ class Main:
         # - reset and power-cycle
         if rdp == 0xaa or rdp == 0xcc:
             print("[+] Warning: rdp not as expected. Programming target with test program (to flash) and enabling rdp level 1.")
-            self.ext_power_supply.set_voltage(3.3)
+            if self.args.power is not None:
+                self.ext_power_supply.set_voltage(3.3)
             self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", unlock=False, rdp_level=1, power_cycle_time=self.power_cycle_time)
         elif pcrop != 0x00:
             print("[+] Warning: pcrop not as expected. Programming target with test program (to flash) and enabling rdp level 1.")
-            self.ext_power_supply.set_voltage(3.3)
+            if self.args.power is not None:
+                self.ext_power_supply.set_voltage(3.3)
             self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", unlock=True, rdp_level=1, power_cycle_time=self.power_cycle_time)
         elif force:
             print("[+] Programming forced.")
-            self.ext_power_supply.set_voltage(3.3)
+            if self.args.power is not None:
+                self.ext_power_supply.set_voltage(3.3)
             self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l422.elf", unlock=True, rdp_level=1, power_cycle_time=self.power_cycle_time)
 
         # check if programming was successful (RDP should be active)
@@ -143,7 +148,8 @@ class Main:
         # steps:
         # - init; halt; load_image {elf_image}; resume; exit
         print("[+] Programming target with program to downgrade to RDP 0 (to RAM).")
-        self.ext_power_supply.set_voltage(2.2)
+        if self.args.power is not None:
+            self.ext_power_supply.set_voltage(2.2)
         #self.debugger.load_exec(elf_image="rdp-downgrade-stm32l422.elf", verbose=True)
         self.debugger.attach(delay=0.1)
         #while 1:
@@ -220,10 +226,10 @@ class Main:
                 time.sleep(0.5)
 
             # dump memory
-            #if b'success' in state:
-            #    self.debugger.read_image(bin_image=f"{Helper.timestamp()}_memory_dump.bin")
-            #    #self.debugger.telnet_read_image(bin_image=f"{Helper.timestamp()}_memory_dump.bin")
-            #    state = b'success: dump finished'
+            if b'success' in state:
+                self.debugger.read_image(bin_image=f"{Helper.timestamp()}_memory_dump.bin")
+                #self.debugger.telnet_read_image(bin_image=f"{Helper.timestamp()}_memory_dump.bin")
+                state = b'success: dump finished'
 
             # classify state
             color = self.glitcher.classify(state)
@@ -243,20 +249,20 @@ class Main:
             experiment_id += 1
 
             # Dump finished
-            #if state == b'success: dump finished':
-            #    break
+            if state == b'success: dump finished':
+                break
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--rpico", required=True, help="rpico port", default="/dev/ttyUSB2")
-    parser.add_argument("--power", required=True, help="rk6006 port", default=None)
+    parser.add_argument("--power", required=False, help="rk6006 port", default=None)
     parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
-    parser.add_argument("--delay-between", required=False, nargs=2, help="delay between pulses", type=int, default=100)
+    parser.add_argument("--delay-between", required=False, nargs=2, help="delay between pulses", type=int, default=[100, 100])
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
     parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
-    parser.add_argument("--program-target", required=False, metavar="RDP_LEVEL", type=int, default=None, help="Reprogram the target before glitching and set the RDP level.")
+    parser.add_argument("--program-target", required=False, metavar="RDP_LEVEL", type=int, default=None, help="Reprogram the target before glitching and set the RDP level (for research only).")
     args = parser.parse_args()
 
     main = Main(args)
