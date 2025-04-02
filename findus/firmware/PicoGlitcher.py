@@ -874,7 +874,7 @@ class PicoGlitcher():
             # state machine that emits the glitch if the trigger condition is met
             self.sm0 = StateMachine(0, glitch_burst, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
             # push delay and length (in nano seconds) into the fifo of the statemachine
-            self.sm0.put(int(delay) // (1_000_000_000 // self.frequency) - 2)
+            self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
             pulse_length = int(length) // (1_000_000_000 // self.frequency)
             delay_between = int(delay_between) // (1_000_000_000 // self.frequency)
             config = pulse_length << 16 | delay_between

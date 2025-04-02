@@ -152,8 +152,6 @@ class Main:
             self.ext_power_supply.set_voltage(2.2)
         #self.debugger.load_exec(elf_image="rdp-downgrade-stm32l422.elf", verbose=True)
         self.debugger.attach(delay=0.1)
-        #while 1:
-        #    time.sleep(0.1)
         self.debugger.gdb_load_exec(elf_image="rdp-downgrade-stm32l422.elf", timeout=0.7, verbose=False)
         self.debugger.detach()
 
@@ -170,7 +168,7 @@ class Main:
 
         # bring the target to a known state
         self.glitcher.power_cycle_reset(power_cycle_time=self.power_cycle_time)
-        time.sleep(0.5)
+        time.sleep(self.power_cycle_time)
 
         experiment_id = 0
         while True:
@@ -199,7 +197,7 @@ class Main:
                 #print(samples[0:256])
                 #self.plotter.update_curve(samples)
                 self.glitcher.power_cycle_reset(power_cycle_time=self.power_cycle_time)
-                time.sleep(0.5)
+                time.sleep(self.power_cycle_time)
                 # read from protected address and characterize debugger response
                 memory, response = self.debugger.read_address(address=0x08000000)
                 state = self.debugger.characterize(response=response, mem=memory)
@@ -209,7 +207,7 @@ class Main:
                 print("[-] Timeout received in block(). Continuing.")
                 print(e)
                 self.glitcher.power_cycle_reset(power_cycle_time=self.power_cycle_time)
-                time.sleep(0.5)
+                time.sleep(self.power_cycle_time)
                 state = b'warning: timeout'
 
             # further check if something changed
@@ -223,7 +221,7 @@ class Main:
             # power cycle if error
             if b'error' in state:
                 self.glitcher.power_cycle_reset(power_cycle_time=self.power_cycle_time)
-                time.sleep(0.5)
+                time.sleep(self.power_cycle_time)
 
             # dump memory
             if b'success' in state:
