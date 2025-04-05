@@ -416,8 +416,11 @@ class PicoGlitcherInterface(MicroPythonScript):
     def set_pattern_match(self, pattern:int):
         self.pyb.exec(f'mp.set_pattern_match({pattern})')
 
-    def power_cycle_target(self, power_cycle_time:float, use_mux:bool = False):
-        self.pyb.exec(f'mp.power_cycle_target({power_cycle_time}, {use_mux})')
+    def power_cycle_target(self, power_cycle_time:float):
+        self.pyb.exec(f'mp.power_cycle_target({power_cycle_time})')
+
+    def power_cycle_reset(self, power_cycle_time:float):
+        self.pyb.exec(f'mp.power_cycle_reset({power_cycle_time})')
 
     def arm(self, delay:int, length:int, number_of_pulses:int = 1, delay_between:int = 0):
         if number_of_pulses == 1:
@@ -864,27 +867,25 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.release_reset()
 
-    def power_cycle_target(self, power_cycle_time:float = 0.2, use_mux:bool = False):
+    def power_cycle_target(self, power_cycle_time:float = 0.2):
         """
-        Power cycle the target via the Pico Glitcher `VTARGET` output or optionally via the multiplexing stage.
+        Power cycle the target via the Pico Glitcher `VTARGET` output or optionally via the multiplexing stage. Depending on the glitch configuration (crowbar, multiplexing, pulse-shaping), the power-cycle is performed with either the crowbar, multiplexing or pulse-shaping stage.
         If available, target is power-cycled by the external power supply RD6006.
         
         Parameters:
             power_cycle_time: Time how long the power supply is cut. If `ext_power` is defined, the external power supply (RD6006) is cycled.
-            use_mux: use the multiplexer stage to power-cycle the target (ignored if external power supply is used).
         """
         if self.power_supply is not None:
             self.power_supply.power_cycle_target(power_cycle_time)
         else:
-            self.pico_glitcher.power_cycle_target(power_cycle_time, use_mux)
+            self.pico_glitcher.power_cycle_target(power_cycle_time)
 
-    def power_cycle_reset(self, power_cycle_time:float = 0.2, use_mux:bool = False):
+    def power_cycle_reset(self, power_cycle_time:float = 0.2):
         """
-        Power cycle and reset the target via the Pico Glitcher `VTARGET` and `RESET` output. Optionally the multiplexing stage can be used to power-cycle the target. Can also be used to define sharper trigger conditions via the `RESET` line.
+        Power cycle and reset the target via the Pico Glitcher `VTARGET` and `RESET` output. Optionally the multiplexing stage can be used to power-cycle the target. Can also be used to define sharper trigger conditions via the `RESET` line. Depending on the glitch configuration (crowbar, multiplexing, pulse-shaping), the power-cycle is performed with either the crowbar, multiplexing or pulse-shaping stage.
         
         Parameters:
             power_cycle_time: Time how long the power supply is cut. If `ext_power` is defined, the external power supply is cycled.
-            use_mux: use the multiplexer stage to power-cycle the target (ignored if external power supply is used).
         """
         if self.power_supply is not None:
             self.power_supply.disable_vtarget()
@@ -893,11 +894,7 @@ class PicoGlitcher(Glitcher):
             self.power_supply.enable_vtarget()
             self.pico_glitcher.release_reset()
         else:
-            self.pico_glitcher.disable_vtarget(use_mux)
-            self.pico_glitcher.initiate_reset()
-            time.sleep(power_cycle_time)
-            self.pico_glitcher.enable_vtarget(use_mux)
-            self.pico_glitcher.release_reset()
+            self.pico_glitcher.power_cycle_reset(power_cycle_time)
 
     def reset_and_eat_it_all(self, target:serial.Serial, target_timeout:float = 0.3):
         """

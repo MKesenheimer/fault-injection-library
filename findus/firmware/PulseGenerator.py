@@ -54,6 +54,11 @@ class PulseGenerator():
         self.points_per_volt = int(self.calibration_factor * voltage_resolution / self.gain)
 
     @micropython.native
+    def get_value(self, voltage:float):
+        v = voltage - self.offset
+        return int(v * self.points_per_volt)
+
+    @micropython.native
     def set_calibration(self, output_voltage_at_minimal_gain:float, calibration_factor:float):
         self.output_voltage_at_minimal_gain = output_voltage_at_minimal_gain
         self.calibration_factor = calibration_factor
@@ -97,6 +102,9 @@ class PulseGenerator():
 
     @micropython.native
     def pulse_from_spline(self, xpoints:list[int], ypoints:list[float], padding:bool = False) -> list[int]:
+        """
+        TODO
+        """
         if len(xpoints) != len(ypoints):
             raise Exception("xpoints and ypoints have different lengths.")
         tpoints = [0] * len(xpoints)

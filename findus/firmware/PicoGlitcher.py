@@ -659,7 +659,22 @@ class PicoGlitcher():
             self.pin_mux1.value(1)
             self.pin_mux0.value(1)
 
-    def power_cycle_target(self, power_cycle_time:float = 0.2, use_mux:bool = False):
+    def __ps_power_cycle(self, power_cycle_time:float):
+        if self.sm0 is not None:
+            # deactivate any statemachine that has access to the ps_trigger pin
+            self.sm0.active(0)
+            # take control over the pins
+            self.pin_ps_trigger = self.ad910x.init_trigger_pin()
+        self.ad910x.set_pulse_output_continous()
+        value = self.pulse_generator.get_value(0)
+        self.ad910x.set_const(value, 100)
+        self.ad910x.update_sram(100)
+        self.pin_ps_trigger.low()
+        time.sleep(power_cycle_time)
+        self.pin_ps_trigger.high()
+        self.ad910x.set_pulse_output_oneshot()
+
+    def power_cycle_target(self, power_cycle_time:float = 0.2):
         """
         Power cycle the target via the Pico Glitcher `VTARGET` output.
         
@@ -667,9 +682,40 @@ class PicoGlitcher():
             power_cycle_time: Time how long the power supply is cut.
             use_mux: use the multiplexer stage to power-cycle the target. Must not be used after arm() since this would disable the statemachine for glitching.
         """
-        self.disable_vtarget(use_mux)
-        time.sleep(power_cycle_time)
-        self.enable_vtarget(use_mux)
+        if self.glitch_mode == "mul":
+            self.disable_vtarget(True)
+            time.sleep(power_cycle_time)
+            self.enable_vtarget(True)
+        elif self.glitch_mode == "pul":
+            self.__ps_power_cycle(power_cycle_time)
+        else:
+            self.disable_vtarget(False)
+            time.sleep(power_cycle_time)
+            self.enable_vtarget(False)
+
+    def power_cycle_reset(self, power_cycle_time:float = 0.2):
+        """
+        Power cycle and reset the target via the Pico Glitcher `VTARGET` and `RESET` output. Optionally the multiplexing stage can be used to power-cycle the target. Can also be used to define sharper trigger conditions via the `RESET` line.
+
+        Parameters:
+            power_cycle_time: Time how long the power supply is cut. If `ext_power` is defined, the external power supply is cycled.
+        """
+        if self.glitch_mode == "mul":
+            self.disable_vtarget(True)
+            self.initiate_reset()
+            time.sleep(power_cycle_time)
+            self.enable_vtarget(True)
+            self.release_reset()
+        elif self.glitch_mode == "pul":
+            self.initiate_reset()
+            self.__ps_power_cycle(power_cycle_time)
+            self.release_reset()
+        else:
+            self.disable_vtarget(False)
+            self.initiate_reset()
+            time.sleep(power_cycle_time)
+            self.enable_vtarget(False)
+            self.release_reset()
 
     def initiate_reset(self):
         """
@@ -745,7 +791,6 @@ class PicoGlitcher():
         self.pulse_generator.set_offset(vinit)
         self.ad910x.set_frequency(self.pulse_generator.get_frequency())
         self.ad910x.set_gain(1.5)
-        #self.ad910x.set_offset(2048)
         # configure the AD9102 to emit an oneshot pulse
         self.ad910x.set_pulse_output_oneshot()
 
@@ -861,9 +906,6 @@ class PicoGlitcher():
             delay_between: The delay between each pulse.
         """
         #self.release_reset()
-        self.pin_hpglitch.low()
-        self.pin_lpglitch.low()
-
         if number_of_pulses == 1:
             # state machine that emits the glitch if the trigger condition is met
             self.sm0 = StateMachine(0, glitch, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
@@ -984,8 +1026,6 @@ class PicoGlitcher():
         if self.config["hardware_version"][0] < 2:
             raise Exception("Multiplexing not implemented in hardware version 1.")
 
-        # disable pulse output
-        self.pin_ps_trigger.high()
         # load the pulse into AD9102 SRAM
         self.ad910x.write_sram_from_start(pulse)
         self.ad910x.update_sram(len(pulse))

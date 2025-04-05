@@ -66,7 +66,7 @@ class Main():
         if args.multiplexing:
             self.glitcher.set_multiplexing()
         elif args.pulse_shaping:
-            self.glitcher.set_pulseshaping(vinit=3.0)
+            self.glitcher.set_pulseshaping(vinit=3.3)
         else:
             self.glitcher.set_lpglitch()
 
@@ -98,11 +98,11 @@ class Main():
             # trunk-ignore(bandit/B311)
             length = random.randint(s_length, e_length)
 
-            # power-cycle the target: If power-cycling is done via the multiplexing stage
-            # this must be done before arming the Pico Glitcher, since this would disable
+            # power-cycle the target: If power-cycling is done via the multiplexing or pulse-shaping
+            # stage this must be done before arming the Pico Glitcher, since this would disable
             # the statemachine for glitch generation.
-            #self.glitcher.power_cycle_target(0.05, use_mux=True)
-            #time.sleep(0.05)
+            self.glitcher.power_cycle_target(0.05)
+            #time.sleep(0.1)
 
             # arm
             if args.multiplexing:

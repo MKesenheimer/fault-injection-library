@@ -131,8 +131,15 @@ class AD910X():
 
     def get_trigger_pin(self):
         """
-        TODO
+        Get the trigger pin.
         """
+        return self.pin_trigger
+
+    def init_trigger_pin(self):
+        """
+        Re-initialize the trigger pin. This is required if you want to regain control of the pin outside the state machine.
+        """
+        self.pin_trigger = Pin(PS_TRIGGER, mode=Pin.OUT, value=1, pull=Pin.PULL_UP)
         return self.pin_trigger
 
     def spi_write_registers(self, addr:int, data:list[int]):
@@ -303,6 +310,16 @@ class AD910X():
             raise Exception("SRAM data too large.")
         self.write_sram(SRAM_ADDRESS_MIN, data)
 
+    def set_const(self, value:int, length:int = 4096):
+        if value > 8190:
+            value = 8190
+        elif value < -8190:
+            value = -8190
+        self.spi_write_register(REG_PAT_STATUS, MEM_ACCESS_ENABLE)
+        for addr in range(SRAM_ADDRESS_MIN, SRAM_ADDRESS_MIN + length):
+            self.spi_write_register(addr, value << 2)
+        self.spi_write_register(REG_PAT_STATUS, MEM_ACCESS_DISABLE)
+
     def read_sram(self, addr:int, length:int) -> list[int]:
         """
         Read array of 16-bit data from SRAM.
@@ -401,9 +418,6 @@ class AD910X():
     def set_pulse_output_oneshot(self):
         """
         Configure the DDS to output one defined pulse.
-
-        Parameters:
-            pulse: The pulse to output
         """
         # update settings
         self.spi_write_register(REG_PAT_TYPE, PATTERN_RPT_FINITE) # pattern is emitted a finite amount of times
@@ -412,6 +426,16 @@ class AD910X():
         self.spi_write_register(REG_PAT_TIMEBASE, 0x0111) # HOLD = 1, PAT_PERIOD_BASE = 1, START_DELAY_BASE = 1; TODO: set the time base, TODO: HOLD = 0 for faster sampling?
         #self.spi_write_register(REG_PATTERN_DLY, 0x000E) # TODO: control this by the delay parameter
         #self.spi_write_register(REG_START_DLY, 0x0003) # TODO: OR: control this by the delay parameter
+
+    def set_pulse_output_continous(self):
+        """
+        Configure the DDS to output a defined pulse continously.
+        """
+        # update settings
+        self.spi_write_register(REG_PAT_TYPE, PATTERN_RPT_CONTINOUS)
+        self.spi_write_register(REG_DAC_PAT, 0x0000)
+        self.spi_write_register(REG_WAV_CONFIG, WAV_CFG_PRESTORE_DDS) # output from DDS
+        self.spi_write_register(REG_PAT_TIMEBASE, 0x0111)
 
     def set_wave_output(self, wave:int):
         """
