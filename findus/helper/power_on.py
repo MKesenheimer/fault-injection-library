@@ -8,12 +8,11 @@
 import argparse
 import sys
 import time
-from findus import PicoGlitcher, Helper
+from findus import PicoGlitcher
 
 class PowerCycler:
     def __init__(self, args):
         self.args = args
-
         if self.args.rpico == "":
             print("[+] Initializing ProGlitcher")
             from findus.ProGlitcher import ProGlitcher
@@ -24,6 +23,14 @@ class PowerCycler:
             self.glitcher = PicoGlitcher()
             self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
 
+        # choose multiplexing, pulse-shaping or crowbar glitching
+        if args.multiplexing:
+            self.glitcher.change_config_and_reset("mux_vinit", str(args.voltage))
+            self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=args.voltage)
+            self.glitcher.set_multiplexing()
+        elif args.pulse_shaping:
+            self.glitcher.set_pulseshaping(vinit=args.voltage)
+
     def run(self):
         print("[+] Enabling VTARGET. Press Ctrl-C to disable.")
         # power cycle target
@@ -33,9 +40,12 @@ class PowerCycler:
             time.sleep(0.2)
 
 def main(argv=sys.argv):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--rpico", required=False, help="rpico port", default="")
+    parser = argparse.ArgumentParser(description="Power the target via different output stages of the Pico Glitcher (VTARGET, multiplexing stage, pulse-shaping stage or external power supply).")
+    parser.add_argument("--rpico", required=False, help="rpico port", default="/dev/ttyACM0")
     parser.add_argument("--power", required=False, help="rk6006 port", default=None)
+    parser.add_argument("--multiplexing", required=False, action='store_true', help="Use the multiplexing stage to power the target (requires PicoGlitcher v2).")
+    parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Use the pulse-shaping stage to power the target (requires PicoGlitcher v2). Be sure to calibrate the pulse-shaping stage's voltage output.")
+    parser.add_argument("--voltage", required=False, help="The voltage to set. Note that the voltage output of the pulse-shaping stage can not be controlled with this parameter. The voltage output of the pulse-shaping stage must be set manually with the potentiometer.", type=float, default=3.3)
     args = parser.parse_args()
 
     pc = PowerCycler(args)

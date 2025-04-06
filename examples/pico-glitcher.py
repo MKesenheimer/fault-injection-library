@@ -101,7 +101,7 @@ class Main():
             # power-cycle the target: If power-cycling is done via the multiplexing or pulse-shaping
             # stage this must be done before arming the Pico Glitcher, since this would disable
             # the statemachine for glitch generation.
-            self.glitcher.power_cycle_target(0.05)
+            #self.glitcher.power_cycle_target(0.05)
             #time.sleep(0.1)
 
             # arm
@@ -124,6 +124,7 @@ class Main():
             # reset target
             time.sleep(0.01)
             self.glitcher.reset_target(0.01)
+            #self.glitcher.power_cycle_reset(0.05)
 
             # reset target via gpio
             # see issue #21: if this is used to generate the trigger, the ADC times out

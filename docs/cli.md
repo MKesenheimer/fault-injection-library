@@ -95,15 +95,22 @@ usage: stm8-programmer [-h] --port PORT [--baud BAUD] [--write WRITE] [--read RE
 
 ## power-on
 
-Enable `VTARGET` with this simple script. Can be necessary, for example, to supply the target with power for debugging purposes.
+Enable `VTARGET` with this simple script. Can be necessary, for example, to supply the target with power for debugging purposes. Alternatively, the target device can also powered via the multiplexing stage, pulse-shaping stage or external power supply. If the `--rpico` argument is omitted (no Pico Glitcher connected), it will try to connect to the ChipWhisperer Pro instead.
 
 ```bash
 power-on --help
-usage: power-on [-h] [--rpico RPICO]
+usage: power-on [-h] [--rpico RPICO] [--power POWER] [--multiplexing] [--pulse-shaping] [--voltage VOLTAGE]
+
+Power the target via different output stages of the Pico Glitcher (VTARGET, multiplexing stage, pulse-shaping stage or external power supply).
 
 options:
-  -h, --help     show this help message and exit
-  --rpico RPICO  rpico port
+  -h, --help         show this help message and exit
+  --rpico RPICO      rpico port
+  --power POWER      rk6006 port
+  --multiplexing     Use the multiplexing stage to power the target (requires PicoGlitcher v2).
+  --pulse-shaping    Use the pulse-shaping stage to power the target (requires PicoGlitcher v2). Be sure to calibrate the pulse-shaping stage's voltage output.
+  --voltage VOLTAGE  The voltage to set. Note that the voltage output of the pulse-shaping stage can not be controlled with this parameter. The voltage output of the pulse-
+                     shaping stage must be set manually with the potentiometer.
 ```
 
 Example:
@@ -114,17 +121,25 @@ power-on --rpico /dev/<rpi-tty-port>
 ## stm32-power-cycle-and-read
 
 Test the power supply capabilities of your setup by executing this script. The target's response is read over UART after power-cycle.
-If the argument `--rpico` is not supplied (no Pico Glitcher connected), the ChipWhisperer Pro is tried instead. 
+If the `--rpico` argument is omitted (no Pico Glitcher connected), it will try to connect to the ChipWhisperer Pro instead.
 
 ```bash
 stm32-power-cycle-and-read --help
-usage: power-cycle-and-read [-h] [--target TARGET] [--rpico RPICO] [--dump]
+usage: stm32-power-cycle-and-read [-h] --target TARGET [--rpico RPICO] [--dump] [--power POWER] [--multiplexing] [--pulse-shaping] [--voltage VOLTAGE]
+
+Power the target via different output stages of the Pico Glitcher (VTARGET, multiplexing stage, pulse-shaping stage or external power supply) and dump the flash content of a
+STM32 in bootloader mode via a UART connection.
 
 options:
-  -h, --help       show this help message and exit
-  --target TARGET  target port
-  --rpico RPICO    rpico port
+  -h, --help         show this help message and exit
+  --target TARGET    target port
+  --rpico RPICO      rpico port
   --dump
+  --power POWER      rk6006 port
+  --multiplexing     Use the multiplexing stage to power the target (requires PicoGlitcher v2).
+  --pulse-shaping    Use the pulse-shaping stage to power the target (requires PicoGlitcher v2). Be sure to calibrate the pulse-shaping stage's voltage output.
+  --voltage VOLTAGE  The voltage to set. Note that the voltage output of the pulse-shaping stage can not be controlled with this parameter. The voltage output of the pulse-
+                     shaping stage must be set manually with the potentiometer.
 ```
 
 Example:
@@ -142,15 +157,22 @@ stm32-power-cycle-and-read --target /dev/<target-tty-port> --rpico /dev/<rpi-tty
 ## power-cycle
 
 Test the power supply capabilities of your setup by executing this script.
-If the argument `--rpico` is not supplied (no Pico Glitcher connected), the ChipWhisperer Pro is tried instead.
+If the `--rpico` argument is omitted (no Pico Glitcher connected), it will try to connect to the ChipWhisperer Pro instead.
 
 ```bash
 power-cycle --help
-usage: power-cycle [-h] [--rpico RPICO]
+usage: power-cycle [-h] [--rpico RPICO] [--power POWER] [--multiplexing] [--pulse-shaping] [--voltage VOLTAGE]
+
+Power-cycle the target via different output stages of the Pico Glitcher (VTARGET, multiplexing stage, pulse-shaping stage or external power supply).
 
 options:
-  -h, --help     show this help message and exit
-  --rpico RPICO  rpico port
+  -h, --help         show this help message and exit
+  --rpico RPICO      rpico port
+  --power POWER      rk6006 port
+  --multiplexing     Use the multiplexing stage to power-cycle the target (requires PicoGlitcher v2).
+  --pulse-shaping    Use the pulse-shaping stage to power-cycle the target (requires PicoGlitcher v2). Be sure to calibrate the pulse-shaping stage's voltage output.
+  --voltage VOLTAGE  The voltage to set. Note that the voltage output of the pulse-shaping stage can not be controlled with this parameter. The voltage output of the pulse-
+                     shaping stage must be set manually with the potentiometer.
 ```
 
 Example:
@@ -167,7 +189,7 @@ power-cycle
 
 ## pulse-calibration
 
-A small tool to calibrate the digital-to-analog converter of the Pulse Shaping expansion board.
+A small tool to calibrate the digital-to-analog converter of the pulse-shaping expansion board.
 
 ```bash
 pulse-calibration --help
@@ -176,8 +198,8 @@ usage: pulse-calibration [-h] --rpico RPICO [--vhigh VHIGH] [--vlow VLOW]
 options:
   -h, --help     show this help message and exit
   --rpico RPICO  rpico port
-  --vhigh VHIGH
-  --vlow VLOW
+  --vhigh VHIGH  The measured maximum voltage of the pulse.
+  --vlow VLOW    The measured minimum voltage of the pulse.
 ```
 
 Execute the following command and follow the notes on the command line:

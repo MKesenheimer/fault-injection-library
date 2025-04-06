@@ -434,6 +434,7 @@ class PicoGlitcher():
         self.glitch_mode = "crowbar"
         self.baudrate = 115200
         self.number_of_bits = 8
+        self.armed = False
 
         # read config
         with open("config.json", "r") as file:
@@ -668,7 +669,7 @@ class PicoGlitcher():
         self.ad910x.set_pulse_output_continous()
         value = self.pulse_generator.get_value(0)
         self.ad910x.set_const(value, 100)
-        self.ad910x.update_sram(100)
+        self.ad910x.update_sram(1)
         self.pin_ps_trigger.low()
         time.sleep(power_cycle_time)
         self.pin_ps_trigger.high()
@@ -680,13 +681,16 @@ class PicoGlitcher():
         
         Parameters:
             power_cycle_time: Time how long the power supply is cut.
-            use_mux: use the multiplexer stage to power-cycle the target. Must not be used after arm() since this would disable the statemachine for glitching.
         """
         if self.glitch_mode == "mul":
+            if self.armed:
+                raise Exception("Error: Power-cycling with multiplexing stage not possible when armed.")
             self.disable_vtarget(True)
             time.sleep(power_cycle_time)
             self.enable_vtarget(True)
         elif self.glitch_mode == "pul":
+            if self.armed:
+                raise Exception("Error: Power-cycling with pulse-shaping stage not possible when armed.")
             self.__ps_power_cycle(power_cycle_time)
         else:
             self.disable_vtarget(False)
@@ -701,12 +705,16 @@ class PicoGlitcher():
             power_cycle_time: Time how long the power supply is cut. If `ext_power` is defined, the external power supply is cycled.
         """
         if self.glitch_mode == "mul":
+            if self.armed:
+                raise Exception("Error: Power-cycling with multiplexing stage not possible when armed.")
             self.disable_vtarget(True)
             self.initiate_reset()
             time.sleep(power_cycle_time)
             self.enable_vtarget(True)
             self.release_reset()
         elif self.glitch_mode == "pul":
+            if self.armed:
+                raise Exception("Error: Power-cycling with pulse-shaping stage not possible when armed.")
             self.initiate_reset()
             self.__ps_power_cycle(power_cycle_time)
             self.release_reset()
@@ -893,6 +901,7 @@ class PicoGlitcher():
             self.sm2.irq(handler=irq_clear)
             self.sm2.active(1)
 
+        self.armed = True
         #self.arm_adc()
 
     def arm(self, delay:int, length:int, number_of_pulses:int = 1, delay_between:int = 0):
@@ -1051,11 +1060,13 @@ class PicoGlitcher():
             start_time = time.time()
             while time.time() - start_time < timeout:
                 if self.sm0.rx_fifo() > 0:
+                    self.armed = False
                     break
             if time.time() - start_time >= timeout:
                 self.sm0.active(0)
                 self.pin_glitch_en.low()
                 self.core1_stopped = True
+                self.armed = False
                 raise Exception("Function execution timed out!")
 
     def get_sm1_output(self):

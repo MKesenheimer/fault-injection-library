@@ -35,8 +35,8 @@ class Calibration():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--rpico", required=True, help="rpico port", default="/dev/ttyACM0")
-    parser.add_argument("--vhigh", required=False, help="", type=float, default=1.0)
-    parser.add_argument("--vlow", required=False, help="", type=float, default=0.0)
+    parser.add_argument("--vhigh", required=False, help="The measured maximum voltage of the pulse.", type=float, default=1.0)
+    parser.add_argument("--vlow", required=False, help="The measured minimum voltage of the pulse.", type=float, default=0.0)
     args = parser.parse_args()
 
     cal = Calibration(args)
