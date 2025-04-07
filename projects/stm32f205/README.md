@@ -68,9 +68,15 @@ Successful glitches should be found about 176us after the VCAP line comes up. St
 python stm32f2-boot-debugger.py --rpico /dev/<tty-device> --length 100 500 --delay 175_600 176_700 --trigger-input ext1
 ```
 
+Use the `analyzer` from `findus` to analyze the glitch parameters:
+
+```bash
+analyzer --directory databases --auto-update 60
+```
+
 ![](images/12-parameterspace.png)
 
-In the default configuration, the script does not halt if a positive glitch is detected. This is helpful to search for good parameters. If you want to get live debug access to the RAM, you can use the `--halt` parameter and stop execution of the script. Use `--resume` to resume a previous capture.
+In the default configuration, the script `stm32f2-boot-debugger.py` does not halt if a positive glitch is detected. This is helpful to search for good parameters. If you want to get live debug access to the RAM, you can use the `--halt` parameter and stop execution of the script. Use `--resume` to resume a previous capture.
 
 ```bash
 python stm32f2-boot-debugger.py --rpico /dev/<tty-device> --length 100 500 --delay 175_600 176_700 --trigger-input ext1 --resume --halt
