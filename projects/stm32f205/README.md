@@ -76,7 +76,7 @@ analyzer --directory databases --auto-update 60
 
 ![](images/12-parameterspace.png)
 
-In the default configuration, the script `stm32f2-boot-debugger.py` does not halt if a positive glitch is detected. This is helpful to search for good parameters. If you want to get live debug access to the RAM, you can use the `--halt` parameter and stop execution of the script. Use `--resume` to resume a previous capture.
+In the default configuration, the script `stm32f2-boot-debugger.py` does not halt if a positive glitch is detected. This is helpful to search for good parameters. If you want to get live debug access to the RAM, you can use the `--halt` parameter and stop execution of the script. Use `--resume` to resume data collection to the previous database.
 
 ```bash
 python stm32f2-boot-debugger.py --rpico /dev/<tty-device> --length 100 500 --delay 175_600 176_700 --trigger-input ext1 --resume --halt
