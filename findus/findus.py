@@ -1209,6 +1209,8 @@ class Helper():
 
     def random_point(a, b, stride=0, dtype=int):
         points = None
+        if a == b:
+            return a
         if stride > (b - a):
             raise ValueError("Stride is larger than the interval length.")
         elif stride == 0:

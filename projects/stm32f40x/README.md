@@ -13,22 +13,22 @@ Short notes for the attacks on the STM32F40x microcontroller series.
 
 Note that this script is for research only and is not intended to run on a real target. For example, if the script detects an error (such as a PCROP bit set), the microcontroller will be reprogrammed and all content will be lost. Make sure you understand what this script does and modify it to suit your needs.
 
-Look into the [image folder](https://github.com/MKesenheimer/fault-injection-library/tree/master/projects/stm32f40x/images) for more details.
+Look into the [image folder](images) for more details.
 
 A detailed write-up can be read [here](https://mkesenheimer.github.io/blog/glitching-the-stm32f4.html).
 
 ## Schematics
 
-![](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f40x/images/stm32f40-glitching_bb.png)
+![](images/stm32f40-glitching_bb.png)
 
 ## Black Pill setup
 
-![](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f40x/images/setup.JPG)
+![](images/setup.JPG)
 
 ## Parameterspace
 
-![](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f40x/images/parameterspace-attempt-1.png)
+![](images/parameterspace-attempt-1.png)
 
 ## Successful dump
 
-![](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f40x/images/successful-dump.png)
+![](images/successful-dump.png)
