@@ -23,7 +23,7 @@ Glue a SMA connector to the backside of the device and connect the positive lead
 Connect a ST-Link debug adapter to the SWD lines, and the reset line to `RESET`, as well as the power lines to the Pico Glitcher:
 
 | Trezor pins   | ST-Link | Pico Glitcher |
-|---------------------------------------
+|---------------|---------|---------------|
 | RESET         |         | RESET output  |
 | GND           | GND     | GND           |
 | SWO           |         |               |
