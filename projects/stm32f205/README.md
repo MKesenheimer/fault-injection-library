@@ -32,5 +32,38 @@ Connect a ST-Link debug adapter to the SWD lines, and the reset line to `RESET`,
 | VDD           | T_VCC   | VTARGET       |
 | SMA connector |         | SMA crowbar   |
 
+Connect the input `EXT1` to the crowbar glitch output `GLITCH`. This is necessary to trigger on the rising-edge of the voltage on the `V_CAP` line (green dupont cable). Turn the potentiometer labeled `ATN` all the way to the right (clockwise). The `THR` potentiometer should be adjusted during the execution of the glitcher script so that no timeouts occur (probable `3/4` position, the arrow points to the left).
 
 ![](images/07-glitching-setup.JPG)
+![](images/08-trezor-connections.JPG)
+
+
+Connect channel 1 of a oscilloscope to the `VCAP` line via the SMA connector, channel 2 two the `VTARGET` output and the external trigger input of the oscilloscope to the `EXT1` hook.
+
+![](images/09-pico-glitcher-setup.JPG)
+
+## Voltage traces
+
+Verify the startup sequence of the STM32F205 by measuring the voltage trace during startup:
+
+![](images/10-startup.bmp)
+
+The level of the voltage supply should slowly rise in comparison to the voltage on the `V_CAP` line. Furthermore, the voltage output on the `VCAP` line is delayed approximately 150ms after the device is powered on. Powering the device and measuring the voltage trace can be done with the command:
+
+```bash
+power-on --rpico /dev/<tty-device>
+```
+
+## Glitching
+
+Now everything is set up, we can start glitching our device. For this, the script `stm32f2-boot-debugger.py` has been prepared. This script powers up the device, waits for the trigger signal on input `EXT1`, waits a given delay and emits a glitch of a certain length. Afterwards, it is tested if memory can be read from RAM.
+
+![](images/11-vcap-power-trace.bmp)
+
+Successful glitches should be found about 176us after the VCAP line comes up. Start by searching a wider parameter space and reduce the parameter space when the first positive events are observed. The glitch length is not critical, but in general shorter glitches are preferable.
+
+```bash
+python stm32f2-boot-debugger.py --rpico /dev/<tty-device> --length 100 500 --delay 175_600 176_700 --trigger-input ext1
+```
+
+![](images/12-parameterspace.png)
