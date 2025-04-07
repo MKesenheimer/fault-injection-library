@@ -17,6 +17,10 @@ Look into the [image folder](https://github.com/MKesenheimer/fault-injection-lib
 
 A detailed write-up can be read [here](https://mkesenheimer.github.io/blog/glitching-the-stm32f4.html).
 
+## Schematics
+
+![](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f40x/images/stm32f40-glitching_bb.png)
+
 ## Black Pill setup
 
 ![](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f40x/images/setup.JPG)
