@@ -15,6 +15,8 @@ Note that this script is for research only and is not intended to run on a real 
 
 Look into the [image folder](https://github.com/MKesenheimer/fault-injection-library/tree/master/projects/stm32f40x/images) for more details.
 
+A detailed write-up can be read [here](https://mkesenheimer.github.io/blog/glitching-the-stm32f4.html).
+
 ## Black Pill setup
 
 ![](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f40x/images/setup.JPG)
