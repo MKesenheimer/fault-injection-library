@@ -122,7 +122,7 @@ class Main:
 
             # Dump finished
             #time.sleep(0.2)
-            if b'success' in state:
+            if self.args.halt and b'success' in state:
                 self.glitcher.reset(0.1)
                 print("[+] Now connect the Trezor One via USB with your computer and go to the Trezor Suite app.")
                 print("    Wait for the Trezor One to connect. Do not abort this script!")
@@ -148,6 +148,7 @@ if __name__ == "__main__":
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
+    parser.add_argument("--halt", required=False, action='store_true', help="halt execution if successful glitch is detected")
     parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
     args = parser.parse_args()
 

