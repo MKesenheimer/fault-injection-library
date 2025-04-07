@@ -32,13 +32,13 @@ Connect a ST-Link debug adapter to the SWD lines, and the reset line to `RESET`,
 | VDD           | T_VCC   | VTARGET       |
 | SMA connector |         | SMA crowbar   |
 
-Connect the input `EXT1` to the crowbar glitch output `GLITCH`. This is necessary to trigger on the rising-edge of the voltage on the `V_CAP` line (green dupont cable). Turn the potentiometer labeled `ATN` all the way to the right (clockwise). The `THR` potentiometer should be adjusted during the execution of the glitcher script so that no timeouts occur (probable `3/4` position, the arrow points to the left).
+Connect the input `EXT1` to the crowbar glitch output `GLITCH`. This is necessary to trigger on the rising-edge of the voltage on the `V_CAP` line (green dupont cable in the following figure). Turn the potentiometer labeled `ATN` all the way to the right (clockwise). The `THR` potentiometer should be adjusted during the execution of the glitcher script so that no timeouts occur (probable `3/4` position, the arrow points to the left).
 
 ![](images/07-glitching-setup.JPG)
 ![](images/08-trezor-connections.JPG)
 
 
-Connect channel 1 of a oscilloscope to the `VCAP` line via the SMA connector, channel 2 two the `VTARGET` output and the external trigger input of the oscilloscope to the `EXT1` hook.
+Connect channel 1 of an oscilloscope to the `VCAP` line via the SMA connector, channel 2 to the `VTARGET` output and the external trigger input of the oscilloscope to the `EXT1` hook.
 
 ![](images/09-pico-glitcher-setup.JPG)
 
@@ -46,11 +46,11 @@ DO NOT connect the Trezor one during glitching via USB to your computer.
 
 ## Voltage traces
 
-Verify the startup sequence of the STM32F205 by measuring the voltage trace during startup:
+Verify the startup sequence of the STM32F205 by measuring the voltage traces during startup:
 
 ![](images/10-startup.bmp)
 
-The level of the voltage supply should slowly rise in comparison to the voltage on the `V_CAP` line. Furthermore, the voltage output on the `VCAP` line is delayed approximately 150ms after the device is powered on. Powering the device and measuring the voltage trace can be done with the command:
+The level of the voltage supply should slowly rise in comparison to the voltage on the `V_CAP` line. Furthermore, the voltage output on the `VCAP` line is delayed approximately 150ms after the device is powered on. Powering the device and measuring the voltage traces can be done with the command:
 
 ```bash
 power-on --rpico /dev/<tty-device>
@@ -70,13 +70,13 @@ python stm32f2-boot-debugger.py --rpico /dev/<tty-device> --length 100 500 --del
 
 ![](images/12-parameterspace.png)
 
-In the default configuration, the script does not halt if a positive glitch is detected. This is helpful to search for good parameters. If you want to get debug access to the RAM, you can use the `--halt` parameter and stop execution of the script. Use `--resume` to resume a previous capture.
+In the default configuration, the script does not halt if a positive glitch is detected. This is helpful to search for good parameters. If you want to get live debug access to the RAM, you can use the `--halt` parameter and stop execution of the script. Use `--resume` to resume a previous capture.
 
 ```bash
 python stm32f2-boot-debugger.py --rpico /dev/<tty-device> --length 100 500 --delay 175_600 176_700 --trigger-input ext1 --resume --halt
 ```
 
-If the script is halted, further instructions are printed on in the terminal if a successful glitch is detected:
+When the script is stopped (when a successful glitch is detected), further instructions are printed to the terminal:
 
 ```bash
 [+] Experiment 158	12914	(3)	176526	126	R	b'success: read zero'
@@ -94,24 +94,24 @@ If the script is halted, further instructions are printed on in the terminal if 
     $ openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; dump_image ram.bin 0x20000000 0x1fffffff; exit"
 ```
 
-In this state, you can either try to dump the RAM content:
+In this state, you can either try to dump the RAM contents:
 
 ```bash
 openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; dump_image ram.bin 0x20000000 0x1fffffff; exit"
 ```
 
-Or you can connect to the device via telnet or gdb:
+Or you can connect to the device via telnet or gdb. First initialize a debug connection with openocd:
 
 ```bash
 openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; reset run"
 ```
 
-Telnet:
+Then connect via telnet:
 ```bash
 telnet localhost 4444
 ```
 
-GDB:
+Or GDB:
 ```bash
 arm-none-eabi-gdb
 (gdb) target remote :3333
