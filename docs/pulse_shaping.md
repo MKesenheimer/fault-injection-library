@@ -29,7 +29,9 @@ glitcher.set_pulseshaping(vinit=3.3)
 ```
 
 - `glitcher.rising_edge_trigger()`: To ensure the glitch is applied at the correct moment, a trigger condition needs to be defined. Here, we use a rising edge trigger.
-- `glitcher.set_pulseshaping(vinit=3.3)`: Instead of a simple voltage drop, the pulse-shaping mode allows defining a more complex glitch waveform. The pulse-shaping capabilities are initialized and the initial voltage of `3.3V` is applied.
+- `glitcher.set_pulseshaping(vinit=3.3)`: Instead of a simple voltage drop, the pulse-shaping mode allows defining a more complex glitch waveform. The pulse-shaping capabilities are initialized and the initial voltage of `3.3V` is stored for internal reference. 
+
+**Note** that the initial voltage output of the Pulse Shaping Expansion Board cannot be controlled by software. Instead, the small potentiometer on the board must be used to set the desired voltage output. The voltage set by the `vinit` parameter is for internal reference only. Other voltages during pulse output are calculated from this parameter. Remember to calibrate the voltage output of the pulse shaping expansion board according to this [guide](#calibration).
 
 To create a smooth glitch waveform, we define a time-voltage spline:
 

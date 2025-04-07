@@ -56,7 +56,7 @@ class DerivedDebugInterface(DebugInterface):
 class Main:
     def __init__(self, args):
         self.args = args
-        self.power_cycle_time = 0.5
+        self.power_cycle_time = 0.1
 
         # logging
         logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
@@ -66,6 +66,7 @@ class Main:
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
         if args.power is not None:
+            self.power_cycle_time = 0.5
             self.ext_power_supply = self.glitcher.get_power_supply()
         #self.glitcher.init(ext_power=args.power, ext_power_voltage=3.3)
 
