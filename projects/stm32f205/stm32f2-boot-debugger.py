@@ -17,7 +17,7 @@ import time
 
 # import custom libraries
 from findus.DebugInterface import DebugInterface
-from findus import Database, PicoGlitcher, Helper
+from findus import Database, PicoGlitcher
 
 class DerivedDebugInterface(DebugInterface):
     def characterize(self, response:str, mem:int):
@@ -54,11 +54,24 @@ class Main:
 
         # glitcher
         self.glitcher = PicoGlitcher()
-        # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
-        self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
+        self.glitcher.init(port=args.rpico, enable_vtarget=False)
+
+        # the initial voltage for multiplexing must be hard-coded and can only be applied
+        # if the raspberry pi pico is reset and re-initialized.
+        if args.multiplexing:
+            self.glitcher.change_config_and_reset("mux_vinit", "VI2")
+            self.glitcher.init(port=args.rpico, enable_vtarget=False)
 
         # trigger on the rising edge of the reset signal
-        self.glitcher.rising_edge_trigger(pin_trigger=args.trigger_input)
+        self.glitcher.rising_edge_trigger(pin_trigger="ext1")
+        #self.glitcher.edge_count_trigger(pin_trigger="ext1", number_of_edges=2, edge_type="falling")
+
+        # choose multiplexing, pulse-shaping or crowbar glitching
+        if args.multiplexing:
+            self.glitcher.set_multiplexing()
+        else:
+            self.glitcher.set_lpglitch()
+            #self.glitcher.set_hpglitch()
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
@@ -79,24 +92,51 @@ class Main:
         e_length = self.args.length[1]
 
         experiment_id = 0
+        self.glitcher.release_reset()
         while True:
             # set up glitch parameters (in nano seconds) and arm glitcher
             delay = random.randint(s_delay, e_delay)
             length = random.randint(s_length, e_length)
-            self.glitcher.arm(delay, length)
+
+            if args.multiplexing:
+                # VI2 must not be connected, leave floating for voltage measuring with EXT1 input
+                self.glitcher.set_mux_voltage("VI2")
+
+            # arm
+            if args.multiplexing:
+                #mul_config = {"t1": length, "v1": "GND", "t2": 10_000, "v2": "VI1"}
+                mul_config = {"t1": length, "v1": "GND"}
+                self.glitcher.arm_multiplexing(delay, mul_config)
+            else:
+                self.glitcher.arm(delay, length)
 
             # reset target (this triggers the glitch)
             #self.glitcher.reset(0.01)
-            self.glitcher.power_cycle_reset(0.2)
+            #self.glitcher.power_cycle_reset(0.2)
             #time.sleep(0.01)
+            #self.glitcher.initiate_reset()
+            self.glitcher.disable_vtarget()
+            time.sleep(0.1)
+            self.glitcher.enable_vtarget()
+            #self.glitcher.release_reset()
+
+            #self.glitcher.block(timeout=1)
+            #while True:
+            #    self.glitcher.set_mux_voltage("VI1")
+            #    time.sleep(0.1)
 
             # block until glitch
             response = ""
             try:
                 self.glitcher.block(timeout=1)
+                # stabilize voltage on V_CAP with external power supply
+                if args.multiplexing:
+                    self.glitcher.set_mux_voltage("VI1")
                 memory, response = self.debugger.read_address(0x20000000)
                 state = self.debugger.characterize(response=response, mem=memory)
-                #print(f"Content of register: {memory}")
+                # DEBUG
+                #state = b'expected: no connection'
+                print(f"Content of register: {memory}")
             except Exception as e:
                 print(e)
                 print("[-] Timeout received in block(). Continuing.")
@@ -143,13 +183,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", required=False, help="target port", default="/dev/ttyUSB1")
     parser.add_argument("--rpico", required=False, help="rpico port", default="/dev/ttyUSB2")
-    parser.add_argument("--power", required=False, help="rk6006 port", default=None)
+    parser.add_argument("--multiplexing", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with multiplexing between different voltages (requires PicoGlitcher v2).")
     parser.add_argument("--delay", required=True, nargs=2, help="delay start and end", type=int)
     parser.add_argument("--length", required=True, nargs=2, help="length start and end", type=int)
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
     parser.add_argument("--halt", required=False, action='store_true', help="halt execution if successful glitch is detected")
-    parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
     args = parser.parse_args()
 
     main = Main(args)

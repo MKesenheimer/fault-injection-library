@@ -235,25 +235,6 @@ def multiplex(MUX_PIO_INIT=MUX_PIO_INIT):
     irq(clear, 7)
     push(block)
 
-@asm_pio(set_init=(1, 1), in_shiftdir=PIO.SHIFT_RIGHT)
-def mux_power_cycle(MUX_PIO_INIT=MUX_PIO_INIT):
-    # block until delay received
-    pull(block)
-    mov(x, osr)
-
-    # power down
-    set(pins, 0b11)
-
-    # wait delay
-    label("delay_loop")
-    jmp(x_dec, "delay_loop")
-
-    # power up
-    set(pins, MUX_PIO_INIT)
-
-    # tell execution finished
-    push(block)
-
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
 def tio_trigger_with_dead_time_rising_edge():
     # wait for irq in block_rising_condition or block_falling_condition state machine (dead time)
@@ -621,44 +602,17 @@ class PicoGlitcher():
         """
         self.pattern = pattern
 
-    def enable_vtarget(self, use_mux:bool = False):
+    def enable_vtarget(self):
         """
         Enable `VTARGET` output. Activates the Pico Glitcher's power supply for the target.
-
-        Parameters:
-            use_mux: use the multiplexer stage to power-cycle the target. Must not be used after arm() since this would disable the statemachine for glitching.
         """
         self.pin_vtarget_en.value(self.vtarget_enable)
-        if use_mux and self.config["hardware_version"][0] >= 2:
-            if self.sm0 is not None:
-                # deactivate any statemachine that has access to the multiplexer
-                self.sm0.active(0)
-                #PIO(0).remove_program() # not necessary
-                # take control over the pins
-                self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
-                self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
-            self.pin_mux1.value(MUX1_INIT)
-            self.pin_mux0.value(MUX0_INIT)
 
-    def disable_vtarget(self, use_mux:bool = False):
+    def disable_vtarget(self):
         """
         Disables `VTARGET` output. Disables the Pico Glitcher's power supply for the target.
-
-        Parameters:
-            use_mux: use the multiplexer stage to power-cycle the target. Must not be used after arm() since this would disable the statemachine for glitching.
         """
         self.pin_vtarget_en.value(self.vtarget_disable)
-        if use_mux and self.config["hardware_version"][0] >= 2:
-            if self.sm0 is not None:
-                # deactivate any statemachine that has access to the multiplexer
-                self.sm0.active(0)
-                #PIO(0).remove_program()
-                # take control over the pins
-                self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
-                self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
-            # pull the multiplexer to GND
-            self.pin_mux1.value(1)
-            self.pin_mux0.value(1)
 
     def __ps_power_cycle(self, power_cycle_time:float):
         if self.sm0 is not None:
@@ -675,6 +629,42 @@ class PicoGlitcher():
         self.pin_ps_trigger.high()
         self.ad910x.set_pulse_output_oneshot()
 
+    def __mux_power_cycle(self, power_cycle_time:float):
+        if self.sm0 is not None:
+            # deactivate any statemachine that has access to the multiplexer
+            self.sm0.active(0)
+            #PIO(0).remove_program() # not necessary
+            # take control over the pins
+            self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
+            self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
+        # pull the multiplexer to GND
+        self.pin_mux1.value(1)
+        self.pin_mux0.value(1)
+        time.sleep(power_cycle_time)
+        # enable power
+        self.pin_mux1.value(MUX1_INIT)
+        self.pin_mux0.value(MUX0_INIT)
+
+    def set_mux_voltage(self, voltage:str = "GND"):
+        if self.sm0 is not None:
+            # deactivate any statemachine that has access to the multiplexer
+            self.sm0.active(0)
+            # take control over the pins
+            self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
+            self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
+        if voltage == "GND":
+            self.pin_mux1.value(1)
+            self.pin_mux0.value(1)
+        elif voltage == "VI1" or voltage == "VCC":
+            self.pin_mux1.value(0)
+            self.pin_mux0.value(0)
+        elif voltage == "1.8":
+            self.pin_mux1.value(1)
+            self.pin_mux0.value(0)
+        else: # 3.3 or VI2
+            self.pin_mux1.value(0)
+            self.pin_mux0.value(1)
+
     def power_cycle_target(self, power_cycle_time:float = 0.2):
         """
         Power cycle the target via the Pico Glitcher `VTARGET` output.
@@ -685,17 +675,16 @@ class PicoGlitcher():
         if self.glitch_mode == "mul":
             if self.armed:
                 raise Exception("Error: Power-cycling with multiplexing stage not possible when armed.")
-            self.disable_vtarget(True)
-            time.sleep(power_cycle_time)
-            self.enable_vtarget(True)
+            self.__mux_power_cycle(power_cycle_time)
         elif self.glitch_mode == "pul":
             if self.armed:
                 raise Exception("Error: Power-cycling with pulse-shaping stage not possible when armed.")
             self.__ps_power_cycle(power_cycle_time)
         else:
-            self.disable_vtarget(False)
+            # power-cycling in "normal" and multiplexing mode
+            self.disable_vtarget()
             time.sleep(power_cycle_time)
-            self.enable_vtarget(False)
+            self.enable_vtarget()
 
     def power_cycle_reset(self, power_cycle_time:float = 0.2):
         """
@@ -707,10 +696,8 @@ class PicoGlitcher():
         if self.glitch_mode == "mul":
             if self.armed:
                 raise Exception("Error: Power-cycling with multiplexing stage not possible when armed.")
-            self.disable_vtarget(True)
             self.initiate_reset()
-            time.sleep(power_cycle_time)
-            self.enable_vtarget(True)
+            self.__mux_power_cycle(power_cycle_time)
             self.release_reset()
         elif self.glitch_mode == "pul":
             if self.armed:
@@ -719,10 +706,11 @@ class PicoGlitcher():
             self.__ps_power_cycle(power_cycle_time)
             self.release_reset()
         else:
-            self.disable_vtarget(False)
+            # power-cycling in "normal" and multiplexing mode
+            self.disable_vtarget()
             self.initiate_reset()
             time.sleep(power_cycle_time)
-            self.enable_vtarget(False)
+            self.enable_vtarget()
             self.release_reset()
 
     def initiate_reset(self):

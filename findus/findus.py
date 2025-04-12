@@ -422,6 +422,9 @@ class PicoGlitcherInterface(MicroPythonScript):
     def power_cycle_reset(self, power_cycle_time:float):
         self.pyb.exec(f'mp.power_cycle_reset({power_cycle_time})')
 
+    def set_mux_voltage(self, voltage:str):
+        self.pyb.exec(f'mp.set_mux_voltage("{voltage}")')
+
     def arm(self, delay:int, length:int, number_of_pulses:int = 1, delay_between:int = 0):
         if number_of_pulses == 1:
             self.pyb.exec(f'mp.arm({delay}, {length})')
@@ -449,11 +452,11 @@ class PicoGlitcherInterface(MicroPythonScript):
     def release_reset(self):
         self.pyb.exec('mp.release_reset()')
 
-    def disable_vtarget(self, use_mux:bool = False):
-        self.pyb.exec(f'mp.disable_vtarget({use_mux})')
+    def disable_vtarget(self):
+        self.pyb.exec('mp.disable_vtarget()')
 
-    def enable_vtarget(self, use_mux:bool = False):
-        self.pyb.exec(f'mp.enable_vtarget({use_mux})')
+    def enable_vtarget(self):
+        self.pyb.exec('mp.enable_vtarget()')
 
     def reset_target(self, reset_time:float):
         self.pyb.exec(f'mp.reset_target({reset_time})')
@@ -670,7 +673,7 @@ class PicoGlitcher(Glitcher):
         except Exception as _:
             pass
 
-    def init(self, port:str, ext_power:str = None, ext_power_voltage:float = 3.3):
+    def init(self, port:str, ext_power:str = None, ext_power_voltage:float = 3.3, enable_vtarget:bool = True):
         """
         Default initialization procedure of the Pico Glitcher. Default configuration is:
 
@@ -713,9 +716,11 @@ class PicoGlitcher(Glitcher):
             self.power_supply = ExternalPowerSupply(port=ext_power)
             self.power_supply.set_voltage(ext_power_voltage)
             print(self.power_supply.status())
-            self.power_supply.enable_vtarget()
+            if enable_vtarget:
+                self.power_supply.enable_vtarget()
         else:
-            self.pico_glitcher.enable_vtarget()
+            if enable_vtarget:
+                self.pico_glitcher.enable_vtarget()
             self.power_supply = None
 
     def get_power_supply(self):
@@ -863,9 +868,33 @@ class PicoGlitcher(Glitcher):
 
     def release_reset(self):
         """
-        Release the reset to the target via the Pico Glitcher's `RESET` output.
+        Release the reset of the target via the Pico Glitcher's `RESET` output.
         """
         self.pico_glitcher.release_reset()
+
+    def initiate_reset(self):
+        """
+        Initiate the reset of the target via the Pico Glitcher's `RESET` output.
+        """
+        self.pico_glitcher.initiate_reset()
+
+    def enable_vtarget(self):
+        """
+        Enable the Pico Glitcher's `VTARGET` output.
+        """
+        self.pico_glitcher.enable_vtarget()
+
+    def disable_vtarget(self):
+        """
+        Enable the Pico Glitcher's `VTARGET` output.
+        """
+        self.pico_glitcher.disable_vtarget()
+
+    def set_mux_voltage(self, voltage:str):
+        """
+        TODO
+        """
+        self.pico_glitcher.set_mux_voltage(voltage)
 
     def power_cycle_target(self, power_cycle_time:float = 0.2):
         """

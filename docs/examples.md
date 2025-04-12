@@ -153,7 +153,7 @@ It turns out that the timing is a little different than with the crowbar method.
 
 ### Programming the STM8s target board
 
-If something goes wrong and the memory of the STM8s is wiped (or simply if we want to flash the target with another program), we can flash the STM8s with the following steps. For this a ST-LINK V2 is needed.
+If something goes wrong and the memory of the STM8s is wiped (or simply if we want to flash the target with another program), we can flash the STM8s with the following steps. For this an ST-LINK V2 is needed.
 The setup is as follows:
 
 ![Target board programming](images/stm8s/programming.jpg)

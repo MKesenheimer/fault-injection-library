@@ -124,7 +124,7 @@ class Main():
             # reset target
             time.sleep(0.01)
             self.glitcher.reset_target(0.01)
-            #self.glitcher.power_cycle_reset(0.05)
+            #self.glitcher.power_cycle_reset(0.01)
 
             # reset target via gpio
             # see issue #21: if this is used to generate the trigger, the ADC times out
