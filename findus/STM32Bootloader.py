@@ -77,6 +77,18 @@ class STM32Bootloader:
         # read garbage and discard
         #self.ser.read(1024)
 
+    def serial_read(self, nbytes=1) -> bytes:
+        """
+        Read a given number of byts from the serial console.
+        """
+        return self.ser.read(nbytes)
+
+    def serial_write(self, bytes:bytes):
+        """
+        Write a byte sequence to the serial console.
+        """
+        return self.ser.write(bytes)
+
     def flush_v2(self, timeout:float = 0.01):
         """
         Flush serial data buffers with timeout.

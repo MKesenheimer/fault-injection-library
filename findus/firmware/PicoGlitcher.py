@@ -432,16 +432,16 @@ class PicoGlitcher():
         if self.config["hardware_version"][0] == 2 and self.config["hardware_version"][1] >= 3:
             # VTARGET_EN (active high)
             self.pin_vtarget_en = Pin(VTARGET_EN, Pin.OUT, Pin.PULL_DOWN)
-            self.vtarget_enable = 1
-            self.vtarget_disable = 0
+            self.vtarget_enable_value = 1
+            self.vtarget_disable_value = 0
         elif (self.config["hardware_version"][0] == 2 and self.config["hardware_version"][1] < 3) or self.config["hardware_version"][0] == 1:
             # VTARGET_EN (active low)
             self.pin_vtarget_en = Pin(VTARGET_EN, Pin.OUT, Pin.PULL_UP)
-            self.vtarget_enable = 0
-            self.vtarget_disable = 1
+            self.vtarget_enable_value = 0
+            self.vtarget_disable_value = 1
         else:
             raise Exception(f"Hardware version {self.config['hardware_version']} not implemented.")
-        self.pin_vtarget_en.value(self.vtarget_disable)
+        self.pin_vtarget_en.value(self.vtarget_disable_value)
         # RESET
         self.pin_reset = Pin(RESET, Pin.OUT, Pin.PULL_UP)
         self.pin_reset.low()
@@ -606,13 +606,13 @@ class PicoGlitcher():
         """
         Enable `VTARGET` output. Activates the Pico Glitcher's power supply for the target.
         """
-        self.pin_vtarget_en.value(self.vtarget_enable)
+        self.pin_vtarget_en.value(self.vtarget_enable_value)
 
     def disable_vtarget(self):
         """
         Disables `VTARGET` output. Disables the Pico Glitcher's power supply for the target.
         """
-        self.pin_vtarget_en.value(self.vtarget_disable)
+        self.pin_vtarget_en.value(self.vtarget_disable_value)
 
     def __ps_power_cycle(self, power_cycle_time:float):
         if self.sm0 is not None:
@@ -839,6 +839,10 @@ class PicoGlitcher():
         #print(f"self.pin_condition = {self.pin_condition}")
         self.dead_time = dead_time
         self.condition = condition
+
+    def cleanup_pio(self):
+        PIO(0).remove_program()
+        PIO(1).remove_program()
 
     def __arm_common(self):
         if self.trigger_mode == "tio":

@@ -425,6 +425,9 @@ class PicoGlitcherInterface(MicroPythonScript):
     def set_mux_voltage(self, voltage:str):
         self.pyb.exec(f'mp.set_mux_voltage("{voltage}")')
 
+    def cleanup_pio(self):
+        self.pyb.exec('mp.cleanup_pio()')
+
     def arm(self, delay:int, length:int, number_of_pulses:int = 1, delay_between:int = 0):
         if number_of_pulses == 1:
             self.pyb.exec(f'mp.arm({delay}, {length})')
@@ -731,6 +734,12 @@ class PicoGlitcher(Glitcher):
             Returns the `power_supply` object if the external power supply is used.
         """
         return self.power_supply
+
+    def cleanup_pio(self):
+        """
+        TODO
+        """
+        self.pico_glitcher.cleanup_pio()
 
     def arm(self, delay:int, length:int, number_of_pulses:int = 1, delay_between:int = 0):
         """
@@ -1298,7 +1307,7 @@ class ErrorHandling():
                 response = b'error: successive error occurred'
                 if self.database is not None:
                     try:
-                        parameters = (experiment_id - self.look_back + 1, ) + parameters[1:-2] + ('O', str(response).encode("utf-8"))
+                        parameters = (experiment_id - self.look_back + 1, ) + parameters[1:-2] + ('O', response)
                         self.database.insert(*parameters)
                     except Exception as _:
                         pass
