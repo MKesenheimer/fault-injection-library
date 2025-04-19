@@ -390,6 +390,13 @@ class MicroPythonScript():
 
 # inherit functionality and overwrite some functions
 class PicoGlitcherInterface(MicroPythonScript):
+    def clean_init(self):
+        self.pyb.exec('mp.init()')
+
+    def switch_pio(self, pio_base:int):
+        if pio_base == 0 or pio_base == 1:
+            self.pyb.exec(f'mp.switch_pio({pio_base})')
+
     def get_firmware_version(self):
         version_bytes = self.pyb.exec('mp.get_firmware_version()')
         decoded_str = version_bytes.decode('utf-8').strip()
@@ -676,6 +683,12 @@ class PicoGlitcher(Glitcher):
         except Exception as _:
             pass
 
+    def clean_init(self):
+        """
+        Re-initialize the Pico Glitcher on the fly. Can be used to make changes to the configuration on the fly.
+        """
+        self.pico_glitcher.clean_init()
+
     def init(self, port:str, ext_power:str = None, ext_power_voltage:float = 3.3, enable_vtarget:bool = True):
         """
         Default initialization procedure of the Pico Glitcher. Default configuration is:
@@ -709,10 +722,6 @@ class PicoGlitcher(Glitcher):
             print("[*] upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py <config-version>/config.json")
             sys.exit(-1)
 
-        self.pico_glitcher.set_trigger("tio", "default", "rising")
-        self.pico_glitcher.set_dead_zone(0, "default", "rising")
-        self.pico_glitcher.set_frequency(200_000_000)
-        self.pico_glitcher.set_hpglitch()
         if ext_power is not None:
             from findus.ExternalPowerSupply import ExternalPowerSupply
             self.pico_glitcher.disable_vtarget()
@@ -737,9 +746,18 @@ class PicoGlitcher(Glitcher):
 
     def cleanup_pio(self):
         """
-        TODO
+        Remove all programs from the internal statemachines. Could be necessary before a program is added to the statemachine but it is out of memory. Some weird behavior was observed when removing and adding programs to the statemachines. Use with caution.
         """
         self.pico_glitcher.cleanup_pio()
+
+    def switch_pio(self, pio_base:int):
+        """
+        In some rare cases, it might be necessary to switch to the other internal statemachine. For example, if a change in the glitch configuration is necessary but the statemachine is out of memory. Instead of removing the programs from the statemachine (`cleanup_pio`), one can simply switch to the other statemachine and setup the Pico Glitcher to use the configuration on the second statemachine.
+
+        Parameters:
+            pio_base: Base number of the statemachine. Can either be 0 or 1. Other values are ignored.
+        """
+        self.pico_glitcher.switch_pio(pio_base)
 
     def arm(self, delay:int, length:int, number_of_pulses:int = 1, delay_between:int = 0):
         """

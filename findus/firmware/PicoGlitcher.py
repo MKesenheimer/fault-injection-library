@@ -11,7 +11,7 @@ Upload this module onto your Pico Glitcher. The classes and methods will become 
 """
 
 import machine
-from rp2 import asm_pio, PIO, StateMachine
+from rp2 import asm_pio, PIO
 from machine import Pin
 import time
 import ujson
@@ -78,9 +78,6 @@ elif config["hardware_version"][0] == 2:
         MUX1_PIO_INIT = PIO.OUT_LOW
         MUX0_PIO_INIT = PIO.OUT_HIGH
         MUX_PIO_INIT = 0b10
-
-def irq_clear(sm):
-  pass
 
 @asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
 def glitch():
@@ -245,7 +242,6 @@ def tio_trigger_with_dead_time_rising_edge():
     wait(1, pin, 0)
 
     # tell observed trigger
-    # TODO: should block be removed?
     irq(block, 7)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
@@ -258,7 +254,6 @@ def tio_trigger_with_dead_time_falling_edge():
     wait(0, pin, 0)
 
     # tell observed trigger
-    # TODO: should block be removed?
     irq(block, 7)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
@@ -277,7 +272,6 @@ def edge_trigger_rising_edge():
     jmp(x_dec, "edge_count_loop")
 
     # tell observed trigger
-    # TODO: should block be removed?
     irq(block, 7)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
@@ -296,7 +290,6 @@ def edge_trigger_falling_edge():
     jmp(x_dec, "edge_count_loop")
 
     # tell observed trigger
-    # TODO: should block be removed?
     irq(block, 7)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
@@ -313,7 +306,6 @@ def block_rising_condition():
     jmp(x_dec, "delay_loop")
 
     # tell execution finished
-    # TODO: can block be removed?
     irq(block, 6)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
@@ -330,19 +322,7 @@ def block_falling_condition():
     jmp(x_dec, "delay_loop")
 
     # tell execution finished
-    # TODO: can block be removed?
     irq(block, 6)
-
-@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
-def test():
-    # block until dead time received
-    pull(block)
-    #mov(x, osr)
-    out(x, 18)
-
-    # get the content of x with function get_sm1_output()
-    mov(isr, x)
-    push(block)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_LEFT)
 def uart_trigger():
@@ -372,7 +352,6 @@ def uart_trigger():
     jmp(x_not_y, "start")
 
     # if received data matches pattern, set the irq and activate the glitch
-    # TODO: can "block" be removed?
     irq(block, 7)
 
     # wrap around
@@ -407,9 +386,13 @@ class PicoGlitcher():
         - Enables the low-power MOSFET for glitching
         - Configures the Pico Glitcher to use the rising-edge triggger condition.
         """
-        self.sm0 = None
-        self.sm1 = None
-        self.sm2 = None
+        self.init()
+
+    def init(self):
+        self.sm0 = PIO(0).state_machine(0)
+        self.sm1 = PIO(0).state_machine(1)
+        self.sm2 = PIO(0).state_machine(2)
+        self.cleanup_pio()
         self.frequency = None
         self.trigger_mode = "tio"
         self.glitch_mode = "crowbar"
@@ -489,6 +472,11 @@ class PicoGlitcher():
             self.ad910x.init()
             self.pin_ps_trigger = self.ad910x.get_trigger_pin()
             self.pulse_generator = PulseGenerator(vhigh=self.config["ps_offset"], factor=self.config["ps_factor"])
+
+    def switch_pio(self, pio_base):
+        self.sm0 = PIO(pio_base).state_machine(0)
+        self.sm1 = PIO(pio_base).state_machine(1)
+        self.sm2 = PIO(pio_base).state_machine(2)
 
     def waveform_generator(self, frequency:int = AD910X.DEFAULT_FREQUENCY, gain:float = AD910X.DEFAULT_GAIN, waveid:int = AD910X.WAVE_TRIANGLE):
         if self.config["hardware_version"][0] < 2:
@@ -841,10 +829,18 @@ class PicoGlitcher():
         self.condition = condition
 
     def cleanup_pio(self):
+        if self.sm0 is not None:
+            self.sm0.active(0)
+        if self.sm1 is not None:
+            self.sm1.active(0)
+        if self.sm2 is not None:
+            self.sm2.active(0)
         PIO(0).remove_program()
         PIO(1).remove_program()
 
     def __arm_common(self):
+        self.sm1.active(0)
+        self.sm2.active(0)
         if self.trigger_mode == "tio":
             sm1_func = None
             if not self.trigger_inverting:
@@ -852,17 +848,18 @@ class PicoGlitcher():
             else:
                 sm1_func = tio_trigger_with_dead_time_falling_edge
             # state machine that checks the trigger condition
-            self.sm1 = StateMachine(1, sm1_func, freq=self.frequency, in_base=self.pin_trigger)
-
+            self.sm1.init(sm1_func, freq=self.frequency, in_base=self.pin_trigger)
             # state machine that blocks for a specific time after a certain condition (dead time)
             sm2_func = None
             if self.condition == "rising":
                 sm2_func = block_rising_condition
             else:
                 sm2_func = block_falling_condition
-            self.sm2 = StateMachine(2, sm2_func, freq=self.frequency, in_base=self.pin_condition)
+            self.sm2.init(sm2_func, freq=self.frequency, in_base=self.pin_condition)
             # push dead time (in seconds) into the fifo of the statemachine
             self.sm2.put(int(self.dead_time * self.frequency))
+            self.sm1.active(1)
+            self.sm2.active(1)
 
         elif self.trigger_mode == "edge":
             sm1_func = None
@@ -871,29 +868,22 @@ class PicoGlitcher():
             else:
                 sm1_func = edge_trigger_falling_edge
             # state machine that checks the trigger condition
-            self.sm1 = StateMachine(1, sm1_func, freq=self.frequency, in_base=self.pin_trigger)
+            self.sm1.init(sm1_func, freq=self.frequency, in_base=self.pin_trigger)
             self.sm1.put(self.number_of_edges - 1)
+            self.sm1.active(1)
 
         elif self.trigger_mode == "uart":
             # state machine that checks the trigger condition
-            self.sm1 = StateMachine(1, uart_trigger, freq=self.baudrate * 8, in_base=self.pin_trigger)
+            self.sm1.init(uart_trigger, freq=self.baudrate * 8, in_base=self.pin_trigger)
             # push pattern into the fifo of the statemachine
             pattern = self.pattern << (32 - self.number_of_bits)
             self.sm1.put(pattern)
             # push number of bits into the fifo of the statemachine (self.number_of_bits - 1 is an optimization here)
             self.sm1.put(self.number_of_bits - 1)
-
-        if self.sm0 is not None:
-            self.sm0.irq(handler=irq_clear)
-            self.sm0.active(1)
-        if self.sm1 is not None:
-            self.sm1.irq(handler=irq_clear)
             self.sm1.active(1)
-        if self.sm2 is not None:
-            self.sm2.irq(handler=irq_clear)
-            self.sm2.active(1)
 
         self.armed = True
+        self.sm0.active(1)
         #self.arm_adc()
 
     def arm(self, delay:int, length:int, number_of_pulses:int = 1, delay_between:int = 0):
@@ -906,16 +896,16 @@ class PicoGlitcher():
             number_of_pulses: The number of pulses to emit. This can be used to emit bursts of crowbar glitches.
             delay_between: The delay between each pulse.
         """
-        #self.release_reset()
+        self.sm0.active(0)
         if number_of_pulses == 1:
             # state machine that emits the glitch if the trigger condition is met
-            self.sm0 = StateMachine(0, glitch, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+            self.sm0.init(glitch, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
             # push delay and length (in nano seconds) into the fifo of the statemachine
             self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
             self.sm0.put(int(length) // (1_000_000_000 // self.frequency))
         elif number_of_pulses > 1:
             # state machine that emits the glitch if the trigger condition is met
-            self.sm0 = StateMachine(0, glitch_burst, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+            self.sm0.init(glitch_burst, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
             # push delay and length (in nano seconds) into the fifo of the statemachine
             self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
             pulse_length = int(length) // (1_000_000_000 // self.frequency)
@@ -937,12 +927,9 @@ class PicoGlitcher():
         if self.config["hardware_version"][0] < 2:
             raise Exception("Multiplexing not implemented in hardware version 1.")
 
-        #self.pin_mux1.value(MUX1_INIT)
-        #self.pin_mux0.value(MUX0_INIT)
-        #PIO(0).remove_program()
-
         # state machine that emits the glitch if the trigger condition is met (part 1)
-        self.sm0 = StateMachine(0, multiplex, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+        self.sm0.active(0)
+        self.sm0.init(multiplex, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
         # push multiplexing shape config into the fifo of the statemachine
         self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
         try:
@@ -1032,7 +1019,8 @@ class PicoGlitcher():
         self.ad910x.update_sram(len(pulse))
 
         # state machine that pulls the ps_trigger pin to low if the trigger condition is met
-        self.sm0 = StateMachine(0, pulse_shaping, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+        self.sm0.active(0)
+        self.sm0.init(pulse_shaping, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
         # push delay (in nano seconds) into the fifo of the statemachine
         self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
         maxlength = 10_000 # TODO: control this by an argument or the pulse length
