@@ -26,14 +26,6 @@ import subprocess
 from findus.STM32Bootloader import STM32Bootloader
 from findus import Database, PicoGlitcher, Helper, ErrorHandling
 
-def program_target():
-    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32f4x.cfg', '-c', 'init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;'], text=True, capture_output=True)
-    print(result.stdout)
-    print(result.stderr)
-    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32f4x.cfg', '-c', 'init; halt; stm32f4x lock 0; sleep 1000; reset run; shutdown;'], text=True, capture_output=True)
-    print(result.stdout)
-    print(result.stderr)
-
 class Main:
     def __init__(self, args):
         self.args = args
@@ -119,7 +111,7 @@ class Main:
             color = self.glitcher.classify(response)
 
             # add to database
-            response_str = str(response).encode("utf-8") + mem
+            response_str = response + mem
             self.database.insert(experiment_id, delay, length, color, response_str)
 
             # monitor

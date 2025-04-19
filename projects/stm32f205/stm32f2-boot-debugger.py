@@ -110,20 +110,10 @@ class Main:
             else:
                 self.glitcher.arm(delay, length)
 
-            # reset target (this triggers the glitch)
-            #self.glitcher.reset(0.01)
-            #self.glitcher.power_cycle_reset(0.2)
-            #time.sleep(0.01)
-            #self.glitcher.initiate_reset()
+            # power-cycle target (this triggers the glitch)
             self.glitcher.disable_vtarget()
             time.sleep(0.1)
             self.glitcher.enable_vtarget()
-            #self.glitcher.release_reset()
-
-            #self.glitcher.block(timeout=1)
-            #while True:
-            #    self.glitcher.set_mux_voltage("VI1")
-            #    time.sleep(0.1)
 
             # block until glitch
             response = ""
@@ -160,8 +150,7 @@ class Main:
             # increase experiment id
             experiment_id += 1
 
-            # Dump finished
-            #time.sleep(0.2)
+            # Halt target
             if self.args.halt and b'success' in state:
                 self.glitcher.reset(0.1)
                 print("[+] Now connect the Trezor One via USB with your computer and go to the Trezor Suite app.")
