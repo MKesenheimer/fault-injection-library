@@ -19,65 +19,8 @@ from FastADC import FastADC
 import AD910X
 from PulseGenerator import PulseGenerator
 import _thread
-
-# load config
-with open("config.json", "r") as file:
-    config = ujson.load(file)
-
-if config["hardware_version"][0] == 1:
-    # Trigger 1 (without level shifter)
-    ALT_TRIGGER = 18
-    # Trigger 2 (with level shifter)
-    TRIGGER = 15
-    VTARGET_OC = 21
-    VTARGET_EN = 20
-    RESET = 0
-    GLITCH_EN = 1
-    HP_GLITCH = 16
-    LP_GLITCH = 17
-    # added as dummy variables to fix undefined variable error
-    MUX0_PIO_INIT = None
-    MUX1_PIO_INIT = None
-    MUX_PIO_INIT = 0b00
-elif config["hardware_version"][0] == 2:
-    TRIGGER = 14
-    # alternative trigger on EXT1
-    ALT_TRIGGER = 11
-    VTARGET_EN = 22
-    RESET = 2
-    GLITCH_EN = 3
-    HP_GLITCH = 12
-    HP_GLITCH_LED = 8
-    LP_GLITCH = 13
-    LP_GLITCH_LED = 7
-    MUX0 = 1
-    MUX1 = 0
-    EXT1 = 11
-    EXT2 = 10
-    if config["mux_vinit"] == "GND":
-        MUX1_INIT = 1
-        MUX0_INIT = 1
-        MUX1_PIO_INIT = PIO.OUT_HIGH
-        MUX0_PIO_INIT = PIO.OUT_HIGH
-        MUX_PIO_INIT = 0b11
-    elif config["mux_vinit"] == "VI1" or config["mux_vinit"] == "VCC":
-        MUX1_INIT = 0
-        MUX0_INIT = 0
-        MUX1_PIO_INIT = PIO.OUT_LOW
-        MUX0_PIO_INIT = PIO.OUT_LOW
-        MUX_PIO_INIT = 0b00
-    elif config["mux_vinit"] == "1.8":
-        MUX1_INIT = 1
-        MUX0_INIT = 0
-        MUX1_PIO_INIT = PIO.OUT_HIGH
-        MUX0_PIO_INIT = PIO.OUT_LOW
-        MUX_PIO_INIT = 0b01
-    else: # 3.3 or VI2
-        MUX1_INIT = 0
-        MUX0_INIT = 1
-        MUX1_PIO_INIT = PIO.OUT_LOW
-        MUX0_PIO_INIT = PIO.OUT_HIGH
-        MUX_PIO_INIT = 0b10
+import Globals
+import sys
 
 @asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
 def glitch():
@@ -184,8 +127,104 @@ def pulse_shaping():
     irq(clear, 7)
     push(block)
 
-@asm_pio(set_init=(MUX1_PIO_INIT, MUX0_PIO_INIT), out_init=(MUX1_PIO_INIT, MUX0_PIO_INIT), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
-def multiplex(MUX_PIO_INIT=MUX_PIO_INIT):
+@asm_pio(set_init=(Globals.MUX1_PIO_INIT, Globals.MUX0_PIO_INIT), out_init=(Globals.MUX1_PIO_INIT, Globals.MUX0_PIO_INIT), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
+def multiplex(MUX_PIO_INIT=Globals.MUX_PIO_INIT):
+    # block until delay received
+    pull(block)
+    mov(x, osr)
+    # block until multiplexing config received
+    pull(block)
+
+    # wait for trigger condition
+    # enable pin_glitch_en
+    wait(1, irq, 7).side(0b1)
+
+    # wait delay
+    label("delay_loop")
+    jmp(x_dec, "delay_loop")
+
+    # get the pulse length and pulse voltage and set the corresponding outputs
+    set(x, 2)
+    label("two_pulses")
+    out(y, 14) # t = OSR >> 14
+    #set(pindirs, 0b00) # disable pinout while shifting
+    out(pins, 2) # v = OSR >> 2
+    #set(pindirs, 0b11) # enable pinout again
+    label("length_loop")
+    jmp(y_dec, "length_loop")
+    jmp(x_dec, "two_pulses")
+
+    # pull the next config
+    pull(block)
+
+    # get the pulse length and pulse voltage and set the corresponding outputs
+    set(x, 2)
+    label("two_pulses2")
+    out(y, 14) # t = OSR >> 14
+    #set(pindirs, 0b00) # disable pinout while shifting
+    out(pins, 2) # v = OSR >> 2
+    #set(pindirs, 0b11) # enable pinout again
+    label("length_loop2")
+    jmp(y_dec, "length_loop2")
+    jmp(x_dec, "two_pulses2")
+
+    # reset and disable pin_glitch_en
+    set(pins, MUX_PIO_INIT).side(0b0)
+
+    # tell execution finished (fills the sm's fifo buffer)
+    irq(clear, 7)
+    push(block)
+
+@asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_LOW), out_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
+def multiplex_vin1(MUX_PIO_INIT=0b00):
+    # block until delay received
+    pull(block)
+    mov(x, osr)
+    # block until multiplexing config received
+    pull(block)
+
+    # wait for trigger condition
+    # enable pin_glitch_en
+    wait(1, irq, 7).side(0b1)
+
+    # wait delay
+    label("delay_loop")
+    jmp(x_dec, "delay_loop")
+
+    # get the pulse length and pulse voltage and set the corresponding outputs
+    set(x, 2)
+    label("two_pulses")
+    out(y, 14) # t = OSR >> 14
+    #set(pindirs, 0b00) # disable pinout while shifting
+    out(pins, 2) # v = OSR >> 2
+    #set(pindirs, 0b11) # enable pinout again
+    label("length_loop")
+    jmp(y_dec, "length_loop")
+    jmp(x_dec, "two_pulses")
+
+    # pull the next config
+    pull(block)
+
+    # get the pulse length and pulse voltage and set the corresponding outputs
+    set(x, 2)
+    label("two_pulses2")
+    out(y, 14) # t = OSR >> 14
+    #set(pindirs, 0b00) # disable pinout while shifting
+    out(pins, 2) # v = OSR >> 2
+    #set(pindirs, 0b11) # enable pinout again
+    label("length_loop2")
+    jmp(y_dec, "length_loop2")
+    jmp(x_dec, "two_pulses2")
+
+    # reset and disable pin_glitch_en
+    set(pins, MUX_PIO_INIT).side(0b0)
+
+    # tell execution finished (fills the sm's fifo buffer)
+    irq(clear, 7)
+    push(block)
+
+@asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_HIGH), out_init=(PIO.OUT_LOW, PIO.OUT_HIGH), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
+def multiplex_vin2(MUX_PIO_INIT=0b10):
     # block until delay received
     pull(block)
     mov(x, osr)
@@ -414,31 +453,31 @@ class PicoGlitcher():
         self.led.low()
         if self.config["hardware_version"][0] == 2 and self.config["hardware_version"][1] >= 3:
             # VTARGET_EN (active high)
-            self.pin_vtarget_en = Pin(VTARGET_EN, Pin.OUT, Pin.PULL_DOWN)
+            self.pin_vtarget_en = Pin(Globals.VTARGET_EN, Pin.OUT, Pin.PULL_DOWN)
             self.vtarget_enable_value = 1
             self.vtarget_disable_value = 0
         elif (self.config["hardware_version"][0] == 2 and self.config["hardware_version"][1] < 3) or self.config["hardware_version"][0] == 1:
             # VTARGET_EN (active low)
-            self.pin_vtarget_en = Pin(VTARGET_EN, Pin.OUT, Pin.PULL_UP)
+            self.pin_vtarget_en = Pin(Globals.VTARGET_EN, Pin.OUT, Pin.PULL_UP)
             self.vtarget_enable_value = 0
             self.vtarget_disable_value = 1
         else:
             raise Exception(f"Hardware version {self.config['hardware_version']} not implemented.")
         self.pin_vtarget_en.value(self.vtarget_disable_value)
         # RESET
-        self.pin_reset = Pin(RESET, Pin.OUT, Pin.PULL_UP)
+        self.pin_reset = Pin(Globals.RESET, Pin.OUT, Pin.PULL_UP)
         self.pin_reset.low()
         # GLITCH_EN
-        self.pin_glitch_en = Pin(GLITCH_EN, Pin.OUT, Pin.PULL_DOWN)
+        self.pin_glitch_en = Pin(Globals.GLITCH_EN, Pin.OUT, Pin.PULL_DOWN)
         self.pin_glitch_en.low()
         # TRIGGER
-        self.pin_trigger = Pin(TRIGGER, Pin.IN)
+        self.pin_trigger = Pin(Globals.TRIGGER, Pin.IN)
         self.trigger_inverting = False
         # HP_GLITCH
-        self.pin_hpglitch = Pin(HP_GLITCH, Pin.OUT, Pin.PULL_DOWN)
+        self.pin_hpglitch = Pin(Globals.HP_GLITCH, Pin.OUT, Pin.PULL_DOWN)
         self.pin_hpglitch.low()
         # LP_GLITCH
-        self.pin_lpglitch = Pin(LP_GLITCH, Pin.OUT, Pin.PULL_DOWN)
+        self.pin_lpglitch = Pin(Globals.LP_GLITCH, Pin.OUT, Pin.PULL_DOWN)
         self.pin_lpglitch.low()
         # which glitching transistor to use. Default: lpglitch
         self.pin_glitch = self.pin_lpglitch
@@ -455,10 +494,10 @@ class PicoGlitcher():
         self.pin_gpios = {}
         # pins for multiplexing and pulse-shaping (only hardware version 2)
         if self.config["hardware_version"][0] >= 2:
-            self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
-            self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
-            self.pin_mux1.value(MUX1_INIT)
-            self.pin_mux0.value(MUX0_INIT)
+            self.pin_mux1 = Pin(Globals.MUX1, Pin.OUT, Pin.PULL_DOWN)
+            self.pin_mux0 = Pin(Globals.MUX0, Pin.OUT, Pin.PULL_DOWN)
+            self.pin_mux1.value(Globals.MUX1_INIT)
+            self.pin_mux0.value(Globals.MUX0_INIT)
             # msb: GPIO0 -> MUX1
             # lsb: GPIO1 -> MUX0
             # 0b00: VI1
@@ -530,25 +569,25 @@ class PicoGlitcher():
         """
         self.trigger_mode = mode
         if pin_trigger == "default":
-            self.pin_trigger = Pin(TRIGGER, Pin.IN)
+            self.pin_trigger = Pin(Globals.TRIGGER, Pin.IN)
             if edge_type == "rising":
                 self.trigger_inverting = False
             else:
                 self.trigger_inverting = True
         elif pin_trigger == "alt":
-            self.pin_trigger = Pin(ALT_TRIGGER, Pin.IN)
+            self.pin_trigger = Pin(Globals.ALT_TRIGGER, Pin.IN)
             if edge_type == "rising":
                 self.trigger_inverting = False
             else:
                 self.trigger_inverting = True
         elif pin_trigger == "ext1":
-            self.pin_trigger = Pin(EXT1, Pin.IN)
+            self.pin_trigger = Pin(Globals.EXT1, Pin.IN)
             if edge_type == "rising":
                 self.trigger_inverting = True
             else:
                 self.trigger_inverting = False
         elif pin_trigger == "ext2":
-            self.pin_trigger = Pin(EXT2, Pin.IN)
+            self.pin_trigger = Pin(Globals.EXT2, Pin.IN)
             if edge_type == "rising":
                 self.trigger_inverting = True
             else:
@@ -623,23 +662,23 @@ class PicoGlitcher():
             self.sm0.active(0)
             #PIO(0).remove_program() # not necessary
             # take control over the pins
-            self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
-            self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
+            self.pin_mux1 = Pin(Globals.MUX1, Pin.OUT, Pin.PULL_DOWN)
+            self.pin_mux0 = Pin(Globals.MUX0, Pin.OUT, Pin.PULL_DOWN)
         # pull the multiplexer to GND
         self.pin_mux1.value(1)
         self.pin_mux0.value(1)
         time.sleep(power_cycle_time)
         # enable power
-        self.pin_mux1.value(MUX1_INIT)
-        self.pin_mux0.value(MUX0_INIT)
+        self.pin_mux1.value(Globals.MUX1_INIT)
+        self.pin_mux0.value(Globals.MUX0_INIT)
 
     def set_mux_voltage(self, voltage:str = "GND"):
         if self.sm0 is not None:
             # deactivate any statemachine that has access to the multiplexer
             self.sm0.active(0)
             # take control over the pins
-            self.pin_mux1 = Pin(MUX1, Pin.OUT, Pin.PULL_DOWN)
-            self.pin_mux0 = Pin(MUX0, Pin.OUT, Pin.PULL_DOWN)
+            self.pin_mux1 = Pin(Globals.MUX1, Pin.OUT, Pin.PULL_DOWN)
+            self.pin_mux0 = Pin(Globals.MUX0, Pin.OUT, Pin.PULL_DOWN)
         if voltage == "GND":
             self.pin_mux1.value(1)
             self.pin_mux0.value(1)
@@ -916,20 +955,26 @@ class PicoGlitcher():
 
         self.__arm_common()
 
-    def arm_multiplexing(self, delay:int, mul_config:dict):
+    def arm_multiplexing(self, delay:int, mul_config:dict, vinit:str = "config"):
         """
         Arm the Pico Glitcher in multiplexing mode and wait for the trigger condition.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
             mul_config: The dictionary for the multiplexing profile with pairs of identifiers and values. For example, this could be `{"t1": 10, "v1": "GND", "t2": 20, "v2": "1.8", "t3": 30, "v3": "GND", "t4": 40, "v4": "1.8"}`. Meaning that when triggered, a GND-voltage pulse with duration of `10ns` is emitted, followed by a +1.8V step with duration of `20ns` and so on.
+            vinit: The initial value of the multiplexer. If `"config"` is chosen, the initial value is read from the configuration file. Additionally, the user can choose between `"VI1"` or `"VI2"`.
         """
         if self.config["hardware_version"][0] < 2:
             raise Exception("Multiplexing not implemented in hardware version 1.")
 
         # state machine that emits the glitch if the trigger condition is met (part 1)
         self.sm0.active(0)
-        self.sm0.init(multiplex, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+        if vinit == "config":
+            self.sm0.init(multiplex, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+        elif vinit == "VI1":
+            self.sm0.init(multiplex_vin1, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+        elif vinit == "VI2":
+            self.sm0.init(multiplex_vin2, freq=self.frequency, set_base=self.pin_glitch, out_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
         # push multiplexing shape config into the fifo of the statemachine
         self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
         try:
@@ -937,13 +982,13 @@ class PicoGlitcher():
             v1 = self.voltage_map[mul_config["v1"]]
         except Exception as _:
             t1 = 0
-            v1 = MUX_PIO_INIT
+            v1 = Globals.MUX_PIO_INIT
         try:
             t2 = int(mul_config["t2"]) // (1_000_000_000 // self.frequency)
             v2 = self.voltage_map[mul_config["v2"]]
         except Exception as _:
             t2 = 0
-            v2 = MUX_PIO_INIT
+            v2 = Globals.MUX_PIO_INIT
         config = v2 << 30 | t2 << 16 | v1 << 14 | t1
         self.sm0.put(config)
         # push the next multiplexing shape config into the fifo of the statemachine
@@ -952,13 +997,13 @@ class PicoGlitcher():
             v3 = self.voltage_map[mul_config["v3"]]
         except Exception as _:
             t3 = 0
-            v3 = MUX_PIO_INIT
+            v3 = Globals.MUX_PIO_INIT
         try:
             t4 = int(mul_config["t4"]) // (1_000_000_000 // self.frequency)
             v4 = self.voltage_map[mul_config["v4"]]
         except Exception as _:
             t4 = 0
-            v4 = MUX_PIO_INIT
+            v4 = Globals.MUX_PIO_INIT
         config = v4 << 30 | t4 << 16 | v3 << 14 | t3
         self.sm0.put(config)
 
@@ -1076,6 +1121,20 @@ class PicoGlitcher():
         with open("config.json", "r") as file:
             config = ujson.load(file)
         print(config)
+
+    def change_config_and_apply(self, key:str, value:int|float|str):
+        """
+        Change the content of the configuration file `config.json`. Note that the value to be changed must already exist. Apply the values afterwards.
+
+        Parameters:
+            key: Key of value to be replaced.
+            value: Value to be set.
+        """
+        self.__change_config(key, value)
+        with open("config.json", "r") as file:
+            self.config = ujson.load(file)
+        del sys.modules['Globals']
+        import Globals
 
     def change_config_and_reset(self, key:str, value:int|float|str):
         """

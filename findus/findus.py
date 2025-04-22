@@ -441,8 +441,8 @@ class PicoGlitcherInterface(MicroPythonScript):
         else:
             self.pyb.exec(f'mp.arm({delay}, {length}, {number_of_pulses}, {delay_between})')
 
-    def arm_multiplexing(self, delay:int, mul_config:dict):
-        return self.pyb.exec(f'mp.arm_multiplexing({delay}, {mul_config})')
+    def arm_multiplexing(self, delay:int, mul_config:dict, vinit:str = "config"):
+        return self.pyb.exec(f'mp.arm_multiplexing({delay}, {mul_config}, "{vinit}")')
 
     def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[int]]):
         return self.pyb.exec(f'mp.arm_pulseshaping_from_config({delay}, {ps_config})')
@@ -509,6 +509,9 @@ class PicoGlitcherInterface(MicroPythonScript):
 
     def change_config_and_reset(self, key, value) -> str:
         return self.pyb.exec(f'mp.change_config_and_reset("{key}", "{value}")')
+
+    def change_config_and_apply(self, key, value) -> str:
+        return self.pyb.exec(f'mp.change_config_and_apply("{key}", "{value}")')
 
     def arm_adc(self):
         self.pyb.exec('mp.arm_adc()')
@@ -771,15 +774,16 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.arm(delay, length, number_of_pulses, delay_between)
 
-    def arm_multiplexing(self, delay:int, mul_config:dict):
+    def arm_multiplexing(self, delay:int, mul_config:dict, vinit:str = "config"):
         """
         Arm the Pico Glitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. Only available for hardware revision 2 and later.
 
         Parameters:
             delay: Glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
             mul_config: The dictionary for the multiplexing profile with pairs of identifiers and values. For example, this could be `{"t1": 10, "v1": "GND", "t2": 20, "v2": "1.8", "t3": 30, "v3": "GND", "t4": 40, "v4": "1.8"}`. Meaning that when triggered, a GND-voltage pulse with duration of `10ns` is emitted, followed by a +1.8V step with duration of `20ns` and so on.
+            vinit: The initial value of the multiplexer. If `"config"` is chosen, the initial value is read from the configuration file. Additionally, the user can choose between `"VI1"` or `"VI2"`.
         """
-        self.pico_glitcher.arm_multiplexing(delay, mul_config)
+        self.pico_glitcher.arm_multiplexing(delay, mul_config, vinit)
 
     def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[int]]):
         """
@@ -1126,13 +1130,23 @@ class PicoGlitcher(Glitcher):
 
     def change_config_and_reset(self, key:str, value:int|float|str):
         """
-        Change the content of the configuration file `config.json`. Note that the value to be changed must already exist. After calling this function, the Pico Glitcher must be re-initialized.
+        Change the content of the configuration file `config.json`. Note that the value to be changed must already exist. After calling this function, the Pico Glitcher must be re-initialized (call `glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)` again).
 
         Parameters:
-            key: Key of value to be replacedl.
+            key: Key of value to be replaced.
             value: Value to be set.
         """
         return self.pico_glitcher.change_config_and_reset(key, value)
+
+    def change_config_and_apply(self, key:str, value:int|float|str):
+        """
+        Change the content of the configuration file `config.json`. Note that the value to be changed must already exist. Apply the values afterwards without reset by calling `glitcher.switch_pio(1)`. This will re-initialize the internal statemachines and apply the configuration.
+
+        Parameters:
+            key: Key of value to be replaced.
+            value: Value to be set.
+        """
+        return self.pico_glitcher.change_config_and_apply(key, value)
 
     def waveform_generator(self, frequency:int, gain:float, waveid:int):
         """
