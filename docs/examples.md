@@ -15,7 +15,7 @@ The following  setup can be used to test the Pico Glitcher.
 Next, run the test script `pico-glitcher.py` located in `fault-injection-library/example`:
 
 ```bash
-cd example
+cd examples
 python pico-glitcher.py --rpico /dev/<rpi-tty-port> --delay 1000 1000 --length 100 100
 ```
 
@@ -34,7 +34,7 @@ Next, run the test script `pico-glitcher-uart.py` located in `fault-injection-li
 
 ```bash
 cd example
-python pico-glitcher-uart.py --rpico /dev/<rpi-tty-port> --target /dev/<target-tty-port> --delay 1000 1000 --length 100 100
+python pico-glitcher-uart-trigger.py --rpico /dev/<rpi-tty-port> --target /dev/<target-tty-port> --delay 1000 1000 --length 100 100
 ```
 
 You should now be able to observe the glitches with an oscilloscope on the 10 Ohm resistor.
