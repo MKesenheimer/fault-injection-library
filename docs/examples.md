@@ -2,6 +2,12 @@
 
 Start your glitching career with these examples.
 
+## Before you start
+
+Some connections on the Pico Glitcher are not obvious and incorrect connection can lead to errors or even destruction of the hardware. So be especially careful when rebuilding the following examples. In particular, be aware that some pin headers carry both the signal and a connection to GND. The following pins on the signal lines, marked with a capital 'G', are connected to GND.
+
+![GND connections](images/pico-glitcher-v2.4-gnd-connections.png)
+
 ## Test the functionality of your Pico Glitcher
 
 The following  setup can be used to test the Pico Glitcher.
