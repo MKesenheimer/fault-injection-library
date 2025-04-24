@@ -94,7 +94,7 @@ To carry out the attack on the STM8s in bootloader mode, the target board is con
 ![STM8s crowbar glitching](images/stm8s/target-board-example-crowbar_bb.png)
 ![STM8s crowbar glitching setup](images/stm8s/setup.jpg)
 
-If you don't have an SMA cable, twist two jumper cables and connect them as shown in the following figure (black and brown cables). Connect the black cable to GND and the brown cable to `GLITCH``.
+If you don't have an SMA cable, twist two jumper cables and connect them as shown in the following figure (black and brown cables). Connect the black cable to GND and the brown cable to `GLITCH`.
 
 ![No SMA cable](images/stm8s/no-sma-cable.jpeg)
 
