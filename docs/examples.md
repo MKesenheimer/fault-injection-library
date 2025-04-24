@@ -94,6 +94,10 @@ To carry out the attack on the STM8s in bootloader mode, the target board is con
 ![STM8s crowbar glitching](images/stm8s/target-board-example-crowbar_bb.png)
 ![STM8s crowbar glitching setup](images/stm8s/setup.jpg)
 
+If you don't have a SMA cable, twist two jumper cables and connect them as shown in the following figure (black and brown cables). Connect the black cable to GND and connect the brown cable to `GLITCH`.
+
+![No SMA cable](images/stm8s/no-sma-cable.jpeg)
+
 - red: 1.8V, supply voltage for the VCAP input of the STM8s MCU
 - black: GND
 - green: Reset line, connected to the Reset input of the target board
@@ -124,6 +128,10 @@ After a few attempts you should observe the first positive results.
 The parameterspace could be optimized to increase the success rate even more.
 
 ![Optimized parameterspace](images/stm8s/parameterspace-optimized.png)
+
+Note how the successful events shift upwards if no SMA cable and instead two jumper cables are used to connect to the `GLITCH` line.
+
+![Parameterspace without SMA cable](images/stm8s/parameterspace-no-sma.png)
 
 ### Technical deep-dive - why do we attack the VCAP line and not VCC?
 
