@@ -102,24 +102,28 @@ To carry out the attack on the STM8s in bootloader mode, the target board is con
 
 Also, for glitching the jumper must be in the `ISP ENABLE` position.
 
-Next, we determine the time between the read memory command `0x11` and the response (`ACK` or `NACK`) from the microcontroller. The check whether ROP is active must happen between those two events. It turns out (and by observing the [Analog Plotter](../adc)), the glitch must be placed between 106,000 and 108,000 ns.
+Next, we determine the time between the read memory command `0x11` and the response (`ACK` or `NACK`) from the microcontroller. The check whether ROP is active must happen between those two events. It turns out (and by observing the [Analog Plotter](../adc)), the glitch must be placed between 106,000 and 107,500 ns.
 
 <TODO: AnalogPlot figure>
 
-As always, the glitch length is estimated: the length must not be too long, but also not too short. A length of 200 to 300 ns turns out to be good.
+As always, the glitch length is estimated: the length must not be too long, but also not too short. We start with a broad range of 10 to 100 ns.
 Overall, the glitching script is called with the following parameters (the tty ports can of course be different in your case).
 
 ```bash
 git clone https://github.com/MKesenheimer/fault-injection-library.git
 cd fault-injection-library/projects/stm8s
 python stm8-readmemory.py --rpico /dev/tty.usbmodem11301 \
-  --target /dev/tty.usbserial-A50285BI --delay 106_000 108_000 \
-  --length 100 200
+  --target /dev/tty.usbserial-A50285BI --delay 106_000 107_500 \
+  --length 10 100
 ```
 
 After a few attempts you should observe the first positive results.
 
 ![Successful glitches](images/stm8s/parameterspace.png)
+
+The parameterspace could be optimized to increase the success rate even more.
+
+![Optimized parameterspace](images/stm8s/parameterspace-optimized.png)
 
 ### Technical deep-dive - why do we attack the VCAP line and not VCC?
 
