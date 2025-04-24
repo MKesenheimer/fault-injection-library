@@ -104,7 +104,7 @@ If you don't have an SMA cable, twist two jumper cables and connect them as show
 - yellow: Trigger line, connected to the UART TX line. If the UART word `0x11` is observed on this line, the glitch is triggered.
 - purple: Glitch, connected to VCAP of the STM8s
 
-Also, for glitching the jumper must be in the `ISP ENABLE` position.
+Also, for glitching the jumper on the STM8s target board must be in the `ISP ENABLE` position.
 
 Next, we determine the time between the read memory command `0x11` and the response (`ACK` or `NACK`) from the microcontroller. The check whether ROP is active must happen between those two events. It turns out (and by observing the [Analog Plotter](../adc)), the glitch must be placed between 106,000 and 107,500 ns.
 
