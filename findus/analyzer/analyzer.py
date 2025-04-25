@@ -343,7 +343,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
                 nbinsx=heatmap.x_number_of_bins,
                 nbinsy=heatmap.y_number_of_bins,
                 color_continuous_scale=heatmap.color_scale,
-                labels={"red_count": "Red Count", "x": x_axis, "y": y_axis}
+                labels={"red_count": "success counts", "x": x_axis, "y": y_axis}
             )
 
         # compute elapsed time
