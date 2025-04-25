@@ -75,6 +75,6 @@ Add your modifications to `PicoGlitcher.py` ([https://github.com/MKesenheimer/fa
 
 ```bash
 cd findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files PicoGlitcher.py AD910X.py \ 
+upload --port /dev/tty.<rpi-tty-port> --files PicoGlitcher.py AD910X.py Globals.py \ 
     PulseGenerator.py Spline.py FastADC.py <config-path>/config.json
 ```

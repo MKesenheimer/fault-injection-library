@@ -10,6 +10,9 @@ import re
 import sys
 from operator import itemgetter
 import shutil
+import numpy as np
+from itertools import product
+from dataclasses import dataclass
 
 from os import listdir
 from dash import Dash, dcc, html, dash_table, Input, Output, State
@@ -81,7 +84,13 @@ def get_databases(directory):
         databases_new.append('%s (%d)' %(databases[index], get_number_of_experiments(directory, databases[index])))
     return databases_new
 
-def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", aspect_ratio=0, auto_update_interval=0, debug=False):
+@dataclass
+class Heatmap():
+    x_number_of_bins: int = 10
+    y_number_of_bins: int = 10
+    color_scale:str = "findus"
+
+def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", aspect_ratio=0, auto_update_interval=0, debug=False, heatmap:Heatmap=None):
     DATABASE_DIRECTORY = directory
     app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
     app.css.config.serve_locally = True
@@ -96,9 +105,9 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
                     html.Option(value="match_string(response, 'ets')"),
                     html.Option(value="match_hex(response, '661b')"),
                     html.Option(value="color = 'G'"),
-                    html.Option(value=f"length > 100"),
-                    html.Option(value=f"delay > 100"),
-                    html.Option(value=f"voltage = 400"),
+                    html.Option(value="length > 100"),
+                    html.Option(value="delay > 100"),
+                    html.Option(value="voltage = 400"),
                 ]),
                 dcc.Input(id='query-input', type="text", list='examples', style={'width':'80%','display': 'inline-block'}, placeholder="SELECT * FROM experiments WHERE"),
                 dcc.Dropdown(id='graph-dropdown', style={'width':'100%'}),
@@ -231,7 +240,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
 
         # perform the query based on the query extension
         if query is not None and query != '':
-            query = f'SELECT * FROM experiments WHERE %s;' %(query)
+            query = f'SELECT * FROM experiments WHERE {query};'
         else:
             query = 'SELECT * FROM experiments;'
 
@@ -266,27 +275,76 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
         nr_of_current_experiments = len(df) 
 
         # output plot
-        fig = px.scatter(
-            df,
-            x = x_axis,
-            y = y_axis,
-            render_mode = "webgl",
-            color = "color", 
-            labels = {"color":f"Classification ({nr_of_current_experiments:,})",y_axis:y_axis, x_axis:x_axis},
-            color_discrete_map = { 
-                "G": "green",
-                "Y": "yellow", 
-                "M" : "magenta", 
-                "O": "orange",
-                "C": "cyan",
-                "B": "blue",
-                "Z": "black",
-                "R": "red", 
-            },
-            category_orders = {
-                "color" : ["G","Y","M","O","C","B","R"]
-            },
-        )
+        if heatmap is None:
+            fig = px.scatter(
+                df,
+                x = x_axis,
+                y = y_axis,
+                render_mode = "webgl",
+                color = "color",
+                labels = {"color":f"Classification ({nr_of_current_experiments:,})",y_axis:y_axis, x_axis:x_axis},
+                color_discrete_map = {
+                    "G": "green",
+                    "Y": "yellow",
+                    "M" : "magenta",
+                    "O": "orange",
+                    "C": "cyan",
+                    "B": "blue",
+                    "Z": "black",
+                    "R": "red",
+                },
+                category_orders = {
+                    "color" : ["G","Y","M","O","C","B","R"]
+                },
+            )
+        else:
+            # Assume x_edges and y_edges already created
+            x_edges = np.linspace(df[x_axis].min(), df[x_axis].max(), heatmap.x_number_of_bins + 1)
+            y_edges = np.linspace(df[y_axis].min(), df[y_axis].max(), heatmap.y_number_of_bins + 1)
+
+            # Bin data
+            df["x_bin"] = pd.cut(df[x_axis], bins=x_edges, labels=False, include_lowest=True)
+            df["y_bin"] = pd.cut(df[y_axis], bins=y_edges, labels=False, include_lowest=True)
+
+            # Filter red only
+            red_df = df[df["color"] == "R"]
+
+            # Count red points in each bin
+            heatmap_data = red_df.groupby(["x_bin", "y_bin"]).size().reset_index(name="red_count")
+
+            # Create all possible bin combinations
+            all_bins = pd.DataFrame(list(product(range(heatmap.x_number_of_bins), range(heatmap.y_number_of_bins))), columns=["x_bin", "y_bin"])
+
+            # Merge with actual data to fill missing bins
+            heatmap_data = pd.merge(all_bins, heatmap_data, on=["x_bin", "y_bin"], how="left")
+            heatmap_data["red_count"] = heatmap_data["red_count"].fillna(0)
+
+            # Map bin numbers to bin centers for plotting
+            x_centers = 0.5 * (x_edges[:-1] + x_edges[1:])
+            y_centers = 0.5 * (y_edges[:-1] + y_edges[1:])
+            heatmap_data["x"] = heatmap_data["x_bin"].map(dict(enumerate(x_centers)))
+            heatmap_data["y"] = heatmap_data["y_bin"].map(dict(enumerate(y_centers)))
+
+            if heatmap.color_scale == "findus":
+                costum_scale=[
+                    "#FFEECC",  # White
+                    "#FFA500",  # Orange
+                    "#FF0000",  # Red
+                    "#FF00FF"   # Magenta
+                ]
+                heatmap.color_scale = costum_scale
+
+            # Plot heatmap
+            fig = px.density_heatmap(
+                heatmap_data,
+                x="x",
+                y="y",
+                z="red_count",
+                nbinsx=heatmap.x_number_of_bins,
+                nbinsy=heatmap.y_number_of_bins,
+                color_continuous_scale=heatmap.color_scale,
+                labels={"red_count": "Red Count", "x": x_axis, "y": y_axis}
+            )
 
         # compute elapsed time
         # elapsed_time_in_seconds = int(time.time()-get_start_time(DATABASE_DIRECTORY, database))
@@ -438,7 +496,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
             done = round(time.time() * 1000)
             print('It took %d milliseconds to generate this data.' %(done - now))
 
-        return fig,data
+        return fig, data
 
     # start server on localhost
     app.run(host=ip, port=port, debug=True)
@@ -457,9 +515,18 @@ def main(argv=sys.argv):
     parser.add_argument("-y", help="parameter to plot on the y-axis", required=False, default='length')
     parser.add_argument("--aspect-ratio", help="aspect ratio of the plot relative to x-axis", required=False, default=0, type=float)
     parser.add_argument("--auto-update", help="Whether to update the plot automatically. Optionally pass the update interval in seconds.", required=False, type=int, nargs='?', const=1, default=0)
+    parser.add_argument("--heatmap", action="store_true", help="Generate a heat map", required=False)
+    parser.add_argument("--x-number-of-bins", "--x-bins", help="Number of bins of the x-axis for the heat map", required=False, default=10, type=int)
+    parser.add_argument("--y-number-of-bins", "--y-bins", help="Number of bins of the y-axis for the heat map", required=False, default=10, type=int)
+    parser.add_argument("--color-scale", help="Color scale to use for the heat map (findus, Blues, Reds, Greys, PuRd, YlOrRd).", required=False, default="findus", type=str)
 
     args = parser.parse_args()
-    run(directory=args.directory, ip=args.ip, port=args.port, x_axis=args.x, y_axis=args.y, aspect_ratio=args.aspect_ratio, auto_update_interval=args.auto_update, debug=True)
+
+    heatmap = None
+    if args.heatmap:
+        heatmap = Heatmap(x_number_of_bins=args.x_number_of_bins, y_number_of_bins=args.y_number_of_bins, color_scale=args.color_scale)
+
+    run(directory=args.directory, ip=args.ip, port=args.port, x_axis=args.x, y_axis=args.y, aspect_ratio=args.aspect_ratio, auto_update_interval=args.auto_update, heatmap=heatmap, debug=True)
 
 if __name__ == "__main__":
     main()

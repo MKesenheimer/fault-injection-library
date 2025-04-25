@@ -12,7 +12,7 @@ mkdir my-fi-project && cd my-fi-project
 python3 -m venv .venv && source .venv/bin/activate
 pip install findus
 cd .venv/lib/python3.13/site-packages/findus/firmware
-upload --port /dev/ttyACM0 --files AD910X.py FastADC.py PicoGlitcher.py PulseGenerator.py Spline.py <config-path>/config.json
+upload --port /dev/ttyACM0 --files AD910X.py FastADC.py Globals.py PicoGlitcher.py PulseGenerator.py Spline.py <config-path>/config.json
 cd ~/my-fi-project
 wget https://raw.githubusercontent.com/MKesenheimer/fault-injection-library/refs/heads/master/examples/pico-glitcher.py
 python pico-glitcher.py --rpico /dev/ttyACM0 --delay 0 0 --length 100 100
@@ -98,8 +98,8 @@ Take note of the device path. Next upload the Pico Glitcher firmware and the spe
 
 ```bash
 cd .venv/lib/python3.12/site-packages/findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py \ 
-    PulseGenerator.py Spline.py <config-path>/config.json
+upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py Globals.py \ 
+    PicoGlitcher.py PulseGenerator.py Spline.py <config-path>/config.json
 ```
 
 Your Pico Glitcher should now be ready to perform fault-injection attacks.
@@ -126,8 +126,8 @@ Then:
 
 ```bash
 cd findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py PicoGlitcher.py \ 
-    PulseGenerator.py Spline.py <config-path>/config.json
+upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py Globals.py \ 
+    PicoGlitcher.py PulseGenerator.py Spline.py <config-path>/config.json
 ```
 
 The next step is to copy an existing glitching script and to adapt it to your needs.
