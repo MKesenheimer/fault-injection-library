@@ -45,6 +45,9 @@ Script that spins up a web application during a glitching campaign to observe th
 ```bash
 $ analyzer --help
 usage: analyzer [-h] --directory DIRECTORY [--port PORT] [--ip IP] [-x X] [-y Y]
+                [--aspect-ratio ASPECT_RATIO] [--auto-update [AUTO_UPDATE]] [--heatmap]
+                [--x-number-of-bins X_NUMBER_OF_BINS] [--y-number-of-bins Y_NUMBER_OF_BINS]
+                [--color-scale COLOR_SCALE]
 
 analyzer.py v0.1 - Fault Injection Analyzer
 
@@ -56,6 +59,19 @@ options:
   --ip IP               Server address
   -x X                  parameter to plot on the x-axis
   -y Y                  parameter to plot on the y-axis
+  --aspect-ratio ASPECT_RATIO
+                        aspect ratio of the plot relative to x-axis
+  --auto-update [AUTO_UPDATE]
+                        Whether to update the plot automatically. Optionally pass the update interval
+                        in seconds.
+  --heatmap             Generate a heat map
+  --x-number-of-bins, --x-bins X_NUMBER_OF_BINS
+                        Number of bins of the x-axis for the heat map
+  --y-number-of-bins, --y-bins Y_NUMBER_OF_BINS
+                        Number of bins of the y-axis for the heat map
+  --color-scale COLOR_SCALE
+                        Color scale to use for the heat map (findus, Blues, Reds, Greys, PuRd,
+                        YlOrRd).
 ```
 
 Example:
@@ -72,6 +88,12 @@ Alternatively, you can spin up the web application on all network interfaces to 
 ```bash
 cd projects/airtag-glitching
 analyzer --directory databases --ip 0.0.0.0
+```
+
+If you want to generate a heat map that shows the number of successful events in a region, use:
+
+```bash
+analyzer --directory databases --auto-update 60 --heatmap --x-bins 15 --y-bins 15 --color-scale findus
 ```
 
 ## stm32-bootloader
