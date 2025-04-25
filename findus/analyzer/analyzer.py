@@ -153,15 +153,6 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
             ], style={'width':'80%','border-style':'none','margin':'0 auto'}),
         ], style={'width':'100%', 'border-style':'none', 'margin-top':'100px','margin-bottom':'100px'})
 
-    #@app.callback(
-    #    Output('graph_opt', 'style'),
-    #    Input('graph_opt', 'value')
-    #)
-    #def toggle_graph(value):
-    #    if heatmap is not None:
-    #        return {'display': 'none'}
-    #    return {'width': '80%'}
-
     # callback for database list
     @app.callback(
         Output("argv", "children"),
@@ -313,8 +304,17 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
         fig_opt = None
         if heatmap is not None:
             # Assume x_edges and y_edges already created
-            x_edges = np.linspace(df[x_axis].min(), df[x_axis].max(), heatmap.x_number_of_bins + 1)
-            y_edges = np.linspace(df[y_axis].min(), df[y_axis].max(), heatmap.y_number_of_bins + 1)
+            x_edges = np.linspace(df[x_axis].min(), df[x_axis].max(), heatmap.x_number_of_bins + 1, endpoint=True)
+            y_edges = np.linspace(df[y_axis].min(), df[y_axis].max(), heatmap.y_number_of_bins + 1, endpoint=True)
+            # include lower and upper limits
+            x_edges[-1] = df[x_axis].max()
+            y_edges[-1] = df[y_axis].max()
+            x_step = (df[x_axis].max() - df[x_axis].min()) / (heatmap.x_number_of_bins)
+            y_step = (df[y_axis].max() - df[y_axis].min()) / (heatmap.y_number_of_bins)
+            x_min = df[x_axis].min() - x_step
+            y_min = df[y_axis].min() - y_step
+            x_edges = np.insert(x_edges, 0, x_min)
+            y_edges = np.insert(y_edges, 0, y_min)
 
             # Bin data
             df["x_bin"] = pd.cut(df[x_axis], bins=x_edges, labels=False, include_lowest=True)
@@ -327,7 +327,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
             heatmap_data = red_df.groupby(["x_bin", "y_bin"]).size().reset_index(name="red_count")
 
             # Create all possible bin combinations
-            all_bins = pd.DataFrame(list(product(range(heatmap.x_number_of_bins), range(heatmap.y_number_of_bins))), columns=["x_bin", "y_bin"])
+            all_bins = pd.DataFrame(list(product(range(heatmap.x_number_of_bins + 1), range(heatmap.y_number_of_bins + 1))), columns=["x_bin", "y_bin"])
 
             # Merge with actual data to fill missing bins
             heatmap_data = pd.merge(all_bins, heatmap_data, on=["x_bin", "y_bin"], how="left")
@@ -354,8 +354,8 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
                 x="x",
                 y="y",
                 z="red_count",
-                nbinsx=heatmap.x_number_of_bins,
-                nbinsy=heatmap.y_number_of_bins,
+                nbinsx=heatmap.x_number_of_bins + 1,
+                nbinsy=heatmap.y_number_of_bins + 1,
                 color_continuous_scale=heatmap.color_scale,
                 labels={"red_count": "success counts", "x": x_axis, "y": y_axis}
             )
