@@ -25,7 +25,7 @@ AS['database'] = None
 AS['argv'] = None
 AS['start_time'] = None
 
-def update_legend_labels(fig,labels):
+def update_legend_labels(fig, labels):
     for entry in fig.data:
         if entry['name'] in labels:
             entry['name'] = labels[entry['name']]
@@ -114,6 +114,9 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
                 html.Center([
                     dcc.Graph(id='graph', style={'width':'80%'}),
                 ]),
+                html.Center([
+                    dcc.Graph(id='graph_opt', style=({'display': 'none'} if heatmap is None else {'width':'80%'})),
+                ]),
                 html.P('re.search(*, response)'),
                 dcc.Input(id='recolor-green', type="text", placeholder="green", style={'width':'15%'}),
                 dcc.Input(id='recolor-green-label', type="text", placeholder="green-label", style={'width':'10%'}),
@@ -138,7 +141,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
                 dcc.RadioItems(id='combine-data', options=['Yes', 'No'], value='Yes', inline=True),
                 html.Div(id='data',style={'width':'100%', 'height':'80%', 'border-style':'none'}),
                 html.Label('Arguments:'),
-                html.Label('lalala', id='argv'),
+                html.Label('argv_label', id='argv'),
 
                 # timer for update_graph callback
                 dcc.Interval(
@@ -147,8 +150,17 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
                     n_intervals=0,
                     disabled=(auto_update_interval == 0)
                 )
-            ],style={'width':'80%','border-style':'none','margin':'0 auto'}),
-        ],style={'width':'100%', 'border-style':'none', 'margin-top':'100px','margin-bottom':'100px'})
+            ], style={'width':'80%','border-style':'none','margin':'0 auto'}),
+        ], style={'width':'100%', 'border-style':'none', 'margin-top':'100px','margin-bottom':'100px'})
+
+    #@app.callback(
+    #    Output('graph_opt', 'style'),
+    #    Input('graph_opt', 'value')
+    #)
+    #def toggle_graph(value):
+    #    if heatmap is not None:
+    #        return {'display': 'none'}
+    #    return {'width': '80%'}
 
     # callback for database list
     @app.callback(
@@ -194,6 +206,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
     # callback for database selection  
     @app.callback(
         Output('graph','figure'),
+        Output('graph_opt','figure'),
         Output('data','children'),
         Input('update-button', 'n_clicks'),
         Input('graph-dropdown', 'value'),
@@ -275,29 +288,30 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
         nr_of_current_experiments = len(df) 
 
         # output plot
-        if heatmap is None:
-            fig = px.scatter(
-                df,
-                x = x_axis,
-                y = y_axis,
-                render_mode = "webgl",
-                color = "color",
-                labels = {"color":f"Classification ({nr_of_current_experiments:,})",y_axis:y_axis, x_axis:x_axis},
-                color_discrete_map = {
-                    "G": "green",
-                    "Y": "yellow",
-                    "M" : "magenta",
-                    "O": "orange",
-                    "C": "cyan",
-                    "B": "blue",
-                    "Z": "black",
-                    "R": "red",
-                },
-                category_orders = {
-                    "color" : ["G","Y","M","O","C","B","R"]
-                },
-            )
-        else:
+        fig = px.scatter(
+            df,
+            x = x_axis,
+            y = y_axis,
+            render_mode = "webgl",
+            color = "color",
+            labels = {"color":f"Classification ({nr_of_current_experiments:,})",y_axis:y_axis, x_axis:x_axis},
+            color_discrete_map = {
+                "G": "green",
+                "Y": "yellow",
+                "M" : "magenta",
+                "O": "orange",
+                "C": "cyan",
+                "B": "blue",
+                "Z": "black",
+                "R": "red",
+            },
+            category_orders = {
+                "color" : ["G","Y","M","O","C","B","R"]
+            },
+        )
+
+        fig_opt = None
+        if heatmap is not None:
             # Assume x_edges and y_edges already created
             x_edges = np.linspace(df[x_axis].min(), df[x_axis].max(), heatmap.x_number_of_bins + 1)
             y_edges = np.linspace(df[y_axis].min(), df[y_axis].max(), heatmap.y_number_of_bins + 1)
@@ -335,7 +349,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
                 heatmap.color_scale = costum_scale
 
             # Plot heatmap
-            fig = px.density_heatmap(
+            fig_opt = px.density_heatmap(
                 heatmap_data,
                 x="x",
                 y="y",
@@ -357,6 +371,9 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
             fig.update_layout(title_text=f"{database[:-7]}", title_x=0.5, yaxis=dict(scaleanchor="x", scaleratio=aspect_ratio))
         else:
             fig.update_layout(title_text=f"{database[:-7]}", title_x=0.5)
+
+        if fig_opt is not None:
+            fig_opt.update_layout(title_text=f"{database[:-7]}", title_x=0.5)
 
         # update labels in legenda
         def make_label(color, label, df):
@@ -385,10 +402,8 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
 
         # TODO: rewrite this code
         if combine == 'Yes':
-
             combined_records = []
             for record in records:
-
                 # decode response to make sure it's compatible with json
                 response_hex = record['response'].hex(' ')
                 response = record['response'].decode('utf-8', errors='replace')
@@ -440,7 +455,6 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
  
         else:
             columns = ['id', 'color', y_axis, x_axis, 'rlen', 'response','response_hex']
-
             all_records = []
 
             for record in records:
@@ -496,7 +510,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
             done = round(time.time() * 1000)
             print('It took %d milliseconds to generate this data.' %(done - now))
 
-        return fig, data
+        return fig, fig_opt, data
 
     # start server on localhost
     app.run(host=ip, port=port, debug=True)
