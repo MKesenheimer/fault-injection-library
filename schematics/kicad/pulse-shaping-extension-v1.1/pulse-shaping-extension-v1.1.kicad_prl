@@ -1,8 +1,8 @@
 {
   "board": {
-    "active_layer": 37,
+    "active_layer": 0,
     "active_layer_preset": "",
-    "auto_track_width": true,
+    "auto_track_width": false,
     "hidden_netclasses": [],
     "hidden_nets": [],
     "high_contrast_mode": 0,
@@ -74,7 +74,7 @@
     "ssh_key": ""
   },
   "meta": {
-    "filename": "pico-glitcher-v2.1-extension.kicad_prl",
+    "filename": "pulse-shaping-extension-v1.1.kicad_prl",
     "version": 3
   },
   "project": {
