@@ -52,13 +52,14 @@ import re
 import socket
 
 class DebugInterface():
-    def __init__(self, interface:str = "stlink", interface_config:str=None, target:str = "stm32l0", target_config:str=None, transport:str = "hla_swd", gdb_exec:str = "arm-none-eabi-gdb"):
+    def __init__(self, interface:str = "stlink", interface_config:str=None, target:str = "stm32l0", target_config:str=None, transport:str = "hla_swd", gdb_exec:str = "arm-none-eabi-gdb", adapter_serial:str = None):
         self.openocd_process = None
         self.gdb_process = None
         self.target_name = target
         self.socket = None
         self.gdb_exec = gdb_exec
         self.transport = transport
+        self.adapter_serial = adapter_serial
         if interface_config is None:
             self.interface_config = f'interface/{interface}.cfg'
         else:
@@ -92,13 +93,17 @@ class DebugInterface():
         """
         # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
-        result = subprocess.run([
+        args = [
             'openocd',
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
             '-c', f'init; halt; {self.target_name}x unlock 0; exit'
-            ], text=True, capture_output=True)
+            ]
+        if self.adapter_serial is not None:
+            args.insert(3, '-c')
+            args.insert(4, f'adapter serial {self.adapter_serial}')
+        result = subprocess.run(args, text=True, capture_output=True)
         if verbose:
             print(result.stdout + result.stderr)
 
@@ -108,13 +113,17 @@ class DebugInterface():
         """
         # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
-        result = subprocess.run([
+        args = [
             'openocd',
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
             '-c', f'init; halt; {self.target_name}x lock 0; exit'
-            ], text=True, capture_output=True)
+            ]
+        if self.adapter_serial is not None:
+            args.insert(3, '-c')
+            args.insert(4, f'adapter serial {self.adapter_serial}')
+        result = subprocess.run(args, text=True, capture_output=True)
         if verbose:
             print(result.stdout + result.stderr)
 
@@ -124,13 +133,17 @@ class DebugInterface():
         """
         # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
-        result = subprocess.run([
+        args = [
             'openocd',
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
             '-c', f'init; halt; program {elf_image}; exit'
-            ], text=True, capture_output=True)
+            ]
+        if self.adapter_serial is not None:
+            args.insert(3, '-c')
+            args.insert(4, f'adapter serial {self.adapter_serial}')
+        result = subprocess.run(args, text=True, capture_output=True)
         if verbose:
             print(result.stdout + result.stderr)
 
@@ -142,7 +155,7 @@ class DebugInterface():
         # openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; load_image rdp-downgrade-STM32L0.elf" -c "reg sp 0x20002000" -c "reg pc 0x20000fa4" -c "resume" -c "exit"
         # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
-        result = subprocess.run([
+        args = [
             'openocd',
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
@@ -152,39 +165,51 @@ class DebugInterface():
             '-c', f'reg pc {hex(pc)}',
             '-c', 'resume',
             '-c', 'exit',
-            ], text=True, capture_output=True)
+            ]
+        if self.adapter_serial is not None:
+            args.insert(3, '-c')
+            args.insert(4, f'adapter serial {self.adapter_serial}')
+        result = subprocess.run(args, text=True, capture_output=True)
         if verbose:
             print(result.stdout + result.stderr)
 
     def read_image(self, bin_image:str = "memory_dump.bin", start_addr:int = 0x08000000, length:int = 0x400, verbose:bool = False):
         # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
-        result = subprocess.run([
+        args = [
             'openocd',
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
             '-c', f'init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; exit'
-            ], text=True, capture_output=True)
+            ]
+        if self.adapter_serial is not None:
+            args.insert(3, '-c')
+            args.insert(4, f'adapter serial {self.adapter_serial}')
+        result = subprocess.run(args, text=True, capture_output=True)
         if verbose:
             print(result.stdout + result.stderr)
 
     def test_connection(self):
         # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
-        result = subprocess.run([
+        args = [
             'openocd',
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
             '-c', 'init; reset run; exit'
-            ], text=True, capture_output=True)
+            ]
+        if self.adapter_serial is not None:
+            args.insert(3, '-c')
+            args.insert(4, f'adapter serial {self.adapter_serial}')
+        result = subprocess.run(args, text=True, capture_output=True)
         print(result.stdout + result.stderr)
 
     def read_address(self, address):
         # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
-        result = subprocess.run([
+        args = [
             'openocd',
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
@@ -192,7 +217,11 @@ class DebugInterface():
             '-c', 'init',
             '-c', f'mdw {hex(address)}',
             '-c', 'exit'
-            ], text=True, capture_output=True)
+            ]
+        if self.adapter_serial is not None:
+            args.insert(3, '-c')
+            args.insert(4, f'adapter serial {self.adapter_serial}')
+        result = subprocess.run(args, text=True, capture_output=True)
         response = result.stdout + result.stderr
         return self.extract_memory_content(response=response, address=address), response
 
@@ -248,13 +277,17 @@ class DebugInterface():
         self.kill_process(3333)
         # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
-        self.openocd_process = subprocess.Popen([
+        args = [
             'openocd',
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
             '-c', 'init'
-            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, start_new_session=True)
+            ]
+        if self.adapter_serial is not None:
+            args.insert(3, '-c')
+            args.insert(4, f'adapter serial {self.adapter_serial}')
+        self.openocd_process = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, start_new_session=True)
         time.sleep(delay)
 
     def detach(self):
