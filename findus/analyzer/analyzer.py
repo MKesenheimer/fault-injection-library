@@ -375,14 +375,55 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
         if fig_opt is not None:
             fig_opt.update_layout(title_text=f"{database[:-7]}", title_x=0.5)
 
+        # calculate the average percentage and the standard deviation for every category
+        # Divide the experiments carried out into sub-experiments and calculate the average 
+        # quotient (xi) for each subset. Also calculate the average quotient of all experiments (mu).
+        # The standard deviation can then be calculated using the following formula, where N is the number of experiments:
+        # sigma = Sqrt(Sum((xi - mu)**2) / N)
+        # Note that this approximation is dependent on the number of subsets the experiments are divided into (samples).
+        # If the sample size is equal to 1, the standard deviation is 0.
+        # If the sample size is large, the standard deviation is big and meaningless.
+        # Both extreme values are not meaningful, which is why a samples size in between must be selected.
+        # Select >= 10 samples for a rough estimate.
+        # Select >= 30 samples for a statistically reliable estimate.
+        # Select >= 100 samples for solid confidence, especially with noisy data.
+        samples = 10
+        bin_size = int(len(df) / samples)
+        if bin_size == 0:
+            bin_size = 1
+        count = {'G':0, 'Y':0, 'M':0, 'O':0, 'C':0, 'B':0, 'Z':0, 'R':0}
+        stddev = {'G':0, 'Y':0, 'M':0, 'O':0, 'C':0, 'B':0, 'Z':0, 'R':0}
+        avg = {'G':0, 'Y':0, 'M':0, 'O':0, 'C':0, 'B':0, 'Z':0, 'R':0}
+        for color in stddev:
+            cnt = len(df.query(f"color == '{color}'"))
+            count[color] = cnt
+            if cnt > 0:
+                mu = cnt / len(df) * 100
+            else:
+                mu = 0.0
+            avg[color] = mu
+            
+            avg_per_bin = []
+            for bins in range(0, int(len(df) / bin_size) - 1):
+                subset = df[bin_size * bins:bin_size * (bins + 1)]
+                cnt_subset = len(subset.query(f"color == '{color}'"))
+                if cnt_subset > 0 and len(subset) > 0:
+                    mu_subset = cnt_subset / len(subset)
+                else:
+                    mu_subset = 0.0
+                avg_per_bin.append(mu_subset)
+            sigma = 0
+            if cnt > 0:
+                for xi in avg_per_bin:
+                    sigma += (xi - mu)**2 / cnt
+                sigma = sigma**0.5
+            stddev[color] = sigma
+        #print(stddev)
+
+
         # update labels in legenda
         def make_label(color, label, df):
-            count = len(df.query(f"color == '{color}'"))
-            if count > 0:
-                percentage = "{:.1%}".format(count/len(df))
-            else:
-                percentage = "{:.1%}".format(0)
-            return { color: f'{label} ( {count} / {percentage} )'}
+            return { color: f'{label} ( {count[color]} / {avg[color]:.1f} % +- {stddev[color]:.1f} % )'}
 
         labels = {}
         labels.update(make_label('G', greenlabel, df))
