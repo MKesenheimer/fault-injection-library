@@ -96,6 +96,35 @@ If you want to generate a heat map that shows the number of successful events in
 analyzer --directory databases --auto-update 60 --heatmap --x-bins 15 --y-bins 15 --color-scale findus
 ```
 
+## database-tool
+
+This is a small tool to operate on existing databases. For example, experiments can be removed on certain conditions, or two databases can be merged.
+
+```bash
+database-tool --help
+usage: database-tool [-h] [--dbname DBNAME] [--cleanup CLEANUP] [--remove REMOVE] [--merge databas1 database2 output]
+
+options:
+  -h, --help            show this help message and exit
+  --dbname DBNAME       Name of the database
+  --cleanup CLEANUP     Remove experiments with a certain color from the database.
+  --remove REMOVE       Remove experiments by a certain condition. For example, `id = 1000`, `id > 1000`, `color = "C"`
+                        or `delay < 6000`.
+  --merge databas1 database2 output
+                        Merge two databases
+```
+
+Example how to remove experiments by a given condition:
+```bash
+database-tool --dbname database1.sqlite --remove 'color = "G"'
+database-tool --dbname database1.sqlite --remove 'id > 1000'
+```
+
+Example how to merge two databases:
+```bash
+database-tool --merge database1.sqlite database2.sqlite out.sqlite
+```
+
 ## stm32-bootloader
 
 Communicate with a STM32 microcontroller in bootloader mode and read the flash memory (only if RDP-0 is active). If read-out protection is active, the corresponding target responses are printed.

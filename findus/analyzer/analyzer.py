@@ -322,16 +322,22 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
 
             # Filter red only
             red_df = df[df["color"] == "R"]
+            green_df = df[df["color"] == "G"]
 
             # Count red points in each bin
-            heatmap_data = red_df.groupby(["x_bin", "y_bin"]).size().reset_index(name="red_count")
+            red_counts = red_df.groupby(["x_bin", "y_bin"]).size().reset_index(name="red_count")
+            green_counts = green_df.groupby(["x_bin", "y_bin"]).size().reset_index(name="green_count")
+
+            # merge counts and calculate score
+            heatmap_data = pd.merge(red_counts, green_counts, on=["x_bin", "y_bin"], how="outer").fillna(0)
+            heatmap_data["score"] = heatmap_data["red_count"] / (heatmap_data["red_count"] + heatmap_data["green_count"])
 
             # Create all possible bin combinations
             all_bins = pd.DataFrame(list(product(range(heatmap.x_number_of_bins + 1), range(heatmap.y_number_of_bins + 1))), columns=["x_bin", "y_bin"])
 
             # Merge with actual data to fill missing bins
             heatmap_data = pd.merge(all_bins, heatmap_data, on=["x_bin", "y_bin"], how="left")
-            heatmap_data["red_count"] = heatmap_data["red_count"].fillna(0)
+            heatmap_data["score"] = heatmap_data["score"].fillna(0)
 
             # Map bin numbers to bin centers for plotting
             x_centers = 0.5 * (x_edges[:-1] + x_edges[1:])
@@ -353,11 +359,11 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
                 heatmap_data,
                 x="x",
                 y="y",
-                z="red_count",
+                z="score",
                 nbinsx=heatmap.x_number_of_bins + 1,
                 nbinsy=heatmap.y_number_of_bins + 1,
                 color_continuous_scale=heatmap.color_scale,
-                labels={"red_count": "success counts", "x": x_axis, "y": y_axis}
+                labels={"score": "score", "x": x_axis, "y": y_axis}
             )
 
         # compute elapsed time

@@ -52,7 +52,7 @@ import re
 import socket
 
 class DebugInterface():
-    def __init__(self, interface:str = "stlink", interface_config:str=None, target:str = "stm32l0", target_config:str=None, transport:str = "hla_swd", gdb_exec:str = "arm-none-eabi-gdb", adapter_serial:str = None):
+    def __init__(self, interface:str = "stlink", interface_config:str=None, target:str = "stm32l0", target_config:str=None, transport:str = "hla_swd", gdb_exec:str = "arm-none-eabi-gdb", adapter_serial:str = None, gdb_port = 3333, telnet_port = 4444, tcl_port = 6666):
         self.openocd_process = None
         self.gdb_process = None
         self.target_name = target
@@ -60,6 +60,9 @@ class DebugInterface():
         self.gdb_exec = gdb_exec
         self.transport = transport
         self.adapter_serial = adapter_serial
+        self.gdb_port = gdb_port
+        self.telnet_port = telnet_port
+        self.tcl_port = tcl_port
         if interface_config is None:
             self.interface_config = f'interface/{interface}.cfg'
         else:
@@ -98,6 +101,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}',
             '-c', f'init; halt; {self.target_name}x unlock 0; exit'
             ]
         if self.adapter_serial is not None:
@@ -118,6 +124,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}',
             '-c', f'init; halt; {self.target_name}x lock 0; exit'
             ]
         if self.adapter_serial is not None:
@@ -138,6 +147,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}',
             '-c', f'init; halt; program {elf_image}; exit'
             ]
         if self.adapter_serial is not None:
@@ -160,6 +172,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}',
             '-c', f'init; halt; load_image {elf_image}',
             '-c', f'reg sp {hex(sp)}',
             '-c', f'reg pc {hex(pc)}',
@@ -181,6 +196,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}',
             '-c', f'init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; exit'
             ]
         if self.adapter_serial is not None:
@@ -198,6 +216,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}',
             '-c', 'init; reset run; exit'
             ]
         if self.adapter_serial is not None:
@@ -214,6 +235,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}',
             '-c', 'init',
             '-c', f'mdw {hex(address)}',
             '-c', 'exit'
@@ -249,7 +273,7 @@ class DebugInterface():
         rdp = (optbytes & 0xff)
         return rdp, pcrop
 
-    def kill_process(self, port:int = 3333, verbose=False):
+    def kill_process(self, port:int, verbose=False):
         # Find process using the port
         cmd = ["lsof", "-i", f":{port}"]
         #pattern = r"\b(\d+)\b"  # Regex for PID
@@ -273,8 +297,8 @@ class DebugInterface():
                 print(f"[-] Error killing process: {e}")
 
     def attach(self, delay=0.1):
-        # check if there is a dangling process that would interfere with openeocd
-        self.kill_process(3333)
+        # check if there is a dangling process that would interfere with openocd
+        self.kill_process(self.gdb_port)
         # trunk-ignore(bandit/B607)
         # trunk-ignore(bandit/B603)
         args = [
@@ -282,6 +306,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}',
             '-c', 'init'
             ]
         if self.adapter_serial is not None:
@@ -309,7 +336,7 @@ class DebugInterface():
             '--interpreter=mi2',
             f'{elf_image}'
             ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        self.gdb_process.stdin.write("target remote localhost:3333\n")
+        self.gdb_process.stdin.write(f"target remote localhost:{self.gdb_port}\n")
         self.gdb_process.stdin.write(f"load {elf_image}\n")
         self.gdb_process.stdin.write("continue\n")
         self.gdb_process.stdin.write("detach\n")
@@ -331,7 +358,7 @@ class DebugInterface():
         # generate a connection to the openocd telnet server
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(1)
-        self.socket.connect(('localhost', 4444))
+        self.socket.connect(('localhost', {self.telnet_port}))
         # receive start messages
         time.sleep(0.1)
         self.socket.recv(4096)

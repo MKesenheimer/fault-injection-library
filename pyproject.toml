@@ -39,7 +39,7 @@ stm32-power-cycle-and-read = "findus.helper.stm32_power_cycle_and_read:main"
 stm8-programmer = "findus.STM8Programmer:main"
 pulse-editor = "findus.InteractivePchipEditor:main"
 pulse-calibration = "findus.helper.pulse_shaping_calibration:main"
-
+database-tool = "findus.helper.database_tool:main"
 
 [project.urls]
 Homepage = "https://mkesenheimer.github.io"

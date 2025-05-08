@@ -59,7 +59,10 @@ class Database():
     Methods:
         __init__: Default constructor.
         insert: Method to insert datapoints into the SQLite database.
+        get_parameters_of_experiment_rel: Get the parameters of a dataset by experiment_id relative to the base row count.
         get_parameters_of_experiment: Get the parameters of a dataset by experiment_id.
+        remove_conditional: Remove a parameter point from the database by a condition.
+        remove_rel: Remove a parameter point from the database by experiment_id relative to the base row count.
         remove: Remove a parameter point from the database by experiment_id.
         cleanup: Remove all parameter points with a given color.
         get_number_of_experiments: Get the total number of performed experiments (number of datasets in the database).
@@ -68,7 +71,7 @@ class Database():
         close: Close the connection to the database.
     """
 
-    def __init__(self, argv: list[str], dbname: str = None, resume: bool = False, nostore: bool = False, column_names = None):
+    def __init__(self, argv:list[str], dbname:str = None, resume:bool = False, nostore:bool = False, column_names:list[str] = None, dirname:str = "databases"):
         """
         Default constructor of the Database class.
 
@@ -77,13 +80,15 @@ class Database():
             dbname: Name of the database to be generated.
             resume: Resume a previous run and write the results into the previously generated database
             nostore: Do not store the results in a database (can be used for debugging).
+            column_names: Specify the parameter names of the experiments.
+            dirname: Directory name to store the databases. If dirname is None, dbname can be an absolut path.
         """
         self.nostore = nostore
-        if not os.path.isdir('databases'):
-            os.mkdir("databases")
+        if dirname is not None and not os.path.isdir(dirname):
+            os.mkdir(dirname)
 
         if resume and dbname is None:
-            list_of_files = glob.glob('databases/*.sqlite')
+            list_of_files = glob.glob(f'{dirname}/*.sqlite')
             latest_file = max(list_of_files, key=os.path.getctime)[10:]
             print(f"[+] Resuming previous database {latest_file}")
             self.dbname = latest_file
@@ -93,22 +98,29 @@ class Database():
         else:
             self.dbname = dbname
 
-        self.con = sqlite3.connect("databases/" + self.dbname)
+        if dirname is not None:
+            self.con = sqlite3.connect(f"{dirname}/" + self.dbname)
+        else:
+            self.con = sqlite3.connect(self.dbname)
         self.cur = self.con.cursor()
         self.argv = argv
         self.column_names = column_names
         if column_names is None:
             self.column_names = ["delay", "length"]
-        if not resume and dbname is None:
-            columns = ", ".join(f"{col} integer" for col in self.column_names)
-            self.cur.execute(f"CREATE TABLE experiments(id integer, {columns}, color text, response blob)")
-            self.cur.execute("CREATE TABLE metadata (stime_seconds integer, argv blob)")
+        if not resume:
+            columns = ", ".join(f"{col} INTEGER" for col in self.column_names)
+            #print(f"CREATE TABLE experiments (id INTEGER, {columns}, color TEXT, response BLOB)")
+            self.cur.execute(f"CREATE TABLE experiments (id INTEGER, {columns}, color TEXT, response BLOB);")
+            self.cur.execute("CREATE TABLE metadata (stime_seconds INTEGER, argv BLOB);")
 
         self.base_row_count = self.get_latest_experiment_id()
         if self.base_row_count is None:
             self.base_row_count = 0
-        if resume or dbname is not None:
-            print(f"[+] Number of experiments in previous database: {self.base_row_count}")
+
+    def get_column_names(self):
+        self.cur.execute("SELECT * FROM experiments LIMIT 1")
+        column_names = [description[0] for description in self.cur.description]
+        return column_names[1:5]
 
     def insert(self, *dataset):
         """
@@ -144,12 +156,26 @@ class Database():
             self.cur.execute(f"INSERT INTO experiments (id,{columns},color,response) VALUES ({qmarks})", values)
             self.con.commit()
 
-    def get_parameters_of_experiment(self, experiment_id: int) -> list:
+    def get_parameters_of_experiment(self, experiment_id:int) -> list:
         """
         Get the parameters of a dataset by experiment_id.
 
         Parameters:
-            experiment_id: ID of the experiment to insert into the database.
+            experiment_id: ID of the experiment
+
+        Returns:
+            List of parameters.
+        """
+        self.cur.execute("SELECT * FROM experiments WHERE id = (?);", [experiment_id])
+        self.con.commit()
+        return next(self.cur, [None])
+
+    def get_parameters_of_experiment_rel(self, experiment_id:int) -> list:
+        """
+        Get the parameters of a dataset by experiment_id relative to the base row count.
+
+        Parameters:
+            experiment_id: ID of the experiment relative to the base row count.
 
         Returns:
             List of parameters.
@@ -158,7 +184,17 @@ class Database():
         self.con.commit()
         return next(self.cur, [None])
 
-    def remove(self, experiment_id: int):
+    def remove_conditional(self, condition:str):
+        """
+        Remove a parameter point from the database by a condition.
+
+        Parameters:
+            condition: Condition to apply. For example, `id = 1000`, `id > 1000`, `color = \"C\"` or `delay < 6000`.
+        """
+        self.cur.execute(f"DELETE FROM experiments WHERE {condition};")
+        self.con.commit()
+
+    def remove(self, experiment_id:int):
         """
         Remove a parameter point from the database by experiment_id.
 
@@ -168,7 +204,7 @@ class Database():
         self.cur.execute("DELETE FROM experiments WHERE id = (?);", [experiment_id])
         self.con.commit()
 
-    def remove_rel(self, experiment_id: int):
+    def remove_rel(self, experiment_id:int):
         """
         Remove a parameter point from the database by experiment_id relative to the base row count.
 
@@ -205,9 +241,12 @@ class Database():
         Returns:
             Experiment ID.
         """
-        self.cur.execute("SELECT * FROM experiments WHERE id=(SELECT max(id) FROM experiments);")
-        self.con.commit()
-        return next(self.cur, [None])[0]
+        try:
+            self.cur.execute("SELECT * FROM experiments WHERE id=(SELECT max(id) FROM experiments);")
+            self.con.commit()
+            return next(self.cur, [None])[0]
+        except sqlite3.OperationalError:
+            return 0
 
     def get_base_experiments_count(self) -> int:
         """
@@ -1335,7 +1374,7 @@ class ErrorHandling():
                         self.database.remove_rel(eid)
 
                 # get parameters of first erroneous experiment and store in database with extra classification
-                parameters = self.database.get_parameters_of_experiment(experiment_id - self.look_back)
+                parameters = self.database.get_parameters_of_experiment_rel(experiment_id - self.look_back)
                 response = b'error: successive error occurred'
                 if self.database is not None:
                     try:
