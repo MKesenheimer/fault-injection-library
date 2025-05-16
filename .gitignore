@@ -26,6 +26,7 @@ schematics/kicad/pico-glitcher-v2-amplifier
 schematics/kicad/pico-glitcher-v2-opamp-amplifier
 schematics/kicad/pico-glitcher-v2-simulation
 schematics/kicad/pico-glitcher-v2-extension/production
+schematics/kicad/stm32l05-target-v1.0
 **/*backups
 schematics/product
 *.pdf

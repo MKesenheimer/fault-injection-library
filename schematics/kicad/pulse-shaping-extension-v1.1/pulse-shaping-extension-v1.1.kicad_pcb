@@ -20200,6 +20200,7 @@
 		(property "Reference" "U5"
 			(at 0 -2.25 90)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "f46678aa-3ece-4a32-8a63-654e17b67deb")
 			(effects
 				(font
