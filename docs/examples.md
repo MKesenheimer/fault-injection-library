@@ -48,7 +48,11 @@ Measure the expected delay and glitch length with the oscilloscope.
 
 ## Edge Counting Trigger
 
-<TODO>
+Sometimes it is clever to trigger after a certain number of edges in a signal. For example, if the communication protocol is unknown or is not supported by the Pico Glitcher as a trigger signal.
+However, since most signals are deterministic, the number of edges can be used as a trigger signal.
+
+The script `pico-glitcher-edge-counter.py` located in `fault-injection-library/examples` can be used to test the edge-counting trigger capabilities of the Pico Glitcher. Use the same connections as in [the first setup](#test-the-functionality-of-your-pico-glitcher).
+
 
 ## STM8s Glitching
 
