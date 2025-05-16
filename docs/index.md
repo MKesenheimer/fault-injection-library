@@ -16,6 +16,12 @@ Furthermore, this library supports the [ChipWhisperer Pro](https://rtfm.newae.co
 The database functionality has been expanded to a certain extent, too.
 With this implementation, e.g. one can add experiments to a previous measurement campaign.
 
+## Where to get the Pico Glitcher from?
+
+The Pico Glitcher and accessories can be obtained from tindie:
+[https://www.tindie.com/stores/faulty-hardware/](https://www.tindie.com/stores/faulty-hardware/)
+
+
 ## Links and further resources
 
 If you have feature requests or issues, please contact me:
