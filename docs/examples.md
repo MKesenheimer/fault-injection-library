@@ -12,9 +12,9 @@ Some connections on the Pico Glitcher are not obvious and incorrect connection c
 
 The following  setup can be used to test the Pico Glitcher.
 
-- Connect 'TRIGGER' input with 'RESET'.
-- Between 'GLITCH' and 'VTARGET', connect a 10 Ohm resistor (this is the test target in this case).
-- Optionally connect channel 1 of an oscilloscope to 'RESET' and channel 2 to 'GLITCH'.
+- Connect `TRIGGER` input with `RESET`.
+- Between `GLITCH` and `VTARGET`, connect a 10 Ohm resistor (this is the test target in this case).
+- Optionally connect channel 1 of an oscilloscope to `RESET` and channel 2 to `GLITCH`.
 
 ![Example setup](images/test-example.png)
 
@@ -30,9 +30,9 @@ Measure the expected delay and glitch length with the oscilloscope.
 
 ## UART Trigger
 
-- Connect 'TRIGGER' input to 'RX' and 'TX' of a USB-to-UART adapter
-- Between 'GLITCH' and 'VTARGET', connect a 10 Ohm resistor (this is the test target in this case).
-- Optionally connect channel 1 of an oscilloscope to 'RESET' and channel 2 to 'GLITCH'.
+- Connect `TRIGGER` input to `RX` and `TX` of a USB-to-UART adapter
+- Between `GLITCH` and `VTARGET`, connect a 10 Ohm resistor (this is the test target in this case).
+- Optionally connect channel 1 of an oscilloscope to `RESET` and channel 2 to `GLITCH`.
 
 ![Example setup](images/test-example-uart.png)
 
@@ -49,10 +49,18 @@ Measure the expected delay and glitch length with the oscilloscope.
 ## Edge Counting Trigger
 
 Sometimes it is clever to trigger after a certain number of edges in a signal. For example, if the communication protocol is unknown or is not supported by the Pico Glitcher as a trigger signal.
-However, since most signals are deterministic, the number of edges can be used as a trigger signal.
+However, since most signals are deterministic, the number of edges of the signal can be used as a trigger signal.
 
 The script `pico-glitcher-edge-counter.py` located in `fault-injection-library/examples` can be used to test the edge-counting trigger capabilities of the Pico Glitcher. Use the same connections as in [the first setup](#test-the-functionality-of-your-pico-glitcher).
 
+Run the following command to execute the script that implements edge-counting:
+
+```bash
+cd examples
+python pico-glitcher-edge-counter.py --rpico /dev/<rpi-tty-port> --delay 1000 1000 --length 100 100
+```
+
+Observe the edges of the signal on the `RESET` line and the position of the glitch on the `GLITCH` output.
 
 ## STM8s Glitching
 
@@ -238,7 +246,7 @@ The colors of the connections encode these signals:
 - green: Trigger line, connected to 1.8V of the airtag. If this line is supplied with voltage, the trigger is set.
 - purple: Glitch, connected to VCORE of the airtag. This is the power supply of the nrf52832
 
-An oscilloscope on 'VTARGET' and 'VCORE' is also used to monitor the fault-injection campaign and to narrow down the 'delay' paremeter. The following figures show the voltage curve of 'VTARGET' (blue) and 'VCORE' (yellow). The fine voltage drop in VCORE after about 4.5ms after activating the power supply is striking. This area is interesting for gliching attacks, as the microcontroller nrf52832 switches from the bootloader to the user program (application) and has a higher energy consumption after this switch. Shortly before this switch, a check is made to see whether read-out protection is set. Glitches are therefore set around the 4.5ms mark.
+An oscilloscope on `VTARGET` and 'VCORE' is also used to monitor the fault-injection campaign and to narrow down the 'delay' paremeter. The following figures show the voltage curve of `VTARGET` (blue) and 'VCORE' (yellow). The fine voltage drop in VCORE after about 4.5ms after activating the power supply is striking. This area is interesting for gliching attacks, as the microcontroller nrf52832 switches from the bootloader to the user program (application) and has a higher energy consumption after this switch. Shortly before this switch, a check is made to see whether read-out protection is set. Glitches are therefore set around the 4.5ms mark.
 
 ![Voltage trace](images/voltage-trace.png)
 
@@ -373,6 +381,50 @@ In addition to the memory read command, the bootloader also offers the memory er
 It can also happen that the SPRMOD bit is set in the event of a glitch. This bit causes the bytes returned by the bootloader when reading the flash contents to be masked with 0x00. This means that the bootloader is in the correct path of the read memory routine due to the glitch, but any response from the bootloader will be replaced with a zero by a downstream instance in the microcontroller.
 
 If the PCROP bit is set by mistake, the glitching process must be aborted and the entire flash reprogrammed. Interesting data (e.g. firmware) will be lost.
+
+## Burst Glitching
+
+If the position of the glitch is unknown, a fast overview of the parameters space can be obtained with the burst glitching feature of the Pico Glitcher.
+Add the arguments `number_of_pulses` and `delay_between` when invoking the function `arm()`, where `number_of_pulses` is the number of pulses to emit and `delay_between` is the delay between each pulse. For example:
+
+```python
+from findus import PicoGlitcher
+import random
+import sys
+
+glitcher = PicoGlitcher()
+glitcher.init(port="/dev/ttyACM0", ext_power="/dev/ttyACM1", ext_power_voltage=3.3)
+
+# set up database with a third parameter delay_between
+database = Database(sys.argv, column_names=["delay", "length", "delay_between"])
+
+# define delay, length, delay_between
+delay = random.randint(0, 1_000)
+length = random.randint(100, 200)
+delay_between = random.randint(100, 200)
+
+# burst glitching
+glitcher.arm(delay=delay, length=length, number_of_pulses=20, delay_between=delay_between)
+
+# reset target for 0.01 seconds (the rising edge on reset line triggers the glitch)
+glitcher.reset_target(0.01)
+
+# read the response from the device (for example UART, SWD, etc.)
+response = ...
+
+# classify the response and put into database
+# If the method classify is not sufficient, overload classify with your own implementation
+color = glitcher.classify(response)
+
+database.insert(experiment_id, delay, length, delay_between, color, response)
+```
+
+As there are now three parameters in the database, different cuts through the parameterspace can be made to analyze different scenarios:
+
+```bash
+analyzer --directory databases -x delay -y length
+analyzer --directory databases -x delay -y delay_between
+```
 
 ## More examples
 
