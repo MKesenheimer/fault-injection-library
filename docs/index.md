@@ -10,7 +10,7 @@ Furthermore, this library supports the [ChipWhisperer Pro](https://rtfm.newae.co
 
 ![Pico Glitcher Board](images/pgfpv2.1.jpg)
 
-The Pico Glitcher was developed to minimise the effort and requirements for the hardware setup. The Pico Glitcher is optimized for use with findus and makes it particularly easy to carry out fault injection attacks.
+The Pico Glitcher was developed to minimize the effort and requirements for the hardware setup. The Pico Glitcher is optimized for use with findus and makes it particularly easy to carry out fault injection attacks.
 
 ## Where to get the Pico Glitcher from?
 
@@ -24,3 +24,6 @@ If you have feature requests or issues, please contact me:
 - twitter: [@BartimaeusvUruk](https://x.com/BartimaeusvUruk)
 - mastodon: [@mkesenheimer@mastodon.social](https://mastodon.social/@mkesenheimer)
 - discord: [https://discord.gg/8mqEVPG6k7](https://discord.gg/8mqEVPG6k7)
+- Pico Glitcher v2: [https://www.tindie.com/products/faulty-hardware/picoglitcher-v2/](https://www.tindie.com/products/faulty-hardware/picoglitcher-v2/)
+- STM8s target board: [https://www.tindie.com/products/faulty-hardware/stm8-target-board/](https://www.tindie.com/products/faulty-hardware/stm8-target-board/)
+- Pulse Shaping expansion board: [https://www.tindie.com/products/faulty-hardware/pulse-shaping-expansion-board-v1/](https://www.tindie.com/products/faulty-hardware/pulse-shaping-expansion-board-v1/)
