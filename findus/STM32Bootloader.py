@@ -269,15 +269,22 @@ class STM32Bootloader:
     # returns b'error: eroneous memory read' if memory read was eroneous
     # returns b'success: dump successful' if one dump was successful
     # returns b'success: dump finished' if entire memory was dummped
-    def dump_memory_to_file(self, dump_filename:str) -> [bytes, bytes]:
+    def dump_memory_to_file(self, dump_filename:str, start:int, size:int) -> [bytes, bytes]:
         """
         Read the memory from a given memory range and write the memory dump to a file.
         
         Parameters:
             dump_filename: Filename to write the memory dump to.
+            start: Memory address to start reading from. If argument not provided, the start address given in the constructor is used.
+            size: Size of the memory to read from the device. Limited to 0xFF Bytes. If argument not provided, the size given in the constructor is used.
         Returns:
             Returns `b'ok: dump error'` if memory read was eroneous, `b'success: dump successful'` if one dump was successful, and `b'success: dump finished'` if entire memory was dummped.
         """
+        if start is not None:
+            self.current_dump_addr = start
+        if size is not None:
+            self.current_dump_len = size
+
         # read memory if RDP is inactive
         len_to_dump = 0xFF if (self.current_dump_len // 0xFF) else self.current_dump_len % 0xFF
         response, mem = self.read_memory(self.current_dump_addr, len_to_dump)
