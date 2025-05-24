@@ -120,7 +120,7 @@ class Database():
     def get_column_names(self):
         self.cur.execute("SELECT * FROM experiments LIMIT 1")
         column_names = [description[0] for description in self.cur.description]
-        return column_names[1:5]
+        return column_names[1:-2]
 
     def insert(self, *dataset):
         """
