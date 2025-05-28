@@ -290,7 +290,7 @@ class STM32Bootloader:
         response, mem = self.read_memory(self.current_dump_addr, len_to_dump)
 
         if b'error' in response or response == b'ok: dump error':
-            return b'error: eroneous memory read', mem
+            return b'error: eroneous memory read (' + response + b')', mem
 
         # write memory dump to file
         with open(dump_filename, 'ab+') as f:

@@ -10,14 +10,11 @@
 # color = 'R' or response LIKE '_Warning.flash_reset'
 
 import argparse
-import logging
-import random
 import sys
-import time
 import os.path
 
 # import custom libraries
-from findus import DebugInterface, Database, PicoGlitcher, Helper
+from findus import Database
 
 
 class DBTool:
