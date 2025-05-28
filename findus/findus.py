@@ -480,6 +480,9 @@ class PicoGlitcherInterface(MicroPythonScript):
         else:
             self.pyb.exec(f'mp.arm({delay}, {length}, {number_of_pulses}, {delay_between})')
 
+    def arm_double(self, delay1:int, length1:int, delay2:int, length2:int):
+        self.pyb.exec(f'mp.arm_double({delay1}, {length1}, {delay2}, {length2})')
+
     def arm_multiplexing(self, delay:int, mul_config:dict, vinit:str = "config"):
         return self.pyb.exec(f'mp.arm_multiplexing({delay}, {mul_config}, "{vinit}")')
 
@@ -812,6 +815,19 @@ class PicoGlitcher(Glitcher):
             delay_between: The delay between each pulse.
         """
         self.pico_glitcher.arm(delay, length, number_of_pulses, delay_between)
+
+    def arm_double(self, delay1:int, length1:int, delay2:int, length2:int):
+        """
+        Arm the Pico Glitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. This functions emits two glitches after a given time, each measured separately from the trigger condition.
+        Be sure that `delay2 > delay1 + length1`.
+
+        Parameters:
+            delay1: First glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            length1: Length of the frist glitch in nano seconds. Expect a resolution of about 5 nano seconds.
+            delay2: Second glitch is emitted after this time measured from the trigger condition.
+            length2: Length of the second glitch in nano seconds.
+        """
+        self.pico_glitcher.arm_double(delay1, length1, delay2, length2)
 
     def arm_multiplexing(self, delay:int, mul_config:dict, vinit:str = "config"):
         """

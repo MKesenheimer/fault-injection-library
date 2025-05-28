@@ -22,7 +22,9 @@ import _thread
 import Globals
 import sys
 
-@asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
+# 
+
+@asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW))
 def glitch():
     # block until delay received
     pull(block)
@@ -51,7 +53,7 @@ def glitch():
     irq(clear, 7)
     push(block)
 
-@asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), out_shiftdir=PIO.SHIFT_RIGHT)
 def glitch_burst():
     # block until delay received
     pull(block)
@@ -98,7 +100,47 @@ def glitch_burst():
     irq(clear, 7)
     push(block)
 
-@asm_pio(set_init=(PIO.OUT_HIGH), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), out_shiftdir=PIO.SHIFT_RIGHT)
+def glitch_multiple():
+    # block until number of pulses received
+    pull(block)
+    mov(y, osr)
+    
+    # wait for trigger condition
+    # enable pin_glitch_en
+    wait(1, irq, 7).side(0b1)
+
+    # emit multiple glitches given by each config
+    label("glitch_loop")
+
+    # block until first config is received
+    pull(block)
+    out(x, 22) # delay = OSR >> 22
+
+    # delay until first glitch
+    label("delay_loop")
+    jmp(x_dec, "delay_loop")
+
+    # get the length
+    out(x, 10) # length = OSR >> 10
+
+    # emit glitch at base pin
+    set(pins, 0b1)
+    label("length_loop")       
+    jmp(x_dec, "length_loop")
+    set(pins, 0b0)
+
+    jmp(y_dec, "glitch_loop")
+
+    # stop glitch and disable pin_glitch_en
+    set(pins, 0b0).side(0b0)
+
+    # tell execution finished (fills the sm's fifo buffer)
+    irq(clear, 7)
+    push(block)
+
+
+@asm_pio(set_init=(PIO.OUT_HIGH), sideset_init=(PIO.OUT_LOW))
 def pulse_shaping():
     # block until delay received
     pull(block)
@@ -127,12 +169,12 @@ def pulse_shaping():
     irq(clear, 7)
     push(block)
 
-@asm_pio(set_init=(Globals.MUX1_PIO_INIT, Globals.MUX0_PIO_INIT), out_init=(Globals.MUX1_PIO_INIT, Globals.MUX0_PIO_INIT), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio(set_init=(Globals.MUX1_PIO_INIT, Globals.MUX0_PIO_INIT), out_init=(Globals.MUX1_PIO_INIT, Globals.MUX0_PIO_INIT), sideset_init=(PIO.OUT_LOW), out_shiftdir=PIO.SHIFT_RIGHT)
 def multiplex(MUX_PIO_INIT=Globals.MUX_PIO_INIT):
     # block until delay received
     pull(block)
     mov(x, osr)
-    # block until multiplexing config received
+    # block until multiplexing config received, stored in osr
     pull(block)
 
     # wait for trigger condition
@@ -175,7 +217,7 @@ def multiplex(MUX_PIO_INIT=Globals.MUX_PIO_INIT):
     irq(clear, 7)
     push(block)
 
-@asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_LOW), out_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_LOW), out_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), out_shiftdir=PIO.SHIFT_RIGHT)
 def multiplex_vin1(MUX_PIO_INIT=0b00):
     # block until delay received
     pull(block)
@@ -223,7 +265,7 @@ def multiplex_vin1(MUX_PIO_INIT=0b00):
     irq(clear, 7)
     push(block)
 
-@asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_HIGH), out_init=(PIO.OUT_LOW, PIO.OUT_HIGH), sideset_init=(PIO.OUT_LOW), in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_HIGH), out_init=(PIO.OUT_LOW, PIO.OUT_HIGH), sideset_init=(PIO.OUT_LOW), out_shiftdir=PIO.SHIFT_RIGHT)
 def multiplex_vin2(MUX_PIO_INIT=0b10):
     # block until delay received
     pull(block)
@@ -271,7 +313,7 @@ def multiplex_vin2(MUX_PIO_INIT=0b10):
     irq(clear, 7)
     push(block)
 
-@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio()
 def tio_trigger_with_dead_time_rising_edge():
     # wait for irq in block_rising_condition or block_falling_condition state machine (dead time)
     wait(1, irq, 6)
@@ -283,7 +325,7 @@ def tio_trigger_with_dead_time_rising_edge():
     # tell observed trigger
     irq(block, 7)
 
-@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio()
 def tio_trigger_with_dead_time_falling_edge():
     # wait for irq in block_rising_condition or block_falling_condition state machine (dead time)
     wait(1, irq, 6)
@@ -295,7 +337,7 @@ def tio_trigger_with_dead_time_falling_edge():
     # tell observed trigger
     irq(block, 7)
 
-@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio()
 def edge_trigger_rising_edge():
     # block until number of edges received
     pull(block)
@@ -313,7 +355,7 @@ def edge_trigger_rising_edge():
     # tell observed trigger
     irq(block, 7)
 
-@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio()
 def edge_trigger_falling_edge():
     # block until number of edges received
     pull(block)
@@ -331,7 +373,7 @@ def edge_trigger_falling_edge():
     # tell observed trigger
     irq(block, 7)
 
-@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio()
 def block_rising_condition():
     # block until dead time received
     pull(block)
@@ -347,7 +389,7 @@ def block_rising_condition():
     # tell execution finished
     irq(block, 6)
 
-@asm_pio(in_shiftdir=PIO.SHIFT_RIGHT)
+@asm_pio()
 def block_falling_condition():
     # block until dead time received
     pull(block)
@@ -949,9 +991,48 @@ class PicoGlitcher():
             self.sm0.put(int(delay) // (1_000_000_000 // self.frequency))
             pulse_length = int(length) // (1_000_000_000 // self.frequency)
             delay_between = int(delay_between) // (1_000_000_000 // self.frequency)
-            config = pulse_length << 16 | delay_between
+            config = delay_between << 16 | pulse_length
             self.sm0.put(config)
             self.sm0.put(number_of_pulses - 1)
+
+        self.__arm_common()
+
+    def arm_double(self, delay1:int, length1:int, delay2:int, length2:int):
+        """
+        Arm the Pico Glitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. This functions emits two glitches after a given time, each measured separately from the trigger condition.
+        Be sure that `delay2 > delay1 + length1`.
+
+        Parameters:
+            delay1: First glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            length1: Length of the frist glitch in nano seconds. Expect a resolution of about 5 nano seconds.
+            delay2: Second glitch is emitted after this time measured from the trigger condition.
+            length2: Length of the second glitch in nano seconds.
+        """
+        if delay2 <= delay1 + length1:
+            raise Exception(f"Second glitch collides with first one; delay2 too short.")
+
+        # make delay2 relative to delay1 + length1
+        delay2 = delay2 - (delay1 + length1)
+
+        self.sm0.active(0)
+        # state machine that emits the glitch if the trigger condition is met
+        self.sm0.init(glitch_multiple, freq=self.frequency, set_base=self.pin_glitch, sideset_base=self.pin_glitch_en)
+        pulse1_length = int(length1) // (1_000_000_000 // self.frequency)
+        pulse1_delay = int(delay1) // (1_000_000_000 // self.frequency)
+        pulse2_length = int(length2) // (1_000_000_000 // self.frequency)
+        pulse2_delay = int(delay2) // (1_000_000_000 // self.frequency)
+
+        if pulse1_length > 2**10 or pulse2_length > 2**10:
+            raise Exception(f"Pulse length exceeds maximum value.")
+        if pulse1_delay > 2**22 or pulse2_delay > 2**22:
+            raise Exception(f"Pulse delay exceeds maximum value.")
+
+        config1 = pulse1_length << 22 | pulse1_delay
+        config2 = pulse2_length << 22 | pulse2_delay
+        number_of_pulses = 2
+        self.sm0.put(number_of_pulses - 1)
+        self.sm0.put(config1)
+        self.sm0.put(config2)
 
         self.__arm_common()
 
