@@ -210,7 +210,3 @@ analyzer --directory databases
 This spins up a local web application on [http://127.0.0.1:8080](http://127.0.0.1:8080) which can be used to observe the current progress.
 
 ![Parameter space web application](https://github.com/MKesenheimer/fault-injection-library/blob/master/docs/images/parameterspace-pico-glitcher.png)
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=MKesenheimer/fault-injection-library&type=Date)](https://star-history.com/#MKesenheimer/fault-injection-library&Date)
