@@ -486,6 +486,9 @@ class PicoGlitcherInterface(MicroPythonScript):
     def arm_multiplexing(self, delay:int, mul_config:dict, vinit:str = "config"):
         return self.pyb.exec(f'mp.arm_multiplexing({delay}, {mul_config}, "{vinit}")')
 
+    def arm_double_multiplexing(self, delay1:int, length1:int, delay2:int, length2:int, v1:str = "1.8", v2:str = "1.8"):
+        return self.pyb.exec(f'mp.arm_double_multiplexing({delay1}, {length1}, {delay2}, {length2}, "{v1}", "{v2}")')
+    
     def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[int]]):
         return self.pyb.exec(f'mp.arm_pulseshaping_from_config({delay}, {ps_config})')
 
@@ -839,6 +842,21 @@ class PicoGlitcher(Glitcher):
             vinit: The initial value of the multiplexer. If `"config"` is chosen, the initial value is read from the configuration file. Additionally, the user can choose between `"VI1"` or `"VI2"`.
         """
         self.pico_glitcher.arm_multiplexing(delay, mul_config, vinit)
+
+    def arm_double_multiplexing(self, delay1:int, length1:int, delay2:int, length2:int, v1:str = "1.8", v2:str = "1.8"):
+        """
+        Arm the Pico Glitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. This functions emits two multiplexing glitches after a given time, each measured separately from the trigger condition.
+        Be sure that `delay2 > delay1 + length1`.
+
+        Parameters:
+            delay1: First glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            length1: Length of the frist glitch in nano seconds. Expect a resolution of about 5 nano seconds.
+            delay2: Second glitch is emitted after this time measured from the trigger condition.
+            length2: Length of the second glitch in nano seconds.
+            v1: Voltage level of the first glitch, e.g. "GND", "1.8", "3.3", "config", "VI1", "VI2".
+            v2: Voltage level of the second glitch, e.g. "GND", "1.8", "3.3", "config", "VI1", "VI2".
+        """
+        self.pico_glitcher.arm_double_multiplexing(delay1, length1, delay2, length2, v1, v2)
 
     def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[int]]):
         """

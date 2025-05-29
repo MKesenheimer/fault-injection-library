@@ -313,6 +313,49 @@ def multiplex_vin2(MUX_PIO_INIT=0b10):
     irq(clear, 7)
     push(block)
 
+@asm_pio(set_init = (Globals.MUX1_PIO_INIT, Globals.MUX0_PIO_INIT), out_init = (Globals.MUX1_PIO_INIT, Globals.MUX0_PIO_INIT), sideset_init=PIO.OUT_LOW, out_shiftdir=PIO.SHIFT_RIGHT)
+def multiplex_double():
+    # block until first delay received
+    pull(block)
+    mov(x, osr)               # X = delay1
+
+    # block until first config received (t1 & v1)
+    pull(block)
+    mov(isr, osr)             # ISR = cfg1
+
+    # block until second delay received
+    pull(block)
+    mov(y, osr)               # Y = delay2
+
+    # block until second config received (t2 & v2)
+    pull(block)               # OSR = cfg2
+
+    # wait for trigger condition, enable glitch_en
+    wait(1, irq, 7).side(1)
+
+    # first multiplex pulse
+    label("delay1_loop")
+    jmp(x_dec, "delay1_loop") # wait delay1 cycles
+    mov(osr, isr)             # reload cfg1
+    out(y, 14)                # Y = cfg1 >> 14 (length1)
+    out(pins, 2)              # switch MUX to v1
+    label("pulse1_loop")
+    jmp(y_dec, "pulse1_loop") # hold v1 for length1
+    set(pins, Globals.MUX_PIO_INIT)  # back to idle
+
+    # second multiplex pulse
+    label("delay2_loop")
+    jmp(y_dec, "delay2_loop") # wait delay2 cycles
+    out(y, 14)                # Y = cfg2 >> 14 (length2)
+    out(pins, 2)              # switch MUX to v2
+    label("pulse2_loop")
+    jmp(y_dec, "pulse2_loop") # hold v2 for length2
+    set(pins, Globals.MUX_PIO_INIT).side(0)  # idle + disable glitch_en
+
+    # signal done
+    irq(clear, 7)
+    push(block)
+
 @asm_pio()
 def tio_trigger_with_dead_time_rising_edge():
     # wait for irq in block_rising_condition or block_falling_condition state machine (dead time)
@@ -1088,6 +1131,57 @@ class PicoGlitcher():
         config = v4 << 30 | t4 << 16 | v3 << 14 | t3
         self.sm0.put(config)
 
+        self.__arm_common()
+
+    def arm_double_multiplexing(self, delay1: int, length1: int, delay2: int, length2: int, v1: str = "1.8", v2: str = "1.8"):
+        """
+        Arm two back-to-back multiplex glitches on one trigger:
+        1) after delay1 ns, switch to v1 for length1 ns
+        2) then after delay2 ns, switch to v2 for length2 ns
+        Returns to idle voltage between and after pulses.
+
+        Parameters:
+            delay1: First glitch is emitted after this time. Given in nano seconds. Expect a resolution of about 5 nano seconds.
+            length1: Length of the first glitch in nano seconds. Expect a resolution of about 5 nano seconds.
+            delay2: Second glitch is emitted after this time measured from the trigger condition.
+            length2: Length of the second glitch in nano seconds.
+            v1: Voltage level for the first glitch. Can be one of "VI1", "VI2", "1.8", "GND", "3.3" or "VCC".
+            v2: Voltage level for the second glitch. Can be one of "VI1", "VI2", "1.8", "GND", "3.3" or "VCC".
+        """
+        if self.config["hardware_version"][0] < 2:
+            raise Exception("Multiplexing not implemented in hardware version 1.")
+        
+        if delay2 <= delay1 + length1:
+            raise Exception(f"Second glitch collides with first one; delay2 too short.")
+
+        # state machine for double multiplex glitch
+        self.sm0.active(0)
+        self.sm0.init(
+            multiplex_double,
+            freq=self.frequency,
+            set_base=self.pin_glitch,
+            out_base=self.pin_glitch,
+            sideset_base=self.pin_glitch_en
+        )
+
+        # convert nanoseconds to PIO clock cycles
+        cycle = 1_000_000_000 // self.frequency
+        d1 = int(delay1) // cycle
+        l1 = int(length1) // cycle
+        d2 = int(delay2) // cycle
+        l2 = int(length2) // cycle
+
+        # pack each config: bits [0..13]=length, bits [14..15]=voltage index
+        c1 = (self.voltage_map[v1] << 14) | (l1 & 0x3FFF)
+        c2 = (self.voltage_map[v2] << 14) | (l2 & 0x3FFF)
+
+        # push parameters into SM0 FIFO
+        self.sm0.put(d1)
+        self.sm0.put(c1)
+        self.sm0.put(d2)
+        self.sm0.put(c2)
+
+        # start trigger + dead-time machines and enable SM0
         self.__arm_common()
 
     def arm_pulseshaping_from_config(self, delay:int, ps_config:list[list[float]]):
