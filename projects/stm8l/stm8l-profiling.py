@@ -16,17 +16,18 @@ SUCCESS_PIN = 15
 
 
 class DerivedPicoGlitcher(PicoGlitcher):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Define flag_pin in the Pico’s Python REPL (no output expected)
-        self.exec_raw_no_follow(
+    # override init, not __init__, to ensure
+    def init(self, *args, **kwargs):
+        super().init(*args, **kwargs)
+
+        self.pico_glitcher.pyb.exec_raw_no_follow(
             "import machine\n"
             f"flag_pin = machine.Pin({SUCCESS_PIN}, machine.Pin.IN, machine.Pin.PULL_DOWN)\n"
         )
 
     def read_success_flag(self) -> bool:
         """Return True if that pin is HIGH (i.e. we hit the 'impossible' section)."""
-        out = self.exec_raw("print(flag_pin.value())\n")
+        out = self.pico_glitcher.pyb.exec_raw_no_follow(f"print(int(flag_pin.value()))\n")
         return bool(int(out.strip()))
 
 
