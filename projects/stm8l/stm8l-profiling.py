@@ -10,9 +10,10 @@ import time
 
 from findus import Database, PicoGlitcher
 
-# Pico GPIO that your bootloader sets HIGH when the “impossible” 
+# Pico GPIO that your bootloader sets HIGH when the “impossible”
 # section has been reached
-SUCCESS_PIN = 15  
+SUCCESS_PIN = 15
+
 
 class DerivedPicoGlitcher(PicoGlitcher):
     def __init__(self, *args, **kwargs):
@@ -28,6 +29,7 @@ class DerivedPicoGlitcher(PicoGlitcher):
         out = self.exec_raw("print(flag_pin.value())\n")
         return bool(int(out.strip()))
 
+
 class Main:
     def __init__(self, args):
         self.args = args
@@ -37,7 +39,7 @@ class Main:
             filemode="a",
             format="%(asctime)s %(message)s",
             level=logging.INFO,
-            force=True
+            force=True,
         )
 
         # -- initialize glitcher --
@@ -46,9 +48,9 @@ class Main:
 
         # Use external trigger pin (wired from your instrumented bootloader)
         self.glitcher.set_trigger(
-            mode="tio",              # edge-trigger mode
+            mode="tio",  # edge-trigger mode
             pin_trigger=args.trigger_input,
-            edge_type="rising"
+            edge_type="rising",
         )
 
         # Single crowbar glitch to GND. If you'd rather do a multiplex-voltage
@@ -58,15 +60,13 @@ class Main:
         self.glitcher.set_lpglitch()
 
         # -- database for logging --
-        self.db = Database(sys.argv,
-                           resume=args.resume,
-                           nostore=args.no_store)
+        self.db = Database(sys.argv, resume=args.resume, nostore=args.no_store)
 
     def run(self):
         exp_id = 0
         while True:
             # pick random glitch parameters (ns)
-            delay  = random.randint(*self.args.delay)
+            delay = random.randint(*self.args.delay)
             length = random.randint(*self.args.length)
 
             # arm the Pico: waits for your ext1/2 trigger, then after `delay`
@@ -86,35 +86,46 @@ class Main:
                 # on a clean exit, read your “success” GPIO
                 success = self.glitcher.read_success_flag()
 
-            color = 'G' if success else 'R'
-            self.db.insert(exp_id,
-                           delay, length,
-                           color,
-                           b'')  # no serial dump here
+            color = "G" if success else "R"
+            self.db.insert(exp_id, delay, length, color, b"")  # no serial dump here
             print(f"[{exp_id}] delay={delay}  length={length} → success={success}")
             exp_id += 1
+
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(
         description="STM8L single-glitch via external trigger + success pin"
     )
-    p.add_argument("--rpico",        default="/dev/ttyUSB1",
-                   help="PicoGlitcher serial port")
-    p.add_argument("--trigger-input", default="ext1",
-                   choices=["default","alt","ext1","ext2"],
-                   help="Which Pico GPIO to use as trigger")
-    p.add_argument("--delay",        nargs=2, type=int, required=True,
-                   help="Glitch offset range (ns)")
-    p.add_argument("--length",       nargs=2, type=int, required=True,
-                   help="Glitch pulse width range (ns)")
-    p.add_argument("--reset-hold",   type=float, default=0.01,
-                   help="Target reset hold time (s)")
-    p.add_argument("--block-timeout",type=float, default=1.0,
-                   help="Timeout waiting for glitch (s)")
-    p.add_argument("--resume",       action="store_true",
-                   help="Resume previous database run")
-    p.add_argument("--no-store",     action="store_true",
-                   help="Do not write results to the database")
+    p.add_argument("--rpico", default="/dev/ttyUSB1", help="PicoGlitcher serial port")
+    p.add_argument(
+        "--trigger-input",
+        default="ext1",
+        choices=["default", "alt", "ext1", "ext2"],
+        help="Which Pico GPIO to use as trigger",
+    )
+    p.add_argument(
+        "--delay", nargs=2, type=int, required=True, help="Glitch offset range (ns)"
+    )
+    p.add_argument(
+        "--length",
+        nargs=2,
+        type=int,
+        required=True,
+        help="Glitch pulse width range (ns)",
+    )
+    p.add_argument(
+        "--reset-hold", type=float, default=0.01, help="Target reset hold time (s)"
+    )
+    p.add_argument(
+        "--block-timeout",
+        type=float,
+        default=1.0,
+        help="Timeout waiting for glitch (s)",
+    )
+    p.add_argument("--resume", action="store_true", help="Resume previous database run")
+    p.add_argument(
+        "--no-store", action="store_true", help="Do not write results to the database"
+    )
     args = p.parse_args()
 
     try:
