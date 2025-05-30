@@ -11,15 +11,21 @@ from findus import Database, PicoGlitcher, STM8Programmer
 
 class DerivedPicoGlitcher(PicoGlitcher):
     def classify(self, state: bytes) -> str:
-        """Map raw bootloader response to a display color."""
-        if b'success' in state:
-            return 'G'
+        color = 'C'
+        # do i need this line?
+        if b'error: sending read memory command failed' == state:
+            color = 'G'
         elif b'error' in state:
-            return 'R'
+            color = 'M'
+        elif b'warning' in state:
+            color = 'O'
         elif b'timeout' in state:
-            return 'Y'
-        else:
-            return 'C'
+            color = 'Y'
+        elif b'ok' in state:
+            color = 'C'
+        elif b'success' in state:
+            color = 'R'
+        return color
 
 class Main:
     def __init__(self, args):
@@ -73,10 +79,13 @@ class Main:
 
             # Wait for bootloader to come up
             state = self.programmer.bootloader_enter()
-            data = b''
+            flash = b''
+            eeprom = b''
+            
             if b'success' in state:
                 # Attempt to read firmware dump
-                state, data = self.programmer.read_memory(address=0x6000, length=0x2000)
+                state, flash = self.programmer.read_memory(address=0x8000, length=0x2000)
+                _, eeprom = self.programmer.read_memory(address=0x1000, length=0xFF)
 
             # Block until both glitches have fired (or timeout)
             try:
@@ -86,7 +95,7 @@ class Main:
                 logging.warning(f"Experiment {exp_id}: timeout")
 
             color = self.glitcher.classify(state)
-            self.database.insert(exp_id, t0, w0, t1, w1, color, state + data)
+            self.database.insert(exp_id, t0, w0, t1, w1, color, state + flash + eeprom)
 
             print(f"[{exp_id}] T0={t0} W0={w0}  T1={t1} W1={w1} → {state.decode()}", flush=True)
             exp_id += 1
