@@ -27,7 +27,7 @@ class DerivedPicoGlitcher(PicoGlitcher):
 
     def read_success_flag(self) -> bool:
         """Return True if that pin is HIGH (i.e. we hit the 'impossible' section)."""
-        out = self.pico_glitcher.pyb.exec_raw_no_follow(f"print(int(flag_pin.value()))\n")
+        out = self.pico_glitcher.pyb.exec_raw(f"print(int(flag_pin.value()))\n")
         return bool(int(out.strip()))
 
 
@@ -87,7 +87,7 @@ class Main:
                 # on a clean exit, read your “success” GPIO
                 success = self.glitcher.read_success_flag()
 
-            color = "G" if success else "R"
+            color = self.glitcher.get_color(success)
             self.db.insert(exp_id, delay, length, color, b"")  # no serial dump here
             print(f"[{exp_id}] delay={delay}  length={length} → success={success}")
             exp_id += 1
