@@ -21,7 +21,6 @@ More information about the ChipWhisperer Pro and the ChipWhisperer Husky can be 
 - [UART Trigger](#uart-trigger)
 - [More Examples](#more-examples)
 - [Analyzer](#analyzer)
-- [Star History](#star-history)
 
 ## Purchasing the Pico Glitcher
 
