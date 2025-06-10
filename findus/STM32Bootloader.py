@@ -36,7 +36,7 @@ class STM32Bootloader:
     ACK  = b'\x79'
     verbose = False
 
-    def __init__(self, port:str, serial_timeout:float=1, dump_address:int=0x08000000, dump_len:int=0x400):
+    def __init__(self, port:str, serial_timeout:float=1, dump_address:int=0x08000000, dump_len:int=0x400, baudrate=115200):
         """
         Default constructor. Initializes the serial connection to the STM32 target (in 8e1 configuration), and stores parameter for the memory dump.
         
@@ -44,12 +44,13 @@ class STM32Bootloader:
             port: Port identifier of the STM32 target.
             dump_address: Memory address to start reading from.
             dump_len: Size of the memory to read from the device.
+            baudrate: baudrate of the serial connection.
         Returns:
             return
         """
         print(f"[+] Opening serial port {port}.")
         self.timeout = serial_timeout
-        self.ser = serial.Serial(port=port, baudrate=115200, timeout=serial_timeout, bytesize=8, parity="E", stopbits=1)
+        self.ser = serial.Serial(port=port, baudrate=baudrate, timeout=serial_timeout, bytesize=8, parity="E", stopbits=1)
         # memory read settings
         self.current_dump_addr = dump_address
         self.current_dump_len = dump_len

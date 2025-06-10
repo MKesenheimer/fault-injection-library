@@ -603,14 +603,14 @@ class Glitcher():
         color = 'C'
         if b'expected' in state:
             color = 'G'
+        elif b'ok' in state:
+            color = 'C'
         elif b'error' in state:
             color = 'M'
         elif b'timeout' in state:
             color = 'Y'
         elif b'warning' in state:
             color = 'O'
-        elif b'ok' in state:
-            color = 'C'
         elif b'success' in state:
             color = 'R'
         return color
