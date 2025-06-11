@@ -104,6 +104,8 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
                 html.Datalist(id="examples", children=[
                     html.Option(value="match_string(response, 'ets')"),
                     html.Option(value="match_hex(response, '661b')"),
+                    html.Option(value="response like \"state = ok%\""),
+                    html.Option(value="length(response) > 40"),
                     html.Option(value="color = 'G'"),
                     html.Option(value="length > 100"),
                     html.Option(value="delay > 100"),
@@ -231,7 +233,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
         
         database = database.split(' ')[0]
 
-        # copy database to /tmp and opening it
+        # copy database to /tmp and open it
         print(f"Copying {database} to /tmp and opening from there")
         shutil.copyfile(f"{DATABASE_DIRECTORY}/{database}", f"/tmp/{database}")
         con = sqlite3.connect(f"file:/tmp/{database}?mode=ro", uri=True)

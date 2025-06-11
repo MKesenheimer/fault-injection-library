@@ -740,7 +740,7 @@ class PicoGlitcher(Glitcher):
 
         - Set the trigger input to rising-edge trigger on `TRIGGER` input and assume triggering when the reset is released.
         - Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions.
-        - Use the high-power crowbar MOSFET.
+        - Use the low-power crowbar MOSFET as default.
 
         Parameters:
             port: Port identifier of the Pico Glitcher.
@@ -1383,14 +1383,24 @@ class ErrorHandling():
         if  experiment_id >= self.fail_gate_close and self.fail_gate_open:
             self.fail_gate_open = False
             if self.successive_fails >= self.max_fails:
-                # delete the erroneous data points, but not the first
+                first_good = experiment_id
+                # delete the erroneous data points
                 if self.database is not None:
-                    for eid in range(experiment_id - self.max_fails + 1, experiment_id + 1):
-                        #print(f"Deleting {eid}")
+                    print("Successive error occurred:")
+                    # since the fail gate could start outside the successive fail range, we have to look back twice
+                    for eid in reversed(range(experiment_id - 2 * self.look_back, experiment_id + 1)):
+                        par = self.database.get_parameters_of_experiment_rel(eid)
+                        res = par[-1]
+                        if expected in res:
+                            first_good = eid
+                            break
+                    # remove everything expect the first erroneous experiment
+                    for eid in range(first_good + 2, experiment_id + 1):
+                        print(f"Removing experiment {eid} from database")
                         self.database.remove_rel(eid)
 
-                # get parameters of first erroneous experiment and store in database with extra classification
-                parameters = self.database.get_parameters_of_experiment_rel(experiment_id - self.look_back)
+                # get parameters of first erroneous experiment and store this event in database with extra classification
+                parameters = self.database.get_parameters_of_experiment_rel(first_good + 1)
                 response = b'error: successive error occurred'
                 if self.database is not None:
                     try:
