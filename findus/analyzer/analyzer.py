@@ -104,6 +104,8 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
                 html.Datalist(id="examples", children=[
                     html.Option(value="match_string(response, 'ets')"),
                     html.Option(value="match_hex(response, '661b')"),
+                    html.Option(value="response like \"state = ok%\""),
+                    html.Option(value="length(response) > 40"),
                     html.Option(value="color = 'G'"),
                     html.Option(value="length > 100"),
                     html.Option(value="delay > 100"),
@@ -231,7 +233,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
         
         database = database.split(' ')[0]
 
-        # copy database to /tmp and opening it
+        # copy database to /tmp and open it
         print(f"Copying {database} to /tmp and opening from there")
         shutil.copyfile(f"{DATABASE_DIRECTORY}/{database}", f"/tmp/{database}")
         con = sqlite3.connect(f"file:/tmp/{database}?mode=ro", uri=True)
@@ -303,47 +305,39 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
 
         fig_opt = None
         if heatmap is not None:
-            # Assume x_edges and y_edges already created
-            x_edges = np.linspace(df[x_axis].min(), df[x_axis].max(), heatmap.x_number_of_bins + 1, endpoint=True)
-            y_edges = np.linspace(df[y_axis].min(), df[y_axis].max(), heatmap.y_number_of_bins + 1, endpoint=True)
-            # include lower and upper limits
-            x_edges[-1] = df[x_axis].max()
-            y_edges[-1] = df[y_axis].max()
-            x_step = (df[x_axis].max() - df[x_axis].min()) / (heatmap.x_number_of_bins)
-            y_step = (df[y_axis].max() - df[y_axis].min()) / (heatmap.y_number_of_bins)
-            x_min = df[x_axis].min() - x_step
-            y_min = df[y_axis].min() - y_step
-            x_edges = np.insert(x_edges, 0, x_min)
-            y_edges = np.insert(y_edges, 0, y_min)
+            # bin data
+            df["x_bin"] = pd.cut(df[x_axis], bins=heatmap.x_number_of_bins, labels=False, include_lowest=True)
+            df["y_bin"] = pd.cut(df[y_axis], bins=heatmap.y_number_of_bins, labels=False, include_lowest=True)
 
-            # Bin data
-            df["x_bin"] = pd.cut(df[x_axis], bins=x_edges, labels=False, include_lowest=True)
-            df["y_bin"] = pd.cut(df[y_axis], bins=y_edges, labels=False, include_lowest=True)
-
-            # Filter red only
+            # filter red only
             red_df = df[df["color"] == "R"]
             green_df = df[df["color"] == "G"]
 
-            # Count red points in each bin
+            # count red points in each bin
             red_counts = red_df.groupby(["x_bin", "y_bin"]).size().reset_index(name="red_count")
             green_counts = green_df.groupby(["x_bin", "y_bin"]).size().reset_index(name="green_count")
 
             # merge counts and calculate score
             heatmap_data = pd.merge(red_counts, green_counts, on=["x_bin", "y_bin"], how="outer").fillna(0)
             heatmap_data["score"] = heatmap_data["red_count"] / (heatmap_data["red_count"] + heatmap_data["green_count"])
+            #print(heatmap_data)
 
-            # Create all possible bin combinations
-            all_bins = pd.DataFrame(list(product(range(heatmap.x_number_of_bins + 1), range(heatmap.y_number_of_bins + 1))), columns=["x_bin", "y_bin"])
+            # create all possible bin combinations
+            all_bins = pd.DataFrame(list(product(range(heatmap.x_number_of_bins), range(heatmap.y_number_of_bins))), columns=["x_bin", "y_bin"])
 
-            # Merge with actual data to fill missing bins
+            # merge with actual data to fill missing bins
             heatmap_data = pd.merge(all_bins, heatmap_data, on=["x_bin", "y_bin"], how="left")
             heatmap_data["score"] = heatmap_data["score"].fillna(0)
+            heatmap_data["red_count"] = heatmap_data["red_count"].fillna(0)
+            heatmap_data["green_count"] = heatmap_data["green_count"].fillna(0)
 
-            # Map bin numbers to bin centers for plotting
-            x_centers = 0.5 * (x_edges[:-1] + x_edges[1:])
-            y_centers = 0.5 * (y_edges[:-1] + y_edges[1:])
-            heatmap_data["x"] = heatmap_data["x_bin"].map(dict(enumerate(x_centers)))
-            heatmap_data["y"] = heatmap_data["y_bin"].map(dict(enumerate(y_centers)))
+            # map bin numbers to bin centers for plotting
+            x_edges = np.floor(np.linspace(df[x_axis].min(), df[x_axis].max() + 1, heatmap.x_number_of_bins, endpoint=False))
+            y_edges = np.floor(np.linspace(df[y_axis].min(), df[y_axis].max() + 1, heatmap.y_number_of_bins, endpoint=False))
+            heatmap_data["x"] = heatmap_data["x_bin"].map(dict(enumerate(x_edges)))
+            heatmap_data["y"] = heatmap_data["y_bin"].map(dict(enumerate(y_edges)))
+            #print(heatmap_data[heatmap_data["red_count"] > 0])
+            #print(heatmap_data[heatmap_data["x_bin"] == 14])
 
             if heatmap.color_scale == "findus":
                 costum_scale=[
@@ -354,18 +348,22 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
                 ]
                 heatmap.color_scale = costum_scale
 
-            # Plot heatmap
+            # plot heatmap
             fig_opt = px.density_heatmap(
                 heatmap_data,
                 x="x",
                 y="y",
                 z="score",
-                nbinsx=heatmap.x_number_of_bins + 1,
-                nbinsy=heatmap.y_number_of_bins + 1,
+                nbinsx=heatmap.x_number_of_bins,
+                nbinsy=heatmap.y_number_of_bins,
                 color_continuous_scale=heatmap.color_scale,
+                #histnorm='probability',
+                histfunc='max',
                 labels={"score": "score", "x": x_axis, "y": y_axis}
             )
-
+            #fig_opt.update_traces(hovertemplate=x_axis + ': %{x:d}<br>' + y_axis + ': %{y:d}<br>score: %{z:.2f}')
+            fig_opt.update_traces(hovertemplate='score: %{z:.2f}')
+            
         # compute elapsed time
         # elapsed_time_in_seconds = int(time.time()-get_start_time(DATABASE_DIRECTORY, database))
         # elapsed_time = datetime.timedelta(seconds=elapsed_time_in_seconds)

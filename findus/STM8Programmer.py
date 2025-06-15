@@ -22,7 +22,7 @@ class STM8Programmer():
     ACK  = (0x79, )
     NACK = (0x1f, )
 
-    def __init__(self, port, baud):
+    def __init__(self, port, baud=115200):
         try:
             self.ser = serial.Serial(port, baud, timeout=0.05)
         except:
