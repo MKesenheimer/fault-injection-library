@@ -741,6 +741,7 @@ class PicoGlitcher():
         Parameters:
             power_cycle_time: Time how long the power supply is cut.
         """
+        self.update_trigger()
         if self.glitch_mode == "mul":
             if self.armed:
                 raise Exception("Error: Power-cycling with multiplexing stage not possible when armed.")
@@ -762,6 +763,7 @@ class PicoGlitcher():
         Parameters:
             power_cycle_time: Time how long the power supply is cut. If `ext_power` is defined, the external power supply is cycled.
         """
+        self.update_trigger()
         if self.glitch_mode == "mul":
             if self.armed:
                 raise Exception("Error: Power-cycling with multiplexing stage not possible when armed.")
@@ -1155,6 +1157,20 @@ class PicoGlitcher():
         self.__arm_common()
         #print(pulse)
 
+    def update_trigger(self):
+        """
+        Checks if sm was triggered and clears the "armed" state if needed.
+
+        Parameters:
+            None
+        """
+        if self.sm0 is not None:
+            if self.sm0.rx_fifo() > 0:
+                self.armed = False
+                #return False
+            #else:
+                #return True
+    
     def block(self, timeout:float):
         """
         Block until trigger condition is met. Raises an exception if times out.
