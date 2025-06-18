@@ -148,6 +148,9 @@ class Main():
                 time.sleep(0.2)
                 response = b'Timeout'
 
+            # check if glitch was emitted
+            print(self.glitcher.check_glitch())
+
             # classify response
             color = self.glitcher.classify(response)
 
