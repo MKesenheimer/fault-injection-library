@@ -546,7 +546,7 @@ class PicoGlitcherInterface(MicroPythonScript):
     def waveform_generator(self, frequency:int, gain:float, waveid:int):
         return self.pyb.exec(f'mp.waveform_generator({frequency}, {gain}, {waveid})')
 
-    def set_dead_zone(self, dead_time:float, pin_condition:str, condition:str):
+    def set_dead_zone(self, dead_time:int, pin_condition:str, condition:str):
         self.pyb.exec(f'mp.set_dead_zone({dead_time}, "{pin_condition}", "{condition}")')
 
     def change_config_and_reset(self, key, value) -> str:

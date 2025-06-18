@@ -888,7 +888,7 @@ class PicoGlitcher():
             self.__change_config("ps_offset", vhigh)
             self.__change_config("ps_factor", factor)
 
-    def set_dead_zone(self, dead_time:float = 0, pin_condition:str = "default", condition:str = "rising"):
+    def set_dead_zone(self, dead_time:int = 0, pin_condition:str = "default", condition:str = "rising"):
         """
         Set a dead time that prohibits triggering within a certain time (trigger rejection). This is intended to exclude false trigger conditions. Can also be set to 0 to disable this feature.
         
@@ -908,7 +908,8 @@ class PicoGlitcher():
             self.configure_gpio_out(pin_number)
             self.pin_condition = self.pin_gpios[pin_number]
         #print(f"self.pin_condition = {self.pin_condition}")
-        self.dead_time = dead_time
+        #convert int nanoseconds to float seconds
+        self.dead_time = dead_time / 1e9
         self.condition = condition
 
     def cleanup_pio(self):
