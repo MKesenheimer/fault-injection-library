@@ -51,7 +51,7 @@ class Main():
 
         # the initial voltage for multiplexing must be hard-coded and can only be applied
         # if the raspberry pi pico is reset and re-initialized.
-        self.glitcher.change_config_and_reset("mux_vinit", "1.8")
+        self.glitcher.change_config_and_reset("mux_vinit", "3.3")
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
 
         # choose rising edge trigger with dead time of 0 seconds after power down
@@ -90,21 +90,23 @@ class Main():
             mul_config = {"t1": t1, "v1": "1.8", "t2": length, "v2": "GND"}
             # for demonstration, switch between two different initial voltages periodically
             # Since the PIO statemachines have limited memory, the PIO must be switched before applying the new configuration
-            if (experiment_id // 100) % 2 == 0:
-                print("Using configuration mux_vinit = VI1")
-                self.glitcher.switch_pio(0)
-                self.glitcher.arm_multiplexing(delay, mul_config, "VI1")
-            else:
-                print("Using configuration mux_vinit = VI2")
-                self.glitcher.switch_pio(1)
-                self.glitcher.arm_multiplexing(delay, mul_config, "VI2")
+            #if (experiment_id // 100) % 2 == 0:
+            #    print("Using configuration mux_vinit = VI1")
+            #    self.glitcher.switch_pio(0)
+            #    self.glitcher.arm_multiplexing(delay, mul_config, "VI1")
+            #else:
+            #    print("Using configuration mux_vinit = VI2")
+            #    self.glitcher.switch_pio(1)
+            #    self.glitcher.arm_multiplexing(delay, mul_config, "VI2")
+            self.glitcher.arm_multiplexing(delay, mul_config, "VI2")
 
             # power cycle target
             #self.glitcher.power_cycle_target(0.1)
 
             # reset target
             time.sleep(0.01)
-            self.glitcher.reset_target(0.01)
+            #self.glitcher.reset_target(0.01)
+            self.glitcher.power_cycle_reset(0.1)
 
             # block until glitch
             try:
