@@ -1191,9 +1191,20 @@ class PicoGlitcher():
                 self.armed = False
                 raise Exception("Function execution timed out!")
 
+    def check_glitch(self) -> bool:
+        """
+        Check if the glitch was emitted.
+
+        Returns:
+            Returns True if statemachine 1, that is used for glitch generation, was triggered.
+        """
+        if self.sm0 is not None:
+            check = self.sm0.rx_fifo() > 0
+            print(check)
+            return check
+
     def get_sm1_output(self):
         if self.sm1 is not None:
-            # pull the output of statemachine 2
             res = self.sm1.get()
             print(res)
 
@@ -1231,6 +1242,7 @@ class PicoGlitcher():
         with open("config.json", "r") as file:
             self.config = ujson.load(file)
         del sys.modules['Globals']
+        # reload the global variables
         import Globals
 
     def change_config_and_reset(self, key:str, value:int|float|str):
