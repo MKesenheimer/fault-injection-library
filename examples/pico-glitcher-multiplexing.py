@@ -47,12 +47,12 @@ class Main():
         # glitcher
         self.glitcher = DerivedGlitcher()
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
-        self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
+        self.glitcher.init(port=args.rpico)
 
         # the initial voltage for multiplexing must be hard-coded and can only be applied
         # if the raspberry pi pico is reset and re-initialized.
-        self.glitcher.change_config_and_reset("mux_vinit", "1.8")
-        self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
+        self.glitcher.change_config_and_reset("mux_vinit", "3.3")
+        self.glitcher.init(port=args.rpico)
 
         # choose rising edge trigger with dead time of 0 seconds after power down
         # note that you still have to physically connect the trigger input with vtarget
@@ -91,13 +91,13 @@ class Main():
             # for demonstration, switch between two different initial voltages periodically
             # Since the PIO statemachines have limited memory, the PIO must be switched before applying the new configuration
             if (experiment_id // 100) % 2 == 0:
-                print("Using configuration mux_vinit = VI1")
-                self.glitcher.switch_pio(0)
-                self.glitcher.arm_multiplexing(delay, mul_config, "VI1")
-            else:
                 print("Using configuration mux_vinit = VI2")
                 self.glitcher.switch_pio(1)
                 self.glitcher.arm_multiplexing(delay, mul_config, "VI2")
+            else:
+                print("Using configuration mux_vinit = VI1")
+                self.glitcher.switch_pio(0)
+                self.glitcher.arm_multiplexing(delay, mul_config, "VI1")
 
             # power cycle target
             #self.glitcher.power_cycle_target(0.1)

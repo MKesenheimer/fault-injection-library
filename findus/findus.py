@@ -525,6 +525,10 @@ class PicoGlitcherInterface(MicroPythonScript):
     def block(self, timeout:float):
         self.pyb.exec(f'mp.block({timeout})')
 
+    def check_glitch(self) -> bool:
+        ret = self.pyb.exec('mp.check_glitch()')
+        return ret.strip() == b'True'
+
     def get_sm1_output(self) -> str:
         return self.pyb.exec('mp.get_sm1_output()')
 
@@ -929,6 +933,15 @@ class PicoGlitcher(Glitcher):
             timeout: Time after the block is released.
         """
         self.pico_glitcher.block(timeout)
+
+    def check_glitch(self) -> bool:
+        """
+        Check if the glitch was emitted.
+
+        Returns:
+            Returns True if statemachine 1, that is used for glitch generation, was triggered.
+        """
+        return self.pico_glitcher.check_glitch()
 
     def get_sm1_output(self) -> str:
         return self.pico_glitcher.get_sm1_output()
