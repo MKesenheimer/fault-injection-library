@@ -793,7 +793,7 @@ class PicoGlitcher():
                 raise Exception("Error: Power-cycling with pulse-shaping stage not possible when armed.")
             self.__ps_power_cycle(power_cycle_time)
         else:
-            # power-cycling in "normal" and multiplexing mode
+            # power-cycling in "normal" mode
             self.disable_vtarget()
             time.sleep(power_cycle_time)
             self.enable_vtarget()
@@ -818,7 +818,7 @@ class PicoGlitcher():
             self.__ps_power_cycle(power_cycle_time)
             self.release_reset()
         else:
-            # power-cycling in "normal" and multiplexing mode
+            # power-cycling in "normal" mode
             self.disable_vtarget()
             self.initiate_reset()
             time.sleep(power_cycle_time)
