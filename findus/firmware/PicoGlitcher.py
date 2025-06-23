@@ -313,48 +313,48 @@ def multiplex_vin2(MUX_PIO_INIT=0b10):
     irq(clear, 7)
     push(block)
 
-@asm_pio(set_init = (Globals.MUX1_PIO_INIT, Globals.MUX0_PIO_INIT), out_init = (Globals.MUX1_PIO_INIT, Globals.MUX0_PIO_INIT), sideset_init=PIO.OUT_LOW, out_shiftdir=PIO.SHIFT_RIGHT)
-def multiplex_double():
-    # block until first delay received
-    pull(block)
-    mov(x, osr)               # X = delay1
+# @asm_pio(set_init = (Globals.MUX1_PIO_INIT, Globals.MUX0_PIO_INIT), out_init = (Globals.MUX1_PIO_INIT, Globals.MUX0_PIO_INIT), sideset_init=PIO.OUT_LOW, out_shiftdir=PIO.SHIFT_RIGHT)
+# def multiplex_double(MUX_PIO_INIT=0b10):
+#     # block until first delay received
+#     pull(block)
+#     mov(x, osr)               # X = delay1
 
-    # block until first config received (t1 & v1)
-    pull(block)
-    mov(isr, osr)             # ISR = cfg1
+#     # block until first config received (t1 & v1)
+#     pull(block)
+#     mov(isr, osr)             # ISR = cfg1
 
-    # block until second delay received
-    pull(block)
-    mov(y, osr)               # Y = delay2
+#     # block until second delay received
+#     pull(block)
+#     mov(y, osr)               # Y = delay2
 
-    # block until second config received (t2 & v2)
-    pull(block)               # OSR = cfg2
+#     # block until second config received (t2 & v2)
+#     pull(block)               # OSR = cfg2
 
-    # wait for trigger condition, enable glitch_en
-    wait(1, irq, 7).side(1)
+#     # wait for trigger condition, enable glitch_en
+#     wait(1, irq, 7).side(1)
 
-    # first multiplex pulse
-    label("delay1_loop")
-    jmp(x_dec, "delay1_loop") # wait delay1 cycles
-    mov(osr, isr)             # reload cfg1
-    out(y, 14)                # Y = cfg1 >> 14 (length1)
-    out(pins, 2)              # switch MUX to v1
-    label("pulse1_loop")
-    jmp(y_dec, "pulse1_loop") # hold v1 for length1
-    set(pins, Globals.MUX_PIO_INIT)  # back to idle
+#     # first multiplex pulse
+#     label("delay1_loop")
+#     jmp(x_dec, "delay1_loop") # wait delay1 cycles
+#     mov(osr, isr)             # reload cfg1
+#     out(y, 14)                # Y = cfg1 >> 14 (length1)
+#     out(pins, 2)              # switch MUX to v1
+#     label("pulse1_loop")
+#     jmp(y_dec, "pulse1_loop") # hold v1 for length1
+#     set(pins, MUX_PIO_INIT)  # back to idle
 
-    # second multiplex pulse
-    label("delay2_loop")
-    jmp(y_dec, "delay2_loop") # wait delay2 cycles
-    out(y, 14)                # Y = cfg2 >> 14 (length2)
-    out(pins, 2)              # switch MUX to v2
-    label("pulse2_loop")
-    jmp(y_dec, "pulse2_loop") # hold v2 for length2
-    set(pins, Globals.MUX_PIO_INIT).side(0)  # idle + disable glitch_en
+#     # second multiplex pulse
+#     label("delay2_loop")
+#     jmp(y_dec, "delay2_loop") # wait delay2 cycles
+#     out(y, 14)                # Y = cfg2 >> 14 (length2)
+#     out(pins, 2)              # switch MUX to v2
+#     label("pulse2_loop")
+#     jmp(y_dec, "pulse2_loop") # hold v2 for length2
+#     set(pins, MUX_PIO_INIT).side(0b0)  # idle + disable glitch_en
 
-    # signal done
-    irq(clear, 7)
-    push(block)
+#     # signal done
+#     irq(clear, 7)
+#     push(block)
 
 @asm_pio()
 def tio_trigger_with_dead_time_rising_edge():
@@ -596,6 +596,11 @@ class PicoGlitcher():
             self.ad910x.init()
             self.pin_ps_trigger = self.ad910x.get_trigger_pin()
             self.pulse_generator = PulseGenerator(vhigh=self.config["ps_offset"], factor=self.config["ps_factor"])
+
+        self.success_pin_num = Globals.SUCCESS_PIN
+        self.success_pin = Pin(self.success_pin_num, Pin.IN, Pin.PULL_DOWN)
+        self.expected_pin_num = Globals.EXPECTED_PIN
+        self.expected_pin = Pin(self.expected_pin_num, Pin.IN, Pin.PULL_DOWN)
 
     def switch_pio(self, pio_base):
         self.sm0 = PIO(pio_base).state_machine(0)
@@ -1156,13 +1161,13 @@ class PicoGlitcher():
 
         # state machine for double multiplex glitch
         self.sm0.active(0)
-        self.sm0.init(
-            multiplex_double,
-            freq=self.frequency,
-            set_base=self.pin_glitch,
-            out_base=self.pin_glitch,
-            sideset_base=self.pin_glitch_en
-        )
+        # self.sm0.init(
+        #     multiplex_double,
+        #     freq=self.frequency,
+        #     set_base=self.pin_glitch,
+        #     out_base=self.pin_glitch,
+        #     sideset_base=self.pin_glitch_en
+        # )
 
         # convert nanoseconds to PIO clock cycles
         cycle = 1_000_000_000 // self.frequency
@@ -1280,6 +1285,24 @@ class PicoGlitcher():
             check = self.sm0.rx_fifo() > 0
             print(check)
             return check
+        
+    def check_success_pin(self) -> bool:
+        """
+        Read the configured success-check GPIO and return True if it's high.
+        Call this after check_glitch().
+        """
+        val = self.success_pin.value()
+        print(f"GPIO{self.success_pin_num} = {val}")
+        return bool(val)
+
+    def check_expected_pin(self) -> bool:
+        """
+        Read the configured expected GPIO and return True if it's high.
+        Call this after check_glitch().
+        """
+        val = self.expected_pin.value()
+        print(f"GPIO{self.expected_pin_num} = {val}")
+        return bool(val)
 
     def get_sm1_output(self):
         if self.sm1 is not None:

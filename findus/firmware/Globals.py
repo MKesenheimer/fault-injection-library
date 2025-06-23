@@ -35,6 +35,8 @@ elif config["hardware_version"][0] == 2:
     MUX1 = 0
     EXT1 = 11
     EXT2 = 10
+    SUCCESS_PIN = 20
+    EXPECTED_PIN = 21
     if config["mux_vinit"] == "GND":
         MUX1_INIT = 1
         MUX0_INIT = 1

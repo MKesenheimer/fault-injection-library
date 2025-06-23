@@ -528,6 +528,14 @@ class PicoGlitcherInterface(MicroPythonScript):
     def check_glitch(self) -> bool:
         ret = self.pyb.exec('mp.check_glitch()')
         return ret.strip() == b'True'
+    
+    def check_success_pin(self) -> bool:
+        ret = self.pyb.exec('mp.check_success_pin()')
+        return ret.strip() == b'True'
+    
+    def check_expected_pin(self) -> bool:
+        ret = self.pyb.exec('mp.check_expected_pin()')
+        return ret.strip() == b'True'
 
     def get_sm1_output(self) -> str:
         return self.pyb.exec('mp.get_sm1_output()')
@@ -942,6 +950,24 @@ class PicoGlitcher(Glitcher):
             Returns True if statemachine 1, that is used for glitch generation, was triggered.
         """
         return self.pico_glitcher.check_glitch()
+    
+    def check_success_pin(self) -> bool:
+        """
+        Check if the success pin was triggered.
+
+        Returns:
+            Returns True if the success pin was triggered.
+        """
+        return self.pico_glitcher.check_success_pin()
+    
+    def check_expected_pin(self) -> bool:
+        """
+        Check if the expected pin was triggered.
+
+        Returns:
+            Returns True if the expected pin was triggered.
+        """
+        return self.pico_glitcher.check_expected_pin()
 
     def get_sm1_output(self) -> str:
         return self.pico_glitcher.get_sm1_output()
