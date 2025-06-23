@@ -23,15 +23,13 @@ class DerivedPicoGlitcher(PicoGlitcher):
 
         self.pico_glitcher.pyb.exec_raw_no_follow(
             "import machine\n"
-            f"flag_pin = machine.Pin({SUCCESS_PIN}, machine.Pin.IN, machine.Pin.PULL_DOWN)\n"
-        )
-        self.pico_glitcher.pyb.exec_raw_no_follow(
+            f"success_pin = machine.Pin({SUCCESS_PIN}, machine.Pin.IN, machine.Pin.PULL_DOWN)\n"
             f"expected_pin = machine.Pin({EXPECTED_PIN}, machine.Pin.IN, machine.Pin.PULL_DOWN)\n"
         )
 
     def read_success_flag(self) -> bool:
         """Return True if that pin is HIGH (i.e. we hit the 'impossible' section)."""
-        out = self.pico_glitcher.pyb.exec_raw(f"print(int(flag_pin.value()))\n")
+        out = self.pico_glitcher.pyb.exec_raw(f"print(int(success_pin.value()))\n")
         return bool(int(out[0].strip()))
 
     def read_expected_flag(self) -> bool:
@@ -68,16 +66,16 @@ class Main:
         self.db = Database(sys.argv, resume=args.resume, nostore=args.no_store)
         self.start_time = int(time.time())
 
-        self.number_of_samples = 1024
-        self.sampling_freq = 450_000
-        self.glitcher.configure_adc(
-            number_of_samples=self.number_of_samples,
-            sampling_freq=self.sampling_freq,
-        )
-        self.plotter = AnalogPlot(
-            number_of_samples=self.number_of_samples,
-            sampling_freq=self.sampling_freq,
-        )
+        # self.number_of_samples = 1024
+        # self.sampling_freq = 500_000
+        # self.glitcher.configure_adc(
+        #     number_of_samples=self.number_of_samples,
+        #     sampling_freq=self.sampling_freq,
+        # )
+        # self.plotter = AnalogPlot(
+        #     number_of_samples=self.number_of_samples,
+        #     sampling_freq=self.sampling_freq,
+        # )
 
     def run(self):
         s_length = self.args.length[0]
@@ -91,10 +89,10 @@ class Main:
             delay = random.randint(s_delay, e_delay)
             length = random.randint(s_length, e_length)
 
-            mul_config = {"t1": length, "v1": "GND"}
+            mul_config = {"t1": length, "v1": "1.8"}
             self.glitcher.arm_multiplexing(delay, mul_config)
             # self.glitcher.arm(delay, length)
-            self.glitcher.arm_adc()
+            # self.glitcher.arm_adc()
 
             # time.sleep(0.01)
             # now reset the STM8L — as soon as it releases reset it will
@@ -106,14 +104,14 @@ class Main:
 
             # wait for the PIO state-machine to clear (or timeout)
             try:
-                self.glitcher.block(timeout=2)
+                self.glitcher.block(timeout=1)
 
                 # on a clean exit, read your “success” GPIO
                 success = self.glitcher.read_success_flag()
                 expected = self.glitcher.read_expected_flag()
 
                 if not (success or expected):
-                    time.sleep(0.01)  # wait a bit for the GPIO to settle
+                    time.sleep(0.001)
                     success = self.glitcher.read_success_flag()
                     expected = self.glitcher.read_expected_flag()
 
@@ -127,8 +125,8 @@ class Main:
                 else:
                     status = b"error"
 
-                samples = self.glitcher.get_adc_samples()
-                self.plotter.update_curve(samples)
+                # samples = self.glitcher.get_adc_samples()
+                # self.plotter.update_curve(samples)
             except Exception as e:
                 status = b"timeout"
                 self.glitcher.power_cycle_target(power_cycle_time=1)
