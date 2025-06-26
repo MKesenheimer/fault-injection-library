@@ -1,169 +1,211 @@
 # Usage with examples
 
-This library is intended to make fault injection attacks against microcontrollers accessible for hobbyists and to introduce the topic of voltage glitching.
-This software offers an easy entry point to carry out your own attacks against microcontrollers, SoCs and CPUs.
-With the provided and easy to use functions and classes, fault injection projects can be realized quickly.
+Findus (aka the fault-injection-library) is a toolchain to perform fault-injection attacks on microcontrollers and other targets.
+This library offers an easy entry point to carry out fault-injection attacks against microcontrollers, SoCs and CPUs.
+With the provided and easy to use functions and classes, fault-injection projects can be realized quickly with cheap and available hardware.
 
-This library is based on [TAoFI-FaultLib](https://github.com/raelize/TAoFI-FaultLib).
-However, several new features have been implemented.
-For example, the original library was developed to work with the [ChipWhisperer-Husky](https://rtfm.newae.com/Capture/ChipWhisperer-Husky/) only.
-This library has been rewritten to work with hardware that consists of a common MOSFET, the [Raspberry Pi Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/) as the controller and a few other cheap components.
-The Raspberry Pi Pico is not only cheap and available for the hobbyist, but also a very capable microcontroller.
-Furthermore, this library supports the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/) as well.
+Findus supports the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/), the [ChipWhisperer Husky](https://rtfm.newae.com/Capture/ChipWhisperer-Husky/) and the PicoGlitcher.
+More information about the ChipWhisperer Pro and the ChipWhisperer Husky can be found on [https://chipwhisperer.readthedocs.io/en/latest/index.html](https://chipwhisperer.readthedocs.io/en/latest/index.html).
 
-The database functionality has been expanded to a certain extent, too.
-With this implementation, e.g. one can add experiments to a previous measurement campaign.
+## Table of contents
 
-## Cloning
+- [Purchasing the Pico Glitcher](#purchasing-the-pico-glitcher)
+- [Documentation](#documentation)
+- [Installing findus](#installing-findus)
+- [Updating the Pico Glitcher firmware](#updating-the-pico-glitcher-firmware)
+    - [Step 1: MicroPython firmware](#step-1-microPython-firmware)
+    - [Step 2: Install the findus library](#step-2-install-the-findus-library)
+    - [Step 3: Upload the Pico Glitcher MicroPython script](#step-3-upload-the-pico-glitcher-micropython-script)
+- [Installing from source](#installing-from-source)
+- [Test the functionality of your Pico Glitcher](#test-the-functionality-of-your-pico-glitcher)
+- [UART Trigger](#uart-trigger)
+- [More Examples](#more-examples)
+- [Analyzer](#analyzer)
 
-Set up the project by cloning it:
+## Purchasing the Pico Glitcher
+
+Only a Raspberry Pi Pico and a few other components are required to use this software.
+However, in order to achieve the best results, a circuit board was developed that was adapted directly for the fault-injection-library.
+
+The board consists of a Raspberry Pi Pico, two level shifters for in- and outputs with any voltage, and glitching transistors that can switch up to 66 amps.
+A multiplexing stage to quickly switch between up to four different voltage levels was added in revision 2.
+
+There are several connection options for different voltage sources, from 1.8V, 3.3V to 5V.
+The Pico Glitcher can also be supplied with any external voltage via `VCC_EXTERN`.
+To power the target board, it is supplied with power via the `VTARGET` connection.
+The output of this voltage source can be controlled via software, i.e. the target can be completely disconnected from power by executing the `power_cycle_target()` command.
+This allows a cold start of the target to be carried out in the event of error states that cannot be eliminated by a reset.
+
+![Assembled Pico Glitcher v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/finished.JPG)
+
+The Pico Glitcher can be purchased from the tindie online store: [https://www.tindie.com/products/faulty-hardware/picoglitcher-v21/](https://www.tindie.com/products/faulty-hardware/picoglitcher-v21/). If you have questions or special requests, please feel free to contact me.
+
+
+## Documentation
+
+The documentation of the source code and how to use the library and the hardware can be found on [https://fault-injection-library.readthedocs.io/](https://fault-injection-library.readthedocs.io/).
+
+
+## Installing findus
+
+If you just want to get started quickly and don't want to bother with the source code of findus, findus can be installed via pip. The findus library can be found on [https://pypi.org/project/findus/](https://pypi.org/project/findus/) and can be installed locally in a Python environment using the following command:
+
 ```bash
-git clone --recurse-submodules https://github.com/MKesenheimer/fault-injection-library.git
-cd fault-injection-lib
+mkdir my-fi-project && cd my-fi-project
+python -m venv .venv
+source .venv/bin/activate
+pip install findus
 ```
 
-## Setting up a virtual environment
+Install the optional RD6006 python bindings if you have a RK6006 or a RD6006 power supply from Riden:
 
-If you want to make sure that the libraries to be installed do not collide with your installed Python environment, use a virtual environment.
+```bash
+pip install rd6006
+```
+
+This external power supply can be used optionally to supply the target with power. It is possible to control the RD6006 power supply via the findus library using the power supply's USB interface. Suitable functions for this are implemented in the findus library.
+Don't worry if you don't have this power supply. The Pico Glitcher can also supply the target with voltage.
+
+Now you can use findus:
+
+```bash
+python
+>>> from findus import Database, PicoGlitcher
+...
+```
+
+The next step is to copy an existing glitching script and to adapt it to your needs.
+Start by copying [https://github.com/MKesenheimer/fault-injection-library/blob/master/example/pico-glitcher.py](https://github.com/MKesenheimer/fault-injection-library/blob/master/example/pico-glitcher.py). More example projects are located at [https://github.com/MKesenheimer/fault-injection-library/tree/master/projects](https://github.com/MKesenheimer/fault-injection-library/tree/master/projects).
+
+See [examples](examples.md) for more information how to use findus and the Pico Glitcher.
+
+## Updating the Pico Glitcher firmware
+
+Your Pico Glitcher should come with the latest firmware already installed. If not, follow the following procedure to update the software on the Pico Glitcher.
+
+### Step 1: MicroPython firmware
+
+Download the MicroPython firmware from [https://micropython.org/download/RPI_PICO/](https://micropython.org/download/RPI_PICO/). Unplug the Pico Glitcher from your computer, press and hold the 'BOOTSEL' button on the Raspberry Pi Pico and connect it back to your computer. The Raspberry Pi Pico should come up as a flash-storage device. Copy the MicroPython firmware ('RPI_PICO-xxxxxxxx-vx.xx.x.uf2') to this drive and wait until the Raspberry Pi Pico disconnects automatically.
+More information about setting up the Raspberry Pi Pico can be found [here](https://projects.raspberrypi.org/en/projects/getting-started-with-the-pico).
+
+### Step 2: Install the findus library
+
+Skip this step, if you already installed findus previously.
+
+If you want to make sure that the libraries to be installed do not collide with your local Python environment, use a virtual environment.
 Set it up by generating a new virtual environment and by activating it:
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 ```
 
-## Installing dependencies
-
-After these steps we have to install some requirements via pip.
+After these steps we have to install findus (aka fault-injection-library).
 Make sure to have pip [installed](https://docs.python.org/3/library/ensurepip.html).
+
 ```bash
-pip install -r requirements.txt
+pip install findus
 ```
 
-If you use the rk6006 power supply and want to power-cycle the target via software, install the rd6006 library (supplied as submodule):
+### Step 3: Upload the Pico Glitcher MicroPython script
+
+If everything went well, you should have the `upload` script available for execution in your command-line environment.
+Connect the Pico Glitcher to your computer and check which serial device comes up:
+
 ```bash
+ls /dev/tty*
+```
+
+Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version (`config_v1/config.json`, `config_v2.1-2/config.json` or `config_v2.3/config.json`) via the following command:
+
+```bash
+cd .venv/lib/python3.12/site-packages/findus/firmware
+upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py Globals.py \ 
+    PicoGlitcher.py PulseGenerator.py Spline.py <config-path>/config.json
+```
+
+Your Pico Glitcher should now be ready to perform fault-injection attacks.
+
+## Installing from source
+
+If you want to get involved in the development or to have access to all the resources of this repository, clone the findus library:
+
+```bash
+git clone --depth 1 --recurse-submodules \ 
+    https://github.com/MKesenheimer/fault-injection-library.git
+```
+
+Install the findus and the optional rd6006 library:
+
+```bash
+cd fault-injection-library
+pip install .
 cd rd6006
-python setup.py install
+pip install .
 ```
 
-However, usage of the rk6006 power supply is optional.
-The Pico Glitcher is also capable of power-cycling the target via software.
+Then:
 
-## Installing micropython scripts on the Raspberry Pi Pico
-
-Now we have to prepare the Raspberry Pi Pico.
-Add the [Micropython firmware](https://projects.raspberrypi.org/en/projects/getting-started-with-the-pico/3).
-In general the following script can be used to upload Micropython scripts to the Raspberry Pi Pico.
 ```bash
-python lib/upload-micro-python.py --port /dev/<rpi-tty-port> <script.py>
+cd findus/firmware
+upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py Globals.py \ 
+    PicoGlitcher.py PulseGenerator.py Spline.py <config-path>/config.json
 ```
 
-## Executing blink test
+The next step is to copy an existing glitching script and to adapt it to your needs.
+Start by copying `fault-injection-library/example/pico-glitcher.py`. More example projects are located at `fault-injection-library/projects`.
 
-A simple example how the Micropython classes and functions are accessed on the Raspberry Pi Pico, the following "Hello World" program can be executed.
-This should also be the first check, if everything is set up correctly.
+
+## Test the functionality of your Pico Glitcher
+
+The following  setup can be used to test the Pico Glitcher.
+
+- Connect 'TRIGGER' input with 'RESET'.
+- Between 'GLITCH' and 'VTARGET', connect a 10 Ohm resistor (this is the test target in this case).
+- Optionally connect channel 1 of an oscilloscope to 'RESET' and channel 2 to 'GLITCH'.
+
+![Example setup](https://github.com/MKesenheimer/fault-injection-library/blob/master/docs/images/test-example.png)
+
+Next, run the test script `pico-glitcher.py` located in `fault-injection-library/example`:
+
 ```bash
-cd blink
-python ../helper/upload-micro-python.py --port /dev/<rpi-tty-port> --script mpBlink.py
-python test.py --rpico /dev/tty.usbmodem11101
+cd example
+python pico-glitcher.py --rpico /dev/<rpi-tty-port> --delay 1000 1000 --length 100 100
 ```
 
-## Executing Raspberry Pi Pico glitcher example implementation
+You should now be able to observe the glitches with an oscilloscope on the 10 Ohm resistor.
+Measure the expected delay and glitch length with the oscilloscope.
 
-To carry out a fault injection attack with the Raspberry Pi Pico on another microcontroller, the following setup can be used.
+## UART Trigger
 
-First, we connect the Pico Glitcher and a target as follows:
-![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/example_bb.png)
-Note that the trigger input is connected directly to the reset line.
-As the reset is released from the device, the trigger signal is sent.
+- Connect 'TRIGGER' input to 'RX' and 'TX' of a USB-to-UART adapter
+- Between 'GLITCH' and 'VTARGET', connect a 10 Ohm resistor (this is the test target in this case).
+- Optionally connect channel 1 of an oscilloscope to 'RESET' and channel 2 to 'GLITCH'.
 
-We install the corresponding Micropython script on the Raspberry Pi Pico:
+![Example setup](https://github.com/MKesenheimer/fault-injection-library/blob/master/docs/images/test-example-uart.png)
+
+Next, run the test script `pico-glitcher-uart.py` located in `fault-injection-library/example`:
+
 ```bash
-python helper/upload-micro-python.py --port /dev/<rpi-tty-port> --delete-all
-python helper/upload-micro-python.py --port /dev/<rpi-tty-port> --script lib/mpGlitcher.py
+cd example
+python pico-glitcher-uart.py --rpico /dev/<rpi-tty-port> --target /dev/<target-tty-port> --delay 1000 1000 --length 100 100
 ```
-Although the software is based on Micropython, using the PIO functions of the Raspberry Pi Pico, very precise switching operations can be made and triggered on external signals.
 
-Next, we switch to the directory `pico-glitcher` and execute the script which controls our attack.
+You should now be able to observe the glitches with an oscilloscope on the 10 Ohm resistor.
+Measure the expected delay and glitch length with the oscilloscope.
+
+## More Examples
+
+More examples can be found on [https://fault-injection-library.readthedocs.io/en/latest/examples/#](https://fault-injection-library.readthedocs.io/en/latest/examples/#) or under `fault-injection-library/projects`.
+
+## Analyzer
+
+During your glitching campaign, run the `analyzer` script in a separate terminal window:
+
 ```bash
-cd ../pico-glitcher
-python pico-glitcher.py --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port> --delay 1_000 2_000 --length 100 150
-```
-The script resets the target, arms the pico glitcher, waits for the external trigger (reset high) and emits a glitch of a given length after a certain delay.
-The response of the target is then read and classified.
-The results are entered into a database, which can be processed in the browser using the command:
-```bash
-python ../analyzer/taofi-analyzer --directory databases
-```
-This attack can be used, for example, to bypass the read-out protection (RDP) of Apple Airtags and to download the firmware of these devices.
-See [the video by stacksmashing](https://www.youtube.com/watch?v=_E0PWQvW-14) for more details.
-
-
-## Attacking a STM32 bootloader via the Raspberry Pi Pico glitcher
-
-A more advanced attack is, for example, a fault injection attack against the STM32 bootloader and bypassing the read-out protection of these chips.
-This attack has been first described by [SEC consult](https://sec-consult.com/blog/detail/secglitcher-part-1-reproducible-voltage-glitching-on-stm32-microcontrollers/) and uses the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/) for the injection controller.
-However, to glitch these devices successully, no expensive hardware is necessary, as it is demonstrated with the following scripts.
-
-Connect the Pico Glitcher and the STM32 target according to the following schematic:
-![Example usage](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/example2_bb.png)
-Here, the trigger line is connected to the UART-TX line, since we want to trigger on a specific UART word that is sent during the bootloader stage.
-Furthermore, "Boot0" pin of the STM32 needs to be pulled high in order to activate the bootloader.
-This pin is exposed on the Nucleo header.
-In addition, due to the inherent limitations of the drawing program Fritzing, the glitching line was connected directly to 3.3V of the target in the schematics.
-In a real setup, however, the glitching line should be soldered as close as possible to the power supply of the STM32 and the capacitors should be removed nearby.
-
-Install the Raspberry Pi Pico Micropython scripts:
-```bash
-cd lib
-python upload-micro-python.py --port /dev/<rpi-tty-port> --script mpGlitcher.py
-```
-Next, change into `stm32-glitching` and execute the following script.
-```bash
-cd stm32-glitching
-python pico-glitcher.py --target /dev/<target-tty-port> --rpico /dev/<rpi-tty-port> --delay 100_000 200_000 --length 100 150
-```
-Or make use of the ChipWhisperer Pro by executing:
-```bash
-cd stm32-glitching
-python pro-glitcher.py --target /dev/<target-tty-port> --delay 100_000 200_000 --length 100 150
+analyzer --directory databases
 ```
 
-Again, use the following command to analyze the collected datapoints:
-```bash
-python ../analyzer/taofi-analyzer --directory databases
-```
+This spins up a local web application on [http://127.0.0.1:8080](http://127.0.0.1:8080) which can be used to observe the current progress.
 
-If everything goes as expected, a successful run should look something like this:
-![Bootloader glitching](https://github.com/MKesenheimer/fault-injection-library/blob/master/stm32l0-glitching/images/bootloader-glitching.png)
-
-
-## Further handy features and notes
-
-One can resume inserting datapoints into the database of the most recent run by supplying the `resume` flag:
-```bash
-python pico-glitcher.py ... --resume
-```
-
-If the datapoints should not be inserted into the database, the flag `no-store` can be used instead:
-```bash
-python pico-glitcher.py ... --no-store
-```
-The flags `resume` and `no-store` can be combined.
-
-## Pico Glitcher v1 hardware
-
-As mentioned above, only a Raspberry Pi Pico and a few other components are required to use this software.
-However, in order to achieve the best results, a circuit board was developed that was adapted directly for the fault-injection-library. 
-
-The board consists of a Raspberry Pi Pico, two level shifters for in- and outputs with any voltage, and glitching transistors that can switch up to 66 amps.
-![Pico Glichter v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/pico-glitcher-v1_sch.png)
-
-There are several connection options for different voltage sources, from 1.8V, 3.3V to 5V.
-The Pico Glitcher v1 can also be supplied with any external voltage via `VCC_EXTERN`.
-To power the target board, it is supplied with power via the `VTARGET` connection.
-The output of this voltage source can be controlled via the fault-injection-library, i.e. the target can be completely disconnected from power by executing the `helper/power-cycle-target.py` command.
-This allows a cold start of the target to be carried out in the event of error states that cannot be eliminated by a reset.
-![Pico Glitcher v1 layout](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/pico-glitcher-v1_brd.png)
-
-The assembled and fully functional board is shown in the following figure:
-![Assembled Pico Glitcher v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/finished.JPG)
+![Parameter space web application](https://github.com/MKesenheimer/fault-injection-library/blob/master/docs/images/parameterspace-pico-glitcher.png)

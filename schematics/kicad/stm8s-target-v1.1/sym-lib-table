@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "KMR221GLFS")(type "KiCad")(uri "${KIPRJMOD}/KMR221GLFS/KMR221GLFS.kicad_sym")(options "")(descr ""))
+)
