@@ -28,6 +28,7 @@ This is a brief summary of the different versions of Pico Glitcher and what has 
 - The logic gates were fixed and the multiplexer stage works correctly.
 - Increased the pin count of the multi-purpose GPIO header from 16 pins to 20 pins to support the pulse shaping expansion board.
 - Removed the level shifters between GPIO pins 16-19 to interface the pulse shaping expansion board.
+- Note: the power switch TPS2041 that controls the targets power supply VTARGET can only switch voltages above 2.2 V. The power switch has been replaced with TPS22860 in versions 2.3 and later to allow lower voltages to be switched.
 
 ### v2.2
 
