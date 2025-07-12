@@ -1,41 +1,119 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: GPL-3.0-only
-# Adapted for STM8L single-glitch with external trigger + success-pin
 
 import argparse
 import logging
-import random
+import os
 import sys
 import time
+import numpy as np
+from serial import Serial
+import requests
+from dotenv import load_dotenv
 
-from findus import AnalogPlot, Database, PicoGlitcher
+from findus import Database, PicoGlitcher
 
-# Pico GPIO that your bootloader sets HIGH when the “impossible”
-# section has been reached
 SUCCESS_PIN = 20
-EXPECTED_PIN = 21
+RESET_PIN = 21
+
+
+def send_pushover_notification(user_key, app_token, message, title=None):
+    url = "https://api.pushover.net/1/messages.json"
+    payload = {
+        "token": app_token,
+        "user": user_key,
+        "message": message,
+    }
+    if title:
+        payload["title"] = title
+
+    response = requests.post(url, data=payload)
+    if response.status_code != 200:
+        print(f"Failed to send notification: {response.text}")
 
 
 class DerivedPicoGlitcher(PicoGlitcher):
-    # override init, not __init__, to ensure
     def init(self, *args, **kwargs):
         super().init(*args, **kwargs)
 
         self.pico_glitcher.pyb.exec_raw_no_follow(
             "import machine\n"
             f"success_pin = machine.Pin({SUCCESS_PIN}, machine.Pin.IN, machine.Pin.PULL_DOWN)\n"
-            f"expected_pin = machine.Pin({EXPECTED_PIN}, machine.Pin.IN, machine.Pin.PULL_DOWN)\n"
+            f"reset_pin = machine.Pin({RESET_PIN}, machine.Pin.IN, machine.Pin.PULL_DOWN)\n"
         )
 
     def read_success_flag(self) -> bool:
-        """Return True if that pin is HIGH (i.e. we hit the 'impossible' section)."""
         out = self.pico_glitcher.pyb.exec_raw(f"print(int(success_pin.value()))\n")
         return bool(int(out[0].strip()))
 
-    def read_expected_flag(self) -> bool:
-        """Return True if the expected pin is HIGH."""
-        out = self.pico_glitcher.pyb.exec_raw(f"print(int(expected_pin.value()))\n")
+    def read_reset_flag(self) -> bool:
+        out = self.pico_glitcher.pyb.exec_raw(f"print(int(reset_pin.value()))\n")
         return bool(int(out[0].strip()))
+
+    def classify(self, state: bytes) -> str:
+        color = "C"
+        if b"expected" in state:
+            color = "G"
+        elif b"ok" in state:
+            color = "C"
+        elif b"error" in state:
+            color = "M"
+        elif b"timeout" in state:
+            color = "Y"
+        elif b"warning" in state:
+            color = "O"
+        elif b"success" in state:
+            color = "R"
+        return color
+
+
+class PSU:
+    def __init__(self, port):
+        self.psu = Serial(port=port, baudrate=9600)
+
+    def get_voltage(self) -> float:
+        """
+        Gets the current output voltage of the psu
+
+        Returns:
+            float: The current output voltage, in volts (V).
+        """
+        self.psu.write("VOUT1?".encode())
+        response = self.psu.readline().decode().strip()
+
+        return float(response)
+
+    def set_voltage(self, voltage: float, attempts: int = 10):
+        """
+        Sets the output voltage of the psu
+
+        Args:
+            voltage (float): The voltage to set, in volts (V).
+        """
+        for _ in range(attempts):
+            self.psu.write("VSET1?".encode())
+
+            current_voltage = self.get_voltage()
+            if abs(current_voltage - voltage) <= 0.01:
+                return
+
+        raise ValueError(
+            f"Failed to set voltage to {voltage} V after {attempts} attempts. Current voltage: {current_voltage} V"
+        )
+
+    def set_current_limit(self, current: float):
+        """
+        Sets the current limit of the psu
+
+        Args:
+            current (float): The current limit to set, in amperes (A).
+        """
+        self.psu.write(f"ISET1:{current}".encode())
+
+    def turn_on(self):
+        self.psu.write("OUT1".encode())
+
+    def turn_off(self):
+        self.psu.write("OUT0".encode())
 
 
 class Main:
@@ -52,99 +130,125 @@ class Main:
 
         # -- initialize glitcher --
         self.glitcher = DerivedPicoGlitcher()
-        self.glitcher.init(port=args.rpico)
+        self.glitcher.init(port=args.rpico, enable_vtarget=False)
         self.glitcher.change_config_and_reset("mux_vinit", "3.3")
-        self.glitcher.init(port=args.rpico)
+        self.glitcher.init(port=args.rpico, enable_vtarget=False)
 
-        # Use external trigger pin (wired from your instrumented bootloader)
         self.glitcher.rising_edge_trigger()
-
         self.glitcher.set_multiplexing()
-        # self.glitcher.set_lpglitch()
 
-        # -- database for logging --
+        self.glitcher.power_cycle_reset(0.01)
+
         self.db = Database(sys.argv, resume=args.resume, nostore=args.no_store)
         self.start_time = int(time.time())
 
-        # self.number_of_samples = 1024
-        # self.sampling_freq = 500_000
-        # self.glitcher.configure_adc(
-        #     number_of_samples=self.number_of_samples,
-        #     sampling_freq=self.sampling_freq,
-        # )
-        # self.plotter = AnalogPlot(
-        #     number_of_samples=self.number_of_samples,
-        #     sampling_freq=self.sampling_freq,
-        # )
+        self.psu = PSU(port=args.psu)
 
     def run(self):
-        s_length = self.args.length[0]
-        e_length = self.args.length[1]
-        s_delay = self.args.delay[0]
-        e_delay = self.args.delay[1]
+        s_length = 0
+        e_length = 150
+        length_step = 5
+        s_delay = 0
+        e_delay = 1000
+        delay_step = 6
+        s_voltage = 1.70
+        e_voltage = 1.96
+        voltage_step = 0.01
+        n_glitches = 200
+
+        expected_glitches_per_second = 34
+        total_glitches = (
+            (e_voltage - s_voltage)
+            / voltage_step
+            * (e_delay - s_delay)
+            / delay_step
+            * (e_length - s_length)
+            / length_step
+            * n_glitches
+        )
+        total_experiment_length = total_glitches / expected_glitches_per_second
+        print(
+            f"Total glitches: {total_glitches}, expected experiment length: {total_experiment_length:.2f} seconds"
+        )
 
         exp_id = 0
-        while True:
-            # pick random glitch parameters (ns)
-            delay = random.randint(s_delay, e_delay)
-            length = random.randint(s_length, e_length)
 
-            mul_config = {"t1": length, "v1": "1.8"}
-            self.glitcher.arm_multiplexing(delay, mul_config)
-            # self.glitcher.arm(delay, length)
-            # self.glitcher.arm_adc()
+        self.psu.set_voltage(s_voltage)
+        self.psu.set_current_limit(0.5)
+        self.psu.turn_on()
 
-            # time.sleep(0.01)
-            # now reset the STM8L — as soon as it releases reset it will
-            # run your patched bootloader, toggle the trigger pin, etc.
-            self.glitcher.reset_target(0.001)
-            # TODO: send uart command to the target to start
+        # while True:
+        for voltage in np.arange(s_voltage, e_voltage + 0.01, 0.01):
+            print(f"Setting PSU voltage to {voltage:.2f} V")
+            self.psu.set_voltage(voltage)
 
-            status = b"unknown"
+            for delay in np.arange(s_delay, e_delay, delay_step):
+                for length in np.arange(s_length, e_length, length_step):
+                    for _ in range(n_glitches):
+                        delay = int(delay)
+                        length = int(length)
 
-            # wait for the PIO state-machine to clear (or timeout)
-            try:
-                self.glitcher.block(timeout=1)
+                        mul_config = {"t1": length, "v1": "VI1"}
+                        self.glitcher.arm_multiplexing(delay, mul_config)
 
-                # on a clean exit, read your “success” GPIO
-                success = self.glitcher.read_success_flag()
-                expected = self.glitcher.read_expected_flag()
+                        self.glitcher.reset(0.001)
 
-                if not (success or expected):
-                    time.sleep(0.001)
-                    success = self.glitcher.read_success_flag()
-                    expected = self.glitcher.read_expected_flag()
+                        try:
+                            self.glitcher.block(timeout=1)
+                            time.sleep(0.001)
 
-                print(f"[{exp_id}] success={success} expected={expected}")
+                            success = self.glitcher.read_success_flag()
+                            reset = self.glitcher.read_reset_flag()
+                            print(f"success={success}, reset={reset}")
 
-                if success:
-                    status = b"success"
-                    # break
-                elif expected:
-                    status = b"expected"
-                else:
-                    status = b"error"
+                            if success:
+                                state = b"success"
+                                send_pushover_notification(
+                                    user_key=os.getenv("PUSHOVER_USER_KEY"),
+                                    app_token=os.getenv("PUSHOVER_APP_TOKEN"),
+                                    message=f"Successful glitch! with delay={delay} ns, length={length} ns, voltage={voltage:.2f} V",
+                                    title="Successful glitch",
+                                )
+                            elif reset:
+                                state = b"reset"
+                            else:
+                                state = b"expected"
+                        except:
+                            print("[-] Timeout received in block(). Continuing.")
+                            self.glitcher.power_cycle_reset(0.2)
+                            time.sleep(0.2)
+                            state = b"timeout"
 
-                # samples = self.glitcher.get_adc_samples()
-                # self.plotter.update_curve(samples)
-            except Exception as e:
-                status = b"timeout"
-                self.glitcher.power_cycle_target(power_cycle_time=1)
-                print(f"[{exp_id}] Error: {e}")
+                        color = self.glitcher.classify(state)
+                        self.db.insert(exp_id, delay, length, color, state)
+                        speed = self.glitcher.get_speed(self.start_time, exp_id)
+                        experiment_base_id = self.db.get_base_experiments_count()
+                        print(
+                            self.glitcher.colorize(
+                                f"[+] Experiment {exp_id}\t{experiment_base_id}\t({speed})\t{delay:>{len(str(e_delay))}}\t{length}\t{color}\t{state}",
+                                color,
+                            )
+                        )
+                        exp_id += 1
 
-            color = self.glitcher.classify(status)
-            self.db.insert(exp_id, delay, length, color, status)  # no serial dump here
-            print(
-                f"[{exp_id}] delay={delay}  length={length} → status={status} ({color})"
-            )
-            exp_id += 1
+        self.psu.turn_off()
 
 
 if __name__ == "__main__":
+    load_dotenv()
+
     p = argparse.ArgumentParser(
         description="STM8L single-glitch via external trigger + success pin"
     )
-    p.add_argument("--rpico", default="/dev/ttyUSB1", help="PicoGlitcher serial port")
+    p.add_argument(
+        "--rpico",
+        default="/dev/ttyUSB1",
+        required=True,
+        help="PicoGlitcher serial port",
+    )
+    p.add_argument(
+        "--psu", default="/dev/ttyUSB0", required=True, help="PSU serial port"
+    )
     p.add_argument(
         "--delay", nargs=2, type=int, required=True, help="Glitch offset range (ns)"
     )

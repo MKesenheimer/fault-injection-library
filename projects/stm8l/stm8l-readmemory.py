@@ -77,7 +77,7 @@ class Main:
             self.glitcher.reset_target(self.args.reset_hold)
             time.sleep(self.args.post_reset_delay)
 
-            # Wait for bootloader to come up
+            # TODO instead just check if pin 2 (USART_RX) is high
             state = self.programmer.bootloader_enter()
             flash = b''
             eeprom = b''
