@@ -139,7 +139,7 @@ class Main:
 
         self.glitcher.power_cycle_reset(0.01)
 
-        self.db = Database(sys.argv, resume=args.resume, nostore=args.no_store)
+        self.db = Database(sys.argv, resume=args.resume, nostore=args.no_store, column_names=["voltage", "delay", "length"])
         self.start_time = int(time.time())
 
         self.psu = PSU(port=args.psu)
@@ -220,12 +220,12 @@ class Main:
                             state = b"timeout"
 
                         color = self.glitcher.classify(state)
-                        self.db.insert(exp_id, delay, length, color, state)
+                        self.db.insert(exp_id, voltage * 100, delay, length, color, state)
                         speed = self.glitcher.get_speed(self.start_time, exp_id)
                         experiment_base_id = self.db.get_base_experiments_count()
                         print(
                             self.glitcher.colorize(
-                                f"[+] Experiment {exp_id}\t{experiment_base_id}\t({speed})\t{delay:>{len(str(e_delay))}}\t{length}\t{color}\t{state}",
+                                f"[+] Experiment {exp_id}\t{experiment_base_id}\t({speed})\t{voltage:.2f}\t{delay:>{len(str(e_delay))}}\t{length}\t{color}\t{state}",
                                 color,
                             )
                         )
