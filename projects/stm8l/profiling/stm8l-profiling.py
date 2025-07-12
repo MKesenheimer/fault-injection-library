@@ -90,7 +90,7 @@ class PS3005D:
             voltage (float): The voltage to set, in volts (V).
         """
         for _ in range(attempts):
-            self.device.write("VSET1?".encode())
+            self.device.write(f"VSET1:{voltage:.2f}".encode())
 
             current_voltage = self.get_voltage()
             if abs(current_voltage - voltage) <= 0.01:
