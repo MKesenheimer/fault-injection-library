@@ -7,3 +7,5 @@ dash_bootstrap_components
 dash_ag_grid
 matplotlib
 scipy
+requests
+dotenv
