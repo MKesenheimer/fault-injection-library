@@ -66,9 +66,9 @@ class DerivedPicoGlitcher(PicoGlitcher):
         return color
 
 
-class PSU:
+class PS3005D:
     def __init__(self, port):
-        self.psu = Serial(port=port, baudrate=9600)
+        self.device = Serial(port=port, baudrate=9600)
 
     def get_voltage(self) -> float:
         """
@@ -77,8 +77,8 @@ class PSU:
         Returns:
             float: The current output voltage, in volts (V).
         """
-        self.psu.write("VOUT1?".encode())
-        response = self.psu.readline().decode().strip()
+        self.device.write("VOUT1?".encode())
+        response = self.device.readline().decode().strip()
 
         return float(response)
 
@@ -90,7 +90,7 @@ class PSU:
             voltage (float): The voltage to set, in volts (V).
         """
         for _ in range(attempts):
-            self.psu.write("VSET1?".encode())
+            self.device.write("VSET1?".encode())
 
             current_voltage = self.get_voltage()
             if abs(current_voltage - voltage) <= 0.01:
@@ -107,13 +107,13 @@ class PSU:
         Args:
             current (float): The current limit to set, in amperes (A).
         """
-        self.psu.write(f"ISET1:{current}".encode())
+        self.device.write(f"ISET1:{current}".encode())
 
     def turn_on(self):
-        self.psu.write("OUT1".encode())
+        self.device.write("OUT1".encode())
 
     def turn_off(self):
-        self.psu.write("OUT0".encode())
+        self.device.write("OUT0".encode())
 
 
 class Main:
@@ -142,7 +142,7 @@ class Main:
         self.db = Database(sys.argv, resume=args.resume, nostore=args.no_store, column_names=["voltage", "delay", "length"])
         self.start_time = int(time.time())
 
-        self.psu = PSU(port=args.psu)
+        self.psu = PS3005D(port=args.psu)
 
     def run(self):
         s_length = 0
