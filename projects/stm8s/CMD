@@ -1,0 +1,1 @@
+python stm8-readmemory.py --rpico /dev/tty.usbmodem11301 --target /dev/tty.usbserial-A50285BI --delay 70_000 107_000 --length 200 300
