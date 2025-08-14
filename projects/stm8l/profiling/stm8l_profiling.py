@@ -89,16 +89,7 @@ class PS3005D:
         Args:
             voltage (float): The voltage to set, in volts (V).
         """
-        # for _ in range(attempts):
         self.device.write(f"VSET1:{voltage:05.2f}".encode())
-
-            # current_voltage = self.get_voltage()
-            # if abs(current_voltage - voltage) <= 0.01:
-            #     return
-
-        # raise ValueError(
-        #     f"Failed to set voltage to {voltage} V after {attempts} attempts. Current voltage: {current_voltage} V"
-        # )
 
     def set_current_limit(self, current: float):
         """
@@ -248,16 +239,6 @@ if __name__ == "__main__":
     )
     p.add_argument(
         "--psu", default="/dev/ttyUSB0", required=True, help="PSU serial port"
-    )
-    p.add_argument(
-        "--delay", nargs=2, type=int, required=True, help="Glitch offset range (ns)"
-    )
-    p.add_argument(
-        "--length",
-        nargs=2,
-        type=int,
-        required=True,
-        help="Glitch pulse width range (ns)",
     )
     p.add_argument(
         "--reset-hold", type=float, default=0.01, help="Target reset hold time (s)"
