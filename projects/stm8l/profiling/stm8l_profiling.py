@@ -165,14 +165,18 @@ class Main:
         exp_id = 0
 
         self.psu.set_voltage(s_voltage)
+        time.sleep(0.1)
         self.psu.set_current_limit(0.5)
+        time.sleep(0.1)
         self.psu.turn_on()
+        time.sleep(0.1)
 
         # while True:
         for voltage in np.arange(s_voltage, e_voltage + 0.01, 0.01):
             print(f"Setting PSU voltage to {voltage:.2f} V")
             self.psu.set_voltage(voltage)
-
+            time.sleep(0.1)
+            
             for delay in np.arange(s_delay, e_delay, delay_step):
                 for length in np.arange(s_length, e_length, length_step):
                     for _ in range(n_glitches):
