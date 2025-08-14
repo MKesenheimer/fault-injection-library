@@ -166,7 +166,7 @@ class Main:
 
         self.psu.set_voltage(s_voltage)
         time.sleep(0.1)
-        self.psu.set_current_limit(0.5)
+        self.psu.set_current_limit(0.2)
         time.sleep(0.1)
         self.psu.turn_on()
         time.sleep(0.1)
@@ -176,7 +176,7 @@ class Main:
             print(f"Setting PSU voltage to {voltage:.2f} V")
             self.psu.set_voltage(voltage)
             time.sleep(0.1)
-            
+
             for delay in np.arange(s_delay, e_delay, delay_step):
                 for length in np.arange(s_length, e_length, length_step):
                     for _ in range(n_glitches):
