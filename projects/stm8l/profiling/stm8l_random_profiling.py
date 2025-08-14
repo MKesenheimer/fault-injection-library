@@ -105,6 +105,9 @@ class Main:
         exp_id = 0
 
         while True:
+            if exp_id % 1000 == 0:
+                self.glitcher.power_cycle_reset(1)
+                
             # for delay in np.arange(s_delay, e_delay + 1, 1):
             # for length in np.arange(s_length, e_length + 1, 1):
             # for _ in range(2000):

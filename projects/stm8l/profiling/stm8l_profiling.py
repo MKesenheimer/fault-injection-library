@@ -77,8 +77,8 @@ class PS3005D:
         Returns:
             float: The current output voltage, in volts (V).
         """
-        self.device.write("VOUT1?".encode())
-        response = self.device.readline().decode().strip()
+        self.device.write("VSET1?".encode())
+        response = self.device.read(5).decode().strip()
 
         return float(response)
 
@@ -89,16 +89,16 @@ class PS3005D:
         Args:
             voltage (float): The voltage to set, in volts (V).
         """
-        for _ in range(attempts):
-            self.device.write(f"VSET1:{voltage:.2f}".encode())
+        # for _ in range(attempts):
+        self.device.write(f"VSET1:{voltage:05.2f}".encode())
 
-            current_voltage = self.get_voltage()
-            if abs(current_voltage - voltage) <= 0.01:
-                return
+            # current_voltage = self.get_voltage()
+            # if abs(current_voltage - voltage) <= 0.01:
+            #     return
 
-        raise ValueError(
-            f"Failed to set voltage to {voltage} V after {attempts} attempts. Current voltage: {current_voltage} V"
-        )
+        # raise ValueError(
+        #     f"Failed to set voltage to {voltage} V after {attempts} attempts. Current voltage: {current_voltage} V"
+        # )
 
     def set_current_limit(self, current: float):
         """
@@ -107,7 +107,7 @@ class PS3005D:
         Args:
             current (float): The current limit to set, in amperes (A).
         """
-        self.device.write(f"ISET1:{current}".encode())
+        self.device.write(f"ISET1:{current:.3f}".encode())
 
     def turn_on(self):
         self.device.write("OUT1".encode())
