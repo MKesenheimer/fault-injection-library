@@ -1,5 +1,23 @@
 # Attacking the ATMEGA328P
 
+## Prerequisites
+
+- avrdude
+- gcc-avr
+- avr-gdb
+- binutils-avr
+- avr-libc
+
+The installation on macOS is given below.
+Installation on other platforms should be similar.
+
+### Commands to install avr-gcc on macOS
+
+```bash
+brew tap osx-cross/avr
+brew install avr-gcc avr-gdb avr-binutils
+```
+
 ## Setup
 
 ![](setup.png)
@@ -27,8 +45,7 @@ The following commands can be used to program the chip, set the lock bits and re
 Write program to flash:
 
 ```bash
-avrdude -p atmega328p -c jtag3isp -P usb -U flash:w:test.hex:i
-avrdude -p m328p -c jtag3isp -P usb -U flash:w:test.hex:i
+avrdude -F -c jtag3isp -p m328p -U flash:w:blink.hex:i
 ```
 
 Setting fuses:
@@ -38,7 +55,7 @@ Setting fuses:
 * Extended fuse (efuse): 0x05 -> sets brown-out detection at 2.7 V
 
 ```bash
-avrdude -p m328p -c jtag3isp -P usb \
+avrdude -F -c jtag3isp -p m328p \
   -U lfuse:w:0xFF:m \
   -U hfuse:w:0xDE:m \
   -U efuse:w:0x05:m # or 0xFD on newer avrdude
@@ -51,28 +68,33 @@ avrdude -p m328p -c jtag3isp -P usb \
 * 0xFC = no programming, no verify/read (strongest: code protected)
 
 ```bash
-avrdude -p m328p -c jtag3isp -P usb -U lock:w:0x00:m
+avrdude -F -c jtag3isp -p m328p -U lock:w:0x00:m
 ```
 
 ### Disable readout protection and erase flash
 
 ```bash
-avrdude -p m328p -c jtag3isp -P usb -e
+avrdude -F -c jtag3isp -p m328p -e
 ```
 
 ### Reading
 
 Dump flash:
 ```bash
-avrdude -p m328p -c jtag3isp -P usb -U flash:r:dump.hex:i
+avrdude -F -c jtag3isp -p m328p -U flash:r:dump.hex:i
 ```
 
 Read fuses:
 ```bash
-avrdude -p m328p -c jtag3isp -P usb -U lfuse:r:lfuse.hex:h -U hfuse:r:hfuse.hex:h -U efuse:r:efuse.hex:h
+avrdude -F -c jtag3isp -p m328p -U lfuse:r:lfuse.hex:h -U hfuse:r:hfuse.hex:h -U efuse:r:efuse.hex:h
 ```
 
 Read lock bits:
 ```bash
-avrdude -p m328p -c jtag3isp -P usb -U lock:r:lock.hex:h
+avrdude -F -c jtag3isp -p m328p -U lock:r:lock.hex:h
+```
+
+Read lock bits to stdout:
+```bash
+avrdude -F -c jtag3isp -p m328p -U lock:r:-:h
 ```

@@ -29,3 +29,5 @@ schematics/kicad/stm32l05-target-v1.0
 schematics/product
 *.pdf
 private-examples
+*.hex
+*.elf
