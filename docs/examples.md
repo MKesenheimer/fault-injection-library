@@ -110,11 +110,11 @@ If you don't have an SMA cable, twist two jumper cables and connect them as show
 
 ![No SMA cable](images/stm8s/no-sma-cable.jpeg)
 
-- red: 1.8V, supply voltage for the VCAP input of the STM8s MCU
-- black: GND
+- red: 1.8V, supply voltage for the `VCAP` input of the STM8s MCU
+- black: `GND`
 - green: Reset line, connected to the Reset input of the target board
-- yellow: Trigger line, connected to the UART TX line. If the UART word `0x11` is observed on this line, the glitch is triggered.
-- purple: Glitch, connected to VCAP of the STM8s
+- yellow: Trigger line, connected to the UART `TX` line. If the UART word `0x11` is observed on this line, the glitch is triggered.
+- purple: `GLITCH`, connected to `VCAP` of the STM8s
 
 Also, for glitching the jumper on the STM8s target board must be in the `ISP ENABLE` position.
 
@@ -147,13 +147,13 @@ Note how the successful events shift upwards if no SMA cable and instead two jum
 
 ### Technical deep-dive - why do we attack the VCAP line and not VCC?
 
-The VCAP line of the STM8 microcontroller is targeted in voltage glitching attacks rather than the VCC line because it directly affects the internal core voltage of the microcontroller.
+The `VCAP` line of the STM8 microcontroller is targeted in voltage glitching attacks rather than the VCC line because it directly affects the internal core voltage of the microcontroller.
 
 ![VCAP input](images/stm8s/vcap.png)
 
-The VCAP pin is connected to the internal voltage regulator, which powers the CPU core. This voltage is typically lower (e.g., 1.8V) than the external supply (VCC, often 3.3V or 5V) and is more sensitive to small fluctuations. Glitching the core voltage can cause instruction corruption, bypass security checks, or cause unintended behavior.
+The `VCAP` pin is connected to the internal voltage regulator, which powers the CPU core. This voltage is typically lower (e.g., 1.8V) than the external supply (VCC, often 3.3V or 5V) and is more sensitive to small fluctuations. Glitching the core voltage can cause instruction corruption, bypass security checks, or cause unintended behavior.
 
-Also, the core voltage (VCAP) is isolated from the peripheral voltage (VCC). Glitching VCC may cause a system reset or disrupt external interfaces, while glitching VCAP directly targets the internal logic without affecting external components.
+Also, the core voltage (`VCAP`) is isolated from the peripheral voltage (VCC). Glitching VCC may cause a system reset or disrupt external interfaces, while glitching `VCAP` directly targets the internal logic without affecting external components.
 
 The VCAP line is in general more vulnerable and effective for precision attacks on the core logic, while the VCC line is more resilient due to the internal voltage regulation.
 
