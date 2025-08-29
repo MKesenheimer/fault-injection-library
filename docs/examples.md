@@ -238,6 +238,31 @@ It has already been shown by other works ([Stacksmashing](https://youtu.be/_E0PW
 
 To ensure that the correct voltage levels are available to the Segger J-Link, a level converter is inserted between the Airtag and J-Link. Voltage levels of 1.8V are required on the Airtag side and 3.3V on the J-Link side. The Pico Glitcher's voltage generation capabilities can be used to generate the different voltage levels.
 
+The numbers on the pads of the Airtag PCB represent the following signals:
+
+|Name | Description                         |
+|-----|-------------------------------------|
+|VCC1 | +3.0V input (1 of 2 - both needed)* |
+|VCC2 | +3.0V input (2 of 2 - both needed)* |
+|GND  | Ground                              | 
+|     |                                     |
+| 5   | VCC2 (Connects to VCC2 input)       |
+| 6   | VCC1 (Connects to VCC1 input)       |
+| 7   | GND                                 |
+| 8   | nRF ball E2 (P0.16)                 |
+| 9   | nRF ball D3 (P0.26)                 |
+| 19  | 1.8V SPI Flash - Data In (COPI) / nRF ball H3 (P0.16)    |
+| 20  | 1.8V SPI Flash - Data Out (CIPO) /nRF ball H4 (P0.15)    |
+| 21  | 1.8V SPI Flash VCC                  |
+| 22  | 1.8V SPI Flash - SCLK / nRF ball G3 (P0.17)              |
+| 24  | 1.8V SPI Flash - Chip Select (CS)/ nRF ball F4 (P0.11)   |
+| 29  | Apple Logo :) GND                   |
+| 30  | nRF ball H1 (P0.21/nRST)            |
+| 31  | nRF ball H2 (P0.18/SWO)             |
+| 34  | 1.8V from nRF                       |
+| 35  | nRF ball F1 (SWCLK)                 |
+| 36  | nRF ball G1 (SWDIO)                 |
+
 The colors of the connections encode these signals:
 
 - red: VTARGET, supply voltage of the air tag (3.3V)
@@ -246,7 +271,11 @@ The colors of the connections encode these signals:
 - green: Trigger line, connected to 1.8V of the airtag. If this line is supplied with voltage, the trigger is set.
 - purple: Glitch, connected to VCORE of the airtag. This is the power supply of the nrf52832
 
-An oscilloscope on `VTARGET` and 'VCORE' is also used to monitor the fault-injection campaign and to narrow down the 'delay' paremeter. The following figures show the voltage curve of `VTARGET` (blue) and 'VCORE' (yellow). The fine voltage drop in VCORE after about 4.5ms after activating the power supply is striking. This area is interesting for gliching attacks, as the microcontroller nrf52832 switches from the bootloader to the user program (application) and has a higher energy consumption after this switch. Shortly before this switch, a check is made to see whether read-out protection is set. Glitches are therefore set around the 4.5ms mark.
+An oscilloscope on `VTARGET` and `VCORE` is also used to monitor the fault-injection campaign and to narrow down the `delay` paremeter.
+The following figures show the voltage curve of `VTARGET` (blue) and `VCORE` (yellow).
+The fine voltage drop in `VCORE` after about 4.5ms after activating the power supply is striking.
+This area is interesting for gliching attacks, as the microcontroller nrf52832 switches from the bootloader to the user program (application) and has a higher energy consumption after this switch.
+Shortly before this switch, a check is made to see whether read-out protection is set. Glitches are therefore set around the 4.5ms mark.
 
 ![Voltage trace](images/voltage-trace.png)
 
@@ -289,7 +318,7 @@ delay = random.randint(s_delay, e_delay)
 self.glitcher.arm(delay, length)
 ```
 
-The target is then restarted (power-cycled), which triggers the glitch. The glitch is sent after the time 'delay' with the duration 'length'. The function `test_jtag()` is used to check whether the nrf52832 can be interacted with on the SWD interface and, if so, the flash content is downloaded.
+The target is then restarted (power-cycled), which triggers the glitch. The glitch is sent after the time `delay` with the duration 'length'. The function `test_jtag()` is used to check whether the nrf52832 can be interacted with on the SWD interface and, if so, the flash content is downloaded.
 
 ```bash
 # power cycle target
@@ -350,7 +379,7 @@ Additionally, an oscilloscope is connected to the TX line and the 'VCAP' pin (gl
 
 The bootloader of the STM32 processors offers a specific option for reading out the program flash. The bootloader mode is activated when the 'BOOT0' pin is connected to VCC. This can be done by pressing the 'BOOT0' switch on the Black Pill board, or by shorting the 'BOOT0' pin to VCC.
 
-To read the program memory, a series of commands must be sent to the processor in bootloader mode via UART, which instruct the processor to return parts of the flash memory (see [STMicroelectronics: USART protocol used in the STM32 bootloader](https://www.st.com/resource/en/application_note/an3155-usart-protocol-used-in-the-stm32-bootloader-stmicroelectronics.pdf)). Among other things, the 'read memory' command is sent to the processor via UART, i.e. the byte 0x11. The glitcher is configured in such a way that it triggers as soon as byte 0x11 is recognized on the TX line. As the transmission of a  second checksum byte requires additional 80µs, the interesting range begins at a 'delay' of 80,000ns and ends as soon as the bootloader sends the acknowledgement approximately 20-40µs later. In practice, it turns out that a range from 95,000ns to 125,000ns must be scanned. The duration of the glitch is selected just short enough so that the microcontroller is not reset (´brown-out’) and long enough so that the glitch also has an effect. A 'length' of 25 to 35ns turns out to be good.
+To read the program memory, a series of commands must be sent to the processor in bootloader mode via UART, which instruct the processor to return parts of the flash memory (see [STMicroelectronics: USART protocol used in the STM32 bootloader](https://www.st.com/resource/en/application_note/an3155-usart-protocol-used-in-the-stm32-bootloader-stmicroelectronics.pdf)). Among other things, the 'read memory' command is sent to the processor via UART, i.e. the byte 0x11. The glitcher is configured in such a way that it triggers as soon as byte 0x11 is recognized on the TX line. As the transmission of a  second checksum byte requires additional 80µs, the interesting range begins at a `delay` of 80,000ns and ends as soon as the bootloader sends the acknowledgement approximately 20-40µs later. In practice, it turns out that a range from 95,000ns to 125,000ns must be scanned. The duration of the glitch is selected just short enough so that the microcontroller is not reset (´brown-out’) and long enough so that the glitch also has an effect. A 'length' of 25 to 35ns turns out to be good.
 
 The script to perform the glitch can be found in `projects/stm32f40x` or [here](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f40x/stm32f4-glitching.py) and is typically run with the command:
 
