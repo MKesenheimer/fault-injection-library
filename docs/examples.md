@@ -4,7 +4,7 @@ Start your glitching career with these examples.
 
 ## Important
 
-Some connections on the Pico Glitcher are not obvious and incorrect connection can lead to errors or even destruction of the hardware. So be especially careful when rebuilding the following examples. In particular, be aware that some pin headers carry both the signal and a connection to GND. The following pins on the signal lines, marked with a capital 'G', are connected to GND.
+Some connections on the Pico Glitcher are not obvious and incorrect connection can lead to errors or even destruction of the hardware. So be especially careful when rebuilding the following examples. In particular, be aware that some pin headers carry both the signal and a connection to `GND`. The following pins on the signal lines, marked with a capital `G`, are connected to `GND`.
 
 ![GND connections](images/pico-glitcher-v2.4-gnd-connections.png)
 
@@ -106,7 +106,7 @@ To carry out the attack on the STM8s in bootloader mode, the target board is con
 ![STM8s crowbar glitching](images/stm8s/target-board-example-crowbar_bb.png)
 ![STM8s crowbar glitching setup](images/stm8s/setup.jpg)
 
-If you don't have an SMA cable, twist two jumper cables and connect them as shown in the following figure (black and brown cables). Connect the black cable to GND and the brown cable to `GLITCH`.
+If you don't have an SMA cable, twist two jumper cables and connect them as shown in the following figure (black and brown cables). Connect the black cable to `GND` and the brown cable to `GLITCH`.
 
 ![No SMA cable](images/stm8s/no-sma-cable.jpeg)
 
@@ -265,11 +265,11 @@ The numbers on the pads of the Airtag PCB represent the following signals:
 
 The colors of the connections encode these signals:
 
-- red: VTARGET, supply voltage of the air tag (3.3V)
-- brown: VRef, reference voltage for the level shifter (1.8V)
-- black: GND
-- green: Trigger line, connected to 1.8V of the airtag. If this line is supplied with voltage, the trigger is set.
-- purple: Glitch, connected to VCORE of the airtag. This is the power supply of the nrf52832
+- red: `VTARGET`, supply voltage of the air tag (`3.3V`)
+- brown: `VRef`, reference voltage for the level shifter (`1.8V`)
+- black: `GND`
+- green: `TRIGGER` line, connected to `1.8V` of the airtag. If this line is supplied with voltage, the trigger is set.
+- purple: `GLITCH`, connected to `VCORE` of the airtag. This is the power supply of the nrf52832
 
 An oscilloscope on `VTARGET` and `VCORE` is also used to monitor the fault-injection campaign and to narrow down the `delay` paremeter.
 The following figures show the voltage curve of `VTARGET` (blue) and `VCORE` (yellow).
