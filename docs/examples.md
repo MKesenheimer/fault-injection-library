@@ -309,7 +309,9 @@ The successful glitch and dump of the Airtag's flash content can be seen in the 
 
 ### Details of the script nrf52832-glitching.py 
 
-After initializing the glitcher, setting up the database and the logging mechanism, a random point from the parameter space is rolled in an endless loop from the arguments passed. The advantage of rolling a random parameter point is that a successful glitch can be achieved more quickly, even if a large range is tested. It also gives a quicker overview of interesting areas. The 'glitcher.arm' function arms the glitcher and waits until the trigger condition occurs.
+After initializing the glitcher, setting up the database and the logging mechanism, a random point from the parameter space is rolled in an endless loop from the arguments passed.
+The advantage of rolling a random parameter point is that a successful glitch can be achieved more quickly, even if a large range is tested.
+It also gives a quicker overview of interesting areas. The `glitcher.arm` function arms the glitcher and waits until the trigger condition occurs.
 
 ```bash
 # set up glitch parameters (in nano seconds) and arm glitcher
@@ -318,7 +320,8 @@ delay = random.randint(s_delay, e_delay)
 self.glitcher.arm(delay, length)
 ```
 
-The target is then restarted (power-cycled), which triggers the glitch. The glitch is sent after the time `delay` with the duration 'length'. The function `test_jtag()` is used to check whether the nrf52832 can be interacted with on the SWD interface and, if so, the flash content is downloaded.
+The target is then restarted (power-cycled), which triggers the glitch. The glitch is sent after the time `delay` with the duration `length`.
+The function `test_jtag()` is used to check whether the nrf52832 can be interacted with on the SWD interface and, if so, the flash content is downloaded.
 
 ```bash
 # power cycle target
@@ -362,24 +365,30 @@ With RDP-1, the readout protection is active for the program flash, but the RAM 
 The level of the readout protection can, for example, be set or read via the [STM32CubeProgrammer](https://www.st.com/en/development-tools/stm32cubeprog.html).
 
 
-The following setup was selected to glitch the microcontroller. The glitch is inserted at one of the voltage regulator capacitors ('VCAP' pin). In order to achieve good results, the capacitor have to be removed from the board.
+The following setup was selected to glitch the microcontroller. The glitch is inserted at one of the voltage regulator capacitors (`VCAP` pin). In order to achieve good results, the capacitor have to be removed from the board.
 
 ![STM Black Pill Glitching](images/stm32f40-glitching.png)
 
 The colors of the connections encode these signals:
 
 - red: Voltage supply of the Black Pill board (5V)
-- purple: 1.8V voltage supply to the 'VCAP' pin decoupled with a 10 Ohms resistor and glitch input. The 1.8V voltage supply via the resistor is needed to get a stable voltage on the 'VCAP' pin.
+- purple: 1.8V voltage supply to the `VCAP` pin decoupled with a 10 Ohms resistor and glitch input. The 1.8V voltage supply via the resistor is needed to get a stable voltage on the `VCAP` pin.
 - yellow: TX line to the STM32 microcontroller.
 - orange. RX line to the STM32 microcontroller.
 - also yellow: Trigger line, connected to the TX line to the STM32 microcontroller. If 0x11 (memory read command) is transmitted, the trigger is set.
 - geen: Reset line to reset the microcontroller.
 
-Additionally, an oscilloscope is connected to the TX line and the 'VCAP' pin (glitch line).
+Additionally, an oscilloscope is connected to the TX line and the `VCAP` pin (glitch line).
 
-The bootloader of the STM32 processors offers a specific option for reading out the program flash. The bootloader mode is activated when the 'BOOT0' pin is connected to VCC. This can be done by pressing the 'BOOT0' switch on the Black Pill board, or by shorting the 'BOOT0' pin to VCC.
+The bootloader of the STM32 processors offers a specific option for reading out the program flash.
+The bootloader mode is activated when the `BOOT0` pin is connected to VCC.
+This can be done by pressing the `BOOT0` switch on the Black Pill board, or by shorting the `BOOT0` pin to `VCC`.
 
-To read the program memory, a series of commands must be sent to the processor in bootloader mode via UART, which instruct the processor to return parts of the flash memory (see [STMicroelectronics: USART protocol used in the STM32 bootloader](https://www.st.com/resource/en/application_note/an3155-usart-protocol-used-in-the-stm32-bootloader-stmicroelectronics.pdf)). Among other things, the 'read memory' command is sent to the processor via UART, i.e. the byte 0x11. The glitcher is configured in such a way that it triggers as soon as byte 0x11 is recognized on the TX line. As the transmission of a  second checksum byte requires additional 80µs, the interesting range begins at a `delay` of 80,000ns and ends as soon as the bootloader sends the acknowledgement approximately 20-40µs later. In practice, it turns out that a range from 95,000ns to 125,000ns must be scanned. The duration of the glitch is selected just short enough so that the microcontroller is not reset (´brown-out’) and long enough so that the glitch also has an effect. A 'length' of 25 to 35ns turns out to be good.
+To read the program memory, a series of commands must be sent to the processor in bootloader mode via UART, which instruct the processor to return parts of the flash memory (see [STMicroelectronics: USART protocol used in the STM32 bootloader](https://www.st.com/resource/en/application_note/an3155-usart-protocol-used-in-the-stm32-bootloader-stmicroelectronics.pdf)).
+Among other things, the 'read memory' command is sent to the processor via UART, i.e. the byte 0x11.
+The glitcher is configured in such a way that it triggers as soon as byte 0x11 is recognized on the TX line.
+As the transmission of a  second checksum byte requires additional 80µs, the interesting range begins at a `delay` of 80,000ns and ends as soon as the bootloader sends the acknowledgement approximately 20-40µs later. In practice, it turns out that a range from 95,000ns to 125,000ns must be scanned.
+The duration of the glitch is selected just short enough so that the microcontroller is not reset (´brown-out’) and long enough so that the glitch also has an effect. A `length` of 25 to 35ns turns out to be good.
 
 The script to perform the glitch can be found in `projects/stm32f40x` or [here](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f40x/stm32f4-glitching.py) and is typically run with the command:
 
