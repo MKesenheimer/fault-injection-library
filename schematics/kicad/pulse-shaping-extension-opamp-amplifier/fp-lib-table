@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "footprints")(type "KiCad")(uri "/Users/kesenheimer/Desktop/fault-injection/fault-injection-library/schematics/kicad/pico-glitcher-v2-extension/footprints.pretty")(options "")(descr ""))
+)
