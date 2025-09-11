@@ -31,3 +31,5 @@ schematics/product
 private-examples
 .env*
 !.env.example
+*.hex
+*.elf
