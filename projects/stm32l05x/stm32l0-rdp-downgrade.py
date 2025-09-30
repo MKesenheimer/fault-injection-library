@@ -268,7 +268,6 @@ class Main:
                 self.database.insert(experiment_id, delay, length, number_of_pulses, delay_between, color, state_str)
 
             # monitor
-            #print(response)
             speed = self.glitcher.get_speed(self.start_time, experiment_id)
             experiment_base_id = self.database.get_base_experiments_count()
             if args.pulse_shaping:
@@ -281,10 +280,6 @@ class Main:
             # increase experiment id
             experiment_id += 1
 
-            # debug
-            #if state == b'success: RDP inactive':
-            #    break
-
             # attack finished
             if experiment_base_id + experiment_id >= 2_500:
                 break
@@ -292,6 +287,16 @@ class Main:
                 break
             if not self.args.test and (b'success' in state or b'ok' in state):
                 print("[+] RDP downgraded successfully. Stop.")
+                break
+            if self.args.demo and (b'success' in state or b'ok' in state):
+                print("[+] RDP downgraded successfully. Stop.")
+                self.debugger.read_image(bin_image="memory_dump.bin", start_addr=0x08000000, length=0x400, verbose=False)
+                with open("memory_dump.bin", "rb") as f:
+                    data = f.read()
+                    for i in range(0, len(data), 16):
+                        chunk = data[i:i+16]
+                        hex_bytes = ' '.join(f"{b:02x}" for b in chunk)
+                        print(f"{i:08x}  {hex_bytes}")
                 break
             elif not self.args.test and b'expected' in state:
                 print("[-] RDP downgrad unsuccessfully. Try again with a fresh target.")
@@ -313,6 +318,7 @@ if __name__ == "__main__":
     parser.add_argument("--resume", required=False, action='store_true', help="if an previous dataset should be resumed")
     parser.add_argument("--no-store", required=False, action='store_true', help="do not store the run in the database")
     parser.add_argument("--oneshot", required=False, action='store_true', help="abort after one experiment")
+    parser.add_argument("--demo", required=False, action='store_true', help="flag for conference demo")
     parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
     parser.add_argument("--program-target", required=False, metavar="RDP_LEVEL", type=int, default=None, help="Reprogram the target before glitching and set the RDP level (for research only).")
     parser.add_argument("--test", required=False, action='store_true', help="Collect data on a test device. If this option is not supplied, all functions that could reset the targets flash are deactivated.")
