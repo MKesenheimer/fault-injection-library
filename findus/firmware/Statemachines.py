@@ -163,7 +163,7 @@ def multiplex(MUX_PIO_INIT=Globals.MUX_PIO_INIT):
     set(x, 1)
     label("for_loop")
 
-    # block until config1 received
+    # block until config received
     pull(block)
     out(pins, 2)
     out(y, 14) # t = OSR >> 14
@@ -203,7 +203,7 @@ def multiplex_vin1(MUX_PIO_INIT=0b00):
     set(x, 1)
     label("for_loop")
 
-    # block until config1 received
+    # block until config received
     pull(block)
     out(pins, 2)
     out(y, 14) # t = OSR >> 14
@@ -243,7 +243,7 @@ def multiplex_vin2(MUX_PIO_INIT=0b10):
     set(x, 1)
     label("for_loop")
 
-    # block until config1 received
+    # block until config received
     pull(block)
     out(pins, 2)
     out(y, 14) # t = OSR >> 14
