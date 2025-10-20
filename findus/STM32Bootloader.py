@@ -169,7 +169,7 @@ class STM32Bootloader:
         return b'error: no response'
 
     # returns b'success: dump ok' if glitch and memory read was successful
-    # returns b'ok: dump error' if glitch was successful, however memory read yielded eroneous results
+    # returns b'ok: dump error' if glitch was successful, however memory read yielded erroneous results
     # must be used in combination with setup_memread
     def read_memory(self, start:int, size:int) -> [bytes, bytes]:
         """
@@ -180,14 +180,18 @@ class STM32Bootloader:
             start: Memory address to start reading from.
             size: Size of the memory to read from the device.
         Returns:
-            Returns `b'success: dump ok'` if glitch and memory read was successful, or `b'ok: dump error'` if glitch was successful, however memory read yielded eroneous results.
+            Returns `b'success: dump ok'` if glitch and memory read was successful, or `b'ok: dump incomplete'` if glitch was successful, however memory read yielded erroneous results.
         """
         # write memory address
         startb = start.to_bytes(4, 'big')
         crc = reduce(lambda x, y: x ^ y, startb, 0).to_bytes(1, 'big')
         self.ser.write(startb)
         self.ser.write(crc)
-        self.ser.read(1)
+        s = self.ser.read(1)
+        if s != self.ACK:
+            return b'error: write memory address failed', b''
+        elif s == b'':
+            return b'error: no response after write memory address', b''
 
         # write bytes to read
         sizeb = size.to_bytes(1, 'big')
@@ -195,7 +199,11 @@ class STM32Bootloader:
         # write number of bytes to read
         self.ser.write(sizeb)
         self.ser.write(crc)
-        self.ser.read(1)
+        s = self.ser.read(1)
+        if s != self.ACK:
+            return b'error: write bytes to read failed', b''
+        elif s == b'':
+            return b'error: no response after write bytes to read', b''
 
         # read memory
         mem = self.ser.read(size)
@@ -205,13 +213,15 @@ class STM32Bootloader:
         response = b'ok'
         if len(mem) == 255 and mem != b"\x00" * 255:
             response = b'success: dump ok'
+        elif len(mem) == 0:
+            response = b'failure: no response after read memory'
         else:
-            response = b'ok: dump error'
+            response = b'ok: dump incomplete'
         return response, mem
 
     # returns b'expected: RDP active' if RDP is active (expected)
     # returns b'success: RDP inactive' if glitch was successful
-    # returns b'ok: dump error' if glitch was successful but dumped memory was eroneous
+    # returns b'ok: dump error' if glitch was successful but dumped memory was erroneous
     # returns b'success: dump ok' if glitch was successful and dumped memory was good
     def dump_memory_debug(self) -> [bytes, bytes]:
         # read memory (x11: read memory, xee: crc)
@@ -245,7 +255,7 @@ class STM32Bootloader:
         return b'expected: RDP active', mem
 
     # returns b'success: dump ok' if glitch and memory read was successful
-    # returns b'ok: dump error' if glitch was successful, however memory read yielded eroneous results
+    # returns b'ok: dump error' if glitch was successful, however memory read yielded erroneous results
     # must be used in combination with setup_memread
     def read_memory_debug(self, start:int, size:int) -> [bytes, bytes]:
         # write memory address
@@ -267,7 +277,7 @@ class STM32Bootloader:
             response = b'ok: dump error'
         return response, mem
 
-    # returns b'error: eroneous memory read' if memory read was eroneous
+    # returns b'error: erroneous memory read' if memory read was erroneous
     # returns b'success: dump successful' if one dump was successful
     # returns b'success: dump finished' if entire memory was dummped
     def dump_memory_to_file(self, dump_filename:str, start:int = None, size:int = None) -> [bytes, bytes]:
@@ -279,7 +289,7 @@ class STM32Bootloader:
             start: Memory address to start reading from. If argument not provided, the start address given in the constructor is used.
             size: Size of the memory to read from the device. If argument not provided, the size given in the constructor is used.
         Returns:
-            Returns `b'ok: dump error'` if memory read was eroneous, `b'success: dump successful'` if one dump was successful, and `b'success: dump finished'` if entire memory was dummped.
+            Returns `b'ok: dump error'` if memory read was erroneous, `b'success: dump successful'` if one dump was successful, and `b'success: dump finished'` if entire memory was dummped.
         """
         if start is not None:
             self.current_dump_addr = start
@@ -291,7 +301,7 @@ class STM32Bootloader:
         response, mem = self.read_memory(self.current_dump_addr, len_to_dump)
 
         if b'error' in response or response == b'ok: dump error':
-            return b'error: eroneous memory read (' + response + b')', mem
+            return b'error: erroneous memory read (' + response + b')', mem
 
         # write memory dump to file
         with open(dump_filename, 'ab+') as f:
