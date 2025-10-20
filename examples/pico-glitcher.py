@@ -108,6 +108,7 @@ class Main():
             if args.multiplexing:
                 mul_config = {"t1": length, "v1": "1.8", "t2": length, "v2": "VI1", "t3": length, "v3": "VI2",  "t4": length, "v4": "GND"}
                 self.glitcher.arm_multiplexing(delay, mul_config)
+                #self.glitcher.arm_multiplexing(delay, {"t1": 1, "v1": "GND", "t2": 200, "v2": "3.3"})
             elif args.pulse_shaping:
                 # pulse from lambda; ramp down to 1.8V than GND glitch
                 ps_lambda = f"lambda t:-1.5/({2*length})*t+3.3 if t<{2*length} else 1.8 if t<{4*length} else 0.0 if t<{5*length} else 3.3"
@@ -147,6 +148,9 @@ class Main():
                 self.glitcher.power_cycle_target(power_cycle_time=1)
                 time.sleep(0.2)
                 response = b'Timeout'
+
+            # check if glitch was emitted
+            #print(self.glitcher.check_glitch())
 
             # classify response
             color = self.glitcher.classify(response)

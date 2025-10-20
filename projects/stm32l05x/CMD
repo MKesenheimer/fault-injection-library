@@ -1,0 +1,1 @@
+python stm32l0-rdp-downgrade.py --rpico /dev/tty.usbmodem1101 --delay 0 12_000 --length 142 154 --delay2 7_500_000 8_000_000 --length2 1_000 1_050 --program-target 1 --test

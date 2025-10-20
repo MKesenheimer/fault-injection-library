@@ -4,7 +4,7 @@ Start your glitching career with these examples.
 
 ## Important
 
-Some connections on the Pico Glitcher are not obvious and incorrect connection can lead to errors or even destruction of the hardware. So be especially careful when rebuilding the following examples. In particular, be aware that some pin headers carry both the signal and a connection to GND. The following pins on the signal lines, marked with a capital 'G', are connected to GND.
+Some connections on the Pico Glitcher are not obvious and incorrect connection can lead to errors or even destruction of the hardware. So be especially careful when rebuilding the following examples. In particular, be aware that some pin headers carry both the signal and a connection to `GND`. The following pins on the signal lines, marked with a capital `G`, are connected to `GND`.
 
 ![GND connections](images/pico-glitcher-v2.4-gnd-connections.png)
 
@@ -106,15 +106,15 @@ To carry out the attack on the STM8s in bootloader mode, the target board is con
 ![STM8s crowbar glitching](images/stm8s/target-board-example-crowbar_bb.png)
 ![STM8s crowbar glitching setup](images/stm8s/setup.jpg)
 
-If you don't have an SMA cable, twist two jumper cables and connect them as shown in the following figure (black and brown cables). Connect the black cable to GND and the brown cable to `GLITCH`.
+If you don't have an SMA cable, twist two jumper cables and connect them as shown in the following figure (black and brown cables). Connect the black cable to `GND` and the brown cable to `GLITCH`.
 
 ![No SMA cable](images/stm8s/no-sma-cable.jpeg)
 
-- red: 1.8V, supply voltage for the VCAP input of the STM8s MCU
-- black: GND
+- red: 1.8V, supply voltage for the `VCAP` input of the STM8s MCU
+- black: `GND`
 - green: Reset line, connected to the Reset input of the target board
-- yellow: Trigger line, connected to the UART TX line. If the UART word `0x11` is observed on this line, the glitch is triggered.
-- purple: Glitch, connected to VCAP of the STM8s
+- yellow: Trigger line, connected to the UART `TX` line. If the UART word `0x11` is observed on this line, the glitch is triggered.
+- purple: `GLITCH`, connected to `VCAP` of the STM8s
 
 Also, for glitching the jumper on the STM8s target board must be in the `ISP ENABLE` position.
 
@@ -147,13 +147,13 @@ Note how the successful events shift upwards if no SMA cable and instead two jum
 
 ### Technical deep-dive - why do we attack the VCAP line and not VCC?
 
-The VCAP line of the STM8 microcontroller is targeted in voltage glitching attacks rather than the VCC line because it directly affects the internal core voltage of the microcontroller.
+The `VCAP` line of the STM8 microcontroller is targeted in voltage glitching attacks rather than the VCC line because it directly affects the internal core voltage of the microcontroller.
 
 ![VCAP input](images/stm8s/vcap.png)
 
-The VCAP pin is connected to the internal voltage regulator, which powers the CPU core. This voltage is typically lower (e.g., 1.8V) than the external supply (VCC, often 3.3V or 5V) and is more sensitive to small fluctuations. Glitching the core voltage can cause instruction corruption, bypass security checks, or cause unintended behavior.
+The `VCAP` pin is connected to the internal voltage regulator, which powers the CPU core. This voltage is typically lower (e.g., 1.8V) than the external supply (VCC, often 3.3V or 5V) and is more sensitive to small fluctuations. Glitching the core voltage can cause instruction corruption, bypass security checks, or cause unintended behavior.
 
-Also, the core voltage (VCAP) is isolated from the peripheral voltage (VCC). Glitching VCC may cause a system reset or disrupt external interfaces, while glitching VCAP directly targets the internal logic without affecting external components.
+Also, the core voltage (`VCAP`) is isolated from the peripheral voltage (VCC). Glitching VCC may cause a system reset or disrupt external interfaces, while glitching `VCAP` directly targets the internal logic without affecting external components.
 
 The VCAP line is in general more vulnerable and effective for precision attacks on the core logic, while the VCC line is more resilient due to the internal voltage regulation.
 
@@ -238,15 +238,44 @@ It has already been shown by other works ([Stacksmashing](https://youtu.be/_E0PW
 
 To ensure that the correct voltage levels are available to the Segger J-Link, a level converter is inserted between the Airtag and J-Link. Voltage levels of 1.8V are required on the Airtag side and 3.3V on the J-Link side. The Pico Glitcher's voltage generation capabilities can be used to generate the different voltage levels.
 
+The numbers on the pads of the Airtag PCB represent the following signals:
+
+|Name | Description                         |
+|-----|-------------------------------------|
+|VCC1 | +3.0V input (1 of 2 - both needed)* |
+|VCC2 | +3.0V input (2 of 2 - both needed)* |
+|GND  | Ground                              | 
+|     |                                     |
+| 5   | VCC2 (Connects to VCC2 input)       |
+| 6   | VCC1 (Connects to VCC1 input)       |
+| 7   | GND                                 |
+| 8   | nRF ball E2 (P0.16)                 |
+| 9   | nRF ball D3 (P0.26)                 |
+| 19  | 1.8V SPI Flash - Data In (COPI) / nRF ball H3 (P0.16)    |
+| 20  | 1.8V SPI Flash - Data Out (CIPO) /nRF ball H4 (P0.15)    |
+| 21  | 1.8V SPI Flash VCC                  |
+| 22  | 1.8V SPI Flash - SCLK / nRF ball G3 (P0.17)              |
+| 24  | 1.8V SPI Flash - Chip Select (CS)/ nRF ball F4 (P0.11)   |
+| 29  | Apple Logo :) GND                   |
+| 30  | nRF ball H1 (P0.21/nRST)            |
+| 31  | nRF ball H2 (P0.18/SWO)             |
+| 34  | 1.8V from nRF                       |
+| 35  | nRF ball F1 (SWCLK)                 |
+| 36  | nRF ball G1 (SWDIO)                 |
+
 The colors of the connections encode these signals:
 
-- red: VTARGET, supply voltage of the air tag (3.3V)
-- brown: VRef, reference voltage for the level shifter (1.8V)
-- black: GND
-- green: Trigger line, connected to 1.8V of the airtag. If this line is supplied with voltage, the trigger is set.
-- purple: Glitch, connected to VCORE of the airtag. This is the power supply of the nrf52832
+- red: `VTARGET`, supply voltage of the air tag (`3.3V`)
+- brown: `VRef`, reference voltage for the level shifter (`1.8V`)
+- black: `GND`
+- green: `TRIGGER` line, connected to `1.8V` of the airtag. If this line is supplied with voltage, the trigger is set.
+- purple: `GLITCH`, connected to `VCORE` of the airtag. This is the power supply of the nrf52832
 
-An oscilloscope on `VTARGET` and 'VCORE' is also used to monitor the fault-injection campaign and to narrow down the 'delay' paremeter. The following figures show the voltage curve of `VTARGET` (blue) and 'VCORE' (yellow). The fine voltage drop in VCORE after about 4.5ms after activating the power supply is striking. This area is interesting for gliching attacks, as the microcontroller nrf52832 switches from the bootloader to the user program (application) and has a higher energy consumption after this switch. Shortly before this switch, a check is made to see whether read-out protection is set. Glitches are therefore set around the 4.5ms mark.
+An oscilloscope on `VTARGET` and `VCORE` is also used to monitor the fault-injection campaign and to narrow down the `delay` paremeter.
+The following figures show the voltage curve of `VTARGET` (blue) and `VCORE` (yellow).
+The fine voltage drop in `VCORE` after about 4.5ms after activating the power supply is striking.
+This area is interesting for gliching attacks, as the microcontroller nrf52832 switches from the bootloader to the user program (application) and has a higher energy consumption after this switch.
+Shortly before this switch, a check is made to see whether read-out protection is set. Glitches are therefore set around the 4.5ms mark.
 
 ![Voltage trace](images/voltage-trace.png)
 
@@ -280,7 +309,9 @@ The successful glitch and dump of the Airtag's flash content can be seen in the 
 
 ### Details of the script nrf52832-glitching.py 
 
-After initializing the glitcher, setting up the database and the logging mechanism, a random point from the parameter space is rolled in an endless loop from the arguments passed. The advantage of rolling a random parameter point is that a successful glitch can be achieved more quickly, even if a large range is tested. It also gives a quicker overview of interesting areas. The 'glitcher.arm' function arms the glitcher and waits until the trigger condition occurs.
+After initializing the glitcher, setting up the database and the logging mechanism, a random point from the parameter space is rolled in an endless loop from the arguments passed.
+The advantage of rolling a random parameter point is that a successful glitch can be achieved more quickly, even if a large range is tested.
+It also gives a quicker overview of interesting areas. The `glitcher.arm` function arms the glitcher and waits until the trigger condition occurs.
 
 ```bash
 # set up glitch parameters (in nano seconds) and arm glitcher
@@ -289,7 +320,8 @@ delay = random.randint(s_delay, e_delay)
 self.glitcher.arm(delay, length)
 ```
 
-The target is then restarted (power-cycled), which triggers the glitch. The glitch is sent after the time 'delay' with the duration 'length'. The function `test_jtag()` is used to check whether the nrf52832 can be interacted with on the SWD interface and, if so, the flash content is downloaded.
+The target is then restarted (power-cycled), which triggers the glitch. The glitch is sent after the time `delay` with the duration `length`.
+The function `test_jtag()` is used to check whether the nrf52832 can be interacted with on the SWD interface and, if so, the flash content is downloaded.
 
 ```bash
 # power cycle target
@@ -333,24 +365,30 @@ With RDP-1, the readout protection is active for the program flash, but the RAM 
 The level of the readout protection can, for example, be set or read via the [STM32CubeProgrammer](https://www.st.com/en/development-tools/stm32cubeprog.html).
 
 
-The following setup was selected to glitch the microcontroller. The glitch is inserted at one of the voltage regulator capacitors ('VCAP' pin). In order to achieve good results, the capacitor have to be removed from the board.
+The following setup was selected to glitch the microcontroller. The glitch is inserted at one of the voltage regulator capacitors (`VCAP` pin). In order to achieve good results, the capacitor have to be removed from the board.
 
 ![STM Black Pill Glitching](images/stm32f40-glitching.png)
 
 The colors of the connections encode these signals:
 
 - red: Voltage supply of the Black Pill board (5V)
-- purple: 1.8V voltage supply to the 'VCAP' pin decoupled with a 10 Ohms resistor and glitch input. The 1.8V voltage supply via the resistor is needed to get a stable voltage on the 'VCAP' pin.
+- purple: 1.8V voltage supply to the `VCAP` pin decoupled with a 10 Ohms resistor and glitch input. The 1.8V voltage supply via the resistor is needed to get a stable voltage on the `VCAP` pin.
 - yellow: TX line to the STM32 microcontroller.
 - orange. RX line to the STM32 microcontroller.
 - also yellow: Trigger line, connected to the TX line to the STM32 microcontroller. If 0x11 (memory read command) is transmitted, the trigger is set.
 - geen: Reset line to reset the microcontroller.
 
-Additionally, an oscilloscope is connected to the TX line and the 'VCAP' pin (glitch line).
+Additionally, an oscilloscope is connected to the TX line and the `VCAP` pin (glitch line).
 
-The bootloader of the STM32 processors offers a specific option for reading out the program flash. The bootloader mode is activated when the 'BOOT0' pin is connected to VCC. This can be done by pressing the 'BOOT0' switch on the Black Pill board, or by shorting the 'BOOT0' pin to VCC.
+The bootloader of the STM32 processors offers a specific option for reading out the program flash.
+The bootloader mode is activated when the `BOOT0` pin is connected to VCC.
+This can be done by pressing the `BOOT0` switch on the Black Pill board, or by shorting the `BOOT0` pin to `VCC`.
 
-To read the program memory, a series of commands must be sent to the processor in bootloader mode via UART, which instruct the processor to return parts of the flash memory (see [STMicroelectronics: USART protocol used in the STM32 bootloader](https://www.st.com/resource/en/application_note/an3155-usart-protocol-used-in-the-stm32-bootloader-stmicroelectronics.pdf)). Among other things, the 'read memory' command is sent to the processor via UART, i.e. the byte 0x11. The glitcher is configured in such a way that it triggers as soon as byte 0x11 is recognized on the TX line. As the transmission of a  second checksum byte requires additional 80µs, the interesting range begins at a 'delay' of 80,000ns and ends as soon as the bootloader sends the acknowledgement approximately 20-40µs later. In practice, it turns out that a range from 95,000ns to 125,000ns must be scanned. The duration of the glitch is selected just short enough so that the microcontroller is not reset (´brown-out’) and long enough so that the glitch also has an effect. A 'length' of 25 to 35ns turns out to be good.
+To read the program memory, a series of commands must be sent to the processor in bootloader mode via UART, which instruct the processor to return parts of the flash memory (see [STMicroelectronics: USART protocol used in the STM32 bootloader](https://www.st.com/resource/en/application_note/an3155-usart-protocol-used-in-the-stm32-bootloader-stmicroelectronics.pdf)).
+Among other things, the 'read memory' command is sent to the processor via UART, i.e. the byte 0x11.
+The glitcher is configured in such a way that it triggers as soon as byte 0x11 is recognized on the TX line.
+As the transmission of a  second checksum byte requires additional 80µs, the interesting range begins at a `delay` of 80,000ns and ends as soon as the bootloader sends the acknowledgement approximately 20-40µs later. In practice, it turns out that a range from 95,000ns to 125,000ns must be scanned.
+The duration of the glitch is selected just short enough so that the microcontroller is not reset (´brown-out’) and long enough so that the glitch also has an effect. A `length` of 25 to 35ns turns out to be good.
 
 The script to perform the glitch can be found in `projects/stm32f40x` or [here](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/stm32f40x/stm32f4-glitching.py) and is typically run with the command:
 

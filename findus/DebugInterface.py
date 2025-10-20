@@ -94,8 +94,6 @@ class DebugInterface():
         Unlock the target and remove any read-out protection.
         Attention: This will erase the targets flash!
         """
-        # trunk-ignore(bandit/B607)
-        # trunk-ignore(bandit/B603)
         args = [
             'openocd',
             '-f', self.interface_config,
@@ -117,8 +115,6 @@ class DebugInterface():
         """
         TODO
         """
-        # trunk-ignore(bandit/B607)
-        # trunk-ignore(bandit/B603)
         args = [
             'openocd',
             '-f', self.interface_config,
@@ -140,8 +136,6 @@ class DebugInterface():
         """
         Write image to flash.
         """
-        # trunk-ignore(bandit/B607)
-        # trunk-ignore(bandit/B603)
         args = [
             'openocd',
             '-f', self.interface_config,
@@ -165,8 +159,6 @@ class DebugInterface():
         Attention: Program must also be compiled to be compatible to run in RAM.
         """
         # openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; load_image rdp-downgrade-STM32L0.elf" -c "reg sp 0x20002000" -c "reg pc 0x20000fa4" -c "resume" -c "exit"
-        # trunk-ignore(bandit/B607)
-        # trunk-ignore(bandit/B603)
         args = [
             'openocd',
             '-f', self.interface_config,
@@ -189,8 +181,6 @@ class DebugInterface():
             print(result.stdout + result.stderr)
 
     def read_image(self, bin_image:str = "memory_dump.bin", start_addr:int = 0x08000000, length:int = 0x400, verbose:bool = False):
-        # trunk-ignore(bandit/B607)
-        # trunk-ignore(bandit/B603)
         args = [
             'openocd',
             '-f', self.interface_config,
@@ -209,8 +199,6 @@ class DebugInterface():
             print(result.stdout + result.stderr)
 
     def test_connection(self):
-        # trunk-ignore(bandit/B607)
-        # trunk-ignore(bandit/B603)
         args = [
             'openocd',
             '-f', self.interface_config,
@@ -228,8 +216,6 @@ class DebugInterface():
         print(result.stdout + result.stderr)
 
     def read_address(self, address):
-        # trunk-ignore(bandit/B607)
-        # trunk-ignore(bandit/B603)
         args = [
             'openocd',
             '-f', self.interface_config,
@@ -299,8 +285,6 @@ class DebugInterface():
     def attach(self, delay=0.1):
         # check if there is a dangling process that would interfere with openocd
         self.kill_process(self.gdb_port)
-        # trunk-ignore(bandit/B607)
-        # trunk-ignore(bandit/B603)
         args = [
             'openocd',
             '-f', self.interface_config,
@@ -346,7 +330,7 @@ class DebugInterface():
         try:
             output, error = self.gdb_process.communicate(timeout=timeout)
         except Exception as e:
-            #print(f"[-] Exception in DebugInterface:gdb_load_exec occured:\n{e}")
+            print(f"[-] Exception in DebugInterface:gdb_load_exec occured:\n{e}")
             pass
         finally:
             if verbose:
