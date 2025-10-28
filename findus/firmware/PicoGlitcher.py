@@ -497,10 +497,16 @@ class PicoGlitcher():
     def cleanup_pio(self):
         if self.sm0 is not None:
             self.sm0.active(0)
+            while self.sm0.rx_fifo() != 0:
+                self.sm0.get()
         if self.sm1 is not None:
             self.sm1.active(0)
+            while self.sm1.rx_fifo() != 0:
+                self.sm1.get()
         if self.sm2 is not None:
             self.sm2.active(0)
+            while self.sm2.rx_fifo() != 0:
+                self.sm2.get()
         PIO(0).remove_program()
         PIO(1).remove_program()
 

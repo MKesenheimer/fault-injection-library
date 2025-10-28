@@ -611,6 +611,8 @@ class Glitcher():
             color = 'C'
         elif b'error' in state:
             color = 'M'
+        elif b'failure' in state:
+            color = 'B'
         elif b'timeout' in state:
             color = 'Y'
         elif b'warning' in state:
@@ -1380,7 +1382,20 @@ class ErrorHandling():
         print("[-] Successive error occurred. Exiting.")
         sys.exit(-1)
 
-    def check(self, experiment_id:int, response:bytes, expected=b'expected', user_action=None):
+    def check(self, experiment_id:int, response:bytes, expected:bytes = b'expected', keep:list[bytes] = None, user_action = None):
+        """
+        Check for consecutive errors and act accordingly.
+
+        Parameters:
+            experiment_id: The current experiment id.
+            response: Response of the current experiment id.
+            expected: The expected response. Everything else is considered erroneous.
+            keep: List of characterization to keep. For example `keep = [b'ok', b'success']`.
+            user_action: Function to execute in the case of consecutive errors. Could be a function to reprogram the target, for example.
+
+        Returns:
+            Returns the response. If a consecutive error is detected, `b'error: successive error occurred'` is returned.
+        """
         # exit if too many successive fails (including a supposedly successful memory read)
         # open fail gate, if error occurred and everything was ok previously
         if expected not in response and not self.fail_gate_open:
@@ -1396,28 +1411,47 @@ class ErrorHandling():
         if  experiment_id >= self.fail_gate_close and self.fail_gate_open:
             self.fail_gate_open = False
             if self.successive_fails >= self.max_fails:
-                first_good = experiment_id
+
                 # delete the erroneous data points
+                # last_good: last "good" experiment with expected characterization
+                # last_good + 1: first erroneous experiment of consecutive erroneous events. We want to keep this in order to observe what happened.
+                # last_good + 2: second erroneous experiment. Everything after this is removed from the database. This experiment is overwritten by an experiment with characterization `b'error: successive error occurred'`
                 if self.database is not None:
                     print("Successive error occurred:")
+                    last_good = experiment_id - self.look_back
+
                     # since the fail gate could start outside the successive fail range, we have to look back twice
                     for eid in reversed(range(experiment_id - 2 * self.look_back, experiment_id + 1)):
                         par = self.database.get_parameters_of_experiment_rel(eid)
                         res = par[-1]
-                        if expected in res:
-                            first_good = eid
+                        if res is not None and expected in res:
+                            last_good = eid
                             break
+
+                    # search from last_good to experiment_id for the first erroneous experiment with characterization we want to keep
+                    if keep is not None:
+                        break_flag = False
+                        for eid in range(last_good, experiment_id + 1):
+                            par = self.database.get_parameters_of_experiment_rel(eid)
+                            res = par[-1]
+                            for characterization_to_keep in keep:
+                                if characterization_to_keep in res:
+                                    last_good = eid - 1
+                                    break_flag = True
+                                    break
+                            if break_flag:
+                                break
+
                     # remove everything expect the first erroneous experiment
-                    for eid in range(first_good + 2, experiment_id + 1):
+                    for eid in range(last_good + 2, experiment_id + 1):
                         print(f"Removing experiment {eid} from database")
                         self.database.remove_rel(eid)
 
-                # get parameters of first erroneous experiment and store this event in database with extra classification
-                parameters = self.database.get_parameters_of_experiment_rel(first_good + 1)
-                response = b'error: successive error occurred'
-                if self.database is not None:
+                    # get parameters of first erroneous experiment and store this event in database with extra classification
+                    parameters = self.database.get_parameters_of_experiment_rel(last_good + 1)
+                    response = b'error: successive error occurred'
                     try:
-                        parameters = (experiment_id - self.look_back + 1, ) + parameters[1:-2] + ('O', response)
+                        parameters = (last_good + 2, ) + parameters[1:-2] + ('O', response)
                         self.database.insert(*parameters)
                     except Exception as _:
                         pass

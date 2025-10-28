@@ -330,7 +330,8 @@ class DebugInterface():
         try:
             output, error = self.gdb_process.communicate(timeout=timeout)
         except Exception as e:
-            print(f"[-] Exception in DebugInterface:gdb_load_exec occured:\n{e}")
+            # timeout exception is ok
+            #print(f"[-] Exception in DebugInterface:gdb_load_exec occured:\n{e}")
             pass
         finally:
             if verbose:
