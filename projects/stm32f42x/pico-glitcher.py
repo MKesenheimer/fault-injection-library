@@ -20,7 +20,6 @@ import logging
 import random
 import sys
 import time
-import subprocess
 
 # import custom libraries
 from findus.STM32Bootloader import STM32Bootloader
@@ -71,6 +70,8 @@ class Main:
             # set up glitch parameters (in nano seconds) and arm glitcher
             delay = random.randint(s_delay, e_delay)
             length = random.randint(s_length, e_length)
+
+            # arm
             self.glitcher.arm(delay, length)
 
             # reset target
@@ -98,8 +99,7 @@ class Main:
             mem = b''
             if b'success' in response:
                 #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
-                #start = 0x08000000
-                start = 0x08000000 - 0*0xFF
+                start = 0x08000000
                 size = 0xFF
                 response, mem = self.bootcom.read_memory(start, size)
                 # DEBUG (to easily find the glitch with a logic analyzer)

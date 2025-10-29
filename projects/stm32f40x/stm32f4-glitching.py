@@ -6,9 +6,9 @@
 # If not, please write to: m.kesenheimer@gmx.net.
 
 # programming
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x unlock 0; exit"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program read-out-protection-test-CW308_STM32L0.elf verify reset exit;"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; sleep 1000; reset run; shutdown"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; halt; stm32f4x unlock 0; exit"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; halt; program GPIO_IOToggle.elf verify reset exit;"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f4x.cfg -c "init; halt; stm32f4x lock 0; sleep 1000; reset run; shutdown"
 # -> power cycle the target!
 
 # SQL Queries:
@@ -27,10 +27,10 @@ from findus.STM32Bootloader import STM32Bootloader
 from findus import Database, PicoGlitcher, Helper, ErrorHandling
 
 def program_target():
-    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32l0.cfg', '-c', 'init; halt; program blink.bin verify reset exit;'], text=True, capture_output=True)
+    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32f4x.cfg', '-c', 'init; halt; program blink.bin verify reset exit;'], text=True, capture_output=True)
     print(result.stdout)
     print(result.stderr)
-    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32l0.cfg', '-c', 'init; halt; stm32l0x lock 0; sleep 1000; reset run; shutdown;'], text=True, capture_output=True)
+    result = subprocess.run(['openocd', '-f', 'interface/stlink.cfg', '-c', 'transport select hla_swd', '-f', 'target/stm32f4x.cfg', '-c', 'init; halt; stm32f4x lock 0; sleep 1000; reset run; shutdown;'], text=True, capture_output=True)
     print(result.stdout)
     print(result.stderr)
 
@@ -44,16 +44,13 @@ class Main:
         # glitcher
         self.glitcher = PicoGlitcher()
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
-        self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=5.0)
+        self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
 
         # we want to trigger on x11 with the configuration 8e1
         # since our statemachine understands only 8n1,
         # we can trigger on x22 with the configuration 9n1 instead
         # Update: Triggering on x11 in configuration 8n1 works good enough.
         self.glitcher.uart_trigger(0x11)
-
-        # choose crowbar glitching
-        self.glitcher.set_lpglitch()
 
         # set up the database
         self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store)
@@ -87,35 +84,30 @@ class Main:
             self.glitcher.arm(delay, length)
 
             # reset target
-            #self.glitcher.power_cycle_target()
             self.glitcher.reset(0.01)
             time.sleep(0.1)
             self.bootcom.flush()
 
             # setup bootloader communication
             response = self.bootcom.init_bootloader()
-            if b'error' in response:
-                self.glitcher.power_cycle_target()
-
             # setup memory read; this function triggers the glitch
             if b'ok' in response:
                 response = self.bootcom.setup_memread()
 
-                # block until glitch
-                try:
-                    self.glitcher.block(timeout=1)
-                except Exception as _:
-                    print("[-] Timeout received in block(). Continuing.")
-                    self.glitcher.power_cycle_target()
-                    time.sleep(0.2)
-                    response = b'warning: timeout'
+            # block until glitch
+            try:
+                self.glitcher.block(timeout=1)
+            except Exception as _:
+                print("[-] Timeout received in block(). Continuing.")
+                self.glitcher.power_cycle_target()
+                time.sleep(0.2)
+                response = b'warning: timeout'
 
             # dump memory
             mem = b''
             if b'success' in response:
                 #response, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
                 start = 0x08000000
-                #start = 0x08000000 - 0*0xFF
                 size = 0xFF
                 response, mem = self.bootcom.read_memory(start, size)
 
