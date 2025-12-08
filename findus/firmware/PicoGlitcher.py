@@ -538,7 +538,7 @@ class PicoGlitcher():
             if not self.trigger_inverting:
                 sm1_func = Statemachines.edge_trigger_rising_edge
             else:
-                sm1_func = Statemachines.dge_trigger_falling_edge
+                sm1_func = Statemachines.edge_trigger_falling_edge
             # state machine that checks the trigger condition
             self.sm1.init(sm1_func, freq=self.frequency, in_base=self.pin_trigger)
             self.sm1.put(self.number_of_edges - 1)
