@@ -118,7 +118,7 @@ If you don't have an SMA cable, twist two jumper cables and connect them as show
 
 Also, for glitching the jumper on the STM8s target board must be in the `ISP ENABLE` position.
 
-Next, we determine the time between the read memory command `0x11` and the response (`ACK` or `NACK`) from the microcontroller. The check whether ROP is active must happen between those two events. It turns out (and by observing the [Analog Plotter](../adc)), the glitch must be placed between 106,000 and 107,500 ns.
+Next, we determine the time between the read memory command `0x11` and the response (`ACK` or `NACK`) from the microcontroller. The check whether ROP is active must happen between those two events. It turns out (and by observing the [Analog Plotter](../adc.md)), the glitch must be placed between 106,000 and 107,500 ns.
 
 <TODO: AnalogPlot figure>
 
