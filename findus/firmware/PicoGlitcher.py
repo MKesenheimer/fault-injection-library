@@ -778,12 +778,13 @@ class PicoGlitcher():
             timeout: Time after the block is released.
         """
         if self.sm0 is not None:
-            start_time = time.time()
-            while time.time() - start_time < timeout:
+            timeout_ms = int(timeout * 1_000)
+            start_time = time.ticks_ms()
+            while time.ticks_diff(time.ticks_ms(), start_time) < timeout_ms:
                 if self.sm0.rx_fifo() > 0:
                     self.armed = False
                     break
-            if time.time() - start_time >= timeout:
+            if time.ticks_diff(time.ticks_ms(), start_time) >= timeout_ms:
                 self.sm0.active(0)
                 self.pin_glitch_en.low()
                 self.core1_stopped = True
@@ -883,11 +884,12 @@ class PicoGlitcher():
         """
         Read back the captured ADC samples.
         """
-        start_time = time.time()
-        while time.time() - start_time < timeout:
+        timeout_ms = int(timeout * 1_000)
+        start_time = time.ticks_ms()
+        while time.ticks_diff(time.ticks_ms(), start_time) < timeout_ms:
             if self.core1_stopped:
                 break
-        if time.time() - start_time >= timeout:
+        if time.ticks_diff(time.ticks_ms(), start_time) >= timeout_ms:
             raise Exception("ADC timed out!")
         #while not self.core1_stopped:
         #    pass
