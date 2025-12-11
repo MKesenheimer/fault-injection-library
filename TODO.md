@@ -6,3 +6,4 @@
 * Bild von AnalogPlot für die Glitchpositionierung beim STM8s Glitchen.
 * use consistent time units for all functions.
 * implement shell completion with 'click'
+* check minimal python version before installation
