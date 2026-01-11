@@ -21,6 +21,11 @@
       "showGrid": true,
       "traces": [
         {
+          "color": "rgb(77, 175, 74)",
+          "signal": "I(ARV1)",
+          "trace_type": 258
+        },
+        {
           "color": "rgb(255, 127, 0)",
           "signal": "V(/IN)",
           "trace_type": 257
