@@ -24,6 +24,6 @@ If you have feature requests or issues, please contact me:
 - twitter: [@BartimaeusvUruk](https://x.com/BartimaeusvUruk)
 - mastodon: [@mkesenheimer@mastodon.social](https://mastodon.social/@mkesenheimer)
 - discord: [discord.gg/8mqEVPG6k7](https://discord.gg/8mqEVPG6k7)
-- Pico Glitcher v2: [tindie.com/.../picoglitcher-v2](https://www.tindie.com/products/faulty-hardware/picoglitcher-v2/)
+- Pico Glitcher v2: [tindie.com/.../picoglitcher-v3](https://www.tindie.com/products/faulty-hardware/picoglitcher-v3/)
 - STM8s target board: [tindie.com/.../stm8-target-board](https://www.tindie.com/products/faulty-hardware/stm8-target-board/)
 - Pulse Shaping expansion board: [tindie.com/.../pulse-shaping-expansion-board-v1](https://www.tindie.com/products/faulty-hardware/pulse-shaping-expansion-board-v1/)

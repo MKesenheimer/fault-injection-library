@@ -76,12 +76,6 @@ The improved power supply makes the Pico Glitcher far more flexible when attacki
 
 The HYS potentiometer of the `EXT2` input (see [Schmitt Trigger EXT inputs](schmitt.md)) is used to adjust the hysteresis of the Schmitt trigger input EXT2. It controls the difference between the upper and lower switching thresholds. By changing this difference, it directly determines how much the input signal must move before the output changes state.
 
-With no hysteresis, the Schmitt trigger switches at the same input level for both rising and falling edges. The output changes state exactly at a single threshold, making the circuit sensitive to noise and small fluctuations around that level.
-
-When hysteresis is introduced, the switching point depends on the direction of the input signal. On a rising input, the signal must reach the upper threshold before the output changes, causing the transition to occur later than it would without hysteresis. On a falling input, the signal must drop below the lower threshold before switching back, which also delays the transition compared to a single-threshold comparator.
-
-Increasing the hysteresis widens the gap between the upper and lower thresholds. This makes the circuit switch later on both rising and falling edges, relative to the no-hysteresis case. Reducing the hysteresis narrows this gap, bringing the two switching points closer together until they coincide when hysteresis is effectively zero.
-
 Continue reading [getting started](getting_started.md) to learn more about how to set up your Pico Glitcher.
 
 [1]: If not, please submit an issue at [https://github.com/MKesenheimer/fault-injection-library/issues](https://github.com/MKesenheimer/fault-injection-library/issues).

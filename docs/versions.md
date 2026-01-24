@@ -48,3 +48,10 @@ This is a brief summary of the different versions of Pico Glitcher and what has 
 - Improved PCB layout.
 - Switched back to NH245 level shifters which proved to be the better choice for that application.
 - Added a 10Ω resistor to the VTARGET output to protect the power switch. This 10Ω resistor can be bypassed by shorting the solder bridge below the resistor.
+
+### v3.0
+
+- Replaced the Raspberry Pi Pico with the more powerful Raspberry Pi Pico 2.
+- Improved power supply: Four different voltages to interface with various microcontrollers can be chosen from: 1.2V, 1.8V, 3.3V, and 5V.
+- Improved Schmitt trigger inputs provide better and more reliable triggering.
+- Tented vias and more vias in critical regions for better impedance.
