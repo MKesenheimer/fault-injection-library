@@ -8,7 +8,7 @@ The fault-injection-library has been built to work with hardware that consists o
 The Raspberry Pi Pico is not only cheap and available for the hobbyist, but also a very capable microcontroller.
 Furthermore, this library supports the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/) and the [ChipWhisperer Husky](https://rtfm.newae.com/Capture/ChipWhisperer-Husky/) as well.
 
-![Pico Glitcher Board](images/pgfpv2.1.jpg)
+![Pico Glitcher Board](images/pgfpv3.0_1.JPG)
 
 The Pico Glitcher was developed to minimize the effort and requirements for the hardware setup. The Pico Glitcher is optimized for use with findus and makes it particularly easy to carry out fault injection attacks.
 

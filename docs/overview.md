@@ -56,6 +56,32 @@ Input pins `GPIO16` - `GPIO19` are connected to the Raspberry Pi Pico without a 
 A new input stage (`EXT1` and `EXT2`) has been added to the board which can be used to filter out noise and other disturbances, see section [Schmitt Trigger EXT inputs](schmitt.md).
 The multiplexing output can be used to quickly switch between different voltage levels and to supply the target board with power. Up to four different voltage levels can be configured and switched between (see section [Multiplexing](multiplexing.md)).
 
-[1]: If not, please submit an issue at [https://github.com/MKesenheimer/fault-injection-library/issues](https://github.com/MKesenheimer/fault-injection-library/issues).
+## Pico Glitcher v3
+
+More improvements have been made to the Pico Glitcher version 3.
+
+![Pico Glitcher v3.0 components](images/pico-glitcher-v3.0-components.png)
+
+The summary of changes are:
+
+- The Pico Glitcher version 3 is based on the Raspberry Pi Pico 2: higher clock speed, better accuracy in glitching attacks, more power!
+- Improved power supply: You can now choose from four different voltages to interface with various microcontrollers: 1.2V, 1.8V, 3.3V, and 5V.
+- Improved Schmitt trigger inputs provide even better and more reliable triggering.
+
+Everything else is unchanged: Two high-power MOSFETs for crowbar glitch generation, and two level shifters to ensure compatibility over a wide voltage range. An Schmitt Trigger input stage (EXT1 and EXT2) can be used to filter out noise and other disturbances via adjustable Schmitt Triggers. The multiplexing output can be used to quickly switch between up to four different voltage levels and to supply the target board with power.
+
+Compared to the original Raspberry Pi Pico, the Pico 2 is simply a better platform for voltage glitching. The most obvious advantage is performance. The Pico 2 runs at a significantly higher clock speed, which directly improves timing resolution. In glitching attacks, timing is everything. Finer timing granularity means you can place glitches more precisely relative to the target's execution, which increases both reliability and repeatability.
+
+The improved power supply makes the Pico Glitcher far more flexible when attacking real-world targets. Modern microcontrollers operate at a wide range of core and I/O voltages, and voltage glitching is most effective when the glitch amplitude closely matches the target's supply rail. By supporting 1.2 V and 1.8 V directly, the Pico Glitcher can interface cleanly with low-power and high-performance MCUs without level shifters or external regulators.
+
+The HYS potentiometer of the `EXT2` input (see [Schmitt Trigger EXT inputs](schmitt.md)) is used to adjust the hysteresis of the Schmitt trigger input EXT2. It controls the difference between the upper and lower switching thresholds. By changing this difference, it directly determines how much the input signal must move before the output changes state.
+
+With no hysteresis, the Schmitt trigger switches at the same input level for both rising and falling edges. The output changes state exactly at a single threshold, making the circuit sensitive to noise and small fluctuations around that level.
+
+When hysteresis is introduced, the switching point depends on the direction of the input signal. On a rising input, the signal must reach the upper threshold before the output changes, causing the transition to occur later than it would without hysteresis. On a falling input, the signal must drop below the lower threshold before switching back, which also delays the transition compared to a single-threshold comparator.
+
+Increasing the hysteresis widens the gap between the upper and lower thresholds. This makes the circuit switch later on both rising and falling edges, relative to the no-hysteresis case. Reducing the hysteresis narrows this gap, bringing the two switching points closer together until they coincide when hysteresis is effectively zero.
 
 Continue reading [getting started](getting_started.md) to learn more about how to set up your Pico Glitcher.
+
+[1]: If not, please submit an issue at [https://github.com/MKesenheimer/fault-injection-library/issues](https://github.com/MKesenheimer/fault-injection-library/issues).
