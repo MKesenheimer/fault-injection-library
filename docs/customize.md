@@ -33,13 +33,17 @@ The GPIO pins of the Raspberry Pi Pico are connected to the following outlets:
 If you want to write code for additional communication protocols, such as a UART-to-USB adapter, or an SPI-to-USB adapter, then the unused GPIO pins are perfect for that.
 The output pins with level-shifting are `GPIO2` - `GPIO7`. For inputs the pins `GPIO8` - `GPIO14` can be used.
 
-## Pico Glitcher v2 GPIO pin overview
+## Pico Glitcher v2 and v3 GPIO pin overview
 
 Of course, the second revision of the Pico Glitcher can also be modified to suit your needs. Unfortunately, for better routing on the PCB and with added features, the GPIO pin assignment is different to version 1. Hence, code written for version 1 will likely not run on version 2.
 
 The Pico Glitcher v2 is built from the following components:
 
 ![Pico Glitcher v2.1 components](images/pico-glitcher-v2.1-components.png)
+
+And the high-level overview of the Pico Glitcher v3 is shown below:
+
+![Pico Glitcher v3.0 components](images/pico-glitcher-v3.0-components.png)
 
 The GPIO pins of the Raspberry Pi Pico are connected to the following outlets:
 
@@ -63,7 +67,7 @@ The GPIO pins of the Raspberry Pi Pico are connected to the following outlets:
 | 27       | Analog input connected to EXT1 input, currently unused      |
 | 28       | Analog input connected to EXT2 input, currently unused      |
 
-## Pico Glitcher v2 GPIO pin header
+## Pico Glitcher v2 and v3 GPIO pin header
 
 If you want to write code for additional communication protocols, such as a UART-to-USB adapter, or an SPI-to-USB adapter, then the unused GPIO pins are perfect for that.
 Pins `GPIO16` - `GPIO19` are connected to the Raspberry Pi Pico without a level shifter and can be used bi-directionally.
