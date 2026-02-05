@@ -90,7 +90,6 @@ class Main:
             self.database = Database(sys.argv, resume=self.args.resume, nostore=self.args.no_store, column_names=["delay", "length", "number_of_pulses", "delay_between"])
         self.start_time = int(time.time())
 
-
         # STLink Debugger
         #self.debugger = DerivedDebugInterface(interface="stlink", target="stm32l0", transport="hla_swd", gdb_exec="gdb-multiarch")
         self.debugger = DerivedDebugInterface(interface_config="interface/stlink.cfg", target="stm32l0", transport="hla_swd", adapter_serial=args.stlink_serial)
@@ -100,7 +99,7 @@ class Main:
             print("[+] Programming target.")
             if args.power is not None:
                 self.ext_power_supply.set_voltage(3.3)
-            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l051.elf", rdp_level=args.program_target, power_cycle_time=self.power_cycle_time, verbose=True)
+            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l051.elf", unlock=True, rdp_level=args.program_target, power_cycle_time=self.power_cycle_time, verbose=True)
 
     def cleanup(self):
         self.debugger.detach()
@@ -109,7 +108,7 @@ class Main:
         programming_necessary = False
         unlock_necessary = False
         # check if target needs to be programmed
-        rdp, pcrop = self.debugger.read_rdp_and_pgrop(verbose=False)
+        rdp, pcrop = self.debugger.read_rdp_and_pcrop(verbose=False)
         print(f"[+] Option bytes: rdp = {hex(rdp)}, pcrop = {hex(pcrop)}")
         if rdp == 0xaa or rdp == 0xcc:
             programming_necessary = True
@@ -122,6 +121,7 @@ class Main:
     def prepare_target(self):
         print("[+] Preparing target.")
         programming_necessary, unlock_necessary = self.is_programming_necessary()
+        #print(f"[+] Is programming necessary? programming_necessary = {programming_necessary}, unlock_necessary = {unlock_necessary}")
         # write a program to the target and enable RDP level 1
         # unlock should not be necessary, since RDP level should be zero from the last experiment
         # if RDP is already level 1, we don't care and continue
@@ -133,12 +133,13 @@ class Main:
             if self.args.power is not None:
                 self.ext_power_supply.set_voltage(3.3)
             print("[+] Warning: rdp or pcrop not as expected. Programming target with test program (to flash) and enabling rdp level 1.")
-            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l051.elf", unlock=unlock_necessary, rdp_level=1, power_cycle_time=self.power_cycle_time)
+            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l051.elf", unlock=unlock_necessary, rdp_level=1, power_cycle_time=self.power_cycle_time, verbose=True)
 
         # check if programming was successful (RDP should be active)
-        rdp = self.debugger.read_rdp()
-        print(f"[+] Result whether programming was successful: {"ok" if rdp != 0xaa and rdp != 0xcc else "failed"}")
-        if rdp == 0xaa or rdp == 0xcc:
+        rdp, pcrop = self.debugger.read_rdp_and_pcrop(verbose=False)
+        success = (rdp != 0xaa and rdp != 0xcc) and pcrop == 0x00
+        print(f"[+] Result whether programming was successful: {"ok" if success else "failed"}, (rdp = {rdp}, pcrop = {pcrop})")
+        if not success:
             raise Exception("Programming failed.")
         print("[+] Programming finished.")
 
@@ -151,9 +152,9 @@ class Main:
         print("[+] Programming target with program to downgrade to RDP 0 (to RAM).")
         if self.args.power is not None:
             self.ext_power_supply.set_voltage(3.1)
-        #self.debugger.load_exec(elf_image=elf_image, verbose=True)
         self.debugger.attach(delay=0.1)
-        self.debugger.gdb_load_exec(elf_image=elf_image, timeout=0.7, verbose=False)
+        self.debugger.gdb_load_exec(elf_image=elf_image, timeout=0.4, verbose=False)
+        self.debugger.gdb_interrupt_disconnect(timeout=0.4, halt_target=False, verbose=False)
         self.debugger.detach()
 
     def run(self):
@@ -238,7 +239,7 @@ class Main:
 
             # further check if something changed
             if b'warning' not in state:
-                rdp, pcrop = self.debugger.read_rdp_and_pgrop()
+                rdp, pcrop = self.debugger.read_rdp_and_pcrop()
                 print(f"[+] Option bytes: rdp = {hex(rdp)}, pcrop = {hex(pcrop)}")
                 # rdp changed
                 if rdp != 0xaa and rdp != 0x00 and rdp != 0xbb:
@@ -277,11 +278,8 @@ class Main:
             else:
                 print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{delay}\t{length}\t{number_of_pulses}\t{delay_between}\t{color}\t{state}", color))
 
-            # increase experiment id
-            experiment_id += 1
-
             # attack finished
-            if experiment_base_id + experiment_id >= 2_500:
+            if experiment_base_id + experiment_id >= self.args.number_of_experiments:
                 break
             if self.args.oneshot:
                 break
@@ -301,6 +299,9 @@ class Main:
             elif not self.args.test and b'expected' in state:
                 print("[-] RDP downgrad unsuccessfully. Try again with a fresh target.")
                 break
+
+            # increase experiment id
+            experiment_id += 1
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -323,6 +324,7 @@ if __name__ == "__main__":
     parser.add_argument("--program-target", required=False, metavar="RDP_LEVEL", type=int, default=None, help="Reprogram the target before glitching and set the RDP level (for research only).")
     parser.add_argument("--test", required=False, action='store_true', help="Collect data on a test device. If this option is not supplied, all functions that could reset the targets flash are deactivated.")
     parser.add_argument("--stlink-serial", required=False, default=None, help="Specify the serial number of the ST-Link adapter to use. Helpful if multiple adapters are used at the same time.")
+    parser.add_argument("--number-of-experiments", required=False, default=None, help="Carry out only this many glitching attempts, then stop.", type=int)
     args = parser.parse_args()
 
     main = Main(args)
