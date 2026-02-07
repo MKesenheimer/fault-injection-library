@@ -40,6 +40,37 @@ def wait_irq7():
     tst(r0, r2) # r0 & r2
     beq(loop) # if r0 & r2 == 0 -> IRQ7 bit not set
 
+@micropython.asm_thumb
+def clear_pio0_irqs():
+    # r1 = 0x50200010 (PIO0_IRQ)
+    mov(r1, 0x50)
+    mov(r2, 24)
+    lsl(r1, r2)      # 0x50000000
+    mov(r2, 0x20)
+    orr(r1, r2)      # 0x50200000
+    mov(r2, 0x10)
+    orr(r1, r2)      # 0x50200010
+
+    # write 1s to clear all IRQ bits (0–7)
+    mov(r0, 0xFF)
+    str(r0, [r1, 0])
+
+@micropython.asm_thumb
+def clear_pio1_irqs():
+    # r1 = 0x50300010 (PIO1_IRQ)
+    mov(r1, 0x50)
+    mov(r2, 24)
+    lsl(r1, r2)      # 0x50000000
+    mov(r2, 0x30)
+    orr(r1, r2)      # 0x50300000
+    mov(r2, 0x10)
+    orr(r1, r2)      # 0x50300010
+
+    # write 1s to clear all IRQ bits (0–7)
+    mov(r0, 0xFF)
+    str(r0, [r1, 0])
+
+
 class PicoGlitcher():
     """
     Class that contains the code to access the hardware of the Pico Glitcher.
@@ -507,6 +538,8 @@ class PicoGlitcher():
             self.sm2.active(0)
             while self.sm2.rx_fifo() != 0:
                 self.sm2.get()
+        clear_pio0_irqs()
+        clear_pio1_irqs
         PIO(0).remove_program()
         PIO(1).remove_program()
 

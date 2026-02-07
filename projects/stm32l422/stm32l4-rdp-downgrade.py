@@ -109,7 +109,7 @@ class Main:
     def prepare_target(self, force=False):
         print("[+] Preparing target.")
         # check if target needs to be programmed
-        rdp, pcrop = self.debugger.read_rdp_and_pgrop(verbose=False)
+        rdp, pcrop = self.debugger.read_rdp_and_pcrop(verbose=False)
         print(f"[+] Option bytes: rdp = {hex(rdp)}, pcrop = {hex(pcrop)}")
 
         # write a program to the target and enable RDP level 1
@@ -213,7 +213,7 @@ class Main:
 
             # further check if something changed
             if b'warning' not in state:
-                rdp, pcrop = self.debugger.read_rdp_and_pgrop()
+                rdp, pcrop = self.debugger.read_rdp_and_pcrop()
                 print(f"[+] Option bytes: rdp = {hex(rdp)}, pcrop = {hex(pcrop)}")
                 # rdp changed
                 if rdp != 0xaa and rdp != 0x00:

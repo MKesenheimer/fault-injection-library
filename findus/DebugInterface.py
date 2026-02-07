@@ -7,7 +7,7 @@
 
 # programming
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x unlock 0; exit"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program toggle-led-STM32L0.elf; reset run; exit;"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program rdp-downgrade-stm32l051.elf; reset run; exit;"
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; exit"
 # -> power cycle the target!
 
@@ -16,7 +16,7 @@
 
 # debugging (install arm-none-eabi-gdb!)
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init"
-# > arm-none-eabi-gdb read-out-protection-test-STM32L0.elf
+# > arm-none-eabi-gdb rdp-downgrade-stm32l051.elf
 # (gdb) target extended-remote localhost:3333
 # (gdb) x 0x08000000
 ## or
@@ -24,16 +24,16 @@
 # > mdw 0x08000000
 
 # load image to ram
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; load_image rdp-downgrade-STM32L0.elf" -c "reg sp 0x20000000" -c "reg pc 0x20000004" -c "resume; exit"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; load_image rdp-downgrade-stm32l051.elf" -c "reg sp 0x20000000" -c "reg pc 0x20000004" -c "resume; exit"
 
 # load image to ram and execute
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; load_image rdp-downgrade-STM32L0.elf" -c "reg sp 0x20002000" -c "reg pc 0x20000fa4" -c "resume" -c "exit"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; load_image rdp-downgrade-stm32l051.elf" -c "reg sp 0x20002000" -c "reg pc 0x20000fa4" -c "resume" -c "exit"
 
 # Alternatively load with gdb:
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt"
-# > arm-none-eabi-gdb rdp-downgrade-STM32L0.elf
+# > arm-none-eabi-gdb rdp-downgrade-stm32l051.elf
 # > target remote :3333
-# > load rdp-downgrade-STM32L0.elf
+# > load rdp-downgrade-stm32l051.elf
 ## Start address 0x20000fa4, load size 4764
 # > x $pc
 ## 0x20000fa4 <Reset_Handler>:	0x4685480d
@@ -74,17 +74,29 @@ class DebugInterface():
 
     def program_target(self, glitcher, elf_image:str = "program.elf", unlock:bool = True, rdp_level:int = 0, power_cycle_time:float = 0.1, verbose:bool = False):
         """
-        TODO
+        Program the target with a binary, set the read-out protection and power-cycle.
         """
         if unlock:
-            glitcher.reset(0.01)
-            time.sleep(0.005)
-            self.unlock_target(verbose)
-            glitcher.power_cycle_reset(power_cycle_time)
-            time.sleep(power_cycle_time)
-        self.write_image(elf_image=elf_image)
+            rdp = 0x01
+            pcrop = 0x01
+            while rdp != 0xaa or pcrop != 0x00:
+                glitcher.reset(0.01)
+                time.sleep(0.005)
+                self.unlock_target(verbose=verbose)
+                glitcher.power_cycle_reset(power_cycle_time)
+                time.sleep(power_cycle_time)
+                rdp, pcrop = self.read_rdp_and_pcrop(verbose=False)
+                if verbose:
+                    print(f"[+] rdp, pcrop = {hex(rdp)}, {hex(pcrop)}")
+        self.write_image(elf_image=elf_image, verbose=verbose)
+        rdp, pcrop = self.read_rdp_and_pcrop(verbose=False)
+        if verbose:
+            print(f"[+] rdp, pcrop = {hex(rdp)}, {hex(pcrop)}")
         if rdp_level == 1:
-            self.lock_target(verbose)
+            self.lock_target(verbose=verbose)
+            rdp, pcrop = self.read_rdp_and_pcrop(verbose=False)
+            if verbose:
+                print(f"[+] rdp, pcrop = {hex(rdp)}, {hex(pcrop)}")
             # changes in the RDP level become active after a power-cycle
             glitcher.power_cycle_reset(power_cycle_time)
             time.sleep(power_cycle_time)
@@ -94,6 +106,8 @@ class DebugInterface():
         Unlock the target and remove any read-out protection.
         Attention: This will erase the targets flash!
         """
+        if verbose:
+            print("[+] Unlocking target...")
         args = [
             'openocd',
             '-f', self.interface_config,
@@ -113,8 +127,10 @@ class DebugInterface():
 
     def lock_target(self, verbose:bool = False):
         """
-        TODO
+        Lock the target (activate RDP).
         """
+        if verbose:
+            print("[+] Locking target...")
         args = [
             'openocd',
             '-f', self.interface_config,
@@ -136,6 +152,8 @@ class DebugInterface():
         """
         Write image to flash.
         """
+        if verbose:
+            print("[+] Writing image to target...")
         args = [
             'openocd',
             '-f', self.interface_config,
@@ -251,7 +269,7 @@ class DebugInterface():
         rdp = (optbytes & 0xff)
         return rdp
 
-    def read_rdp_and_pgrop(self, verbose:bool = False):
+    def read_rdp_and_pcrop(self, verbose:bool = False):
         optbytes, response = self.read_option_bytes()
         if verbose:
             print(response)
@@ -298,8 +316,81 @@ class DebugInterface():
         if self.adapter_serial is not None:
             args.insert(3, '-c')
             args.insert(4, f'adapter serial {self.adapter_serial}')
-        self.openocd_process = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, start_new_session=True)
-        time.sleep(delay)
+        try:
+            self.openocd_process = subprocess.Popen(
+                args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                start_new_session=True,
+            )
+            time.sleep(delay)
+            if self.openocd_process.poll() is not None:
+                out, err = self.openocd_process.communicate()
+                raise RuntimeError(f"OpenOCD failed:\n{out}\n{err}")
+        except subprocess.TimeoutExpired:
+            pass
+
+    def mi_wait_done(self, timeout=1.0, ok_prefixes=("^done", "^running", "^connected"), verbose=False):
+        start = time.time()
+        while True:
+            if time.time() - start > timeout:
+                raise TimeoutError("GDB MI command timed out")
+            line = self.gdb_process.stdout.readline()
+            if not line:
+                raise RuntimeError("GDB exited unexpectedly")
+            line = line.strip()
+            if verbose:
+                print(line)
+            # Ignore CLI prompt and async noise
+            if not line or line == "(gdb)":
+                continue
+            if line[0] in "*=~&":
+                continue
+            # Result records
+            if line.startswith("^error"):
+                raise RuntimeError(f"GDB MI error: {line}")
+            for ok in ok_prefixes:
+                if line.startswith(ok):
+                    return
+        
+    def mi(self, cmd, verbose=False):
+        if verbose:
+            print(f">>> {cmd}")
+        self.gdb_process.stdin.write(cmd + "\n")
+        self.gdb_process.stdin.flush()
+
+    def gdb_load_exec(self, elf_image:str="program.elf", timeout=0.3, verbose=False):
+        # trunk-ignore(bandit/B603)
+        self.gdb_process = subprocess.Popen(
+            [self.gdb_exec, '--interpreter=mi2', elf_image],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            bufsize=1,  # line-buffered
+        )
+        self.mi(f"-file-exec-and-symbols {elf_image}", verbose=verbose)
+        self.mi_wait_done(timeout=timeout, verbose=verbose)
+        self.mi(f"-target-select extended-remote localhost:{self.gdb_port}", verbose=verbose)
+        self.mi_wait_done(timeout=timeout, ok_prefixes=("^connected",), verbose=verbose)
+        self.mi("-target-download", verbose=verbose)
+        self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
+        self.mi("-exec-continue", verbose=verbose)
+        self.mi_wait_done(timeout=timeout, ok_prefixes=("^running",), verbose=verbose)
+
+    def gdb_interrupt_disconnect(self, timeout=0.3, halt_target=True, verbose=False):
+        if halt_target:
+            self.mi("-exec-interrupt", verbose=verbose)
+            self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
+            self.mi("-target-disconnect", verbose=verbose)
+            self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
+            self.mi("-gdb-exit", verbose=verbose)
+            self.mi_wait_done(timeout=timeout, ok_prefixes=("^exit",), verbose=verbose)
+        self.gdb_process.terminate()
+        self.gdb_process.wait(timeout=timeout)
 
     def detach(self):
         if self.openocd_process is not None:
@@ -312,32 +403,6 @@ class DebugInterface():
         if self.gdb_process is not None:
             self.gdb_process.terminate()
             self.gdb_process = None
-
-    def gdb_load_exec(self, elf_image:str = "program.elf", timeout=0.3, verbose=False):
-        # trunk-ignore(bandit/B603)
-        self.gdb_process = subprocess.Popen([
-            f'{self.gdb_exec}',
-            '--interpreter=mi2',
-            f'{elf_image}'
-            ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        self.gdb_process.stdin.write(f"target remote localhost:{self.gdb_port}\n")
-        self.gdb_process.stdin.write(f"load {elf_image}\n")
-        self.gdb_process.stdin.write("continue\n")
-        self.gdb_process.stdin.write("detach\n")
-        self.gdb_process.stdin.write("quit\n")
-        self.gdb_process.stdin.flush()
-        output, error = "", ""
-        try:
-            output, error = self.gdb_process.communicate(timeout=timeout)
-        except Exception as e:
-            # timeout exception is ok
-            #print(f"[-] Exception in DebugInterface:gdb_load_exec occured:\n{e}")
-            pass
-        finally:
-            if verbose:
-                print(output)
-                print(error)
-        self.gdb_process.terminate()
 
     def telnet_init(self):
         # generate a connection to the openocd telnet server
