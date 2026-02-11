@@ -568,9 +568,6 @@ class PicoGlitcherInterface(MicroPythonScript):
     def configure_adc(self, number_of_samples:int = 1024, sampling_freq:int = 500_000):
         self.pyb.exec(f'mp.configure_adc({number_of_samples}, {sampling_freq})')
 
-    def stop_core1(self):
-        self.pyb.exec('mp.stop_core1()')
-
     def hard_reset(self):
         self.pyb.exec('mp.hard_reset()')
 
@@ -729,7 +726,6 @@ class PicoGlitcher(Glitcher):
     def __del__(self):
         print("[+] Terminating gracefully.")
         try:
-            self.stop_core1()
             self.hard_reset()
         except Exception as _:
             pass
@@ -1261,12 +1257,6 @@ class PicoGlitcher(Glitcher):
             sampling_freq: The sampling frequency of the ADC. `500 kSPS` is the maximum for the Pico Glitcher.
         """
         self.pico_glitcher.configure_adc(number_of_samples, sampling_freq)
-
-    def stop_core1(self):
-        """
-        Stop execution on the second core of the Pico Glitcher (Raspberry Pi Pico).
-        """
-        self.pico_glitcher.stop_core1()
 
     def hard_reset(self):
         """
