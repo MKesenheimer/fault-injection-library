@@ -116,7 +116,7 @@ Connect the Pico Glitcher to your computer and check which serial device comes u
 ls /dev/tty*
 ```
 
-Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version (`config_v1/config.json`, `config_v2.1-2/config.json` or `config_v2.3/config.json`) via the following command:
+Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version (`config_v1/config.json`, `config_v2.1-2/config.json`, `config_v2.3-4/config.json` or `config_v3.0/config.json`) via the following command:
 
 ```bash
 cd .venv/lib/python3.12/site-packages/findus/firmware

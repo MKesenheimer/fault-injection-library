@@ -18,7 +18,7 @@ wget https://raw.githubusercontent.com/MKesenheimer/fault-injection-library/refs
 python pico-glitcher.py --rpico /dev/ttyACM0 --delay 0 0 --length 100 100
 ```
 
-Replace `<config-path>` with the hardware version you have. For example `config_v1` for the Pico Glitcher v1, `config_v2.1-2` for the versions v2.1 and v2.2, `config_v2.3` for hardware version v2.3, and so on.
+Replace `<config-path>` with the hardware version you have. For example `config_v1` for the Pico Glitcher v1, `config_v2.1-2` for the versions v2.1 and v2.2, `config_v2.3` for hardware version v2.3, `config_v3.0` for hardware version v3.0, and so on.
 
 Note that the paths and tty names may be slightly different in your case.
 
@@ -94,7 +94,7 @@ Connect the Pico Glitcher to your computer and check which serial device comes u
 ls /dev/tty*
 ```
 
-Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version (`config_v1/config.json`, `config_v2.1-2/config.json` or `config_v2.3/config.json`) via the following command:
+Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version (`config_v1/config.json`, `config_v2.1-2/config.json`, `config_v2.3-4/config.json` or `config_v3.0/config.json`) via the following command:
 
 ```bash
 cd .venv/lib/python3.12/site-packages/findus/firmware

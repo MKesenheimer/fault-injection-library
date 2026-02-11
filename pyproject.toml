@@ -7,7 +7,7 @@ include-package-data = true
 packages = ["findus", "findus.analyzer", "findus.helper", "findus.firmware"]
 
 [tool.setuptools.package-data]
-"findus.firmware" = ["config_v1/config.json", "config_v2.1-2/config.json", "config_v2.3-4/config.json"]
+"findus.firmware" = ["config_v1/config.json", "config_v2.1-2/config.json", "config_v2.3-4/config.json", "config_v3.0/config.json"]
 
 [project]
 name = "findus"
