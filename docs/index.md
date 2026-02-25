@@ -20,8 +20,8 @@ The Pico Glitcher and accessories can be obtained from [https://faultyhardware.d
 
 If you have feature requests or issues, please contact me:
 
-- twitter: [@BartimaeusvUruk](https://x.com/BartimaeusvUruk)
-- mastodon: [@mkesenheimer@mastodon.social](https://mastodon.social/@mkesenheimer)
-- [discord](https://discord.gg/8mqEVPG6k7)
+- [twitter @BartimaeusvUruk](https://x.com/BartimaeusvUruk)
+- [Mastodon @mkesenheimer@mastodon.social](https://mastodon.social/@mkesenheimer)
+- [Faulty Hardware discord server](https://discord.gg/8mqEVPG6k7)
 - [Pico Glitcher v3](https://faultyhardware.de/en/home/21-pico-glitcher-v3.html)
 - [STM8s target board](https://faultyhardware.de/en/home/30-stm8-target-board.html)
