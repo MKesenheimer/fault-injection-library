@@ -20,7 +20,7 @@ if config["hardware_version"][0] == 1:
     MUX0_PIO_INIT = None
     MUX1_PIO_INIT = None
     MUX_PIO_INIT = 0b00
-elif config["hardware_version"][0] == 2:
+elif config["hardware_version"][0] == 2 or config["hardware_version"][0] == 3:
     TRIGGER = 14
     # alternative trigger on EXT1
     ALT_TRIGGER = 11
@@ -59,3 +59,11 @@ elif config["hardware_version"][0] == 2:
         MUX1_PIO_INIT = PIO.OUT_LOW
         MUX0_PIO_INIT = PIO.OUT_HIGH
         MUX_PIO_INIT = 0b10
+
+# FastADC config
+if config["hardware_version"][0] == 2:
+    PADS_BANK0_BASE = 0x4001c000 # S. 301, rp2040-datahseet.pdf
+    ADC_BASE = 0x4004c000 # S. 25, rp2040-datahseet.pdf
+elif config["hardware_version"][0] == 3:
+    PADS_BANK0_BASE = 0x40038000 # S. 786, rp2350-datahseet.pdf
+    ADC_BASE = 0x400a0000 # S. 32, rp2350-datahseet.pdf

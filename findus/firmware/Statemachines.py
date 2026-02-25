@@ -12,7 +12,9 @@ def glitch():
 
     # wait for trigger condition
     # enable pin_glitch_en
-    wait(1, irq, 7).side(0b1)
+    wait(1, irq, 1).side(0b1)
+    # set irq0 which starts the adc callback (if enabled)
+    irq(0)
 
     # wait delay
     label("delay_loop")
@@ -27,7 +29,6 @@ def glitch():
     set(pins, 0b0).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
-    irq(clear, 7)
     push(block)
 
 @asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), out_shiftdir=PIO.SHIFT_RIGHT)
@@ -44,7 +45,9 @@ def glitch_burst():
 
     # wait for trigger condition
     # enable pin_glitch_en
-    wait(1, irq, 7).side(0b1)
+    wait(1, irq, 1).side(0b1)
+    # set irq0 which starts the adc callback (if enabled)
+    irq(0)
 
     # delay until first glitch
     label("delay_loop")
@@ -74,7 +77,6 @@ def glitch_burst():
     set(pins, 0b0).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
-    irq(clear, 7)
     push(block)
 
 @asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), out_shiftdir=PIO.SHIFT_RIGHT)
@@ -85,7 +87,9 @@ def glitch_multiple():
     
     # wait for trigger condition
     # enable pin_glitch_en
-    wait(1, irq, 7).side(0b1)
+    wait(1, irq, 1).side(0b1)
+    # set irq0 which starts the adc callback (if enabled)
+    irq(0)
 
     # emit multiple glitches given by each config
     label("glitch_loop")
@@ -113,7 +117,6 @@ def glitch_multiple():
     set(pins, 0b0).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
-    irq(clear, 7)
     push(block)
 
 @asm_pio(set_init=(PIO.OUT_HIGH), sideset_init=(PIO.OUT_LOW))
@@ -127,7 +130,9 @@ def pulse_shaping():
 
     # wait for trigger condition
     # enable pin_glitch_en
-    wait(1, irq, 7).side(0b1)
+    wait(1, irq, 1).side(0b1)
+    # set irq0 which starts the adc callback (if enabled)
+    irq(0)
 
     # wait delay
     label("delay_loop")
@@ -142,7 +147,6 @@ def pulse_shaping():
     set(pins, 0b1).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
-    irq(clear, 7)
     push(block)
 
 @asm_pio(set_init=(Globals.MUX1_PIO_INIT, Globals.MUX0_PIO_INIT), out_init=(Globals.MUX1_PIO_INIT, Globals.MUX0_PIO_INIT), sideset_init=(PIO.OUT_LOW), out_shiftdir=PIO.SHIFT_RIGHT)
@@ -153,7 +157,9 @@ def multiplex(MUX_PIO_INIT=Globals.MUX_PIO_INIT):
 
     # wait for trigger condition
     # enable pin_glitch_en
-    wait(1, irq, 7).side(0b1)
+    wait(1, irq, 1).side(0b1)
+    # set irq0 which starts the adc callback (if enabled)
+    irq(0)
 
     # wait delay
     label("delay_loop")
@@ -182,7 +188,6 @@ def multiplex(MUX_PIO_INIT=Globals.MUX_PIO_INIT):
     set(pins, MUX_PIO_INIT).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
-    irq(clear, 7)
     push(block)
 
 @asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_LOW), out_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), out_shiftdir=PIO.SHIFT_RIGHT)
@@ -193,7 +198,9 @@ def multiplex_vin1(MUX_PIO_INIT=0b00):
 
     # wait for trigger condition
     # enable pin_glitch_en
-    wait(1, irq, 7).side(0b1)
+    wait(1, irq, 1).side(0b1)
+    # set irq0 which starts the adc callback (if enabled)
+    irq(0)
 
     # wait delay
     label("delay_loop")
@@ -222,7 +229,6 @@ def multiplex_vin1(MUX_PIO_INIT=0b00):
     set(pins, MUX_PIO_INIT).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
-    irq(clear, 7)
     push(block)
 
 @asm_pio(set_init=(PIO.OUT_LOW, PIO.OUT_HIGH), out_init=(PIO.OUT_LOW, PIO.OUT_HIGH), sideset_init=(PIO.OUT_LOW), out_shiftdir=PIO.SHIFT_RIGHT)
@@ -233,7 +239,9 @@ def multiplex_vin2(MUX_PIO_INIT=0b10):
 
     # wait for trigger condition
     # enable pin_glitch_en
-    wait(1, irq, 7).side(0b1)
+    wait(1, irq, 1).side(0b1)
+    # set irq0 which starts the adc callback (if enabled)
+    irq(0)
 
     # wait delay
     label("delay_loop")
@@ -262,32 +270,33 @@ def multiplex_vin2(MUX_PIO_INIT=0b10):
     set(pins, MUX_PIO_INIT).side(0b0)
 
     # tell execution finished (fills the sm's fifo buffer)
-    irq(clear, 7)
     push(block)
 
 @asm_pio()
 def tio_trigger_with_dead_time_rising_edge():
     # wait for irq in block_rising_condition or block_falling_condition state machine (dead time)
-    wait(1, irq, 6)
+    wait(1, irq, 2)
 
     # wait for rising edge on trigger pin
     wait(0, pin, 0)
     wait(1, pin, 0)
 
     # tell observed trigger
-    irq(block, 7)
+    irq(block, 1)
+    push(block)
 
 @asm_pio()
 def tio_trigger_with_dead_time_falling_edge():
     # wait for irq in block_rising_condition or block_falling_condition state machine (dead time)
-    wait(1, irq, 6)
+    wait(1, irq, 2)
 
     # wait for falling edge on trigger pin
     wait(1, pin, 0)
     wait(0, pin, 0)
 
     # tell observed trigger
-    irq(block, 7)
+    irq(block, 1)
+    push(block)
 
 @asm_pio()
 def edge_trigger_rising_edge():
@@ -295,6 +304,7 @@ def edge_trigger_rising_edge():
     pull(block)
     mov(x, osr)
 
+    # count the rising edges on trigger pin
     label("edge_count_loop")
 
     # wait for rising edge on trigger pin
@@ -305,7 +315,8 @@ def edge_trigger_rising_edge():
     jmp(x_dec, "edge_count_loop")
 
     # tell observed trigger
-    irq(block, 7)
+    irq(block, 1)
+    push(block)
 
 @asm_pio()
 def edge_trigger_falling_edge():
@@ -313,6 +324,7 @@ def edge_trigger_falling_edge():
     pull(block)
     mov(x, osr)
 
+    # count the falling edges on trigger pin
     label("edge_count_loop")
 
     # wait for falling edge on trigger pin
@@ -323,39 +335,8 @@ def edge_trigger_falling_edge():
     jmp(x_dec, "edge_count_loop")
 
     # tell observed trigger
-    irq(block, 7)
-
-@asm_pio()
-def block_rising_condition():
-    # block until dead time received
-    pull(block)
-    mov(x, osr)
-
-    # wait for rising edge condition
-    wait(1, pin, 0)
-
-    # wait dead time
-    label("delay_loop")
-    jmp(x_dec, "delay_loop")
-
-    # tell execution finished
-    irq(block, 6)
-
-@asm_pio()
-def block_falling_condition():
-    # block until dead time received
-    pull(block)
-    mov(x, osr)
-
-    # wait for falling edge condition
-    wait(0, pin, 0)
-
-    # wait dead time
-    label("delay_loop")
-    jmp(x_dec, "delay_loop")
-
-    # tell execution finished
-    irq(block, 6)
+    irq(block, 1)
+    push(block)
 
 @asm_pio(in_shiftdir=PIO.SHIFT_RIGHT, out_shiftdir=PIO.SHIFT_LEFT)
 def uart_trigger():
@@ -385,7 +366,42 @@ def uart_trigger():
     jmp(x_not_y, "start")
 
     # if received data matches pattern, set the irq and activate the glitch
-    irq(block, 7)
+    irq(block, 1)
+    push(block)
 
-    # wrap around
+    # wrap around # TODO: ist hier ein wrap überhaupt notwendig?
     jmp("start")
+
+@asm_pio()
+def block_rising_condition():
+    # block until dead time parameters received
+    pull(block)
+    mov(x, osr)
+
+    # wait for rising edge condition
+    wait(1, pin, 0)
+
+    # wait dead time
+    label("delay_loop")
+    jmp(x_dec, "delay_loop")
+
+    # tell execution finished
+    irq(block, 2)
+    push(block)
+
+@asm_pio()
+def block_falling_condition():
+    # block until dead time parameters received
+    pull(block)
+    mov(x, osr)
+
+    # wait for falling edge condition
+    wait(0, pin, 0)
+
+    # wait dead time
+    label("delay_loop")
+    jmp(x_dec, "delay_loop")
+
+    # tell execution finished
+    irq(block, 2)
+    push(block)

@@ -4,8 +4,10 @@ Findus (aka the fault-injection-library) is a toolchain to perform fault-injecti
 This library offers an easy entry point to carry out fault-injection attacks against microcontrollers, SoCs and CPUs.
 With the provided and easy to use functions and classes, fault-injection projects can be realized quickly with cheap and available hardware.
 
-Findus supports the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/), the [ChipWhisperer Husky](https://rtfm.newae.com/Capture/ChipWhisperer-Husky/) and the PicoGlitcher.
-More information about the ChipWhisperer Pro and the ChipWhisperer Husky can be found on [https://chipwhisperer.readthedocs.io/en/latest/index.html](https://chipwhisperer.readthedocs.io/en/latest/index.html).
+Findus supports the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/), the [ChipWhisperer Husky](https://rtfm.newae.com/Capture/ChipWhisperer-Husky/) and the [Pico Glitcher](https://mkesenheimer.github.io/blog/pico-glitcher-v3.html).
+
+More information about the fault-injection-library and the Pico Glitcher can be found on [https://fault-injection-library.readthedocs.io/en/latest/](https://fault-injection-library.readthedocs.io/en/latest/).
+
 
 ## Table of contents
 
@@ -38,7 +40,7 @@ This allows a cold start of the target to be carried out in the event of error s
 
 ![Assembled Pico Glitcher v1](https://github.com/MKesenheimer/fault-injection-library/blob/master/schematics/finished.JPG)
 
-The Pico Glitcher can be purchased from the tindie online store: [https://www.tindie.com/products/faulty-hardware/picoglitcher-v21/](https://www.tindie.com/products/faulty-hardware/picoglitcher-v21/). If you have questions or special requests, please feel free to contact me.
+The Pico Glitcher can be purchased from the [faultyhardware](https://faultyhardware.de) online store. If you have questions or special requests, please feel free to contact me.
 
 
 ## Documentation
@@ -116,7 +118,7 @@ Connect the Pico Glitcher to your computer and check which serial device comes u
 ls /dev/tty*
 ```
 
-Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version (`config_v1/config.json`, `config_v2.1-2/config.json` or `config_v2.3/config.json`) via the following command:
+Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version (`config_v1/config.json`, `config_v2.1-2/config.json`, `config_v2.3-4/config.json` or `config_v3.0/config.json`) via the following command:
 
 ```bash
 cd .venv/lib/python3.12/site-packages/findus/firmware

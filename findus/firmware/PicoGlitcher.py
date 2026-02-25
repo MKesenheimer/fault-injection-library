@@ -18,58 +18,9 @@ import ujson
 from FastADC import FastADC
 import AD910X
 from PulseGenerator import PulseGenerator
-import _thread
 import Globals
 import sys
 import Statemachines
-
-@micropython.asm_thumb
-def wait_irq7():
-    # mov 0xE000E200 to r0
-    mov(r1, 0xE0)
-    mov(r2, 16)
-    lsl(r1, r2) # r0 = 0xE00000
-    mov(r2, 0xE2)
-    orr(r1, r2) # r0 = 0xE000E2
-    mov(r2, 8)
-    lsl(r1, r2) # r0 = 0xE000E200
-
-    label(loop)
-    ldr(r0, [r1, 0]) # Load NVIC_ISPR (interrupt pending register)
-    mov(r2, 0b1000) # irq7 is bit 3 of NVIC_ISPR
-    tst(r0, r2) # r0 & r2
-    beq(loop) # if r0 & r2 == 0 -> IRQ7 bit not set
-
-@micropython.asm_thumb
-def clear_pio0_irqs():
-    # r1 = 0x50200010 (PIO0_IRQ)
-    mov(r1, 0x50)
-    mov(r2, 24)
-    lsl(r1, r2)      # 0x50000000
-    mov(r2, 0x20)
-    orr(r1, r2)      # 0x50200000
-    mov(r2, 0x10)
-    orr(r1, r2)      # 0x50200010
-
-    # write 1s to clear all IRQ bits (0–7)
-    mov(r0, 0xFF)
-    str(r0, [r1, 0])
-
-@micropython.asm_thumb
-def clear_pio1_irqs():
-    # r1 = 0x50300010 (PIO1_IRQ)
-    mov(r1, 0x50)
-    mov(r2, 24)
-    lsl(r1, r2)      # 0x50000000
-    mov(r2, 0x30)
-    orr(r1, r2)      # 0x50300000
-    mov(r2, 0x10)
-    orr(r1, r2)      # 0x50300010
-
-    # write 1s to clear all IRQ bits (0–7)
-    mov(r0, 0xFF)
-    str(r0, [r1, 0])
-
 
 class PicoGlitcher():
     """
@@ -104,18 +55,18 @@ class PicoGlitcher():
         if self.config["hardware_version"][0] == 1:
             # overclocking supposedly works, script runs also with 270_000_000
             self.set_frequency(200_000_000)
-        elif self.config["hardware_version"][0] == 2:
+        elif self.config["hardware_version"][0] >= 2:
             self.set_frequency(250_000_000)
         # LED
         self.led = Pin("LED", Pin.OUT)
         self.led.low()
-        if self.config["hardware_version"][0] == 2 and self.config["hardware_version"][1] >= 3:
-            # VTARGET_EN (active high)
+        if (self.config["hardware_version"][0] == 2 and self.config["hardware_version"][1] >= 3) or self.config["hardware_version"][0] == 3:
+            # VTARGET_EN (active high) for v2.3 and higher
             self.pin_vtarget_en = Pin(Globals.VTARGET_EN, Pin.OUT, Pin.PULL_DOWN)
             self.vtarget_enable_value = 1
             self.vtarget_disable_value = 0
         elif (self.config["hardware_version"][0] == 2 and self.config["hardware_version"][1] < 3) or self.config["hardware_version"][0] == 1:
-            # VTARGET_EN (active low)
+            # VTARGET_EN (active low) for 2.2 and lower
             self.pin_vtarget_en = Pin(Globals.VTARGET_EN, Pin.OUT, Pin.PULL_UP)
             self.vtarget_enable_value = 0
             self.vtarget_disable_value = 1
@@ -147,10 +98,10 @@ class PicoGlitcher():
         # analog digital converter
         self.fastadc = FastADC()
         self.fastsamples = self.fastadc.init_array()
-        self.core1_stopped = True
+        self.adc_samples_captured = False
         # gpio outputs (are configured later as required)
         self.pin_gpios = {}
-        # pins for multiplexing and pulse-shaping (only hardware version 2)
+        # pins for multiplexing and pulse-shaping (only hardware version 2 and later)
         if self.config["hardware_version"][0] >= 2:
             self.pin_mux1 = Pin(Globals.MUX1, Pin.OUT, Pin.PULL_DOWN)
             self.pin_mux0 = Pin(Globals.MUX0, Pin.OUT, Pin.PULL_DOWN)
@@ -528,18 +479,19 @@ class PicoGlitcher():
     def cleanup_pio(self):
         if self.sm0 is not None:
             self.sm0.active(0)
+            self.sm0.irq(handler=None)
             while self.sm0.rx_fifo() != 0:
                 self.sm0.get()
         if self.sm1 is not None:
             self.sm1.active(0)
+            self.sm1.irq(handler=None)
             while self.sm1.rx_fifo() != 0:
                 self.sm1.get()
         if self.sm2 is not None:
             self.sm2.active(0)
+            self.sm2.irq(handler=None)
             while self.sm2.rx_fifo() != 0:
                 self.sm2.get()
-        clear_pio0_irqs()
-        clear_pio1_irqs
         PIO(0).remove_program()
         PIO(1).remove_program()
 
@@ -589,7 +541,6 @@ class PicoGlitcher():
 
         self.armed = True
         self.sm0.active(1)
-        #self.arm_adc()
 
     def arm(self, delay:int, length:int, number_of_pulses:int = 1, delay_between:int = 0):
         """
@@ -619,6 +570,7 @@ class PicoGlitcher():
             self.sm0.put(config)
             self.sm0.put(number_of_pulses - 1)
 
+        # call common arm function
         self.__arm_common()
 
     def arm_double(self, delay1:int, length1:int, delay2:int, length2:int):
@@ -820,7 +772,7 @@ class PicoGlitcher():
             if time.ticks_diff(time.ticks_ms(), start_time) >= timeout_ms:
                 self.sm0.active(0)
                 self.pin_glitch_en.low()
-                self.core1_stopped = True
+                self.adc_samples_captured = True
                 self.armed = False
                 raise Exception("Function execution timed out!")
 
@@ -829,7 +781,7 @@ class PicoGlitcher():
         Check if the glitch was emitted.
 
         Returns:
-            Returns True if statemachine 1, that is used for glitch generation, was triggered.
+            Returns True if statemachine 0, that is used for glitch generation, was triggered.
         """
         if self.sm0 is not None:
             check = self.sm0.rx_fifo() > 0
@@ -897,21 +849,17 @@ class PicoGlitcher():
         machine.reset()
 
     @micropython.native
-    def __poll_fast_adc(self):
-        self.core1_stopped = False
-        # wait for trigger condition
-        wait_irq7()
+    def __poll_fast_adc(self, sm):
         # this code runs with ~2us per sample -> 450 ksps
         self.fastsamples = self.fastadc.read()
-        self.core1_stopped = True
+        self.adc_samples_captured = True
 
     def arm_adc(self):
         """
         Arm the ADC on pin 26 and capture ADC samples if the trigger condition is met. On Pico Glitcher hardware version 1, the separate SMA connector labeled `Analog` can be used to measure analog voltage traces. On revision 2, the analog input is directly connected to the `GLITCH` line.
         """
-        if self.core1_stopped:
-            _thread.start_new_thread(self.__poll_fast_adc, ())
-            #time.sleep(0.001)
+        self.adc_samples_captured = False
+        self.sm0.irq(handler=self.__poll_fast_adc)
 
     def get_adc_samples(self, timeout:float = 1.0):
         """
@@ -920,13 +868,10 @@ class PicoGlitcher():
         timeout_ms = int(timeout * 1_000)
         start_time = time.ticks_ms()
         while time.ticks_diff(time.ticks_ms(), start_time) < timeout_ms:
-            if self.core1_stopped:
+            if self.adc_samples_captured:
                 break
         if time.ticks_diff(time.ticks_ms(), start_time) >= timeout_ms:
             raise Exception("ADC timed out!")
-        #while not self.core1_stopped:
-        #    pass
-        self.core1_stopped = True
         print(self.fastsamples)
 
     def configure_adc(self, number_of_samples:int = 1024, sampling_freq:int = 500_000):
@@ -938,10 +883,3 @@ class PicoGlitcher():
             sampling_freq: The sampling frequency of the ADC. `500 kSPS` is the maximum.
         """
         self.fastadc.configure_adc(number_of_samples, sampling_freq)
-        self.fastsamples = self.fastadc.init_array()
-
-    def stop_core1(self):
-        """
-        Stop execution on the second core of the Pico Glitcher (Raspberry Pi Pico).
-        """
-        self.core1_stopped = True

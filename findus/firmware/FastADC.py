@@ -1,5 +1,6 @@
 import uarray
 from machine import ADC
+import Globals
 
 @micropython.asm_thumb
 def read_memory(r0): # Address
@@ -59,11 +60,11 @@ class FastADC():
 
     def configure_adc(self, number_of_samples:int = 1024, sampling_freq:int = 500_000):
         self.number_of_samples = number_of_samples
-        rGPIO26 = 0x4001c000 + 0x6c # S. 312
+        rGPIO26 = Globals.PADS_BANK0_BASE + 0x6c
         write_memory(rGPIO26, 1<<7) # switch off ADC0 input and output
         self.adc_buffer = uarray.array('h', range(0, number_of_samples))
         self.adc_control = uarray.array('i',[
-            0x4004c000, # BASE 0 CS, 4 Result, 8 FCS, 12 FIFO, 16 DIV S. 570
+            Globals.ADC_BASE, # BASE 0 CS, 4 Result, 8 FCS, 12 FIFO, 16 DIV S. 570
             1, # 4 Status: 0 done, 1 start
             number_of_samples # 8
             ])
@@ -71,9 +72,9 @@ class FastADC():
         #adcx.read_u16() # set up the channel; disabled line since this leads to locks
         max_sample = 48e6 # Hz, TODO: this depends on the CPU frequency!
         div = int(max_sample / sampling_freq)
-        write_memory(0x4004c000 + 0x10, div<<8) # set DIV register
-        set_memory(0x4004c000 + 0x08, 1) # set fifo enable
-        set_memory(0x4004c000, 1<<3) # set startmany
+        write_memory(Globals.ADC_BASE + 0x10, div<<8) # set DIV register
+        set_memory(Globals.ADC_BASE + 0x08, 1) # set fifo enable
+        set_memory(Globals.ADC_BASE, 1<<3) # set startmany
 
     def init_array(self):
         return self.adc_buffer
