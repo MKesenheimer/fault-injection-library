@@ -66,7 +66,7 @@ Observe the edges of the signal on the `RESET` line and the position of the glit
 
 Difficulty: Simple
 
-If you have the STM8s target board (available [here](https://www.tindie.com/products/faulty-hardware/stm8-target-board/)), you can learn how to atttack targets with findus and the Pico Glitcher. The STM8s MCUs are very easy to glitch.
+If you have the STM8s target board (available [here](https://faultyhardware.de/en/home/30-stm8-target-board.html)), you can learn how to atttack targets with findus and the Pico Glitcher. The STM8s MCUs are very easy to glitch.
 
 Similar to the STM32 series, the STM8s has a configurable read-out protection (ROP), which can be used to protect the flash content from unauthorised access. However, the STM8s does not have a UART bootloader like a MCU from the STM32 series (see [STM32 glitching](#stm-black-pill-stm32f401-glitching)), meaning that an ST-Link programming adapter would be required for an example target.
 

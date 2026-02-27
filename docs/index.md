@@ -14,16 +14,14 @@ The Pico Glitcher was developed to minimize the effort and requirements for the 
 
 ## Where to get the Pico Glitcher from?
 
-The Pico Glitcher and accessories can be obtained from tindie:
-[tindie.com/stores/faulty-hardware/](https://www.tindie.com/stores/faulty-hardware/)
+The Pico Glitcher and accessories can be obtained from [https://faultyhardware.de/](https://faultyhardware.de/).
 
 ## Links and further resources
 
 If you have feature requests or issues, please contact me:
 
-- twitter: [@BartimaeusvUruk](https://x.com/BartimaeusvUruk)
-- mastodon: [@mkesenheimer@mastodon.social](https://mastodon.social/@mkesenheimer)
-- discord: [discord.gg/8mqEVPG6k7](https://discord.gg/8mqEVPG6k7)
-- Pico Glitcher v2: [tindie.com/.../picoglitcher-v3](https://www.tindie.com/products/faulty-hardware/picoglitcher-v3/)
-- STM8s target board: [tindie.com/.../stm8-target-board](https://www.tindie.com/products/faulty-hardware/stm8-target-board/)
-- Pulse Shaping expansion board: [tindie.com/.../pulse-shaping-expansion-board-v1](https://www.tindie.com/products/faulty-hardware/pulse-shaping-expansion-board-v1/)
+- [twitter @BartimaeusvUruk](https://x.com/BartimaeusvUruk)
+- [Mastodon @mkesenheimer@mastodon.social](https://mastodon.social/@mkesenheimer)
+- [Faulty Hardware discord server](https://discord.gg/8mqEVPG6k7)
+- [Pico Glitcher v3](https://faultyhardware.de/en/home/21-pico-glitcher-v3.html)
+- [STM8s target board](https://faultyhardware.de/en/home/30-stm8-target-board.html)
