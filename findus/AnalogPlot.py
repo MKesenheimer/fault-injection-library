@@ -18,6 +18,15 @@ class AnalogPlot():
         plotter.update_curve(samples)
     """
     def __init__(self, number_of_samples:int, vref:float = 3.3, sampling_freq = 500_000, dynamic_range:int = 4096):
+        """
+        Initialize the AnalogPlot object.
+
+        Parameters:
+            number_of_samples: Number of samples to plot.
+            vref: Reference voltage. Defaults to 3.3.
+            sampling_freq: Sampling frequency in Hz. Defaults to 500,000.
+            dynamic_range: Dynamic range of the ADC. Defaults to 4096.
+        """
         self.number_of_samples = number_of_samples
         self.vref = vref
         self.sampling_freq = sampling_freq
@@ -47,10 +56,19 @@ class AnalogPlot():
         self.update_curve(self.ypoints)
 
     def show(self):
+        """
+        Show the plot without blocking the program.
+        """
         plt.show(block=False)
         plt.pause(0.001)
 
     def update_curve(self, y:list):
+        """
+        Update the curve with new data.
+
+        Parameters:
+            y: List of new y-values.
+        """
         self.ypoints = np.array(y) / self.dynamic_range * self.vref
         self.curve_line.set_data(self.xpoints, self.ypoints)
         self.show()

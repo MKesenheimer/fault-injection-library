@@ -1,3 +1,3 @@
-# Genetic Algorithm
+# GeneticAlgorithm
 
 ::: findus.GeneticAlgorithm

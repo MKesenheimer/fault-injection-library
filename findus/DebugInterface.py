@@ -52,7 +52,25 @@ import re
 import socket
 
 class DebugInterface():
+    """
+    Class to interact with the target device using OpenOCD and GDB.
+    """
     def __init__(self, interface:str = "stlink", interface_config:str=None, target:str = "stm32l0", target_config:str=None, transport:str = "hla_swd", gdb_exec:str = "arm-none-eabi-gdb", adapter_serial:str = None, gdb_port = 3333, telnet_port = 4444, tcl_port = 6666):
+        """
+        Initializes the OpenOCD configuration with default values or custom values provided.
+    
+        Parameters:
+            interface: The interface type, e.g., 'stlink' or 'j-link'. Defaults to 'stlink'.
+            interface_config: Path to a custom interface configuration file. If None, uses the default configuration for the specified interface.
+            target: The target microcontroller, e.g., 'stm32l0'. Defaults to 'stm32l0'.
+            target_config: Path to a custom target configuration file. If None, uses the default configuration for the specified target.
+            transport: The transport protocol, e.g., 'hla_swd'. Defaults to 'hla_swd'.
+            gdb_exec: The path to the GDB executable. Defaults to 'arm-none-eabi-gdb'.
+            adapter_serial: The serial number of the adapter. If None, no specific serial is used.
+            gdb_port: The port number for GDB communication. Defaults to 3333.
+            telnet_port: The port number for Telnet communication. Defaults to 4444.
+            tcl_port: The port number for TCL communication. Defaults to 6666.
+        """
         self.openocd_process = None
         self.gdb_process = None
         self.target_name = target
@@ -74,7 +92,15 @@ class DebugInterface():
 
     def program_target(self, glitcher, elf_image:str = "program.elf", unlock:bool = True, rdp_level:int = 0, power_cycle_time:float = 0.1, verbose:bool = False):
         """
-        Program the target with a binary, set the read-out protection and power-cycle.
+        Main function to program the target. Optionally unlocks the target, writes the ELF image, and adjusts the RDP level.
+        
+        Parameters:
+            glitcher: An instance of the Glitcher class used for glitching operations.
+            elf_image: The path to the ELF image file to be written to the target. Default is "program.elf".
+            unlock: Whether to unlock the target before programming. Default is True.
+            rdp_level: The desired RDP level (0 or 1). Default is 0.
+            power_cycle_time: The time to wait between power cycles. Default is 0.1 seconds.
+            verbose: Whether to print verbose output. Default is False.
         """
         if unlock:
             rdp = 0x01
@@ -103,7 +129,7 @@ class DebugInterface():
 
     def unlock_target(self, verbose:bool = False):
         """
-        Unlock the target and remove any read-out protection.
+        Unlocks the target and removes any read-out protection.
         Attention: This will erase the targets flash!
         """
         if verbose:
@@ -127,7 +153,7 @@ class DebugInterface():
 
     def lock_target(self, verbose:bool = False):
         """
-        Lock the target (activate RDP).
+        Locks the target (activates RDP).
         """
         if verbose:
             print("[+] Locking target...")
@@ -150,7 +176,11 @@ class DebugInterface():
 
     def write_image(self, elf_image:str = "program.elf", verbose:bool = False):
         """
-        Write image to flash.
+        Writes an ELF image to the target using OpenOCD.
+
+        Parameters:
+            elf_image: The path to the ELF image to be written. Defaults to "program.elf".
+            verbose: Whether to print verbose output. Defaults to False.
         """
         if verbose:
             print("[+] Writing image to target...")
@@ -175,6 +205,12 @@ class DebugInterface():
         """
         Load image to RAM and execute.
         Attention: Program must also be compiled to be compatible to run in RAM.
+
+        Parameters:
+            elf_image: The path to the ELF image file to be loaded. Default is "program.elf".
+            sp: The initial stack pointer value. Default is 0x20002000.
+            pc: The initial program counter value. Default is 0x20000fa4.
+            verbose: If True, print the output and error from openocd. Default is False.
         """
         # openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; load_image rdp-downgrade-STM32L0.elf" -c "reg sp 0x20002000" -c "reg pc 0x20000fa4" -c "resume" -c "exit"
         args = [
@@ -199,6 +235,16 @@ class DebugInterface():
             print(result.stdout + result.stderr)
 
     def read_image(self, bin_image:str = "memory_dump.bin", start_addr:int = 0x08000000, length:int = 0x400, verbose:bool = False):
+        """
+        Reads an image from the target device's memory and saves it to a binary file.
+        
+        Parameters:
+            bin_image: The path to the binary file where the image will be saved.
+            start_addr: The starting address in memory to read from.
+            length: The number of bytes to read from memory.
+            verbose: If True, print the output and error messages.
+            
+        """
         args = [
             'openocd',
             '-f', self.interface_config,
