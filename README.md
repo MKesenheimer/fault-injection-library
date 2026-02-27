@@ -1,13 +1,12 @@
 # Usage with examples
 
 Findus (aka the fault-injection-library) is a toolchain to perform fault-injection attacks on microcontrollers and other targets.
-This library offers an easy entry point to carry out fault-injection attacks against microcontrollers, SoCs and CPUs.
+This library offers an easy entry point to carry out fault-injection attacks against microcontrollers, SoCs and MCUs.
 With the provided and easy to use functions and classes, fault-injection projects can be realized quickly with cheap and available hardware.
 
 Findus supports the [ChipWhisperer Pro](https://rtfm.newae.com/Capture/ChipWhisperer-Pro/), the [ChipWhisperer Husky](https://rtfm.newae.com/Capture/ChipWhisperer-Husky/) and the [Pico Glitcher](https://mkesenheimer.github.io/blog/pico-glitcher-v3.html).
 
 More information about the fault-injection-library and the Pico Glitcher can be found on [https://fault-injection-library.readthedocs.io/en/latest/](https://fault-injection-library.readthedocs.io/en/latest/).
-
 
 ## Table of contents
 

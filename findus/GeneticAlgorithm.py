@@ -16,6 +16,17 @@ import random
 
 class Parameterspace():
     def __init__(self, parameter_boundaries:list[tuple[float, float]], parameter_divisions:list[int]):
+        """
+        Initializes the class with the given parameter boundaries and divisions.
+    
+        Parameters:
+            parameter_boundaries: A list of tuples representing the lower and upper bounds for each parameter.
+            parameter_divisions: A list of integers representing the number of divisions for each parameter.
+    
+        Raises:
+            Exception: If the lengths of parameter_boundaries and parameter_divisions are different.
+            Exception: If any upper bound is lower than the corresponding lower bound.
+        """
         # sanity checks
         if len(parameter_boundaries) != len(parameter_divisions):
             raise Exception(f"Error: parameter_boundaries and parameter_divisions have different lengths ({len(parameter_boundaries)} vs. {len(parameter_divisions)}).")
@@ -30,9 +41,21 @@ class Parameterspace():
         self.weights_per_bin = [0 for x in range(self.cardinality)]
 
     def get_cardinality(self):
+        """
+        Returns the cardinality of the set.
+        """
         return self.cardinality
 
     def get_bin_assignment(self, *parameter:float) -> list[int]:
+        """
+        This function assigns a bin to each parameter based on its value.
+        
+        Parameters:
+            *parameter: A list of float values representing the parameters to be assigned to bins.
+        
+        Returns:
+            list: A list of integers representing the bin numbers for each parameter.
+        """
         fact = 1
         bina = 0
         for i in range(len(self.parameter_divisions)):
@@ -47,6 +70,20 @@ class Parameterspace():
         return bina
 
     def add_experiment(self, weight:int, *parameter:float):
+        """
+        Add experiment data to the dataset.
+        This function adds an experiment to the dataset with the given weight and parameters.
+        It checks if each parameter is within the specified boundaries.
+        If any parameter is out of bounds, it prints an error message and returns without
+        adding the experiment. Otherwise, it assigns the experiment to a bin and updates the weight for that bin.
+    
+        Parameters:
+            weight: The weight to assign to the experiment.
+            *parameter: The parameters for the experiment, must be within the specified boundaries.
+    
+        Returns:
+            None
+        """
         for i in range(len(self.parameter_divisions)):
             if parameter[i] < self.parameter_boundaries[i][0] or parameter[i] >= self.parameter_boundaries[i][1]:
                 print("[-] Error: parameter out of bounds. Skipping.")
@@ -56,12 +93,36 @@ class Parameterspace():
         self.weights_per_bin[bina] += weight
 
     def get_weights(self) -> list[int]:
+        """
+        Returns the list of weights per bin.
+    
+        Returns:
+            list: A list of weights corresponding to each bin.
+        """
         return self.weights_per_bin
 
     def get_bin_numbers_sorted_by_weights(self) -> list[int]:
+        """
+        Returns a list of bin numbers sorted by their corresponding weights.
+    
+        Returns:
+            list: A list of bin numbers sorted by increasing weights.
+        """
         return sorted(range(len(self.weights_per_bin)), key=lambda i: self.weights_per_bin[i])
 
     def get_coordinates(self, bin_assignment:int) -> list[int]:
+        """
+        This function calculates the coordinates of a given bin assignment in a multi-dimensional binning system.
+        
+        Parameters:
+            bin_assignment: The bin assignment for which to calculate the coordinates.
+        
+        Returns:
+            list: A list of coordinates corresponding to the bin assignment.
+        
+        Raises:
+            Exception: If the bin assignment exceeds the total number of bins.
+        """
         bin_numbers = []
         reversed_parameter_divisions = list(reversed(self.parameter_divisions))
         fact = self.cardinality
@@ -77,6 +138,15 @@ class Parameterspace():
         return list(reversed(bin_numbers))
 
     def get_boundaries_from_coordinates(self, coordinates:list[float]) -> list[tuple[float, float]]:
+        """
+        This function calculates the boundaries for each parameter based on the given coordinates.
+        
+        Parameters:
+            coordinates: A list of coordinates.
+        
+        Returns:
+            list: A list of tuples representing the boundaries for each parameter.
+        """
         boundaries = []
         for i in range(len(self.parameter_divisions)):
             division =  self.parameter_divisions[i]
@@ -88,39 +158,106 @@ class Parameterspace():
         return boundaries
 
     def get_boundaries(self, bin_assignment:int) -> list[tuple[float, float]]:
+        """
+        Returns the boundaries for a given bin assignment.
+
+        Parameters:
+            bin_assignment: The bin assignment for which to get the boundaries.
+
+        Returns:
+            list: A list of tuples representing the boundaries.
+        """
         bin_numbers = self.get_coordinates(bin_assignment)
         return self.get_boundaries_from_coordinates(bin_numbers)
 
 class Individual():
+    """
+    This class represents an individual with parameters, health, maximum age, and current age.
+
+    Attributes:
+        parameters: A list of parameters associated with the individual.
+        health: The current health status of the individual.
+        max_age: The maximum age that the individual can reach.
+        age: The current age of the individual.
+    """
     def __init__(self, parameters:list[int], max_age:int = 10):
         self.parameters = parameters
         self.health = 0
         self.max_age = max_age
         self.age = 0
 
-    def set_genom(self, parameters:list[int]):
+    def set_genom(self, parameters: list[int]):
+        """
+        Set the parameters (genom) for the entity.
+
+        Parameters:
+            parameters: The parameters to set.
+        """
         self.parameters = parameters
-
+    
     def get_genom(self) -> list[int]:
+        """
+        Get the parameters (genom) of the entity.
+        
+        Returns:
+            list: The parameters (genom) of the entity.
+        """
         return self.parameters
-
-    def set_health(self, health:int):
+    
+    def set_health(self, health: int):
+        """
+        Set the health of the entity.
+        
+        Parameters:
+            health: The health value to set.
+        """
         self.health = health
-
+    
     def get_health(self) -> int:
+        """
+        Get the health of the entity.
+        
+        Returns:
+            int: The health of the entity.
+        """
         return self.health
-
+    
     def get_age(self) -> int:
+        """
+        Get the current age of the entity.
+        
+        Returns:
+            int: The current age of the entity.
+        """
         return self.age
-
+    
     def get_max_age(self) -> int:
+        """
+        Get the maximum age of the entity.
+        
+        Returns:
+            int: The maximum age of the entity.
+        """
         return self.max_age
-
+    
     def increase_age(self):
+        """
+        Increase the age of the entity by one.
+        """
         self.age += 1
 
 class Population():
+    """
+    A class to represent a population of individuals.
+    """
     def __init__(self, number_of_individuals:int, length_of_genom:int):
+        """
+        Initializes a new population with a given number of individuals and genom length.
+
+        Parameters:
+            number_of_individuals: The number of individuals in the population.
+            length_of_genom: The length of the genom for each individual.
+        """
         if number_of_individuals < 10:
             raise Exception("Error: Population too small.")
 
@@ -132,32 +269,81 @@ class Population():
             self.population[i] = self.generate_random_individual()
 
     def get_number_of_individuals(self) -> int:
+        """
+        Returns the number of individuals in the population.
+
+        Returns:
+            The number of individuals.
+        """
         return self.number_of_individuals
 
     def get_length_of_genom(self) -> int:
+        """
+        Returns the length of the genom for each individual.
+
+        Returns:
+            The length of the genom.
+        """
         return self.length_of_genom
 
     def generate_random_individual(self) -> Individual:
+        """
+        Generates a random individual with a genom of length 'length_of_genom'.
+
+        Returns:
+            A random individual.
+        """
         genom = [0] * self.length_of_genom
         for i in range(self.length_of_genom):
             genom[i] = random.uniform(0, 1)
         return Individual(genom)
 
     def get_individuals(self) -> list[Individual]:
+        """
+        Returns a list of all individuals in the population.
+
+        Returns:
+            A list of individuals.
+        """
         return self.population
 
     def set_individuals(self, individuals:list[Individual]):
+        """
+        Sets the population to the given list of individuals.
+        
+        Parameters:
+            individuals: A list of individuals to set as the population.
+        """
         self.population = individuals
 
     def sort_by_health(self):
+        """
+        Sorts the population by the health of each individual.
+        """
         self.population = sorted(self.population, key=lambda ind: ind.get_health())
 
     def update_health(self, health_function):
+        """
+        Updates the health of each individual in the population using the given health function.
+
+        Parameters:
+            health_function: A function that takes a genom and returns a health value.
+        """
         for ind in self.population:
             ind.set_health(health_function(ind.get_genom()))
             #print(ind.get_health())
 
     def breed(self, i:int, j:int) -> Individual:
+        """
+        Breeds two individuals and returns a new individual with a genom that is a combination of the two parents.
+
+        Parameters:
+            i: The index of the first parent individual.
+            j: The index of the second parent individual.
+
+        Returns:
+            A new individual that is a result of breeding the two parents.
+        """
         geni = self.population[i].get_genom().copy()
         genj = self.population[j].get_genom().copy()
         for k in range(len(geni)):
@@ -167,42 +353,93 @@ class Population():
         return Individual(geni)
 
     def mutate(self, i:int) -> Individual:
+        """
+        Mutates the genom of the individual at the given index.
+
+        Parameters:
+            i: The index of the individual to mutate.
+        
+        Returns:
+            The mutated individual.
+        """
         gene = random.randint(0, self.length_of_genom - 1)
         self.population[i].get_genom()[gene] = random.uniform(0, 1)
 
     def replace(self, i:int, individual:Individual):
+        """
+        Replaces the individual at the given index with the given individual.
+
+        Parameters:
+            i: The index of the individual to replace.
+            individual: The individual to replace the old individual with.
+        """
         self.population[i] = individual
 
     def replace_with_random(self, i:int):
+        """
+        Replaces the individual at the given index with a random individual.
+
+        Parameters:
+            i: The index of the individual to replace.
+        """
         self.population[i] = self.generate_random_individual()
 
     def kill_and_replace(self):
+        """
+        Removes individuals from the population that have exceeded their maximum age and replaces them with random individuals.
+        """
         for i in range(len(self.population)):
             if self.population[i].get_age() > self.population[i].get_max_age():
                 self.population[i] = self.generate_random_individual()
 
     def increase_age_of_population(self):
+        """
+        Increases the age of each individual in the population.
+        """
         for i in range(len(self.population)):
             self.population[i].increase_age()
 
 class GeneticAlgorithm:
+    """
+    Class representing a Genetic Algorithm for optimizing a given problem.
+    """
     def __init__(self, parameterspace:Parameterspace, population:Population, health_malus_factor:float = 1):
+        """
+        Initializes the Genetic Algorithm with a parameterspace, population, and an optional health malus factor.
+        
+        Parameters:
+            parameterspace: The space of parameters over which the algorithm operates.
+            population: The initial population of candidate solutions.
+            health_malus_factor: A factor that penalizes solutions based on their healthiness.
+        """
         self.parameterspace = parameterspace
         self.population = population
         self.health_malus_factor = health_malus_factor
 
     def get_bins_from_genom(self, parameters:list[int]) -> list[int]:
+        """
+        Converts a list of parameters into a list of bins based on the parameterspace.
+        
+        Parameters:
+            parameters: A list of parameters.
+
+        Returns:
+            A list of bins corresponding to the parameters.
+        """
         bins = [int(x * self.parameterspace.get_cardinality()) for x in parameters]
         return bins
 
     def health_function(self, parameters:list[int]) -> int:
-        bins = self.get_bins_from_genom(parameters)
         """
-        Calculates the health of a individual:
+        Calculates the health of an individual:
 
             health = Sum(weight_i) - factor * malus * Sum(weight_i)
             health = (1 - factor * malus) * Sum(weight_i)
+
+        Parameters:
+            parameters: The parameters to set.
         """
+        bins = self.get_bins_from_genom(parameters)
         # sum up the weights in each bin
         health = 0
         weights = self.parameterspace.get_weights()
@@ -225,10 +462,22 @@ class GeneticAlgorithm:
         return health
 
     def get_max_health(self) -> int:
+        """
+        Calculate the maximum health possible for an individual based on the population's genom length and the weights in the parameter space.
+    
+        Returns:
+            Maximum health value.
+        """
         genom_length = self.population.get_length_of_genom()
         return max(self.parameterspace.get_weights()) * genom_length
 
     def step(self) -> list[Individual]:
+        """
+        Perform one step of the simulation by updating the population, performing breeding, mutation, replacing weak individuals, and killing old individuals.
+    
+        Returns:
+            List of updated individuals in the population.
+        """
         self.population.increase_age_of_population()
         self.population.update_health(self.health_function)
         self.population.sort_by_health()
@@ -262,6 +511,15 @@ class GeneticAlgorithm:
         return self.population.get_individuals()
 
     def run(self, threshold:float) -> list[int]:
+        """
+        Runs the simulation until an individual's health meets or exceeds a certain threshold.
+            
+        Parameters:
+            threshold: The threshold as a fraction of the maximum health value.
+            
+        Returns:
+            A list of bins derived from the genom of the individual with the highest health.
+        """
         maxhealth = self.get_max_health()
         while True:
             individuals = self.step()
@@ -273,9 +531,21 @@ class GeneticAlgorithm:
                 return self.get_bins_from_genom(parameters)
 
     def get_population(self) -> Population:
+        """
+        Returns the population.
+        
+        Returns:
+            Population
+        """
         return self.population
 
     def get_parameterspace(self) -> Parameterspace:
+        """
+        Returns the parameterspace.
+        
+        Returns:
+            Parameterspace
+        """
         return self.parameterspace
 
 class OptimizationController():

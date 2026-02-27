@@ -156,6 +156,26 @@ class Database():
             self.cur.execute(f"INSERT INTO experiments (id,{columns},color,response) VALUES ({qmarks})", values)
             self.con.commit()
 
+    def change_color_of_experiment_rel(self, experiment_id:int, color:str):
+        """
+        Change the color of a dataset by experiment_id relative to the base row count.
+
+        Parameters:
+            experiment_id: ID of the experiment r1elative to the base row count
+        """
+        self.cur.execute("UPDATE experiments SET color = (?) WHERE id = (?);", [color, experiment_id + self.base_row_count])
+        self.con.commit()
+
+    def change_color_of_experiment(self, experiment_id:int, color:str):
+        """
+        Change the color of a dataset by experiment_id.
+        
+        Parameters:
+            experiment_id: ID of the experiment
+        """
+        self.cur.execute("UPDATE experiments SET color = (?) WHERE id = (?);", [color, experiment_id])
+        self.con.commit()
+
     def get_parameters_of_experiment(self, experiment_id:int) -> list:
         """
         Get the parameters of a dataset by experiment_id.
