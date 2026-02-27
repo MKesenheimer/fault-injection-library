@@ -15,6 +15,7 @@ nav:
   - Changelog and hardware versions: versions.md
   - Findus: findus.md
   - PicoGlitcher: picoglitcher.md
+  - Genetic Algorithm: genalgorithm.md
 theme: readthedocs
 plugins:
   - search

@@ -1,0 +1,3 @@
+# Genetic Algorithm
+
+::: findus.GeneticAlgorithm
