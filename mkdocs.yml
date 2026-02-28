@@ -13,11 +13,7 @@ nav:
   - Genetic algorithm: genetic.md
   - Using the analog digital converter: adc.md
   - Changelog and hardware versions: versions.md
-  - Findus: findus.md
-  - PicoGlitcher: picoglitcher.md
-  - GeneticAlgorithm: genalgorithm.md
-  - DebugInterface: debuginterface.md
-  - AnalogPlot: analogplot.md
+  - Source code: sourcecode.md
 theme: readthedocs
 plugins:
   - search

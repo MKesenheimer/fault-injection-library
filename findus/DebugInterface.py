@@ -659,7 +659,8 @@ class DebugInterface():
 
     def __del__(self):
         """
-        Destructor method to detach the debugger when the object is destroyed.
+        Destructor method called when the object is about to be garbage collected.
+        Detaches the debugger by printing a message and invoking the detach method.
         """
         print("[+] Detaching debugger.")
         self.detach()

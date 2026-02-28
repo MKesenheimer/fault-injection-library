@@ -1003,7 +1003,7 @@ class PicoGlitcher(Glitcher):
 
     def disable_vtarget(self):
         """
-        Enable the Pico Glitcher's `VTARGET` output.
+        Disable the Pico Glitcher's `VTARGET` output.
         """
         self.pico_glitcher.disable_vtarget()
 
