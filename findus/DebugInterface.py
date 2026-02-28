@@ -243,7 +243,6 @@ class DebugInterface():
             start_addr: The starting address in memory to read from.
             length: The number of bytes to read from memory.
             verbose: If True, print the output and error messages.
-            
         """
         args = [
             'openocd',
@@ -263,6 +262,9 @@ class DebugInterface():
             print(result.stdout + result.stderr)
 
     def test_connection(self):
+        """
+        Tests the connection to the target device by resetting it.
+        """
         args = [
             'openocd',
             '-f', self.interface_config,
@@ -280,6 +282,15 @@ class DebugInterface():
         print(result.stdout + result.stderr)
 
     def read_address(self, address):
+        """
+        Read memory content from a specific address using OpenOCD.
+        
+        Parameters:
+            address: The memory address to read from.
+        
+        Returns:
+            A tuple containing the extracted memory content and the raw response.
+        """
         args = [
             'openocd',
             '-f', self.interface_config,
@@ -300,22 +311,50 @@ class DebugInterface():
         return self.extract_memory_content(response=response, address=address), response
 
     def read_option_bytes(self):
+        """
+        Reads the option bytes from the memory address 0x4002201c.
+
+        Returns:
+            A tuple containing the memory value and the response from the read operation.
+            If the memory value is None, returns (0x00, response).
+        """
         mem, response = self.read_address(0x4002201c)
         if mem is not None:
             return mem, response
         return 0x00, response
 
     def read_pcrop(self):
+        """
+        Reads the PCROP (Programmable Code Protection Region) value from the option bytes.
+
+        Returns:
+            The PCROP value.
+        """
         optbytes, _ = self.read_option_bytes()
         pcrop = (optbytes & 0x100) >> 8
         return pcrop
 
     def read_rdp(self):
+        """
+        Reads the RDP (Read Protection) value from the option bytes.
+
+        Returns:
+            int: The RDP value.
+        """
         optbytes, _ = self.read_option_bytes()
         rdp = (optbytes & 0xff)
         return rdp
 
     def read_rdp_and_pcrop(self, verbose:bool = False):
+        """
+        Reads both RDP and PCROP values from the option bytes.
+
+        Parameters:
+            verbose: If True, prints the response from the read operation. Defaults to False.
+
+        Returns:
+            A tuple containing the RDP and PCROP values.
+        """
         optbytes, response = self.read_option_bytes()
         if verbose:
             print(response)
@@ -324,6 +363,13 @@ class DebugInterface():
         return rdp, pcrop
 
     def kill_process(self, port:int, verbose=False):
+        """
+        Kill the process that is using the specified port.
+        
+        Parameters:
+            port: The port number to check for a process.
+            verbose: If True, print detailed output.
+        """
         # Find process using the port
         cmd = ["lsof", "-i", f":{port}"]
         #pattern = r"\b(\d+)\b"  # Regex for PID
@@ -347,6 +393,12 @@ class DebugInterface():
                 print(f"[-] Error killing process: {e}")
 
     def attach(self, delay=0.1):
+        """
+        Attaches to the OpenOCD server.
+
+        Parameters:
+            delay: Delay in seconds before checking if OpenOCD is running.
+        """
         # check if there is a dangling process that would interfere with openocd
         self.kill_process(self.gdb_port)
         args = [
@@ -378,6 +430,18 @@ class DebugInterface():
             pass
 
     def mi_wait_done(self, timeout=1.0, ok_prefixes=("^done", "^running", "^connected"), verbose=False):
+        """
+        Wait for a GDB MI command to complete with a timeout.
+        
+        Parameters:
+            timeout: Maximum time to wait for the command to complete (default: 1.0 seconds)
+            ok_prefixes: Prefixes indicating a successful completion (default: ("^done", "^running", "^connected"))
+            verbose: Whether to print each line received (default: False)
+        
+        Raises:
+            TimeoutError: If the command times out
+            RuntimeError: If the GDB process exits unexpectedly or encounters an error
+        """
         start = time.time()
         while True:
             if time.time() - start > timeout:
@@ -401,13 +465,27 @@ class DebugInterface():
                     return
         
     def mi(self, cmd, verbose=False):
+        """
+        Sends a GDB command through the GDB process.
+    
+        Parameters:
+            cmd: The GDB command to send.
+            verbose: If True, prints the command before sending it. Defaults to False.
+        """
         if verbose:
             print(f">>> {cmd}")
         self.gdb_process.stdin.write(cmd + "\n")
         self.gdb_process.stdin.flush()
 
     def gdb_load_exec(self, elf_image:str="program.elf", timeout=0.3, verbose=False):
-        # trunk-ignore(bandit/B603)
+        """
+        Load and execute an ELF image using GDB.
+
+        Parameters:
+            elf_image: Path to the ELF image to be loaded and executed.
+            timeout: Timeout for GDB operations.
+            verbose: Whether to print verbose output.
+        """
         self.gdb_process = subprocess.Popen(
             [self.gdb_exec, '--interpreter=mi2', elf_image],
             stdin=subprocess.PIPE,
@@ -428,6 +506,14 @@ class DebugInterface():
         self.mi_wait_done(timeout=timeout, ok_prefixes=("^running",), verbose=verbose)
 
     def gdb_interrupt_disconnect(self, timeout=0.3, halt_target=True, verbose=False):
+        """
+        Disconnects the GDB target and exits the GDB process.
+
+        Parameters:
+            timeout: The maximum time to wait for GDB operations to complete.
+            halt_target: Whether to halt the target before disconnecting.
+            verbose: Whether to print verbose output.
+        """
         if halt_target:
             self.mi("-exec-interrupt", verbose=verbose)
             self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
@@ -439,6 +525,9 @@ class DebugInterface():
         self.gdb_process.wait(timeout=timeout)
 
     def detach(self):
+        """
+        Detaches from the current debugging session by terminating and closing the necessary processes and socket.
+        """
         if self.openocd_process is not None:
             self.openocd_process.terminate()
             self.openocd_process.wait()
@@ -451,6 +540,9 @@ class DebugInterface():
             self.gdb_process = None
 
     def telnet_init(self):
+        """
+        Establishes a connection to the OpenOCD telnet server and receives initial messages.
+        """
         # generate a connection to the openocd telnet server
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(1)
@@ -459,7 +551,18 @@ class DebugInterface():
         time.sleep(0.1)
         self.socket.recv(4096)
 
-    def telnet_interact(self, command:str, wait_time:float = 0.01, verbose:bool = False):
+    def telnet_interact(self, command:str, wait_time:float = 0.01, verbose:bool = False) -> str:
+        """
+        Sends a command via Telnet and receives the response.
+
+        Parameters:
+            command: The command to send.
+            wait_time: Time to wait between sending the command and receiving the response. Defaults to 0.01.
+            verbose: Whether to print the response. Defaults to False.
+
+        Returns:
+            The response received from the Telnet server.
+        """
         if self.openocd_process is None or self.socket is None:
             self.telnet_init()
         command += "\n"
@@ -470,7 +573,16 @@ class DebugInterface():
             print(response.decode("utf-8"))
         return response.decode("utf-8")
 
-    def telnet_read_address(self, address:int):
+    def telnet_read_address(self, address:int) -> tuple:
+        """
+        Reads the memory content at a specified address using Telnet.
+
+        Parameters:
+            address: The memory address to read.
+
+        Returns:
+            A tuple containing the memory content and the response from the Telnet command.
+        """
         command = f"mdw {hex(address)}"
         response = self.telnet_interact(command)
         if "Previous state query failed, trying to reconnect" in response:
@@ -478,12 +590,31 @@ class DebugInterface():
         return self.extract_memory_content(response=response, address=address), response
 
     def telnet_read_image(self, bin_image:str = "memory_dump.bin", start_addr:int = 0x08000000, length:int = 0x400, verbose:bool = False):
+        """
+        Reads an image from a specified memory address using a telnet connection.
+    
+        Parameters:
+            bin_image: The filename where the dumped image will be saved.
+            start_addr: The starting memory address to read from.
+            length: The length of the data to read.
+            verbose: If True, prints the response from the telnet server.
+        """
         command = f"init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; exit"
         response = self.telnet_interact(command)
         if verbose:
             print(response)
 
-    def extract_memory_content(self, response:str, address:int = 0x00):
+    def extract_memory_content(self, response:str, address:int = 0x00) -> int | None:
+        """
+        Extracts memory content from the response.
+        
+        Parameters:
+            response: The response string to extract memory content from.
+            address: The memory address to search for. Defaults to 0x00.
+        
+        Returns:
+            The extracted memory content if found, otherwise None.
+        """
         if "Error: Failed to read memory at" not in response:
             match = re.search(fr'{hex(address)[2:]}:\s*([0-9A-Fa-f]+)', response)
             if match:
@@ -491,7 +622,17 @@ class DebugInterface():
             else:
                 return None
 
-    def characterize(self, response:str, mem:int):
+    def characterize(self, response:str, mem:int) -> bytes:
+        """
+        Characterizes the response based on the memory content.
+        
+        Parameters:
+            response: The response string to characterize.
+            mem: The memory content to check.
+
+        Returns:
+            bytes: A byte string representing the characterization.
+        """
         # possibly ok
         if mem is not None:
             if mem != 0x00:
@@ -517,5 +658,8 @@ class DebugInterface():
         return b'error: no response'
 
     def __del__(self):
+        """
+        Destructor method to detach the debugger when the object is destroyed.
+        """
         print("[+] Detaching debugger.")
         self.detach()
