@@ -17,6 +17,10 @@ except Exception as _:
 
 class InteractivePchipEditor:
     def __init__(self):
+         """
+        Initialize the plot with control points, curve, and interactive elements.
+        Sets up the figure, axes, data points, annotations, and event handlers.
+        """
         self.xpoints = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1050]
         self.ypoints = [3.3, 2.7, 2.7, 0.0, 2.7, 0.0, 2.7, 0.0, 2.7, 3.0, 3.3]
 
@@ -50,6 +54,9 @@ class InteractivePchipEditor:
         self.cid_motion = self.fig.canvas.mpl_connect('motion_notify_event', self.on_motion)
 
     def update_curve(self):
+        """
+        Updates the curve based on the stored points using PCHIP interpolation.
+        """
         interpolator = PchipInterpolator(self.xpoints, self.ypoints)
         x_smooth = np.linspace(min(self.xpoints), max(self.xpoints), 500)
         y_smooth = interpolator(x_smooth)
@@ -58,6 +65,9 @@ class InteractivePchipEditor:
         self.fig.canvas.draw_idle()
 
     def update_annotations(self):
+        """
+        Clears all existing annotations associated with the object and resets the annotations list.
+        """
         # Clear existing annotations
         for annotation in self.annotations:
             annotation.remove()
