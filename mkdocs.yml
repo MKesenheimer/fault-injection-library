@@ -14,6 +14,14 @@ nav:
   - Using the analog digital converter: adc.md
   - Changelog and hardware versions: versions.md
   - Source code: sourcecode.md
+  - findus: findus.md
+  - PicoGlitcher: pico_glitcher.md
+  - AnalogPlot: analog_plot.md
+  - DebugInterface: debug_interface.md
+  - ExternalPowerSupply: external_power_supply.md
+  - GeneticAlgorithm: genetic_algorithm.md
+  - GlitchState: glitch_state.md
+  - InteractivePchipEditor: interactive_pchip_editor.md
 theme: readthedocs
 plugins:
   - search
