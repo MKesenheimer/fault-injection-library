@@ -4,7 +4,7 @@
 # Go to https://github.com/raelize/TAoFI-FaultLib/LICENSE for full license details.
 #
 # You should have received a copy of the GPL3 license with this file.
-# If not, please write to: m.kesenheimer@gmx.net.
+# If not, please write to: info@faultyhardware.de.
 
 """
 Findus is a Python library to perform fault-injection attacks on embedded devices. It was developed for the Pico Glitcher, however, the ChipWhisperer Pro and the ChipWhisperer Husky is also supported.

@@ -3,7 +3,7 @@
 # You may use, distribute and modify this code under the terms of the GPL3 license.
 #
 # You should have received a copy of the GPL3 license with this file.
-# If not, please write to: m.kesenheimer@gmx.net.
+# If not, please write to: info@faultyhardware.de.
 
 # programming
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x unlock 0; exit"

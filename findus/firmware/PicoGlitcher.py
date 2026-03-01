@@ -2,7 +2,7 @@
 # You may use, distribute and modify this code under the terms of the GPL3 license.
 #
 # You should have received a copy of the GPL3 license with this file.
-# If not, please write to: m.kesenheimer@gmx.net.
+# If not, please write to: info@faultyhardware.de.
 
 """
 This is the documentation of the PicoGlitcher module and all its classes.

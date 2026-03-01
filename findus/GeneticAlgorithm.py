@@ -4,7 +4,7 @@
 # Go to https://github.com/raelize/TAoFI-FaultLib/LICENSE for full license details.
 #
 # You should have received a copy of the GPL3 license with this file.
-# If not, please write to: m.kesenheimer@gmx.net.
+# If not, please write to: info@faultyhardware.de.
 
 """
 GeneticAlgorithm

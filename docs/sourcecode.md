@@ -13,3 +13,6 @@
 ::: findus.ExternalPowerSupply
 
 ::: findus.GlitchState
+
+::: findus.STM8Programmer
+
