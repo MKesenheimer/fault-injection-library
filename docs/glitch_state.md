@@ -1,4 +1,0 @@
-
-# GlitchState
-
-::: findus.GlitchState

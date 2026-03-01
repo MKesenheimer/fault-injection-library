@@ -1,4 +1,0 @@
-
-# ExternalPowerSupply
-
-::: findus.ExternalPowerSupply

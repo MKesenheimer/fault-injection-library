@@ -1,4 +1,0 @@
-
-# AnalogPlot
-
-::: findus.AnalogPlot

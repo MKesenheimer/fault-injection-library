@@ -1,4 +1,0 @@
-
-# InteractivePchipEditor
-
-::: findus.InteractivePchipEditor

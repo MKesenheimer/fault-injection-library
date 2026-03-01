@@ -1,3 +1,0 @@
-# PicoGlitcher
-
-::: findus.firmware.PicoGlitcher

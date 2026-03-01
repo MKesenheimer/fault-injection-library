@@ -1,4 +1,0 @@
-
-# GeneticAlgorithm
-
-::: findus.GeneticAlgorithm
