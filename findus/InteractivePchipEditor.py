@@ -17,7 +17,7 @@ except Exception as _:
 
 class InteractivePchipEditor:
     def __init__(self):
-         """
+        """
         Initialize the plot with control points, curve, and interactive elements.
         Sets up the figure, axes, data points, annotations, and event handlers.
         """
