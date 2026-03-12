@@ -4,7 +4,7 @@
 # Go to https://github.com/raelize/TAoFI-FaultLib/LICENSE for full license details.
 #
 # You should have received a copy of the GPL3 license with this file.
-# If not, please write to: m.kesenheimer@gmx.net.
+# If not, please write to: info@faultyhardware.de.
 
 """
 Findus is a Python library to perform fault-injection attacks on embedded devices. It was developed for the Pico Glitcher, however, the ChipWhisperer Pro and the ChipWhisperer Husky is also supported.
@@ -155,6 +155,26 @@ class Database():
             #print(f"INSERT INTO experiments (id,{columns},color,response) VALUES ({qmarks})")
             self.cur.execute(f"INSERT INTO experiments (id,{columns},color,response) VALUES ({qmarks})", values)
             self.con.commit()
+
+    def change_color_of_experiment_rel(self, experiment_id:int, color:str):
+        """
+        Change the color of a dataset by experiment_id relative to the base row count.
+
+        Parameters:
+            experiment_id: ID of the experiment r1elative to the base row count
+        """
+        self.cur.execute("UPDATE experiments SET color = (?) WHERE id = (?);", [color, experiment_id + self.base_row_count])
+        self.con.commit()
+
+    def change_color_of_experiment(self, experiment_id:int, color:str):
+        """
+        Change the color of a dataset by experiment_id.
+        
+        Parameters:
+            experiment_id: ID of the experiment
+        """
+        self.cur.execute("UPDATE experiments SET color = (?) WHERE id = (?);", [color, experiment_id])
+        self.con.commit()
 
     def get_parameters_of_experiment(self, experiment_id:int) -> list:
         """
@@ -983,7 +1003,7 @@ class PicoGlitcher(Glitcher):
 
     def disable_vtarget(self):
         """
-        Enable the Pico Glitcher's `VTARGET` output.
+        Disable the Pico Glitcher's `VTARGET` output.
         """
         self.pico_glitcher.disable_vtarget()
 

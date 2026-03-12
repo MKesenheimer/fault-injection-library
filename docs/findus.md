@@ -1,3 +1,0 @@
-# findus
-
-::: findus.findus

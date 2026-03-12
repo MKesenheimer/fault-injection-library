@@ -31,23 +31,18 @@ def update_legend_labels(fig, labels):
             entry['name'] = labels[entry['name']]
 
 def get_number_of_experiments(directory, database):
-    conn = sqlite3.connect(f"file:{directory}/{database}?mode=ro", uri=True)
-    cursor = conn.cursor()
-    query = "SELECT COUNT(*) FROM experiments"
-    cursor.execute(query)
-    result = cursor.fetchone()
-    row_count = result[0]
-    conn.close()
-    return row_count
+    with sqlite3.connect(f"file:{directory}/{database}?mode=ro", uri=True) as conn:
+        cursor = conn.cursor()
+        query = "SELECT COUNT(*) FROM experiments"
+        cursor.execute(query)
+        row_count = cursor.fetchone()[0]
+        return row_count
 
 def get_start_time(directory, database):
-    conn = sqlite3.connect(f"file:{directory}/{database}?mode=ro", uri=True)
-    cursor = conn.cursor()
-    query = "SELECT stime_seconds FROM metadata"
-    cursor.execute(query)
-    result = cursor.fetchone()
-    seconds = result[0]
-    conn.close()
+    with sqlite3.connect(f"file:{directory}/{database}?mode=ro", uri=True) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT stime_seconds FROM metadata")
+        seconds = cursor.fetchone()[0]
     return seconds
 
 def update_metadata(directory, database):

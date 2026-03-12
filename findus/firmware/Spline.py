@@ -1,3 +1,9 @@
+# Copyright (C) 2024 Dr. Matthias Kesenheimer - All Rights Reserved.
+# You may use, distribute and modify this code under the terms of the GPL3 license.
+#
+# You should have received a copy of the GPL3 license with this file.
+# If not, please write to: info@faultyhardware.de.
+
 # Fast-Cubic-Spline-Python provides an implementation of 1D and 2D fast spline
 # interpolation algorithm (Habermann and Kindermann 2007) in Python.
 # Copyright (C) 2012, 2013 Joon H. Ro
