@@ -144,7 +144,7 @@ class Main:
         print("[+] Programming finished.")
 
     def rdp_downgrade(self):
-        # load an the controller executable to RAM
+        # load the controller executable to RAM
         # this will trigger a RDP downgrade to level 0 which will delete the flash content.
         # The controller executable toggles a GPIO pin which we can use to time our glitch
         # steps:
