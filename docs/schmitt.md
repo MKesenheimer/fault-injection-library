@@ -23,3 +23,7 @@ When hysteresis is introduced, the switching point depends on the direction of t
 Increasing the hysteresis widens the gap between the upper and lower thresholds. This makes the circuit switch later on both rising and falling edges, relative to the no-hysteresis case. Reducing the hysteresis narrows this gap, bringing the two switching points closer together until they coincide when hysteresis is effectively zero.
 
 This behavior is what gives the Schmitt trigger its noise immunity: small variations around the switching level do not cause repeated transitions, and the exact timing of state changes can be deliberately shifted by adjusting the hysteresis.
+
+The schematics of the new Schmitt trigger inputs can be seen below.
+
+![](images/schmitt-trigger-inputs/schematic.png)
