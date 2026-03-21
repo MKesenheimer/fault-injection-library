@@ -5,11 +5,11 @@ A fundamental difference is that with the multiplexing-fault-injection method, t
 It is also possible to go through a sequence of different supply voltages, so called voltage profiles.
 
 With the second hardware revision of the Pico Glitcher, it is possible to create different voltage profiles and apply them to the supply voltage of the target. This is made possible by the introduction of the multiplexing stage, section [customizing your Pico Glitcher](customize.md#pico-glitcher-v2-gpio-pin-overview).
-The multiplexing stage also allows the target to be supplied with power. It is therefore not necessary to additionally supply the target with voltage via the ‘VTARGET’ output.
+The multiplexing stage also allows the target to be supplied with power. It is therefore not necessary to additionally supply the target with voltage via the `VTARGET` output.
 
 ## Multiplexing test setup
 
-The following setup can be used to test the multiplexing stage of the Pico Glitcher v2:
+The following setup can be used to test the multiplexing stage of the Pico Glitcher v2 and v3:
 
 ![](images/multiplexing/multiplexing-test-setup.png)
 
@@ -19,7 +19,7 @@ See `fault-injection-library/example/pico-glitcher.py` for a complete test scrip
 ## Using the multiplexing stage
 
 Implementing multiplexing in your fault injection campaign is no different to using the crowbar method.
-Instead of setting up the crowbar transistors with `self.glitcher.set_lpglitch()` or `self.glitcher.set_hpglitch()`, the Pico Glitcher v2 is configured to use the multiplexing stage with the following command:
+Instead of setting up the crowbar transistors with `self.glitcher.set_lpglitch()` or `self.glitcher.set_hpglitch()`, the Pico Glitcher v2/v3 is configured to use the multiplexing stage with the following command:
 
 ```python
 from findus import PicoGlitcher
@@ -37,9 +37,9 @@ glitcher.rising_edge_trigger()
 glitcher.set_multiplexing()
 ```
 
-Side note: you can also make use of the new trigger inputs of the Pico Glitcher v2 by calling `glitcher.rising_edge_trigger(pin_trigger="ext1")`, described [here](schmitt.md). These trigger inputs are buffered by an adjustable Schmitt Trigger. If you do not provide the argument `pin_trigger` the default trigger input will be used.
+Side note: you can also make use of the new trigger inputs of the Pico Glitcher v2/v3 by calling `glitcher.rising_edge_trigger(pin_trigger="ext1")`, described [here](schmitt.md). These trigger inputs are buffered by an adjustable Schmitt Trigger. If you do not provide the argument `pin_trigger` the default trigger input (`TRIGGER`) will be used.
 
-After initializing the Pico Glitcher v2, the multiplexing profile must be defined and the glitcher can be armed. This is typically done in the `while`-loop of the glitching script (see for example `fault-injection-library/example/pico-glitcher.py`).
+After initializing the Pico Glitcher v2/v3, the multiplexing profile must be defined and the glitcher can be armed. This is typically done in the `while`-loop of the glitching script (see for example `fault-injection-library/example/pico-glitcher.py`).
 
 ```python
 mul_config = {"t1": 100, "v1": "1.8", "t2": length, "v2": "GND"}
@@ -87,10 +87,14 @@ Below are some examples of voltage traces that can be applied to the target.
 By using the multiplexing stage, the possible parameter combinations can increase exponentially, which makes the search for suitable parameters more difficult. Of course, one can also keep multiple parameters constant and only vary one specific parameter. Another option is to vary all parameters and apply a [genetic algorithm](genetic.md) to the search space to find suitable parameters.
 
 ## Technical details
-In order to switch quickly between different voltage levels, the chip 'TS3A4751' from Texas Instruments is used. This chip is a 4-channel analog switch in SPST (single-pull-single-through) configuration.
-To make the analog switch easier to control and to reduce the signal lines from the Raspberry Pi Pico to the analog switch, a digital demultiplexer is used ('SN74LVC1G139DCUT'). Since the voltage levels are reversed after the demultiplexer, a 4-channel not-gate is used to reverse the voltage levels.
+In order to switch quickly between different voltage levels, the chip `TS3A4751` from Texas Instruments is used. This chip is a 4-channel analog switch in SPST (single-pull-single-through) configuration.
+To make the analog switch easier to control and to reduce the signal lines from the Raspberry Pi Pico to the analog switch, a digital demultiplexer is used (`SN74LVC1G139DCUT`). Since the voltage levels are reversed after the demultiplexer, a 4-channel not-gate is used to reverse the voltage levels.
 
-![](images/multiplexing/multiplexing-schematics.png)
+Multiplexing schematic for the Pico Glitcher v2.2:
+![](images/multiplexing/multiplexing-schematics-v2.2.png)
+
+Multiplexing schematic for the Pico Glitcher v2.4 and later:
+![](images/multiplexing/multiplexing-schematics-v2.4.png)
 
 This setup seems rather complicated to switch between four different voltage levels. However, the choice of analogue switches is not exactly extensive or does not match the requirements of a fast-switching fault-injection device. The required properties of the analogue switch are as follows:
 
@@ -99,4 +103,4 @@ This setup seems rather complicated to switch between four different voltage lev
 - Low resistance: to avoid switching losses, a low resistance of 1Ω or less is required.
 - High output current: a high continuous current of at least 100mA is needed to keep the device powered even for a long time. This maximum current should be suitable for most microcontrollers.
 
-All these requirements are met by the 'TS3A4751', even if the choice of this chip has made controlling it a little more complicated.
+All these requirements are met by the `TS3A4751`, even if the choice of this chip has made controlling it a little more complicated.
