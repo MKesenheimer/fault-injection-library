@@ -55,12 +55,14 @@ The above profile, for example, will send a pulse of `1.8V` for `100ns`, followe
 To switch between the different voltages, the user can choose from fixed voltages by selecting the appropriate voltage level, which is controlled by the internal multiplexer pins. The selection is made using the `mul_config` dictionary in `arm_multiplexing()` with voltage identifiers as values (e.g., `"v1": "GND"`, `"v2": "1.8"`).
 
 Pico Glitcher v2.1 and v2.2:
+
 - `GND`: Pulls the output to ground (0V).
 - `1.8`: Outputs a fixed 1.8V reference.
 - `3.3`: Outputs a fixed 3.3V reference.
 - `VCC`: Outputs the voltage from the `VCC` input pin.
 
 Pico Glitcher v2.4 and later:
+
 - `GND`: Pulls the output to ground (0V).
 - `1.8`: Outputs a fixed 1.8V reference.
 - `VI1`: By selecting `VI1` the multiplexing stage outputs the voltage that is supplied at the `VI1` input.
