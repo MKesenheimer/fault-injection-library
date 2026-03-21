@@ -50,6 +50,22 @@ The above profile, for example, will send a pulse of `1.8V` for `100ns`, followe
 
 ![](images/multiplexing/1.8-gnd.bmp)
 
+## Available Voltages
+
+To switch between the different voltages, the user can choose from fixed voltages by selecting <TODO>
+
+Pico Glitcher v2.1 and v2.2:
+- `GND`: <TODO>
+- `1.8`: <TODO>
+- `3.3`: <TODO>
+- `VCC`: <TODO>
+
+Pico Glitcher v2.4 and later:
+- `GND`: <TODO>
+- `1.8`: <TODO>
+- `VI1`: By selecting `VI1` the multiplexing stage outputs the voltage that is supplied at the `VI1` input.
+- `VI2` / `3.3`: If the jumper 'VIN2 = 3V3' is set, by selecting `VI2` the multiplexing stage outputs `3.3V`. If the jumper is not set, arbitrary voltages can be applied to the `VI2` input. 
+
 ## Example of voltage profiles
 
 The software for controlling the multiplexing stage is extremely flexible and a vast number of voltage profiles with countless parameterizations can be generated.
@@ -90,7 +106,7 @@ By using the multiplexing stage, the possible parameter combinations can increas
 In order to switch quickly between different voltage levels, the chip `TS3A4751` from Texas Instruments is used. This chip is a 4-channel analog switch in SPST (single-pull-single-through) configuration.
 To make the analog switch easier to control and to reduce the signal lines from the Raspberry Pi Pico to the analog switch, a digital demultiplexer is used (`SN74LVC1G139DCUT`). Since the voltage levels are reversed after the demultiplexer, a 4-channel not-gate is used to reverse the voltage levels.
 
-Multiplexing schematic for the Pico Glitcher v2.2:
+Multiplexing schematic for the Pico Glitcher v2.1 and v2.2:
 ![](images/multiplexing/multiplexing-schematics-v2.2.png)
 
 Multiplexing schematic for the Pico Glitcher v2.4 and later:
