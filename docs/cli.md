@@ -2,23 +2,49 @@
 
 The following command-line tools are available after the installation of findus (`pip install findus`).
 
-## upload
+## update-fw
 
-Tool to upload MicroPython scripts to the Pico Glitcher. This tool can be used, for example, to update the firmware of the Pico Glitcher.
+Tool to update the firmware of the Pico Glitcher.
 Usage:
 
-``` bash
+```bash
+$ update-fw --help
+usage: update-fw [-h] --port PORT [--version VERSION]
+
+Update the firmware of the Pico Glitcher.
+
+options:
+  -h, --help         show this help message and exit
+  --port PORT        /dev/tty* of the Raspberry Pi Pico
+  --version VERSION  Pico Glitcher (one of v1, v2.1, v2.2, v2.3, v2.4, v2.5, v3.0)
+```
+
+Examples:
+
+- Update hardware version 3.0 to the latest firmware version:
+```bash
+update-fw --version v3.0 --port /dev/tty.usbmodem2101
+```
+
+## upload
+
+Tool to upload MicroPython scripts to the Pico Glitcher. This tool can be used, for example, to update the firmware of the Pico Glitcher or to update single files.
+Usage:
+
+```bash
 $ upload --help
-usage: upload [-h] [--port PORT] [--delete-all] [--file FILE] [--files FILE1 FILE2...]
+usage: upload [-h] --port PORT [--delete-all] [--delete DELETE] [--file FILE] [--files FILES [FILES ...]]
 
 Upload a micro python script to the Raspberry Pi Pico.
 
 options:
   -h, --help            show this help message and exit
   --port PORT           /dev/tty* of the Raspberry Pi Pico
-  --delete-all          delete all files from the Raspberry Pi Pico
-  --file FILE           file to upload to the Raspberry Pi Pico
-  --files FILE1 FILE2   files to upload to the Raspberry Pi Pico
+  --delete-all          Delete all files from the Raspberry Pi Pico
+  --delete DELETE       Delete the file from the Raspberry Pi Pico
+  --file FILE           File to upload to the Raspberry Pi Pico
+  --files FILES [FILES ...]
+                        Files to upload to the Raspberry Pi Pico
 ```
 
 Examples:
@@ -37,6 +63,28 @@ upload --port /dev/<rpi-tty-port> --files <file1.py> <file2.py>
 ```bash
 upload --port /dev/<rpi-tty-port> --delete-all
 ```
+
+## upload-ampy
+
+In case updating the firmware with the command `update-fw` or `upload` fails, there is a fall-back solution that relies on `ampy`. This script is slower, however, it is reliable.
+
+```bash
+upload-ampy --help
+usage: upload-ampy [-h] --port PORT [--delete-all] [--delete DELETE] [--file FILE] [--files FILES [FILES ...]]
+
+Upload a micro python script to the Raspberry Pi Pico.
+
+options:
+  -h, --help            show this help message and exit
+  --port PORT           /dev/tty* of the Raspberry Pi Pico
+  --delete-all          Delete all files from the Raspberry Pi Pico
+  --delete DELETE       Delete the file from the Raspberry Pi Pico
+  --file FILE           File to upload to the Raspberry Pi Pico
+  --files FILES [FILES ...]
+                        Files to upload to the Raspberry Pi Pico
+```
+
+The usage is the same as for `upload`.
 
 ## analyzer
 

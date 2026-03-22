@@ -34,7 +34,7 @@ def files_for_version(version: str) -> list[str]:
 
 def main(argv=sys.argv):
     parser = argparse.ArgumentParser(
-        description="Upload a micro python script to the Raspberry Pi Pico."
+        description="Update the firmware of the Pico Glitcher."
     )
     parser.add_argument("--port", help="/dev/tty* of the Raspberry Pi Pico", required=True, default='/dev/ttyACM1')
     parser.add_argument("--version", help="Pico Glitcher (one of v1, v2.1, v2.2, v2.3, v2.4, v2.5, v3.0)", required=False, default='v3.0')

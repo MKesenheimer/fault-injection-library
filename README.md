@@ -16,7 +16,7 @@ More information about the fault-injection-library and the Pico Glitcher can be 
 - [Updating the Pico Glitcher firmware](#updating-the-pico-glitcher-firmware)
     - [Step 1: MicroPython firmware](#step-1-microPython-firmware)
     - [Step 2: Install the findus library](#step-2-install-the-findus-library)
-    - [Step 3: Upload the Pico Glitcher MicroPython script](#step-3-upload-the-pico-glitcher-micropython-script)
+    - [Step 3: Update the firmware of your Pico Glitcher](#step-3-upload-the-pico-glitcher-micropython-script)
 - [Installing from source](#installing-from-source)
 - [Test the functionality of your Pico Glitcher](#test-the-functionality-of-your-pico-glitcher)
 - [UART Trigger](#uart-trigger)
@@ -108,21 +108,19 @@ Make sure to have pip [installed](https://docs.python.org/3/library/ensurepip.ht
 pip install findus
 ```
 
-### Step 3: Upload the Pico Glitcher MicroPython script
+### Step 3: Update the firmware of your Pico Glitcher
 
-If everything went well, you should have the `upload` script available for execution in your command-line environment.
+If everything went well, you should have the `update-fw` script available for execution in your command-line environment.
 Connect the Pico Glitcher to your computer and check which serial device comes up:
 
 ```bash
 ls /dev/tty*
 ```
 
-Take note of the device path. Next upload the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version (`config_v1/config.json`, `config_v2.1-2/config.json`, `config_v2.3-4/config.json` or `config_v3.0/config.json`) via the following command:
+Take note of the device path. Next update the Pico Glitcher firmware and the specific configuration for your Pico Glitcher hardware version via the following command:
 
 ```bash
-cd .venv/lib/python3.12/site-packages/findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py Globals.py \ 
-    PicoGlitcher.py PulseGenerator.py Spline.py Statemachines.py <config-path>/config.json
+update-fw --port /dev/<rpi-tty-port> --version <pico-glitcher-version>
 ```
 
 Your Pico Glitcher should now be ready to perform fault-injection attacks.
@@ -143,14 +141,7 @@ cd fault-injection-library
 pip install .
 cd rd6006
 pip install .
-```
-
-Then:
-
-```bash
-cd findus/firmware
-upload --port /dev/tty.<rpi-tty-port> --files AD910X.py FastADC.py Globals.py \ 
-    PicoGlitcher.py PulseGenerator.py Spline.py <config-path>/config.json
+update-fw --port /dev/<rpi-tty-port> --version <pico-glitcher-version>
 ```
 
 The next step is to copy an existing glitching script and to adapt it to your needs.
