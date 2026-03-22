@@ -30,13 +30,13 @@ The schematics of the new Schmitt trigger inputs can be seen below.
 
 ## How to set the potentiometers
 
-The `ATN` potentiometers should be turned clock-wise completely to the right to use the full signal range.
-If you have trigger signals that exceed the voltage range of the Pico Glitcher (max. `5V`), use the `ATN` potentiometers to bring down the input signals to a range that is acceptable by the Raspberry Pi Pico.
+The `ATN` potentiometer should be turned clockwise completely to the right to use the full signal range.
+If you have trigger signals that exceed the voltage range of the Pico Glitcher (max. `5V`), use the `ATN` potentiometer to attenuate the input signals to a range acceptable for the Raspberry Pi Pico.
 
-By turning the `THR` potentiometer counter clock-wise to the left, the threshold is lowered, meaning the Pico Glitcher triggers at lower signals. Start the `THR` potentiometer at the highest threshold position (right), then lower it (turn it counter clock-wise) until the trigger is observed.
+By turning the `THR` potentiometer counter-clockwise to the left, the threshold is lowered, which means the Pico Glitcher triggers at lower signals. Start the `THR` potentiometer at the highest threshold position (right), then lower it (turn it counter-clockwise) until the trigger is observed.
 
-Use the `HYS` potentiometer in the same way as the `THR` potentiometer. Start the `HYS` potentiometer at the highest threshold position (right), then lower it (turn it counter clock-wise) until the trigger is observed.
+Adjust the `HYS` potentiometer in the same way as the `THR` potentiometer. Start the `HYS` potentiometer at the highest hysteresis position (right), then reduce it (turn it counter-clockwise) until the desired hysteresis is achieved.
 
-Which trigger input to use (`EXT1` or `EXT2`) depends on your setup and how messy your trigger signal is. Try each trigger setup and decide which input works best for your setup.
+Choose the trigger input (`EXT1` or `EXT2`) based on your setup and the quality of your trigger signal. Try each input to determine which works best.
 
-If you have set the potentiometers for one setup, don't change them until you have completed your glitching campaign. Changing the threshold values can mess with your glitching parameters (especially with the `delay` value).
+Once the potentiometers are set for a particular configuration, do not change them during your glitching campaign. Changing the threshold or hysteresis values can affect your glitching parameters, particularly the `delay` value.
