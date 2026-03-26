@@ -36,3 +36,6 @@ findus/firmware/test_irq2.py
 findus/firmware/test_irq3.py
 schematics/kicad/pico-glitcher-v1
 schematics/kicad/lpc1311-target-v1
+schematics/kicad/stm32f205-breakout-board
+schematics/kicad/pulse-shaping-extension-opamp-amplifier
+schematics/kicad/pulse-shaping-extension-amplifier
