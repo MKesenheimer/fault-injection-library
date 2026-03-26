@@ -35,3 +35,4 @@ findus/firmware/test_irq.py
 findus/firmware/test_irq2.py
 findus/firmware/test_irq3.py
 schematics/kicad/pico-glitcher-v1
+schematics/kicad/lpc1311-target-v1
