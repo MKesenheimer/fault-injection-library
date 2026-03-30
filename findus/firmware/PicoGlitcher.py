@@ -88,6 +88,9 @@ class PicoGlitcher():
         # LP_GLITCH
         self.pin_lpglitch = Pin(Globals.LP_GLITCH, Pin.OUT, Pin.PULL_DOWN)
         self.pin_lpglitch.low()
+        # EXT_MOSFET
+        self.pin_ext_mosfet = Pin(4, Pin.OUT,Pin.PULL_DOWN)
+        self.pin_ext_mosfet.low()
         # which glitching transistor to use. Default: lpglitch
         self.pin_glitch = self.pin_lpglitch
         # standard dead zone after power down
@@ -400,6 +403,13 @@ class PicoGlitcher():
         """
         self.glitch_mode = "crowbar"
         self.pin_glitch = self.pin_hpglitch
+
+    def set_ext_mosfet(self):
+        """
+        Enable the external mosfet triggering on GPIO4
+        """
+        self.glitch_mode = "crowbar"
+        self.pin_glitch = self.pin_ext_mosfet
 
     def set_multiplexing(self):
         """
