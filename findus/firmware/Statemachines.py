@@ -378,6 +378,22 @@ def uart_trigger():
     # wrap around # TODO: ist hier ein wrap überhaupt notwendig?
     jmp("start")
 
+@asm_pio(set_init=(PIO.OUT_LOW))
+def self_trigger():
+    # block until waittime received
+    pull(block)
+    mov(x, osr)
+
+    # wait for waittime ticks
+    label("wait_loop")
+    # decrease x and jump to the beginning of the loop
+    jmp(x_dec, "wait_loop")
+
+    # release reset line, and forward trigger
+    set(pins, 0b1)
+    irq(block, 1)
+    push(block)
+
 @asm_pio()
 def block_rising_condition():
     # block until dead time parameters received

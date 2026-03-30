@@ -92,6 +92,7 @@ class PicoGlitcher():
         self.pin_glitch = self.pin_lpglitch
         # standard dead zone after power down
         self.dead_time = 0.0
+        self.wait_time = 0.0001
         self.pin_condition = self.pin_glitch_en
         self.condition = "rising"
         self.number_of_edges = 1
@@ -537,6 +538,12 @@ class PicoGlitcher():
             self.sm1.put(pattern)
             # push number of bits into the fifo of the statemachine (self.number_of_bits - 1 is an optimization here)
             self.sm1.put(self.number_of_bits - 1)
+            self.sm1.active(1)
+
+        elif self.trigger_mode == "self":
+            # without a trigger source, we trigger after we release the RESET line
+            self.sm1.init(Statemachines.self_trigger, freq=self.frequency, set_base=self.pin_reset)
+            self.sm1.put(int(self.wait_time * self.frequency))
             self.sm1.active(1)
 
         self.armed = True

@@ -1195,6 +1195,9 @@ class PicoGlitcher(Glitcher):
         self.pico_glitcher.set_trigger("edge", pin_trigger, edge_type)
         self.pico_glitcher.set_number_of_edges(number_of_edges)
 
+    def self_trigger(self,pin_trigger:str = "default"):
+        self.pico_glitcher.set_trigger("self", pin_trigger)
+
     def set_cpu_frequency(self, frequency:int = 200_000_000):
         """
         Set the CPU frequency of the Raspberry Pi Pico.
