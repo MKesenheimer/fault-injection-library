@@ -68,6 +68,12 @@ class Main():
             self.glitcher.set_multiplexing()
         elif args.pulse_shaping:
             self.glitcher.set_pulseshaping(vinit=3.3)
+        elif args.lp_glitch:
+            self.glitcher.set_lpglitch()
+        elif args.hp_glitch:
+            self.glitcher.set_hpglitch()
+        elif args.ext_glitch is not None:
+            self.glitcher.set_ext_mosfet(*args.ext_glitch)
         else:
             self.glitcher.set_lpglitch()
 
@@ -179,6 +185,9 @@ if __name__ == "__main__":
     parser.add_argument("--pulse-shaping", required=False, action='store_true', help="Instead of crowbar glitching, perform a fault injection with a predefined voltage profile (requires PicoGlitcher v2).")
     parser.add_argument("--trigger-input", required=False, default="default", help="The trigger input to use (default, alt, ext1, ext2). The inputs ext1 and ext2 require the PicoGlitcher v2.")
     parser.add_argument("--use-adc", required=False, action='store_true', help="Use the onboard ADC of the Pico Glitcher to show the voltage curve during glitching.")
+    parser.add_argument("--lp-glitch", required=False, action='store_true', help="Use the low power MOSFET for glitch generation.")
+    parser.add_argument("--hp-glitch", required=False, action='store_true', help="Use the high power MOSFET for glitch generation.")
+    parser.add_argument("--ext-glitch", required=False, nargs='*', help="Use GPIO pin 19 to output the glitch. Other GPIO pins could also be chosen, for example 16, 17 or 18.", type=int, default=None)
 
     args = parser.parse_args()
 
