@@ -554,6 +554,9 @@ class PicoGlitcherInterface(MicroPythonScript):
 
     def set_hpglitch(self):
         self.pyb.exec('mp.set_hpglitch()')
+    
+    def set_ext_mosfet(self):
+        self.pyb.exec('mp.set_ext_mosfet()')
 
     def set_multiplexing(self):
         self.pyb.exec('mp.set_multiplexing()')
@@ -1096,6 +1099,11 @@ class PicoGlitcher(Glitcher):
         The glitch output is an SMA-connected output line that is normally connected to a target's power rails. If this setting is enabled, a high-powered MOSFET shorts the power-rail to ground when the glitch module's output is active.
         """
         self.pico_glitcher.set_hpglitch()
+    
+    def set_ext_mosfet(self):
+        """
+        """
+        self.pico_glitcher.set_ext_mosfet()
 
     def set_multiplexing(self):
         """
