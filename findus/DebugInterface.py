@@ -429,7 +429,7 @@ class DebugInterface():
         except subprocess.TimeoutExpired:
             pass
 
-    def mi_wait_done(self, timeout=1.0, ok_prefixes=("^done", "^running", "^connected"), verbose=False):
+    def mi_wait_done(self, timeout=1.0, ok_prefixes=("^done", "^running", "^connected"), verbose=False) -> str:
         """
         Wait for a GDB MI command to complete with a timeout.
         
@@ -462,7 +462,7 @@ class DebugInterface():
                 raise RuntimeError(f"GDB MI error: {line}")
             for ok in ok_prefixes:
                 if line.startswith(ok):
-                    return
+                    return line
         
     def mi(self, cmd, verbose=False):
         """
@@ -504,6 +504,78 @@ class DebugInterface():
         self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
         self.mi("-exec-continue", verbose=verbose)
         self.mi_wait_done(timeout=timeout, ok_prefixes=("^running",), verbose=verbose)
+
+    def parse_register_string(self, input_string: str) -> Dict[str, Any]:
+        """
+        Parses a custom formatted string into a dictionary containing a list of register values.
+
+        The input string follows the pattern:
+        ^done,register-values=[{number="0",value="0x0"}, ...]
+
+        Parameters:
+            input_string: The raw input string containing register data.
+
+        Returns:
+            dict: A dictionary with a 'register_values' key containing a list of parsed registers.
+                  Each item in the list has 'number' (int) and 'value' (str or int).
+        """
+        # Define the expected structure for the result
+        result = {}
+
+        try:
+            pattern = r"register-values=\[(.*?)\]"
+            match = re.search(pattern, input_string)
+            if not match:
+                raise ValueError("No 'register-values' section found in the input string.")
+
+            inner_content = match.group(1)
+            clean_content = re.sub(r'\s+', '', inner_content)
+
+            # Parse individual register blocks using regex
+            # Pattern matches: {number="X",value="Y"}
+            block_pattern = r"\{number=\"(\d+)\",value=\"([^\"]+)\"\}"
+            blocks = re.findall(block_pattern, clean_content)
+
+            for number_str, value_str in blocks:
+                # Convert number to integer
+                reg_number = int(number_str)
+
+                # Ensure value is treated as a string (hex format preserved)
+                # maintains the '0x' prefix which is often useful for hardware registers.
+                reg_value = value_str.strip()
+                result[f'r{reg_number}'] = reg_value 
+            return result
+
+        except Exception as e:
+            print(f"An error occurred during parsing: {e}")
+            return result
+
+    def gdb_read_registers(self, timeout=0.3, verbose=False) -> Tuple[Dict[str, Any], str]:
+        """
+        Read the current register values.
+
+        Parameters:
+            timeout: Timeout for GDB operations.
+            verbose: Whether to print verbose output.
+        """
+        self.gdb_process = subprocess.Popen(
+            [self.gdb_exec, '--interpreter=mi2'],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            bufsize=1,  # line-buffered
+        )
+        self.mi(f"-target-select extended-remote localhost:{self.gdb_port}", verbose=verbose)
+        line0 = self.mi_wait_done(timeout=timeout, ok_prefixes=("^connected",), verbose=verbose)
+        self.mi("-data-list-register-values x", verbose=verbose)
+        line1 = self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
+        reg_values = self.__parse_register_string(line1)
+        self.mi("-exec-continue", verbose=verbose)
+        line2 = self.mi_wait_done(timeout=timeout, ok_prefixes=("^running",), verbose=verbose)
+        return reg_values, line0 + line1 + line2
 
     def gdb_interrupt_disconnect(self, timeout=0.3, halt_target=True, verbose=False):
         """
