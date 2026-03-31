@@ -16,7 +16,6 @@ dist
 docs/_build
 docs/generated
 docs/source
-fritzing
 schematics/fusion360
 pypi.md
 projects/genetic-test
@@ -34,3 +33,11 @@ private-examples
 findus/firmware/test_irq.py
 findus/firmware/test_irq2.py
 findus/firmware/test_irq3.py
+schematics/kicad/pico-glitcher-v1
+schematics/kicad/lpc1311-target-v1
+schematics/kicad/stm32f205-breakout-board
+schematics/kicad/pulse-shaping-extension-opamp-amplifier
+schematics/kicad/pulse-shaping-extension-amplifier
+*.bak
+schematics/fritzing/*.svg
+schematics/fritzing/*.png

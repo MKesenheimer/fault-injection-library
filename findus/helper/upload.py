@@ -13,7 +13,6 @@ import stat
 
 from findus.pyboard import Pyboard
 
-
 def connect(port: str, soft_reset: bool = False) -> Pyboard:
     try:
         pyb = Pyboard(port, wait=2)
@@ -23,14 +22,12 @@ def connect(port: str, soft_reset: bool = False) -> Pyboard:
         print("[-] Pico Glitcher could not be found. Aborting.")
         sys.exit(-1)
 
-
 def list_remote_files(pyb: Pyboard) -> list[str]:
     return [
         entry.name
         for entry in pyb.fs_listdir("")
         if not stat.S_ISDIR(entry.st_mode)
     ]
-
 
 def delete_files(pyb: Pyboard, filenames: list[str]):
     if not filenames:
@@ -39,14 +36,12 @@ def delete_files(pyb: Pyboard, filenames: list[str]):
     for filename in filenames:
         pyb.fs_rm(filename)
 
-
 def upload_files(pyb: Pyboard, files: list[str]):
     if not files:
         return
     print(f"[+] Uploading files: {', '.join(files)}...")
     for file in files:
         pyb.fs_put(file, os.path.basename(file))
-
 
 def upload(file: str, port: str):
     pyb = connect(port)
@@ -60,7 +55,6 @@ def upload(file: str, port: str):
     pyb.fs_put(file, filename)
     pyb.exit_raw_repl()
     pyb.close()
-
 
 def upload_files_batch(files: list[str], port: str):
     pyb = connect(port)
@@ -77,14 +71,12 @@ def upload_files_batch(files: list[str], port: str):
     pyb.exit_raw_repl()
     pyb.close()
 
-
 def reset(port: str):
     print("[+] Resetting Raspberry Pi Pico...")
     pyb = connect(port)
     # Use no-follow execution because the board resets immediately.
     pyb.exec_raw_no_follow("import machine\nmachine.reset()")
     pyb.close()
-
 
 def print_remote_content(port: str):
     pyb = connect(port)
@@ -93,7 +85,6 @@ def print_remote_content(port: str):
         print(filename)
     pyb.exit_raw_repl()
     pyb.close()
-
 
 def main(argv=sys.argv):
     parser = argparse.ArgumentParser(

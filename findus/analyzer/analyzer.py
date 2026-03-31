@@ -13,6 +13,8 @@ import shutil
 import numpy as np
 from itertools import product
 from dataclasses import dataclass
+import tempfile
+import os
 
 from os import listdir
 from dash import Dash, dcc, html, dash_table, Input, Output, State
@@ -228,10 +230,12 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
         
         database = database.split(' ')[0]
 
-        # copy database to /tmp and open it
-        print(f"Copying {database} to /tmp and opening from there")
-        shutil.copyfile(f"{DATABASE_DIRECTORY}/{database}", f"/tmp/{database}")
-        con = sqlite3.connect(f"file:/tmp/{database}?mode=ro", uri=True)
+        # copy database to temp directory and open it
+        temp_dir = tempfile.gettempdir()
+        temp_db_path = os.path.join(temp_dir, database)
+        print(f"Copying {database} to {temp_dir} and opening from there")
+        shutil.copyfile(f"{DATABASE_DIRECTORY}/{database}", temp_db_path)
+        con = sqlite3.connect(f"file:{temp_db_path}?mode=ro", uri=True)
 
         con.create_function('match_string', 2, match_string)
         con.create_function('match_hex', 2, match_hex)

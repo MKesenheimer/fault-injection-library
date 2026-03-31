@@ -12,7 +12,7 @@ packages = ["findus", "findus.analyzer", "findus.helper", "findus.firmware"]
 [project]
 name = "findus"
 description = "Library to perform fault injection attacks with the PicoGlitcher, Chipwhisperer Husky or Chipwhisperer Pro"
-version = "1.13.1"
+version = "1.13.3"
 license-files = ["LICENSE"]
 authors = [{name = "Matthias Kesenheimer", email = "m.kesenheimer@gmx.net"}]
 dependencies = [
@@ -32,6 +32,8 @@ dependencies = [
 analyzer = "findus.analyzer.analyzer:main"
 analyzer-new =  "findus.analyzer.analyzer_new:main"
 upload = "findus.helper.upload:main"
+upload-ampy = "findus.helper.upload_ampy:main"
+update-fw = "findus.helper.update_firmware:main"
 power-cycle = "findus.helper.power_cycle:main"
 power-on = "findus.helper.power_on:main"
 stm32-bootloader = "findus.STM32Bootloader:main"
