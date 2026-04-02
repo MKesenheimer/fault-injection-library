@@ -505,7 +505,7 @@ class DebugInterface():
         self.mi("-exec-continue", verbose=verbose)
         self.mi_wait_done(timeout=timeout, ok_prefixes=("^running",), verbose=verbose)
 
-    def parse_register_string(self, input_string: str) -> Dict[str, Any]:
+    def parse_register_string(self, input_string: str) -> dict[str, any]:
         """
         Parses a custom formatted string into a dictionary containing a list of register values.
 
@@ -550,7 +550,7 @@ class DebugInterface():
             print(f"An error occurred during parsing: {e}")
             return result
 
-    def gdb_read_registers(self, timeout=0.3, verbose=False) -> Tuple[Dict[str, Any], str]:
+    def gdb_read_registers(self, timeout=0.3, verbose=False) -> tuple[dict[str, any], str]:
         """
         Read the current register values.
 

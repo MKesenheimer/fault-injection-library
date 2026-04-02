@@ -554,6 +554,12 @@ class PicoGlitcherInterface(MicroPythonScript):
 
     def set_hpglitch(self):
         self.pyb.exec('mp.set_hpglitch()')
+    
+    def set_ext_mosfet(self, pin):
+        if len(pin) == 1:
+            self.pyb.exec(f'mp.set_ext_mosfet({pin[0]})')
+        else:
+            self.pyb.exec('mp.set_ext_mosfet()')
 
     def set_multiplexing(self):
         self.pyb.exec('mp.set_multiplexing()')
@@ -1096,6 +1102,15 @@ class PicoGlitcher(Glitcher):
         The glitch output is an SMA-connected output line that is normally connected to a target's power rails. If this setting is enabled, a high-powered MOSFET shorts the power-rail to ground when the glitch module's output is active.
         """
         self.pico_glitcher.set_hpglitch()
+    
+    def set_ext_mosfet(self, *pin:int):
+        """
+        Enable glitch generation on a given GPIO output. Could be used generate glitches by an external MOSFET.
+
+        Parameters:
+            pin: Optional GPIO pin to use. Default pin is 19 which is an unbuffered GPIO (recommended for glitch generation). Other options are GPIO pin 16, 17 or 18.
+        """
+        self.pico_glitcher.set_ext_mosfet(pin)
 
     def set_multiplexing(self):
         """
@@ -1103,7 +1118,7 @@ class PicoGlitcher(Glitcher):
         """
         self.pico_glitcher.set_multiplexing()
 
-    def set_pulseshaping(self, vinit:float=1.8):
+    def set_pulseshaping(self, vinit:float = 1.8):
         """
         Enables the pulse-shaping mode of the Pico Glitcher version 2 to apply a voltage profile to the target's supply voltage.
 

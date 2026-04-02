@@ -22,10 +22,12 @@ if config["hardware_version"][0] == 1:
     GLITCH_EN = 1
     HP_GLITCH = 16
     LP_GLITCH = 17
+    EXT_GLITCH = 19
     # added as dummy variables to fix undefined variable error
     MUX0_PIO_INIT = None
     MUX1_PIO_INIT = None
     MUX_PIO_INIT = 0b00
+
 elif config["hardware_version"][0] == 2 or config["hardware_version"][0] == 3:
     TRIGGER = 14
     # alternative trigger on EXT1
@@ -37,28 +39,33 @@ elif config["hardware_version"][0] == 2 or config["hardware_version"][0] == 3:
     HP_GLITCH_LED = 8
     LP_GLITCH = 13
     LP_GLITCH_LED = 7
+    EXT_GLITCH = 19
     MUX0 = 1
     MUX1 = 0
     EXT1 = 11
     EXT2 = 10
+
     if config["mux_vinit"] == "GND":
         MUX1_INIT = 1
         MUX0_INIT = 1
         MUX1_PIO_INIT = PIO.OUT_HIGH
         MUX0_PIO_INIT = PIO.OUT_HIGH
         MUX_PIO_INIT = 0b11
+
     elif config["mux_vinit"] == "VI1" or config["mux_vinit"] == "VCC":
         MUX1_INIT = 0
         MUX0_INIT = 0
         MUX1_PIO_INIT = PIO.OUT_LOW
         MUX0_PIO_INIT = PIO.OUT_LOW
         MUX_PIO_INIT = 0b00
+
     elif config["mux_vinit"] == "1.8":
         MUX1_INIT = 1
         MUX0_INIT = 0
         MUX1_PIO_INIT = PIO.OUT_HIGH
         MUX0_PIO_INIT = PIO.OUT_LOW
         MUX_PIO_INIT = 0b01
+
     else: # 3.3 or VI2
         MUX1_INIT = 0
         MUX0_INIT = 1
@@ -70,6 +77,7 @@ elif config["hardware_version"][0] == 2 or config["hardware_version"][0] == 3:
 if config["hardware_version"][0] == 2:
     PADS_BANK0_BASE = 0x4001c000 # S. 301, rp2040-datahseet.pdf
     ADC_BASE = 0x4004c000 # S. 25, rp2040-datahseet.pdf
+
 elif config["hardware_version"][0] == 3:
     PADS_BANK0_BASE = 0x40038000 # S. 786, rp2350-datahseet.pdf
     ADC_BASE = 0x400a0000 # S. 32, rp2350-datahseet.pdf

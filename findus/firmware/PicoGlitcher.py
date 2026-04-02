@@ -401,6 +401,15 @@ class PicoGlitcher():
         self.glitch_mode = "crowbar"
         self.pin_glitch = self.pin_hpglitch
 
+    def set_ext_mosfet(self, pin=Globals.EXT_GLITCH):
+        """
+        Enable the external mosfet triggering on GPIO19
+        """
+        self.pin_ext_mosfet = Pin(pin, Pin.OUT, Pin.PULL_DOWN)
+        self.pin_ext_mosfet.low()
+        self.glitch_mode = "crowbar"
+        self.pin_glitch = self.pin_ext_mosfet
+
     def set_multiplexing(self):
         """
         Enables the multiplexing mode of the Pico Glitcher version 2 to switch between different voltage levels.
