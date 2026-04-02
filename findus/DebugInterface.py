@@ -505,7 +505,7 @@ class DebugInterface():
         self.mi("-exec-continue", verbose=verbose)
         self.mi_wait_done(timeout=timeout, ok_prefixes=("^running",), verbose=verbose)
 
-    def parse_register_string(self, input_string: str) -> dict[str, any]:
+    def __parse_register_string(self, input_string: str) -> dict[str, any]:
         """
         Parses a custom formatted string into a dictionary containing a list of register values.
 
@@ -518,6 +518,7 @@ class DebugInterface():
         Returns:
             dict: A dictionary with a 'register_values' key containing a list of parsed registers.
                   Each item in the list has 'number' (int) and 'value' (str or int).
+                  Example: {"r0": "0x00", "r1": "0x01"}
         """
         # Define the expected structure for the result
         result = {}
@@ -550,9 +551,9 @@ class DebugInterface():
             print(f"An error occurred during parsing: {e}")
             return result
 
-    def gdb_read_registers(self, timeout=0.3, verbose=False) -> tuple[dict[str, any], str]:
+    def gdb_init(self, timeout=1.0, verbose=False) -> str:
         """
-        Read the current register values.
+        Init the gdb debug session.
 
         Parameters:
             timeout: Timeout for GDB operations.
@@ -569,13 +570,38 @@ class DebugInterface():
             bufsize=1,  # line-buffered
         )
         self.mi(f"-target-select extended-remote localhost:{self.gdb_port}", verbose=verbose)
-        line0 = self.mi_wait_done(timeout=timeout, ok_prefixes=("^connected",), verbose=verbose)
+        line = self.mi_wait_done(timeout=timeout, ok_prefixes=("^connected",), verbose=verbose)
+        self.mi(f"monitor init", verbose=verbose)
+        line += self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
+        return line
+
+    def gdb_read_registers(self, timeout=1.0, verbose=False) -> tuple[dict[str, any], str]:
+        """
+        Read the current register values.
+
+        Parameters:
+            timeout: Timeout for GDB operations.
+            verbose: Whether to print verbose output.
+        """
         self.mi("-data-list-register-values x", verbose=verbose)
-        line1 = self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
-        reg_values = self.__parse_register_string(line1)
-        self.mi("-exec-continue", verbose=verbose)
-        line2 = self.mi_wait_done(timeout=timeout, ok_prefixes=("^running",), verbose=verbose)
-        return reg_values, line0 + line1 + line2
+        line = self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
+        reg_values = self.__parse_register_string(line)
+        return reg_values, line
+
+    def gdb_read_register_names(self) -> list[str]:
+        """
+        Connects to the microcontroller over openocd and gdb and extracts the available registers.
+
+        Returns:
+            A list of register names.
+        """
+        self.attach(delay=0.1)
+        self.gdb_init()
+        reg_values, _ = self.gdb_read_registers(timeout=1.0)
+        reg_names = list(reg_values.keys())
+        self.gdb_interrupt_disconnect(timeout=0.4)
+        self.detach()
+        return reg_names
 
     def gdb_interrupt_disconnect(self, timeout=0.3, halt_target=True, verbose=False):
         """
@@ -589,10 +615,10 @@ class DebugInterface():
         if halt_target:
             self.mi("-exec-interrupt", verbose=verbose)
             self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
-            self.mi("-target-disconnect", verbose=verbose)
-            self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
-            self.mi("-gdb-exit", verbose=verbose)
-            self.mi_wait_done(timeout=timeout, ok_prefixes=("^exit",), verbose=verbose)
+        self.mi("-target-disconnect", verbose=verbose)
+        self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
+        self.mi("-gdb-exit", verbose=verbose)
+        self.mi_wait_done(timeout=timeout, ok_prefixes=("^exit",), verbose=verbose)
         self.gdb_process.terminate()
         self.gdb_process.wait(timeout=timeout)
 
@@ -611,71 +637,6 @@ class DebugInterface():
             self.gdb_process.terminate()
             self.gdb_process = None
 
-    def telnet_init(self):
-        """
-        Establishes a connection to the OpenOCD telnet server and receives initial messages.
-        """
-        # generate a connection to the openocd telnet server
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(1)
-        self.socket.connect(('localhost', {self.telnet_port}))
-        # receive start messages
-        time.sleep(0.1)
-        self.socket.recv(4096)
-
-    def telnet_interact(self, command:str, wait_time:float = 0.01, verbose:bool = False) -> str:
-        """
-        Sends a command via Telnet and receives the response.
-
-        Parameters:
-            command: The command to send.
-            wait_time: Time to wait between sending the command and receiving the response. Defaults to 0.01.
-            verbose: Whether to print the response. Defaults to False.
-
-        Returns:
-            The response received from the Telnet server.
-        """
-        if self.openocd_process is None or self.socket is None:
-            self.telnet_init()
-        command += "\n"
-        self.socket.sendall(command.encode("utf-8"))
-        time.sleep(wait_time)
-        response = self.socket.recv(4096)
-        if verbose:
-            print(response.decode("utf-8"))
-        return response.decode("utf-8")
-
-    def telnet_read_address(self, address:int) -> tuple:
-        """
-        Reads the memory content at a specified address using Telnet.
-
-        Parameters:
-            address: The memory address to read.
-
-        Returns:
-            A tuple containing the memory content and the response from the Telnet command.
-        """
-        command = f"mdw {hex(address)}"
-        response = self.telnet_interact(command)
-        if "Previous state query failed, trying to reconnect" in response:
-            response += self.telnet_interact(command)
-        return self.extract_memory_content(response=response, address=address), response
-
-    def telnet_read_image(self, bin_image:str = "memory_dump.bin", start_addr:int = 0x08000000, length:int = 0x400, verbose:bool = False):
-        """
-        Reads an image from a specified memory address using a telnet connection.
-    
-        Parameters:
-            bin_image: The filename where the dumped image will be saved.
-            start_addr: The starting memory address to read from.
-            length: The length of the data to read.
-            verbose: If True, prints the response from the telnet server.
-        """
-        command = f"init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; shutdown"
-        response = self.telnet_interact(command)
-        if verbose:
-            print(response)
-
     def extract_memory_content(self, response:str, address:int = 0x00) -> int | None:
         """
         Extracts memory content from the response.
@@ -693,6 +654,152 @@ class DebugInterface():
                 return int(match.group(1), 16)
             else:
                 return None
+
+    def telnet_init(self):
+        """
+        Establishes a connection to the OpenOCD telnet server and receives initial messages.
+        """
+        # generate a connection to the openocd telnet server
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(1)
+        self.socket.connect(('localhost', self.telnet_port))
+        # receive start messages, discard
+        time.sleep(0.1)
+        self.socket.recv(4096)
+
+    def telnet_interact(self, command:str, read:bool = True, wait_time:float = 0.01, verbose:bool = False) -> str:
+        """
+        Sends a command via Telnet and receives the response.
+
+        Parameters:
+            command: The command to send.
+            wait_time: Time to wait between sending the command and receiving the response. Defaults to 0.01.
+            read: Whether to read the telnet response or not.
+            verbose: Whether to print the response. Defaults to False.
+
+        Returns:
+            The response received from the Telnet server.
+        """
+        self.socket.sendall(command.encode("utf-8"))
+        if read:
+            time.sleep(wait_time)
+            response = self.socket.recv(4096)
+            if verbose:
+                print(response.decode("utf-8"))
+            return response.decode("utf-8")
+        return ""
+    
+    def telnet_read_register_names(self) -> list[str]:
+        """
+        Connects to the microcontroller over openocd and telnet and extracts the available registers.
+
+        Returns:
+            A list of register names.
+        """
+        self.attach(delay=0.1)
+        self.telnet_init()
+        response = self.telnet_interact(command="halt; reg\n")
+        pattern = r'\(\d+\)\s*([a-zA-Z0-9_]+)\s*\(/\d+\)'
+        reg_names = re.findall(pattern, response)
+        self.telnet_interrupt_disconnect()
+        self.detach()
+        return reg_names
+
+    def telnet_read_address(self, address:int) -> tuple:
+        """
+        Reads the memory content at a specified address using Telnet.
+
+        Parameters:
+            address: The memory address to read.
+
+        Returns:
+            A tuple containing the memory content and the response from the Telnet command.
+        """
+        command = f"mdw {hex(address)}\n"
+        response = self.telnet_interact(command)
+        if "Previous state query failed, trying to reconnect" in response:
+            response += self.telnet_interact(command)
+        return self.extract_memory_content(response=response, address=address), response
+
+    def __parse_registers(self, input_data: str) -> dict:
+        """
+        Parses a string of register names and their hexadecimal values into a dictionary.
+
+        Parameters:
+            input_data: A multi-line string where each line contains a register name 
+                              followed by its hex value (e.g., "r0 0x00000033").
+
+        Returns:
+            A dictionary with register names as keys and their values.
+        """
+        registers = {}
+
+        # Split the input string into lines and iterate through each line
+        for line in input_data.strip().splitlines():
+            if not line.strip():  # Skip empty lines
+                continue
+            
+            parts = line.split()
+            if len(parts) >= 2:
+                reg_name = parts[0]
+                reg_value_hex = parts[1]
+
+                # Convert hex string to integer
+                try:
+                    registers[reg_name] = reg_value_hex
+                except ValueError:
+                    print(f"Warning: Could not parse value '{reg_value_hex}' for {reg_name}")
+
+        return registers
+
+    def telnet_read_registers(self, reg_name_list:list[str], wait_time:float = 0.1, verbose:bool = False) -> tuple[dict[str, any], str]:
+        """
+        Read the current register values.
+
+        Parameters:
+            reg_name_list: List of register names to read from the target
+            wait_time: Time before reading the telnet response.
+            verbose: Whether to print verbose output.
+        """
+        #response = self.telnet_interact(command="halt\n", wait_time=wait_time, verbose=verbose)
+        reg_string = ' '.join(reg_name_list)
+        response = self.telnet_interact(command=f"halt; get_reg {{{reg_string}}}\n", wait_time=wait_time, verbose=verbose)
+        reg_values= self.__parse_registers(response)
+        if verbose:
+            print(response)
+        return reg_values, response
+
+    def telnet_read_image(self, bin_image:str = "memory_dump.bin", start_addr:int = 0x08000000, length:int = 0x400, verbose:bool = False):
+        """
+        Reads an image from a specified memory address using a telnet connection.
+    
+        Parameters:
+            bin_image: The filename where the dumped image will be saved.
+            start_addr: The starting memory address to read from.
+            length: The length of the data to read.
+            verbose: If True, prints the response from the telnet server.
+        """
+        command = f"init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; shutdown\n"
+        response = self.telnet_interact(command)
+        if verbose:
+            print(response)
+
+    def telnet_interrupt_disconnect(self, halt_target=True, verbose=False):
+        """
+        Disconnects from the target and exits the telnet process.
+
+        Parameters:
+            timeout: The maximum time to wait for GDB operations to complete.
+            halt_target: Whether to halt the target before disconnecting.
+            verbose: Whether to print verbose output.
+        """
+        if halt_target:
+            # TODO: halt target as in gdb_interrupt_disconnect?
+            pass
+        self.telnet_interact(command="shutdown\n", verbose=verbose)
+        if self.socket is not None:
+            self.socket.close()
+            self.socket = None
 
     def characterize(self, response:str, mem:int) -> bytes:
         """
