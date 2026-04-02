@@ -6,13 +6,13 @@
 # If not, please write to: info@faultyhardware.de.
 
 # programming
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x unlock 0; exit"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program rdp-downgrade-stm32l051.elf; reset run; exit;"
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; exit"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x unlock 0; shutdown"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program rdp-downgrade-stm32l051.elf; reset run; shutdown;"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x lock 0; shutdown"
 # -> power cycle the target!
 
 # reading
-# >  openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; dump_image dump.bin 0x08000000 0x400; exit"
+# >  openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; dump_image dump.bin 0x08000000 0x400; shutdown"
 
 # debugging (install arm-none-eabi-gdb!)
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init"
@@ -24,10 +24,10 @@
 # > mdw 0x08000000
 
 # load image to ram
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; load_image rdp-downgrade-stm32l051.elf" -c "reg sp 0x20000000" -c "reg pc 0x20000004" -c "resume; exit"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; load_image rdp-downgrade-stm32l051.elf" -c "reg sp 0x20000000" -c "reg pc 0x20000004" -c "resume; shutdown"
 
 # load image to ram and execute
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; load_image rdp-downgrade-stm32l051.elf" -c "reg sp 0x20002000" -c "reg pc 0x20000fa4" -c "resume" -c "exit"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; load_image rdp-downgrade-stm32l051.elf" -c "reg sp 0x20002000" -c "reg pc 0x20000fa4" -c "resume" -c "shutdown"
 
 # Alternatively load with gdb:
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt"
@@ -43,7 +43,7 @@
 ## 0x20001ff8
 
 # read RDP level
-# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init" -c "mdw 0x4002201c" -c "exit"
+# > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init" -c "mdw 0x4002201c" -c "shutdown"
 
 
 import time
@@ -139,10 +139,10 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb_port {self.gdb_port}',
-            '-c', f'telnet_port {self.telnet_port}',
-            '-c', f'tcl_port {self.tcl_port}',
-            '-c', f'init; halt; {self.target_name}x unlock 0; exit'
+            '-c', f'gdb port {self.gdb_port}',
+            '-c', f'telnet port {self.telnet_port}',
+            '-c', f'tcl port {self.tcl_port}',
+            '-c', f'init; halt; {self.target_name}x unlock 0; shutdown'
             ]
         if self.adapter_serial is not None:
             args.insert(3, '-c')
@@ -162,10 +162,10 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb_port {self.gdb_port}',
-            '-c', f'telnet_port {self.telnet_port}',
-            '-c', f'tcl_port {self.tcl_port}',
-            '-c', f'init; halt; {self.target_name}x lock 0; exit'
+            '-c', f'gdb port {self.gdb_port}',
+            '-c', f'telnet port {self.telnet_port}',
+            '-c', f'tcl port {self.tcl_port}',
+            '-c', f'init; halt; {self.target_name}x lock 0; shutdown'
             ]
         if self.adapter_serial is not None:
             args.insert(3, '-c')
@@ -189,10 +189,10 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb_port {self.gdb_port}',
-            '-c', f'telnet_port {self.telnet_port}',
-            '-c', f'tcl_port {self.tcl_port}',
-            '-c', f'init; halt; program {elf_image}; exit'
+            '-c', f'gdb port {self.gdb_port}',
+            '-c', f'telnet port {self.telnet_port}',
+            '-c', f'tcl port {self.tcl_port}',
+            '-c', f'init; halt; program {elf_image}; shutdown'
             ]
         if self.adapter_serial is not None:
             args.insert(3, '-c')
@@ -212,20 +212,20 @@ class DebugInterface():
             pc: The initial program counter value. Default is 0x20000fa4.
             verbose: If True, print the output and error from openocd. Default is False.
         """
-        # openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; load_image rdp-downgrade-STM32L0.elf" -c "reg sp 0x20002000" -c "reg pc 0x20000fa4" -c "resume" -c "exit"
+        # openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; load_image rdp-downgrade-STM32L0.elf" -c "reg sp 0x20002000" -c "reg pc 0x20000fa4" -c "resume" -c "shutdown"
         args = [
             'openocd',
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb_port {self.gdb_port}',
-            '-c', f'telnet_port {self.telnet_port}',
-            '-c', f'tcl_port {self.tcl_port}',
+            '-c', f'gdb port {self.gdb_port}',
+            '-c', f'telnet port {self.telnet_port}',
+            '-c', f'tcl port {self.tcl_port}',
             '-c', f'init; halt; load_image {elf_image}',
             '-c', f'reg sp {hex(sp)}',
             '-c', f'reg pc {hex(pc)}',
             '-c', 'resume',
-            '-c', 'exit',
+            '-c', 'shutdown',
             ]
         if self.adapter_serial is not None:
             args.insert(3, '-c')
@@ -249,10 +249,10 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb_port {self.gdb_port}',
-            '-c', f'telnet_port {self.telnet_port}',
-            '-c', f'tcl_port {self.tcl_port}',
-            '-c', f'init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; exit'
+            '-c', f'gdb port {self.gdb_port}',
+            '-c', f'telnet port {self.telnet_port}',
+            '-c', f'tcl port {self.tcl_port}',
+            '-c', f'init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; shutdown'
             ]
         if self.adapter_serial is not None:
             args.insert(3, '-c')
@@ -270,10 +270,10 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb_port {self.gdb_port}',
-            '-c', f'telnet_port {self.telnet_port}',
-            '-c', f'tcl_port {self.tcl_port}',
-            '-c', 'init; reset run; exit'
+            '-c', f'gdb port {self.gdb_port}',
+            '-c', f'telnet port {self.telnet_port}',
+            '-c', f'tcl port {self.tcl_port}',
+            '-c', 'init; reset run; shutdown'
             ]
         if self.adapter_serial is not None:
             args.insert(3, '-c')
@@ -296,12 +296,12 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb_port {self.gdb_port}',
-            '-c', f'telnet_port {self.telnet_port}',
-            '-c', f'tcl_port {self.tcl_port}',
+            '-c', f'gdb port {self.gdb_port}',
+            '-c', f'telnet port {self.telnet_port}',
+            '-c', f'tcl port {self.tcl_port}',
             '-c', 'init',
             '-c', f'mdw {hex(address)}',
-            '-c', 'exit'
+            '-c', 'shutdown'
             ]
         if self.adapter_serial is not None:
             args.insert(3, '-c')
@@ -406,9 +406,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb_port {self.gdb_port}',
-            '-c', f'telnet_port {self.telnet_port}',
-            '-c', f'tcl_port {self.tcl_port}',
+            '-c', f'gdb port {self.gdb_port}',
+            '-c', f'telnet port {self.telnet_port}',
+            '-c', f'tcl port {self.tcl_port}',
             '-c', 'init'
             ]
         if self.adapter_serial is not None:
@@ -671,7 +671,7 @@ class DebugInterface():
             length: The length of the data to read.
             verbose: If True, prints the response from the telnet server.
         """
-        command = f"init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; exit"
+        command = f"init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; shutdown"
         response = self.telnet_interact(command)
         if verbose:
             print(response)
