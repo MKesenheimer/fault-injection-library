@@ -10,6 +10,9 @@ import argparse
 import os
 import sys
 import stat
+import time
+
+from typing import Optional
 
 from findus.pyboard import Pyboard
 
@@ -71,12 +74,14 @@ def upload_files_batch(files: list[str], port: str):
     pyb.exit_raw_repl()
     pyb.close()
 
-def reset(port: str):
+def reset(port: str, wait_time: Optional[int] = 1):
     print("[+] Resetting Raspberry Pi Pico...")
     pyb = connect(port)
     # Use no-follow execution because the board resets immediately.
     pyb.exec_raw_no_follow("import machine\nmachine.reset()")
     pyb.close()
+    if wait_time:
+        time.sleep(wait_time)
 
 def print_remote_content(port: str):
     pyb = connect(port)
