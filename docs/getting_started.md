@@ -64,7 +64,7 @@ Your Pico Glitcher should come with the latest firmware already installed. If no
 Download the MicroPython firmware from [https://micropython.org/download/RPI_PICO/](https://micropython.org/download/RPI_PICO/). Unplug the Pico Glitcher from your computer, press and hold the `BOOTSEL` button on the Raspberry Pi Pico and connect it back to your computer. The Raspberry Pi Pico should come up as a flash-storage device. Copy the MicroPython firmware (`RPI_PICO-xxxxxxxx-vx.xx.x.uf2`) to this drive and wait until the Raspberry Pi Pico disconnects automatically.
 More information about setting up the Raspberry Pi Pico can be found [here](https://projects.raspberrypi.org/en/projects/getting-started-with-the-pico).
 
-On Linux, your user must have permissions to connect to the Pico Glitchers tty port. If not already done, add your user to the `dialout` group:
+On Linux, your user must have permissions to connect to the Pico Glitchers tty port. If not already done, add your user to the `dialout` group and restart your computer:
 
 ```bash
 sudo usermod -aG dialout <username>

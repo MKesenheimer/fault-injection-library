@@ -23,6 +23,10 @@ def connect(port: str, soft_reset: bool = False) -> Pyboard:
         return pyb
     except Exception:
         print("[-] Pico Glitcher could not be found. Aborting.")
+        print("[*] Troubleshooting:")
+        print("    - Do you have access to the tty-port? (Add your user to dialout).")
+        print("    - Is the MicroPython firmware installed on the Pico Glitcher?")
+        print("    - Alternatively, try `upload-ampy`. See the documentation.")
         sys.exit(-1)
 
 def list_remote_files(pyb: Pyboard) -> list[str]:
