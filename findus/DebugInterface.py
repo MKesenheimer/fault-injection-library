@@ -90,7 +90,7 @@ class DebugInterface():
         else:
             self.target_config = target_config
 
-    def program_target(self, glitcher, elf_image:str = "program.elf", unlock:bool = True, rdp_level:int = 0, power_cycle_time:float = 0.1, verbose:bool = False):
+    def program_target(self, glitcher, elf_image:str = "program.elf", unlock:bool = True, rdp_level:int = 0, power_cycle_time:float = 0.1, overwrite_target_name:str = "", verbose:bool = False):
         """
         Main function to program the target. Optionally unlocks the target, writes the ELF image, and adjusts the RDP level.
         
@@ -108,7 +108,7 @@ class DebugInterface():
             while rdp != 0xaa or pcrop != 0x00:
                 glitcher.reset(0.01)
                 time.sleep(0.005)
-                self.unlock_target(verbose=verbose)
+                self.unlock_target(overwrite_target_name=overwrite_target_name, verbose=verbose)
                 glitcher.power_cycle_reset(power_cycle_time)
                 time.sleep(power_cycle_time)
                 rdp, pcrop = self.read_rdp_and_pcrop(verbose=False)
@@ -119,7 +119,7 @@ class DebugInterface():
         if verbose:
             print(f"[+] rdp, pcrop = {hex(rdp)}, {hex(pcrop)}")
         if rdp_level == 1:
-            self.lock_target(verbose=verbose)
+            self.lock_target(overwrite_target_name=overwrite_target_name, verbose=verbose)
             rdp, pcrop = self.read_rdp_and_pcrop(verbose=False)
             if verbose:
                 print(f"[+] rdp, pcrop = {hex(rdp)}, {hex(pcrop)}")
@@ -127,7 +127,7 @@ class DebugInterface():
             glitcher.power_cycle_reset(power_cycle_time)
             time.sleep(power_cycle_time)
 
-    def unlock_target(self, verbose:bool = False):
+    def unlock_target(self, verbose:bool = False, overwrite_target_name:str = ""):
         """
         Unlocks the target and removes any read-out protection.
         Attention: This will erase the targets flash!
@@ -141,9 +141,12 @@ class DebugInterface():
             '-f', self.target_config,
             '-c', f'gdb port {self.gdb_port}',
             '-c', f'telnet port {self.telnet_port}',
-            '-c', f'tcl port {self.tcl_port}',
-            '-c', f'init; halt; {self.target_name}x unlock 0; shutdown'
+            '-c', f'tcl port {self.tcl_port}'
             ]
+        if overwrite_target_name == "":
+            args.extend(['-c', f'init; halt; {self.target_name}x unlock 0; shutdown'])
+        else:
+            args.extend(['-c', f'init; halt; {overwrite_target_name} unlock 0; shutdown'])
         if self.adapter_serial is not None:
             args.insert(3, '-c')
             args.insert(4, f'adapter serial {self.adapter_serial}')
@@ -151,7 +154,7 @@ class DebugInterface():
         if verbose:
             print(result.stdout + result.stderr)
 
-    def lock_target(self, verbose:bool = False):
+    def lock_target(self, verbose:bool = False, overwrite_target_name:str = ""):
         """
         Locks the target (activates RDP).
         """
@@ -164,9 +167,12 @@ class DebugInterface():
             '-f', self.target_config,
             '-c', f'gdb port {self.gdb_port}',
             '-c', f'telnet port {self.telnet_port}',
-            '-c', f'tcl port {self.tcl_port}',
-            '-c', f'init; halt; {self.target_name}x lock 0; shutdown'
+            '-c', f'tcl port {self.tcl_port}'
             ]
+        if overwrite_target_name == "":
+            args.extend(['-c', f'init; halt; {self.target_name}x lock 0; shutdown'])
+        else:
+            args.extend(['-c', f'init; halt; {overwrite_target_name} lock 0; shutdown'])
         if self.adapter_serial is not None:
             args.insert(3, '-c')
             args.insert(4, f'adapter serial {self.adapter_serial}')
@@ -310,31 +316,38 @@ class DebugInterface():
         response = result.stdout + result.stderr
         return self.extract_memory_content(response=response, address=address), response
 
-    def read_option_bytes(self):
+    def read_option_bytes(self) -> tuple[int, str]:
         """
-        Reads the option bytes from the memory address 0x4002201c.
+        Reads the option bytes from the memory address 0x4002201c for stm32l0, or 0x1FFF7800 for stm32g0 microcontrollers.
 
         Returns:
             A tuple containing the memory value and the response from the read operation.
             If the memory value is None, returns (0x00, response).
         """
-        mem, response = self.read_address(0x4002201c)
-        if mem is not None:
-            return mem, response
+        optbytes = 0x00
+        response = ""
+        if self.target_name == "stm32g0x" or self.target_name == "stm32g0":
+            optbytes, response = self.read_address(0x1FFF7800)
+        else:
+            optbytes, response = self.read_address(0x4002201c)
+        if optbytes is not None:
+            return optbytes, response
         return 0x00, response
 
-    def read_pcrop(self):
+    def read_pcrop(self) -> int:
         """
         Reads the PCROP (Programmable Code Protection Region) value from the option bytes.
 
         Returns:
             The PCROP value.
         """
+        if self.target_name == "stm32g0x" or self.target_name == "stm32g0":
+            return 0x0
         optbytes, _ = self.read_option_bytes()
         pcrop = (optbytes & 0x100) >> 8
         return pcrop
 
-    def read_rdp(self):
+    def read_rdp(self) -> int:
         """
         Reads the RDP (Read Protection) value from the option bytes.
 
@@ -345,7 +358,7 @@ class DebugInterface():
         rdp = (optbytes & 0xff)
         return rdp
 
-    def read_rdp_and_pcrop(self, verbose:bool = False):
+    def read_rdp_and_pcrop(self, verbose:bool = False) -> tuple[int, int]:
         """
         Reads both RDP and PCROP values from the option bytes.
 
@@ -358,7 +371,9 @@ class DebugInterface():
         optbytes, response = self.read_option_bytes()
         if verbose:
             print(response)
-        pcrop = (optbytes & 0x100) >> 8
+        pcrop = 0x00
+        if self.target_name != "stm32g0x" and self.target_name != "stm32g0":
+            pcrop = (optbytes & 0x100) >> 8
         rdp = (optbytes & 0xff)
         return rdp, pcrop
 
@@ -752,18 +767,23 @@ class DebugInterface():
 
         return registers
 
-    def telnet_read_registers(self, reg_name_list:list[str], wait_time:float = 0.1, verbose:bool = False) -> tuple[dict[str, any], str]:
+    def telnet_read_registers(self, reg_name_list:list[str], halt:bool = True, wait_time:float = 0.1, verbose:bool = False) -> tuple[dict[str, any], str]:
         """
         Read the current register values.
 
         Parameters:
             reg_name_list: List of register names to read from the target
+            halt: Whether to halt the target before reading.
             wait_time: Time before reading the telnet response.
             verbose: Whether to print verbose output.
         """
         #response = self.telnet_interact(command="halt\n", wait_time=wait_time, verbose=verbose)
         reg_string = ' '.join(reg_name_list)
-        response = self.telnet_interact(command=f"halt; get_reg {{{reg_string}}}\n", wait_time=wait_time, verbose=verbose)
+        response = ""
+        if halt:
+            response = self.telnet_interact(command=f"halt; get_reg {{{reg_string}}}\n", wait_time=wait_time, verbose=verbose)
+        else:
+            response = self.telnet_interact(command=f"get_reg {{{reg_string}}}\n", wait_time=wait_time, verbose=verbose)
         reg_values= self.__parse_registers(response)
         if verbose:
             print(response)
