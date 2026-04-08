@@ -26,6 +26,8 @@ Examples:
 update-fw --version v3.0 --port /dev/tty.usbmodem2101
 ```
 
+In case this script fails, use the old update mechanism with `upload-ampy`. See below.
+
 ## upload
 
 Tool to upload MicroPython scripts to the Pico Glitcher. This tool can be used, for example, to update the firmware of the Pico Glitcher or to update single files.
@@ -64,7 +66,7 @@ upload --port /dev/<rpi-tty-port> --files <file1.py> <file2.py>
 upload --port /dev/<rpi-tty-port> --delete-all
 ```
 
-## upload-ampy
+## upload-ampy (slow but reliable)
 
 In case updating the firmware with the command `update-fw` or `upload` fails, there is a fall-back solution that relies on `ampy`. This script is slower, however, it is reliable.
 
@@ -85,6 +87,16 @@ options:
 ```
 
 The usage is the same as for `upload`.
+
+Example to update the Pico Glitcher to the latest firmware:
+
+```bash
+cd fault-injection-library/findus/firmware
+upload-ampy --files AD910X.py FastADC.py Globals.py PicoGlitcher.py PulseGenerator.py Spline.py Statemachines.py <config-version>/config.json --port /dev/<rpi-tty-port>
+```
+
+where `<rpi-tty-port>` is the tty port the Pico Glitcher is available at, and `<config-version>` is the config path for your specific Pico Glitcher hardware revision. For example `config_v1` for version 1, `config_v2.1-2` for versions 2.1 and 2.2, `config_v2.3-4` for versions v2.3 and v2.4, and `config_v3.0` for version 3.0, and so on.
+
 
 ## analyzer
 
