@@ -613,7 +613,8 @@ class Glitcher():
         """
         pass
 
-    def classify(self, state:bytes) -> str:
+    @staticmethod
+    def classify(state:bytes) -> str:
         """
         Template method to classify an output state. Overload this class if you want to customize the targets response classification. Alternatively, use the built-in class `GlitchState` to characterize the targets responses. Remember to define certain response states depending on the possible responses. See class `STM32Bootloader` for an example.
 
@@ -644,7 +645,8 @@ class Glitcher():
             color = 'R'
         return color
 
-    def colorize(self, s:str, color:str) -> str:
+    @staticmethod
+    def colorize(s:str, color:str) -> str:
         """
         Returns a colorized string depending on a color identifier (G, Y, R, M, C, B, O, Z).
         
@@ -679,7 +681,8 @@ class Glitcher():
         b = colors[color][2]
         return f"\033[38;2;{r};{g};{b}m{s}\033[0m"
 
-    def get_speed(self, start_time:int, number_of_experiments:int) -> int:
+    @staticmethod
+    def get_speed(start_time:int, number_of_experiments:int) -> int | str:
         """
         Calculate and return the average speed of the glitching campaign (glitches per second).
         

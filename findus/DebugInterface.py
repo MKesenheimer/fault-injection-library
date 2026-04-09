@@ -50,6 +50,7 @@ import time
 import subprocess
 import re
 import socket
+from findus import PicoGlitcher
 
 class DebugInterface():
     """
@@ -90,7 +91,7 @@ class DebugInterface():
         else:
             self.target_config = target_config
 
-    def program_target(self, glitcher, elf_image:str = "program.elf", unlock:bool = True, rdp_level:int = 0, power_cycle_time:float = 0.1, overwrite_target_name:str = "", verbose:bool = False):
+    def program_target(self, glitcher:PicoGlitcher = None, elf_image:str = "program.elf", unlock:bool = True, rdp_level:int = 0, power_cycle_time:float = 0.1, overwrite_target_name:str = "", verbose:bool = False):
         """
         Main function to program the target. Optionally unlocks the target, writes the ELF image, and adjusts the RDP level.
         
@@ -106,10 +107,12 @@ class DebugInterface():
             rdp = 0x01
             pcrop = 0x01
             while rdp != 0xaa or pcrop != 0x00:
-                glitcher.reset(0.01)
+                if glitcher is not None:
+                    glitcher.reset(0.01)
                 time.sleep(0.005)
                 self.unlock_target(overwrite_target_name=overwrite_target_name, verbose=verbose)
-                glitcher.power_cycle_reset(power_cycle_time)
+                if glitcher is not None:
+                    glitcher.power_cycle_reset(power_cycle_time)
                 time.sleep(power_cycle_time)
                 rdp, pcrop = self.read_rdp_and_pcrop(verbose=False)
                 if verbose:
@@ -124,7 +127,8 @@ class DebugInterface():
             if verbose:
                 print(f"[+] rdp, pcrop = {hex(rdp)}, {hex(pcrop)}")
             # changes in the RDP level become active after a power-cycle
-            glitcher.power_cycle_reset(power_cycle_time)
+            if glitcher is not None:
+                glitcher.power_cycle_reset(power_cycle_time)
             time.sleep(power_cycle_time)
 
     def unlock_target(self, verbose:bool = False, overwrite_target_name:str = ""):
@@ -706,18 +710,16 @@ class DebugInterface():
     
     def telnet_read_register_names(self) -> list[str]:
         """
-        Connects to the microcontroller over openocd and telnet and extracts the available registers.
+        Connects to the microcontroller over an open openocd connection via telnet and extracts the available registers.
 
         Returns:
             A list of register names.
         """
-        self.attach(delay=0.1)
         self.telnet_init()
         response = self.telnet_interact(command="halt; reg\n")
         pattern = r'\(\d+\)\s*([a-zA-Z0-9_]+)\s*\(/\d+\)'
         reg_names = re.findall(pattern, response)
         self.telnet_interrupt_disconnect()
-        self.detach()
         return reg_names
 
     def telnet_read_address(self, address:int) -> tuple:
@@ -804,19 +806,21 @@ class DebugInterface():
         if verbose:
             print(response)
 
-    def telnet_interrupt_disconnect(self, halt_target=True, verbose=False):
+    def telnet_interrupt_disconnect(self, halt_target:bool = True, shutdown_openocd:bool = True, verbose:bool = False):
         """
         Disconnects from the target and exits the telnet process.
 
         Parameters:
             timeout: The maximum time to wait for GDB operations to complete.
             halt_target: Whether to halt the target before disconnecting.
+            shutdown_openocd: Whether to send the signal to openocd to shutdown.
             verbose: Whether to print verbose output.
         """
         if halt_target:
             # TODO: halt target as in gdb_interrupt_disconnect?
             pass
-        self.telnet_interact(command="shutdown\n", verbose=verbose)
+        if shutdown_openocd:
+            self.telnet_interact(command="shutdown\n", verbose=verbose)
         if self.socket is not None:
             self.socket.close()
             self.socket = None
