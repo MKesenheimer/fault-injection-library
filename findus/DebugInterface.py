@@ -291,6 +291,20 @@ class DebugInterface():
         result = subprocess.run(args, text=True, capture_output=True)
         print(result.stdout + result.stderr)
 
+    @staticmethod
+    def format_bytes(value:str):
+        """
+        Wandelt einen String-Wert so um, dass er nach dem '0x'-Präfix mindestens 4 Hex-Ziffern lang ist.
+        """
+        # Entfernen des Präfixes für die Verarbeitung
+        if value.startswith('0x'):
+            hex_part = value[2:]
+        else:
+            hex_part = value
+        int_value = int(hex_part, 16)
+        formatted_hex = f"{int_value:08x}"
+        return f"0x{formatted_hex}"
+
     def read_address(self, address):
         """
         Read memory content from a specific address using OpenOCD.
@@ -686,13 +700,13 @@ class DebugInterface():
         time.sleep(0.1)
         self.socket.recv(4096)
 
-    def telnet_interact(self, command:str, read:bool = True, wait_time:float = 0.01, verbose:bool = False) -> str:
+    def telnet_interact(self, command:str, read:bool = True, delay_before_read:float = 0.01, verbose:bool = False) -> str:
         """
         Sends a command via Telnet and receives the response.
 
         Parameters:
             command: The command to send.
-            wait_time: Time to wait between sending the command and receiving the response. Defaults to 0.01.
+            delay_before_read: Time to wait between sending the command and receiving the response. Defaults to 0.01.
             read: Whether to read the telnet response or not.
             verbose: Whether to print the response. Defaults to False.
 
@@ -701,7 +715,7 @@ class DebugInterface():
         """
         self.socket.sendall(command.encode("utf-8"))
         if read:
-            time.sleep(wait_time)
+            time.sleep(delay_before_read)
             response = self.socket.recv(4096)
             if verbose:
                 print(response.decode("utf-8"))
@@ -719,7 +733,7 @@ class DebugInterface():
         response = self.telnet_interact(command="halt; reg\n")
         pattern = r'\(\d+\)\s*([a-zA-Z0-9_]+)\s*\(/\d+\)'
         reg_names = re.findall(pattern, response)
-        self.telnet_interrupt_disconnect()
+        self.telnet_interrupt_disconnect(shutdown_openocd=False)
         return reg_names
 
     def telnet_read_address(self, address:int) -> tuple:
@@ -738,7 +752,7 @@ class DebugInterface():
             response += self.telnet_interact(command)
         return self.extract_memory_content(response=response, address=address), response
 
-    def __parse_registers(self, input_data: str) -> dict:
+    def telnet_parse_registers(self, input_data: str) -> dict:
         """
         Parses a string of register names and their hexadecimal values into a dictionary.
 
@@ -769,27 +783,47 @@ class DebugInterface():
 
         return registers
 
-    def telnet_read_registers(self, reg_name_list:list[str], halt:bool = True, wait_time:float = 0.1, verbose:bool = False) -> tuple[dict[str, any], str]:
+    def telnet_read_registers(self, reg_name_list:list[str], halt:bool = True, delay_before_read:float = 0.1, verbose:bool = False) -> tuple[dict[str, any], str]:
         """
         Read the current register values.
 
         Parameters:
             reg_name_list: List of register names to read from the target
             halt: Whether to halt the target before reading.
-            wait_time: Time before reading the telnet response.
+            delay_before_read: Time before reading the telnet response.
             verbose: Whether to print verbose output.
         """
-        #response = self.telnet_interact(command="halt\n", wait_time=wait_time, verbose=verbose)
+        #response = self.telnet_interact(command="halt\n", delay_before_read=delay_before_read, verbose=verbose)
         reg_string = ' '.join(reg_name_list)
         response = ""
         if halt:
-            response = self.telnet_interact(command=f"halt; get_reg {{{reg_string}}}\n", wait_time=wait_time, verbose=verbose)
+            response = self.telnet_interact(command=f"halt; get_reg {{{reg_string}}}\n", delay_before_read=delay_before_read, verbose=verbose)
         else:
-            response = self.telnet_interact(command=f"get_reg {{{reg_string}}}\n", wait_time=wait_time, verbose=verbose)
-        reg_values= self.__parse_registers(response)
-        if verbose:
-            print(response)
+            response = self.telnet_interact(command=f"get_reg {{{reg_string}}}\n", delay_before_read=delay_before_read, verbose=verbose)
+        reg_values= self.telnet_parse_registers(response)
         return reg_values, response
+    
+    def telnet_read_memory(self, start_address:int, width:int = 32, count:int = 256, halt:bool = True, delay_before_read:float = 0.1, verbose:bool = False) -> tuple[list[str], str]:
+        """
+        Read the current register values.
+
+        Parameters:
+            reg_name_list: List of register names to read from the target
+            halt: Whether to halt the target before reading.
+            delay_before_read: Time before reading the telnet response.
+            verbose: Whether to print verbose output.
+        """
+        command = ""
+        if halt:
+            command = f"halt; read_memory 0x{start_address:08x} {width} {count}\n"
+        else:
+            command = f"read_memory 0x{start_address:08x} {width} {count}\n"
+        response = self.telnet_interact(command=command, delay_before_read=delay_before_read, verbose=verbose)
+        hex_values = re.findall(r'0x[0-9a-fA-F]+', response)
+        hex_values = [self.format_bytes(h) for h in hex_values[-count:]]
+        if len(hex_values) != count:
+            return [], response
+        return hex_values, response
 
     def telnet_read_image(self, bin_image:str = "memory_dump.bin", start_addr:int = 0x08000000, length:int = 0x400, verbose:bool = False):
         """
