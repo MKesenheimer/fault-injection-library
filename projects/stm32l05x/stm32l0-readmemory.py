@@ -65,7 +65,7 @@ class Main:
         self.dump_filename = f"{Helper.timestamp()}_memory_dump.bin"
 
         # error handling
-        self.error_handler = ErrorHandling(max_fails=20, look_back=20, database=self.database)
+        self.error_handler = ErrorHandling(max_fails=15, look_back=20, database=self.database)
         self.error_handler2 = ErrorHandling(max_fails=500, look_back=500, database=self.database)
 
     def run(self):

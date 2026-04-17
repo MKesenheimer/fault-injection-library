@@ -1315,6 +1315,7 @@ class Helper():
     Methods:
         timestamp: Provides the current timestamp in a file-friendly format.
     """
+    @staticmethod
     def timestamp() -> str:
         """
         Provides the current timestamp in a file-friendly format.
@@ -1324,6 +1325,7 @@ class Helper():
         """
         return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
+    @staticmethod
     def linspace(start, stop, num, endpoint=True) -> list:
         """
         Generate equidistant points from a start to a stop point. Equivalent to numpy's linspace function.
@@ -1345,6 +1347,7 @@ class Helper():
             step = (stop - start) / num
         return [start + i * step for i in range(num)]
 
+    @staticmethod
     def arange(start, stop=None, step=1.0) -> list:
         """
         Return evenly spaced values within a given interval. Equivalent to numpy's arange function.
@@ -1374,6 +1377,7 @@ class Helper():
                 i += step
         return result
 
+    @staticmethod
     def random_point(a, b, stride=0, dtype=int):
         points = None
         if a == b:
@@ -1387,6 +1391,7 @@ class Helper():
         choice = random.choice(points)
         return dtype(choice)
 
+    @staticmethod
     def range(start, end, step=1):
         if start == end:
             return [start]
