@@ -53,12 +53,12 @@ class Main:
         self.start_time = int(time.time())
 
         # STLink Debugger
-        self.debugger = DebugInterface(target="stm32l0")
+        self.debugger = DebugInterface(interface_config="interface/stlink.cfg", transport="hla_swd", target="stm32l0")
 
         # programming the target
         if args.program_target is not None:
             print("[+] Programming target.")
-            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l051.elf", rdp_level=args.program_target)
+            self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l051.elf", unlock=True,  rdp_level=args.program_target, verbose=True)
 
         # memory read settings
         self.bootcom = STM32Bootloader(port=self.args.target, serial_timeout=0.1, dump_address=0x08000000, dump_len=0x2000)
@@ -67,6 +67,10 @@ class Main:
         # error handling
         self.error_handler = ErrorHandling(max_fails=15, look_back=20, database=self.database)
         self.error_handler2 = ErrorHandling(max_fails=500, look_back=500, database=self.database)
+
+    def cleanup(self):
+        print("[+] Cleaning up.")
+        self.debugger.detach()
 
     def run(self):
         # log execution
@@ -246,4 +250,5 @@ if __name__ == "__main__":
         main.run()
     except KeyboardInterrupt:
         print("\nExitting...")
+        main.cleanup()
         sys.exit(1)

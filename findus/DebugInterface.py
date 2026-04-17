@@ -143,9 +143,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb port {self.gdb_port}',
-            '-c', f'telnet port {self.telnet_port}',
-            '-c', f'tcl port {self.tcl_port}'
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}'
             ]
         if overwrite_target_name == "":
             args.extend(['-c', f'init; halt; {self.target_name}x unlock 0; shutdown'])
@@ -169,9 +169,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb port {self.gdb_port}',
-            '-c', f'telnet port {self.telnet_port}',
-            '-c', f'tcl port {self.tcl_port}'
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}'
             ]
         if overwrite_target_name == "":
             args.extend(['-c', f'init; halt; {self.target_name}x lock 0; shutdown'])
@@ -199,9 +199,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb port {self.gdb_port}',
-            '-c', f'telnet port {self.telnet_port}',
-            '-c', f'tcl port {self.tcl_port}',
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}',
             '-c', f'init; halt; program {elf_image}; shutdown'
             ]
         if self.adapter_serial is not None:
@@ -228,9 +228,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb port {self.gdb_port}',
-            '-c', f'telnet port {self.telnet_port}',
-            '-c', f'tcl port {self.tcl_port}',
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}',
             '-c', f'init; halt; load_image {elf_image}',
             '-c', f'reg sp {hex(sp)}',
             '-c', f'reg pc {hex(pc)}',
@@ -259,9 +259,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb port {self.gdb_port}',
-            '-c', f'telnet port {self.telnet_port}',
-            '-c', f'tcl port {self.tcl_port}',
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}',
             '-c', f'init; dump_image {bin_image} {hex(start_addr)} {hex(length)}; shutdown'
             ]
         if self.adapter_serial is not None:
@@ -280,9 +280,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb port {self.gdb_port}',
-            '-c', f'telnet port {self.telnet_port}',
-            '-c', f'tcl port {self.tcl_port}',
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}',
             '-c', 'init; reset run; shutdown'
             ]
         if self.adapter_serial is not None:
@@ -320,9 +320,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb port {self.gdb_port}',
-            '-c', f'telnet port {self.telnet_port}',
-            '-c', f'tcl port {self.tcl_port}',
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}',
             '-c', 'init',
             '-c', f'mdw {hex(address)}',
             '-c', 'shutdown'
@@ -439,9 +439,9 @@ class DebugInterface():
             '-f', self.interface_config,
             '-c', f'transport select {self.transport}',
             '-f', self.target_config,
-            '-c', f'gdb port {self.gdb_port}',
-            '-c', f'telnet port {self.telnet_port}',
-            '-c', f'tcl port {self.tcl_port}',
+            '-c', f'gdb_port {self.gdb_port}',
+            '-c', f'telnet_port {self.telnet_port}',
+            '-c', f'tcl_port {self.tcl_port}',
             '-c', 'init'
             ]
         if self.adapter_serial is not None:
