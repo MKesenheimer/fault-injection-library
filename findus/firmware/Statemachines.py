@@ -355,6 +355,7 @@ def uart_trigger():
     label("start")
     mov(isr, null)
     # Wait for start bit
+    wait(1, pin, 0)
     wait(0, pin, 0)
     # Preload bit counter, delay until eye of first data bit
     #set(y, BITS - 1) [10]
