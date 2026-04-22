@@ -125,6 +125,10 @@ class Main:
 
             # check for successive errors, re-programm target if too many successive errors occur.
             def error_action():
+                print("[!] Attention: Too many successive errors occured and execution halted.")
+                print("[!] If your target does not contain any valuable firmware, you can comment out the following line for testing purposes.")
+                print("[!] If errors occur, the device will then be reprogrammed automatically with a test firmware.")
+                sys.exit(-1)
                 # reprogram target and try again
                 self.glitcher.power_cycle_target(1)
                 time.sleep(1)
