@@ -87,7 +87,7 @@ class Heatmap():
     y_number_of_bins: int = 10
     color_scale:str = "findus"
 
-def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", aspect_ratio=0, auto_update_interval=0, debug=False, heatmap:Heatmap=None):
+def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", aspect_ratio=0, auto_update_interval=0, debug=False, heatmap:Heatmap=None, x_range=None, y_range=None):
     DATABASE_DIRECTORY = directory
     app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
     app.css.config.serve_locally = True
@@ -589,6 +589,8 @@ def main(argv=sys.argv):
     parser.add_argument("--x-number-of-bins", "--x-bins", help="Number of bins of the x-axis for the heat map", required=False, default=10, type=int)
     parser.add_argument("--y-number-of-bins", "--y-bins", help="Number of bins of the y-axis for the heat map", required=False, default=10, type=int)
     parser.add_argument("--color-scale", help="Color scale to use for the heat map (findus, Blues, Reds, Greys, PuRd, YlOrRd).", required=False, default="findus", type=str)
+    parser.add_argument("--x-range", help="X-axis plot range as min max (e.g., 0 1000)", nargs=2, required=False, type=int)
+    parser.add_argument("--y-range", help="Y-axis plot range as min max (e.g., 0 500)", nargs=2, required=False, type=int)
 
     args = parser.parse_args()
 

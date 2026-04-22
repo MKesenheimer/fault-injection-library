@@ -29,7 +29,7 @@ class DerivedPicoGlitcher(PicoGlitcher):
         elif b'ok' in state:
             color = 'C'
         elif b'error: write number of bytes to read failed' in state:
-            color = 'O'
+            color = 'C'
         elif b'error' in state:
             color = 'M'
         elif b'failure' in state:
@@ -228,14 +228,14 @@ class Main:
                 self.bootcom.flush()
                 # reprogram the target
                 print("[+] Programming target.")
-                self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l051.elf", unlock=True,  rdp_level=args.program_target, verbose=True)
+                self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l051.elf", unlock=True,  rdp_level=1, verbose=True)
                 self.glitcher.power_cycle_target(1)
-            self.error_handler.check(experiment_id=experiment_id, response=state, expected=b'expected', keep=[b'success', b'failure'], user_action=error_action)
+            self.error_handler.check(experiment_id=experiment_id, response=state, expected=b'expected', keep=[b'success', b'failure'], recolor='O', user_action=error_action)
             # if no errors occur at all (only expected), there might be something different wrong:
             def error_action2():
                 print("[+] Glitch may be in the wrong position. Stop.")
                 sys.exit(-1)
-            self.error_handler2.check(experiment_id=experiment_id, response=state, expected=b'error', keep=[b'ok', b'success', b'failure'], user_action=error_action2)  
+            self.error_handler2.check(experiment_id=experiment_id, response=state, expected=b'error', keep=[b'ok', b'success', b'failure'], recolor='O', user_action=error_action2)  
 
             # increase experiment id
             experiment_id += 1
