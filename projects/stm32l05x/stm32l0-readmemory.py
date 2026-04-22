@@ -228,14 +228,14 @@ class Main:
                 self.bootcom.flush()
                 # reprogram the target
                 print("[+] Programming target.")
-                self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l051.elf", rdp_level=1)
+                self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l051.elf", unlock=True,  rdp_level=args.program_target, verbose=True)
                 self.glitcher.power_cycle_target(1)
-            #self.error_handler.check(experiment_id=experiment_id, response=state, expected=b'expected', keep=[b'ok', b'success', b'failure'], user_action=error_action)
+            self.error_handler.check(experiment_id=experiment_id, response=state, expected=b'expected', keep=[b'success', b'failure'], user_action=error_action)
             # if no errors occur at all (only expected), there might be something different wrong:
             def error_action2():
                 print("[+] Glitch may be in the wrong position. Stop.")
                 sys.exit(-1)
-            #self.error_handler2.check(experiment_id=experiment_id, response=state, expected=b'error', keep=[b'ok', b'success', b'failure'], user_action=error_action2)  
+            self.error_handler2.check(experiment_id=experiment_id, response=state, expected=b'error', keep=[b'ok', b'success', b'failure'], user_action=error_action2)  
 
             # increase experiment id
             experiment_id += 1

@@ -224,7 +224,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
         if debug:
             now = round(time.time() * 1000)
         
-        # update databse 
+        # update database
         if not database:
             raise PreventUpdate
         
@@ -275,6 +275,18 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
         
         # create new DataFrame of recolored data
         df = pd.DataFrame.from_dict(records)
+
+        def convert_to_int(value):
+            """Convert value to integer, handling both decimal and hex formats."""
+            try:
+                return int(value)
+            except (ValueError, TypeError):
+                if isinstance(value, str) and value.lower().startswith('0x'):
+                    return int(value, 16)
+                raise
+        df[x_axis] = df[x_axis].apply(convert_to_int)
+        df[y_axis] = df[y_axis].apply(convert_to_int)
+        #print(df)
 
         # get amount of experiments
         nr_of_current_experiments = len(df) 
