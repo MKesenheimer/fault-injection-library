@@ -201,9 +201,9 @@ class STM32Bootloader:
         self.ser.write(crc)
         s = self.ser.read(1)
         if s != self.ACK:
-            return b'error: write bytes to read failed', b''
+            return b'error: write number of bytes to read failed', b''
         elif s == b'':
-            return b'error: no response after write bytes to read', b''
+            return b'error: no response after write number of bytes to read', b''
 
         # read memory
         mem = self.ser.read(size)

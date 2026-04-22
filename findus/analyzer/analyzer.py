@@ -87,7 +87,16 @@ class Heatmap():
     y_number_of_bins: int = 10
     color_scale:str = "findus"
 
-def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", aspect_ratio=0, auto_update_interval=0, debug=False, heatmap:Heatmap=None):
+def int_type(value):
+    """Convert value to integer, handling both decimal and hex formats."""
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        if isinstance(value, str) and value.lower().startswith('0x'):
+            return int(value, 16)
+        raise
+
+def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", aspect_ratio=0, auto_update_interval=0, heatmap:Heatmap=None, x_range=None, y_range=None, debug=False):
     DATABASE_DIRECTORY = directory
     app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
     app.css.config.serve_locally = True
@@ -95,7 +104,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
     app.layout = html.Div([
             html.Div([
                 html.H4('Fault Injection Analysis'),
-            ],style={'width':'80%','border-style':'none','margin':'0 auto'}),               
+            ],style={'width':'80%','border-style':'none','margin':'0 auto'}),
             html.Div([
                 html.Button("Update", id='update-button', n_clicks=0, style={'width':'20%'}),
                 html.Datalist(id="examples", children=[
@@ -224,7 +233,7 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
         if debug:
             now = round(time.time() * 1000)
         
-        # update databse 
+        # update database
         if not database:
             raise PreventUpdate
         
@@ -275,6 +284,16 @@ def run(directory, ip="127.0.0.1", port=8080, x_axis="delay", y_axis="length", a
         
         # create new DataFrame of recolored data
         df = pd.DataFrame.from_dict(records)
+        df[x_axis] = df[x_axis].apply(int_type)
+        df[y_axis] = df[y_axis].apply(int_type)
+
+        # Apply x_range and y_range filtering for zooming
+        if x_range is not None and len(x_range) == 2:
+            x_min, x_max = x_range
+            df = df[(df[x_axis] >= x_min) & (df[x_axis] <= x_max)]
+        if y_range is not None and len(y_range) == 2:
+            y_min, y_max = y_range
+            df = df[(df[y_axis] >= y_min) & (df[y_axis] <= y_max)]
 
         # get amount of experiments
         nr_of_current_experiments = len(df) 
@@ -577,6 +596,8 @@ def main(argv=sys.argv):
     parser.add_argument("--x-number-of-bins", "--x-bins", help="Number of bins of the x-axis for the heat map", required=False, default=10, type=int)
     parser.add_argument("--y-number-of-bins", "--y-bins", help="Number of bins of the y-axis for the heat map", required=False, default=10, type=int)
     parser.add_argument("--color-scale", help="Color scale to use for the heat map (findus, Blues, Reds, Greys, PuRd, YlOrRd).", required=False, default="findus", type=str)
+    parser.add_argument("--x-range", help="X-axis plot range as min max (e.g., 0 1000)", nargs=2, required=False, type=int_type)
+    parser.add_argument("--y-range", help="Y-axis plot range as min max (e.g., 0 500)", nargs=2, required=False, type=int_type)
 
     args = parser.parse_args()
 
@@ -584,7 +605,17 @@ def main(argv=sys.argv):
     if args.heatmap:
         heatmap = Heatmap(x_number_of_bins=args.x_number_of_bins, y_number_of_bins=args.y_number_of_bins, color_scale=args.color_scale)
 
-    run(directory=args.directory, ip=args.ip, port=args.port, x_axis=args.x, y_axis=args.y, aspect_ratio=args.aspect_ratio, auto_update_interval=args.auto_update, heatmap=heatmap, debug=True)
+    run(directory=args.directory,
+        ip=args.ip,
+        port=args.port,
+        x_axis=args.x,
+        y_axis=args.y,
+        aspect_ratio=args.aspect_ratio,
+        auto_update_interval=args.auto_update,
+        heatmap=heatmap,
+        x_range=args.x_range,
+        y_range=args.y_range,
+        debug=True)
 
 if __name__ == "__main__":
     main()

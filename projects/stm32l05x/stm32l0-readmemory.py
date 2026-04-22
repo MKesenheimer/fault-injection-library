@@ -20,6 +20,28 @@ from findus.STM32Bootloader import STM32Bootloader
 from findus import Database, PicoGlitcher, Helper, ErrorHandling
 from findus.DebugInterface import DebugInterface
 
+class DerivedPicoGlitcher(PicoGlitcher):
+    @staticmethod
+    def classify(state:bytes) -> str:
+        color = 'C'
+        if b'expected' in state:
+            color = 'G'
+        elif b'ok' in state:
+            color = 'C'
+        elif b'error: write number of bytes to read failed' in state:
+            color = 'C'
+        elif b'error' in state:
+            color = 'M'
+        elif b'failure' in state:
+            color = 'B'
+        elif b'timeout' in state:
+            color = 'Y'
+        elif b'warning' in state:
+            color = 'O'
+        elif b'success' in state:
+            color = 'R'
+        return color
+
 class Main:
     def __init__(self, args):
         self.args = args
@@ -28,7 +50,7 @@ class Main:
         logging.basicConfig(filename="execution.log", filemode="a", format="%(asctime)s %(message)s", level=logging.INFO, force=True)
 
         # glitcher
-        self.glitcher = PicoGlitcher()
+        self.glitcher = DerivedPicoGlitcher()
         # if argument args.power is not provided, the internal power-cycling capabilities of the pico-glitcher will be used. In this case, ext_power_voltage is not used.
         self.glitcher.init(port=args.rpico, ext_power=args.power, ext_power_voltage=3.3)
         self.glitcher.set_cpu_frequency(300_000_000)
@@ -66,7 +88,7 @@ class Main:
 
         # error handling
         self.error_handler = ErrorHandling(max_fails=15, look_back=20, database=self.database)
-        self.error_handler2 = ErrorHandling(max_fails=500, look_back=500, database=self.database)
+        self.error_handler2 = ErrorHandling(max_fails=1500, look_back=1500, database=self.database)
 
     def cleanup(self):
         print("[+] Cleaning up.")
@@ -99,10 +121,8 @@ class Main:
         while True:
             # flush garbage
             self.bootcom.flush()
-            #self.glitcher.cleanup_pio()
 
             # trigger on read-memory command
-            self.glitcher.switch_pio(0)
             self.glitcher.uart_trigger(0x11)
 
             # set up glitch parameters (in nano seconds) and arm glitcher
@@ -150,17 +170,17 @@ class Main:
             # dump memory
             mem = b''
             if b'success' in state:
-                # arm for the second time and trigger on 0xff (size of memory to read)
-                if not args.pulse_shaping and self.args.delay2 is not None and self.args.length2 is not None:
-                    self.glitcher.switch_pio(1)
-                    self.glitcher.uart_trigger(0xff)
-                    self.glitcher.arm(delay2, length2)
-
                 # this triggers the second glitch (if requested)
                 #state, mem = self.bootcom.dump_memory_to_file(self.dump_filename)
                 #start = 0x08000000
                 start = 0x08000000 - 0*0xFF
                 size = 0xFF
+
+                # arm for the second time and trigger on 0xff (size of memory to read)
+                if not args.pulse_shaping and self.args.delay2 is not None and self.args.length2 is not None:
+                    self.glitcher.uart_trigger(size)
+                    self.glitcher.arm(delay2, length2)
+
                 state, mem = self.bootcom.read_memory(start, size)
 
                 # block until glitch
@@ -208,14 +228,14 @@ class Main:
                 self.bootcom.flush()
                 # reprogram the target
                 print("[+] Programming target.")
-                self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l051.elf", rdp_level=1)
+                self.debugger.program_target(glitcher=self.glitcher, elf_image="toggle-led-stm32l051.elf", unlock=True,  rdp_level=1, verbose=True)
                 self.glitcher.power_cycle_target(1)
-            self.error_handler.check(experiment_id=experiment_id, response=state, expected=b'expected', keep=[b'ok', b'success', b'failure'], user_action=error_action)
+            self.error_handler.check(experiment_id=experiment_id, response=state, expected=b'expected', keep=[b'success', b'failure'], recolor='O', user_action=error_action)
             # if no errors occur at all (only expected), there might be something different wrong:
             def error_action2():
                 print("[+] Glitch may be in the wrong position. Stop.")
                 sys.exit(-1)
-            self.error_handler2.check(experiment_id=experiment_id, response=state, expected=b'error', keep=[b'ok', b'success', b'failure'], user_action=error_action2)  
+            self.error_handler2.check(experiment_id=experiment_id, response=state, expected=b'error', keep=[b'ok', b'success', b'failure'], recolor='O', user_action=error_action2)  
 
             # increase experiment id
             experiment_id += 1

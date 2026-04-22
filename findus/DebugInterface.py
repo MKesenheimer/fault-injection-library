@@ -752,7 +752,7 @@ class DebugInterface():
             response += self.telnet_interact(command)
         return self.extract_memory_content(response=response, address=address), response
 
-    def telnet_parse_registers(self, input_data: str) -> dict:
+    def telnet_parse_registers(self, input_data: str) -> dict[str, str]:
         """
         Parses a string of register names and their hexadecimal values into a dictionary.
 

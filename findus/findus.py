@@ -1414,7 +1414,7 @@ class ErrorHandling():
         print("[-] Successive error occurred. Exiting.")
         sys.exit(-1)
 
-    def check(self, experiment_id:int, response:bytes, expected:bytes = b'expected', keep:list[bytes] = None, user_action = None):
+    def check(self, experiment_id:int, response:bytes, expected:bytes = b'expected', keep:list[bytes] = None, user_action = None, recolor:str = 'O'):
         """
         Check for consecutive errors and act accordingly.
 
@@ -1483,7 +1483,7 @@ class ErrorHandling():
                     parameters = self.database.get_parameters_of_experiment_rel(last_good + 1)
                     response = b'error: successive error occurred'
                     try:
-                        parameters = (last_good + 2, ) + parameters[1:-2] + ('O', response)
+                        parameters = (last_good + 2, ) + parameters[1:-2] + (recolor, response)
                         self.database.insert(*parameters)
                     except Exception as _:
                         pass
