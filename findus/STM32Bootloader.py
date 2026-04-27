@@ -206,12 +206,12 @@ class STM32Bootloader:
             return b'error: no response after write number of bytes to read', b''
 
         # read memory
-        mem = self.ser.read(size)
+        mem = self.ser.read(size + 1)
 
         print(f"[+] Length of memory dump: {len(mem)}")
         print(f"[+] Content: {mem}")
         response = b'ok'
-        if len(mem) == 255 and mem != b"\x00" * 255:
+        if len(mem) == 256 and mem != b"\x00" * 256:
             response = b'success: dump ok'
         elif len(mem) == 0:
             response = b'failure: no response after read memory'
@@ -238,7 +238,7 @@ class STM32Bootloader:
             self.ser.read(1)
 
             # read memory
-            mem = self.ser.read(255)
+            mem = self.ser.read(256)
 
             if mem != b'\x1f' and mem != b'\x79' and mem != b'':
                 print(f"[+] Length of memory dump: {len(mem)}")
@@ -266,12 +266,12 @@ class STM32Bootloader:
         self.ser.read(1)
 
         # read memory
-        mem = self.ser.read(size)
+        mem = self.ser.read(size + 1)
 
         print(f"[+] Length of memory dump: {len(mem)}")
         print(f"[+] Content: {mem}")
         response = b'ok'
-        if len(mem) == 255 and mem != b"\x00" * 255:
+        if len(mem) == 256 and mem != b"\x00" * 256:
             response = b'success: dump ok'
         else:
             response = b'ok: dump error'
