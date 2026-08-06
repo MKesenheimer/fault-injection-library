@@ -37,6 +37,86 @@ def glitch():
     # tell execution finished (fills the sm's fifo buffer)
     push(block)
 
+@asm_pio(out_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), out_shiftdir=PIO.SHIFT_RIGHT)
+def glitch_hstx_rising_edge():
+    """
+    Feed a 32-half-cycle waveform to the RP2350 HSTX coupled-mode input.
+
+    HSTX serialises the two PIO outputs during the first and second half of
+    each system-clock cycle.  The waveform is unrolled because a PIO loop
+    instruction would repeat the previous DDR pair for an extra cycle.
+    """
+    # Full system-clock cycles before the 32-half-cycle waveform window.
+    pull(block)
+    mov(x, osr)
+    # Two waveform bits per PIO cycle, least-significant pair first.
+    pull(block)
+
+    # The waveform state machine runs on dedicated PIO1, so it samples the trigger
+    # directly rather than waiting for an IRQ from a different PIO block.
+    wait(0, pin, 0).side(0b1)
+    wait(1, pin, 0)
+    irq(0)
+
+    label("delay_loop")
+    jmp(x_dec, "delay_loop")
+
+    # One OUT per cycle is required for uninterrupted DDR serialisation.
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    # OSR is now zero, so this terminates even a 32-half-cycle pulse.
+    out(pins, 2).side(0b0)
+
+    push(block)
+
+@asm_pio(out_init=(PIO.OUT_LOW, PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), out_shiftdir=PIO.SHIFT_RIGHT)
+def glitch_hstx_falling_edge():
+    """Falling-edge variant of :func:`glitch_hstx_rising_edge`."""
+    pull(block)
+    mov(x, osr)
+    pull(block)
+
+    wait(1, pin, 0).side(0b1)
+    wait(0, pin, 0)
+    irq(0)
+
+    label("delay_loop")
+    jmp(x_dec, "delay_loop")
+
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2)
+    out(pins, 2).side(0b0)
+
+    push(block)
+
 @asm_pio(set_init=(PIO.OUT_LOW), sideset_init=(PIO.OUT_LOW), out_shiftdir=PIO.SHIFT_RIGHT)
 def glitch_burst():
     # block until delay received

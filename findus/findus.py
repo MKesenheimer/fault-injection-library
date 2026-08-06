@@ -476,7 +476,8 @@ class PicoGlitcherInterface(MicroPythonScript):
         self.pyb.exec(f'mp.set_frequency({frequency})')
 
     def get_frequency(self):
-        return self.pyb.exec('mp.get_frequency()')
+        frequency_bytes = self.pyb.exec('mp.get_frequency()')
+        return int(frequency_bytes.decode('utf-8').strip())
 
     def set_baudrate(self, baud:int):
         self.pyb.exec(f'mp.set_baudrate({baud})')
@@ -504,6 +505,9 @@ class PicoGlitcherInterface(MicroPythonScript):
             self.pyb.exec(f'mp.arm({delay}, {length})')
         else:
             self.pyb.exec(f'mp.arm({delay}, {length}, {number_of_pulses}, {delay_between})')
+
+    def arm_hstx(self, delay:float, length:float):
+        self.pyb.exec(f'mp.arm_hstx({delay}, {length})')
 
     def arm_double(self, delay1:int, length1:int, delay2:int, length2:int):
         self.pyb.exec(f'mp.arm_double({delay1}, {length1}, {delay2}, {length2})')
@@ -736,6 +740,7 @@ class PicoGlitcher(Glitcher):
         __init__: Default constructor. Does nothing in this case.
         init: Default initialization procedure.
         arm: Arm the Pico Glitcher and wait for trigger condition.
+        arm_hstx: Arm an RP2350 HSTX-assisted crowbar glitch.
         block: Block the main script until trigger condition is met. Times out.
         reset: Reset the target via the Pico Glitcher's `RESET` output.
         release_reset: Release the reset to the target via the Pico Glitcher's `RESET` output.
@@ -850,6 +855,22 @@ class PicoGlitcher(Glitcher):
             delay_between: The delay between each pulse.
         """
         self.pico_glitcher.arm(delay, length, number_of_pulses, delay_between)
+
+    def arm_hstx(self, delay:float, length:float):
+        """
+        Arm an RP2350 HSTX-assisted crowbar glitch.
+
+        This mode is available on Pico Glitcher v3. At the default 250 MHz
+        clock, ``delay`` and ``length`` use 2 ns quanta.
+        The length is limited to 64 ns (62 ns when the delay starts on the
+        second half-cycle). HSTX output timing does not include the analogue
+        switching time of the MOSFET or target rail.
+
+        Parameters:
+            delay: Trigger-to-glitch delay in nanoseconds.
+            length: Digital HSTX pulse length in nanoseconds.
+        """
+        self.pico_glitcher.arm_hstx(delay, length)
 
     def arm_double(self, delay1:int, length1:int, delay2:int, length2:int):
         """
