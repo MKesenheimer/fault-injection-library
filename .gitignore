@@ -28,6 +28,8 @@ schematics/kicad/stm32l05-target-v1.0
 schematics/product
 *.pdf
 private-examples
+projects/spc584b/databases/
+projects/spc584b/run-artifacts/
 *.hex
 *.elf
 findus/firmware/test_irq.py
