@@ -287,7 +287,7 @@ The script `nrf52832-glitching.py` located at `projects/nrf52832` (or [here](htt
 
 ```bash
 cd fault-injection-library/projects/nrf52832
-python pico-glitcher.py --rpico /dev/<rpi-tty-port> --delay 300 600 --length 3_300_000 3_600_000
+python nrf52832-glitching.py --rpico /dev/<rpi-tty-port> --length 300 600 --delay 3_300_000 3_600_000
 ```
 
 Note, in order to communicate with the Airtag over SWD, [openocd](https://openocd.org) must be installed. Additionally, the script [testnrf.cfg](https://github.com/MKesenheimer/fault-injection-library/blob/master/projects/nrf52832/testnrf.cfg) must be in the root directory of the script `pico-glitcher.py`.
