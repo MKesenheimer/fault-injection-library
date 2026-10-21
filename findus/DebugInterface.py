@@ -5,6 +5,8 @@
 # You should have received a copy of the GPL3 license with this file.
 # If not, please write to: info@faultyhardware.de.
 
+from __future__ import annotations
+
 # programming
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; stm32l0x unlock 0; shutdown"
 # > openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32l0.cfg -c "init; halt; program rdp-downgrade-stm32l051.elf; reset run; shutdown;"
