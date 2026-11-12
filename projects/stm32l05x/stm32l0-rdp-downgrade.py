@@ -279,8 +279,9 @@ class Main:
                 print(self.glitcher.colorize(f"[+] Experiment {experiment_id}\t{experiment_base_id}\t({speed})\t{delay}\t{length}\t{number_of_pulses}\t{delay_between}\t{color}\t{state}", color))
 
             # attack finished
-            if experiment_base_id + experiment_id >= self.args.number_of_experiments:
-                break
+            if self.args.number_of_experiments is not None:
+                if experiment_base_id + experiment_id >= self.args.number_of_experiments:
+                    break
             if self.args.oneshot:
                 break
             if not self.args.test and (b'success' in state or b'ok' in state):

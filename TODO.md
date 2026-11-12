@@ -7,3 +7,4 @@
 * use consistent time units for all functions.
 * implement shell completion with 'click'
 * check minimal python version before installation
+* RPI overclocking guide: https://gist.github.com/MichaelBell/c413356f4c45bf9aef98cd23ceb83057
