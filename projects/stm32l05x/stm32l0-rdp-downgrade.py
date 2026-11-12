@@ -152,10 +152,14 @@ class Main:
         print("[+] Programming target with program to downgrade to RDP 0 (to RAM).")
         if self.args.power is not None:
             self.ext_power_supply.set_voltage(3.1)
-        self.debugger.attach(delay=0.1)
-        self.debugger.gdb_load_exec(elf_image=elf_image, timeout=0.4, verbose=False)
-        self.debugger.gdb_interrupt_disconnect(timeout=0.4, halt_target=False, verbose=False)
-        self.debugger.detach()
+        try:
+            self.debugger.attach(delay=0.1)
+            self.debugger.gdb_load_exec(elf_image=elf_image, timeout=0.4, verbose=False)
+            self.debugger.gdb_interrupt_disconnect(timeout=0.4, halt_target=False, verbose=False)
+        except TimeoutError as e:
+            print(f"[-] Error: GDB command timed out in rdp_downgrade(): {e}")
+        finally:
+            self.debugger.detach()
 
     def run(self):
         # log execution

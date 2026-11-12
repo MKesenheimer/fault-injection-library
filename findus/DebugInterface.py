@@ -49,6 +49,8 @@
 import time
 import subprocess
 import re
+import os
+import select
 import socket
 from findus import PicoGlitcher
 
@@ -74,6 +76,7 @@ class DebugInterface():
         """
         self.openocd_process = None
         self.gdb_process = None
+        self._gdb_stdout_buffer = b""
         self.target_name = target
         self.socket = None
         self.gdb_exec = gdb_exec
@@ -475,13 +478,9 @@ class DebugInterface():
             TimeoutError: If the command times out
             RuntimeError: If the GDB process exits unexpectedly or encounters an error
         """
-        start = time.time()
+        deadline = time.monotonic() + timeout
         while True:
-            if time.time() - start > timeout:
-                raise TimeoutError("GDB MI command timed out")
-            line = self.gdb_process.stdout.readline()
-            if not line:
-                raise RuntimeError("GDB exited unexpectedly")
+            line = self._read_gdb_line(deadline)
             line = line.strip()
             if verbose:
                 print(line)
@@ -496,6 +495,40 @@ class DebugInterface():
             for ok in ok_prefixes:
                 if line.startswith(ok):
                     return line
+
+    def _read_gdb_line(self, deadline: float) -> str:
+        """
+        Read one line from GDB's stdout without blocking past the deadline.
+
+        select() is used on the raw file descriptor and the data is read with
+        os.read() directly. Reading through the buffered TextIOWrapper would be
+        wrong here: readline() may pull several lines into its internal buffer,
+        which select() can no longer see.
+
+        Parameters:
+            deadline: time.monotonic() value after which a TimeoutError is raised.
+
+        Raises:
+            TimeoutError: If no complete line is available before the deadline.
+            RuntimeError: If the GDB process closed its stdout.
+        """
+        fd = self.gdb_process.stdout.fileno()
+        while b"\n" not in self._gdb_stdout_buffer:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError("GDB MI command timed out")
+            ready, _, _ = select.select([fd], [], [], remaining)
+            if not ready:
+                raise TimeoutError("GDB MI command timed out")
+            chunk = os.read(fd, 4096)
+            if not chunk:
+                if self._gdb_stdout_buffer:
+                    line, self._gdb_stdout_buffer = self._gdb_stdout_buffer, b""
+                    return line.decode("utf-8", errors="replace")
+                raise RuntimeError("GDB exited unexpectedly")
+            self._gdb_stdout_buffer += chunk
+        line, _, self._gdb_stdout_buffer = self._gdb_stdout_buffer.partition(b"\n")
+        return line.decode("utf-8", errors="replace")
         
     def mi(self, cmd, verbose=False):
         """
@@ -529,6 +562,7 @@ class DebugInterface():
             errors="replace",
             bufsize=1,  # line-buffered
         )
+        self._gdb_stdout_buffer = b""
         self.mi(f"-file-exec-and-symbols {elf_image}", verbose=verbose)
         self.mi_wait_done(timeout=timeout, verbose=verbose)
         self.mi(f"-target-select extended-remote localhost:{self.gdb_port}", verbose=verbose)
@@ -602,6 +636,7 @@ class DebugInterface():
             errors="replace",
             bufsize=1,  # line-buffered
         )
+        self._gdb_stdout_buffer = b""
         self.mi(f"-target-select extended-remote localhost:{self.gdb_port}", verbose=verbose)
         line = self.mi_wait_done(timeout=timeout, ok_prefixes=("^connected",), verbose=verbose)
         self.mi(f"monitor init", verbose=verbose)
@@ -648,12 +683,20 @@ class DebugInterface():
         if halt_target:
             self.mi("-exec-interrupt", verbose=verbose)
             self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
-        self.mi("-target-disconnect", verbose=verbose)
-        self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
-        self.mi("-gdb-exit", verbose=verbose)
-        self.mi_wait_done(timeout=timeout, ok_prefixes=("^exit",), verbose=verbose)
+            self.mi("-target-disconnect", verbose=verbose)
+            self.mi_wait_done(timeout=timeout, ok_prefixes=("^done",), verbose=verbose)
+            self.mi("-gdb-exit", verbose=verbose)
+            self.mi_wait_done(timeout=timeout, ok_prefixes=("^exit",), verbose=verbose)
+        # GDB does not complete -target-disconnect or -gdb-exit while the
+        # target is running (it waits for the target to stop). If the target
+        # should keep running, terminate the GDB process directly instead. This
+        # detaches GDB and leaves the target executing.
         self.gdb_process.terminate()
-        self.gdb_process.wait(timeout=timeout)
+        try:
+            self.gdb_process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            self.gdb_process.kill()
+            self.gdb_process.wait()
 
     def detach(self):
         """
