@@ -22,6 +22,34 @@ import Globals
 import sys
 import Statemachines
 
+# RP2350 register definitions used by the PIO-to-HSTX coupled mode.  These
+# values come from the RP2350 datasheet and pico-sdk generated headers.
+_CLOCKS_BASE = 0x40010000
+_CLK_HSTX_CTRL = _CLOCKS_BASE + 0x54
+_CLK_HSTX_DIV = _CLOCKS_BASE + 0x58
+_CLK_HSTX_ENABLE = 1 << 11
+_CLK_HSTX_ENABLED = 1 << 28
+_CLK_HSTX_AUXSRC_MASK = 0x7 << 5
+
+_IO_BANK0_BASE = 0x40028000
+_GPIO_CTRL_FUNCSEL_MASK = 0x1f
+_GPIO_FUNC_HSTX = 0
+
+_HSTX_CTRL_BASE = 0x400c0000
+_HSTX_CSR = _HSTX_CTRL_BASE + 0x00
+_HSTX_BIT0 = _HSTX_CTRL_BASE + 0x04
+_HSTX_COUPLED_MODE = 1 << 4
+_HSTX_COUPLED_SEL_LSB = 5
+_HSTX_ENABLE = 1
+
+_HSTX_FIRST_GPIO = 12
+_HSTX_LAST_GPIO = 19
+_HSTX_PIO_SOURCE_BASE = 12
+_HSTX_PIO_SOURCE_P = 24
+_HSTX_PIO_SOURCE_N = 25
+_HSTX_MAX_WAVEFORM_BITS = 32
+_HSTX_PIO_BASE = 1
+
 class PicoGlitcher():
     """
     Class that contains the code to access the hardware of the Pico Glitcher.
@@ -40,6 +68,14 @@ class PicoGlitcher():
         self.sm0 = PIO(0).state_machine(0)
         self.sm1 = PIO(0).state_machine(1)
         self.sm2 = PIO(0).state_machine(2)
+        self.pio_base = 0
+        self.hstx_active = False
+        self._hstx_completed = False
+        self._hstx_saved_state = None
+        self._hstx_sm = None
+        self._hstx_program = None
+        self._hstx_original_sm0 = None
+        self._hstx_original_pio_base = None
         self.cleanup_pio()
         self.frequency = None
         self.trigger_mode = "tio"
@@ -90,6 +126,7 @@ class PicoGlitcher():
         self.pin_lpglitch.low()
         # which glitching transistor to use. Default: lpglitch
         self.pin_glitch = self.pin_lpglitch
+        self.pin_glitch_number = Globals.LP_GLITCH
         # standard dead zone after power down
         self.dead_time = 0.0
         self.pin_condition = self.pin_glitch_en
@@ -99,6 +136,7 @@ class PicoGlitcher():
         self.fastadc = FastADC()
         self.fastsamples = self.fastadc.init_array()
         self.adc_samples_captured = False
+        self.adc_armed = False
         # gpio outputs (are configured later as required)
         self.pin_gpios = {}
         # pins for multiplexing and pulse-shaping (only hardware version 2 and later)
@@ -122,9 +160,11 @@ class PicoGlitcher():
             self.pulse_generator = PulseGenerator(vhigh=self.config["ps_offset"], factor=self.config["ps_factor"])
 
     def switch_pio(self, pio_base):
+        self._disable_hstx()
         self.sm0 = PIO(pio_base).state_machine(0)
         self.sm1 = PIO(pio_base).state_machine(1)
         self.sm2 = PIO(pio_base).state_machine(2)
+        self.pio_base = pio_base
 
     def waveform_generator(self, frequency:int = AD910X.DEFAULT_FREQUENCY, gain:float = AD910X.DEFAULT_GAIN, waveid:int = AD910X.WAVE_TRIANGLE):
         if self.config["hardware_version"][0] < 2:
@@ -152,6 +192,7 @@ class PicoGlitcher():
         Parameters:
             frequency: the CPU frequency.
         """
+        self._disable_hstx()
         machine.freq(frequency)
         self.frequency = machine.freq()
 
@@ -389,8 +430,10 @@ class PicoGlitcher():
 
         The glitch output is an SMA-connected output line that is normally connected to a target's power rails. If this setting is enabled, a low-powered MOSFET shorts the power-rail to ground when the glitch module's output is active.
         """
+        self._disable_hstx()
         self.glitch_mode = "crowbar"
         self.pin_glitch = self.pin_lpglitch
+        self.pin_glitch_number = Globals.LP_GLITCH
 
     def set_hpglitch(self):
         """
@@ -398,22 +441,27 @@ class PicoGlitcher():
 
         The glitch output is an SMA-connected output line that is normally connected to a target's power rails. If this setting is enabled, a low-powered MOSFET shorts the power-rail to ground when the glitch module's output is active.
         """
+        self._disable_hstx()
         self.glitch_mode = "crowbar"
         self.pin_glitch = self.pin_hpglitch
+        self.pin_glitch_number = Globals.HP_GLITCH
 
     def set_ext_mosfet(self, pin=Globals.EXT_GLITCH):
         """
         Enable the external mosfet triggering on GPIO19
         """
+        self._disable_hstx()
         self.pin_ext_mosfet = Pin(pin, Pin.OUT, Pin.PULL_DOWN)
         self.pin_ext_mosfet.low()
         self.glitch_mode = "crowbar"
         self.pin_glitch = self.pin_ext_mosfet
+        self.pin_glitch_number = pin
 
     def set_multiplexing(self):
         """
         Enables the multiplexing mode of the Pico Glitcher version 2 to switch between different voltage levels.
         """
+        self._disable_hstx()
         if self.config["hardware_version"][0] < 2:
             raise Exception("Multiplexing not implemented in hardware version 1.")
         self.glitch_mode = "mul"
@@ -423,6 +471,7 @@ class PicoGlitcher():
         """
         Enables the pulse-shaping mode of the Pico Glitcher version 2 to emit a pre-defined voltage pulse on the Pulse Shaping expansion board.
         """
+        self._disable_hstx()
         if self.config["hardware_version"][0] < 2:
             raise Exception("Pulse-shaping not implemented in hardware version 1.")
         self.glitch_mode = "pul"
@@ -486,6 +535,7 @@ class PicoGlitcher():
         self.condition = condition
 
     def cleanup_pio(self):
+        self._disable_hstx()
         if self.sm0 is not None:
             self.sm0.active(0)
             self.sm0.irq(handler=None)
@@ -503,6 +553,105 @@ class PicoGlitcher():
                 self.sm2.get()
         PIO(0).remove_program()
         PIO(1).remove_program()
+
+    @staticmethod
+    def _gpio_ctrl_address(pin_number:int) -> int:
+        return _IO_BANK0_BASE + pin_number * 8 + 4
+
+    def _enable_hstx(self, output_pin:int):
+        """Route two PIO outputs through one RP2350 HSTX DDR output."""
+        mux_pins = sorted(set((_HSTX_PIO_SOURCE_BASE,
+                               _HSTX_PIO_SOURCE_BASE + 1,
+                               output_pin)))
+        self._hstx_saved_state = {
+            "clock_ctrl": machine.mem32[_CLK_HSTX_CTRL],
+            "clock_div": machine.mem32[_CLK_HSTX_DIV],
+            "csr": machine.mem32[_HSTX_CSR],
+            "bits": [machine.mem32[_HSTX_BIT0 + lane * 4] for lane in range(8)],
+            "gpio_ctrl": [(pin, machine.mem32[self._gpio_ctrl_address(pin)]) for pin in mux_pins],
+            "output_pin": output_pin,
+            "pad": machine.mem32[Globals.PADS_BANK0_BASE + 4 + output_pin * 4],
+        }
+        self.hstx_active = True
+
+        # Coupled mode requires clk_hstx to be sourced directly from clk_sys.
+        clock_ctrl = machine.mem32[_CLK_HSTX_CTRL]
+        machine.mem32[_CLK_HSTX_CTRL] = clock_ctrl & ~_CLK_HSTX_ENABLE
+        while machine.mem32[_CLK_HSTX_CTRL] & _CLK_HSTX_ENABLED:
+            pass
+        machine.mem32[_CLK_HSTX_DIV] = 1 << 16
+        clock_ctrl &= ~_CLK_HSTX_AUXSRC_MASK
+        machine.mem32[_CLK_HSTX_CTRL] = clock_ctrl | _CLK_HSTX_ENABLE
+
+        # Keep every unused HSTX lane low.  The selected lane consumes PIO12
+        # during the first half-cycle and PIO13 during the second half-cycle.
+        for lane in range(8):
+            machine.mem32[_HSTX_BIT0 + lane * 4] = 0
+        lane = output_pin - _HSTX_FIRST_GPIO
+        machine.mem32[_HSTX_BIT0 + lane * 4] = (_HSTX_PIO_SOURCE_N << 8) | _HSTX_PIO_SOURCE_P
+        machine.mem32[_HSTX_CSR] = (_HSTX_COUPLED_MODE |
+                                    (_HSTX_PIO_BASE << _HSTX_COUPLED_SEL_LSB) |
+                                    _HSTX_ENABLE)
+
+        # Select HSTX on the source pins as well as the physical output so the
+        # internal PIO source pattern cannot leak onto another GPIO/MOSFET.
+        for pin in mux_pins:
+            ctrl_address = self._gpio_ctrl_address(pin)
+            ctrl = machine.mem32[ctrl_address]
+            machine.mem32[ctrl_address] = ((ctrl & ~_GPIO_CTRL_FUNCSEL_MASK) |
+                                           _GPIO_FUNC_HSTX)
+
+        # Fast slew and maximum pad drive minimise distortion at the MOSFET
+        # gate. Preserve all other pad settings.
+        pad_address = Globals.PADS_BANK0_BASE + 4 + output_pin * 4
+        pad = machine.mem32[pad_address]
+        machine.mem32[pad_address] = (pad & ~(0x3 << 4)) | (0x3 << 4) | 0x1
+
+    def _disable_hstx(self):
+        """Restore registers changed by :meth:`_enable_hstx`."""
+        hstx_sm = getattr(self, "_hstx_sm", None)
+        if hstx_sm is not None:
+            hstx_sm.active(0)
+            hstx_sm.irq(handler=None)
+            while hstx_sm.rx_fifo() != 0:
+                hstx_sm.get()
+        hstx_program = getattr(self, "_hstx_program", None)
+        if hstx_program is not None:
+            try:
+                PIO(_HSTX_PIO_BASE).remove_program(hstx_program)
+            except Exception:
+                pass
+
+        state = getattr(self, "_hstx_saved_state", None)
+        if state is not None:
+            machine.mem32[_HSTX_CSR] = 0
+            for lane, value in enumerate(state["bits"]):
+                machine.mem32[_HSTX_BIT0 + lane * 4] = value
+            for pin, value in state["gpio_ctrl"]:
+                machine.mem32[self._gpio_ctrl_address(pin)] = value
+            machine.mem32[Globals.PADS_BANK0_BASE + 4 + state["output_pin"] * 4] = state["pad"]
+
+            clock_ctrl = machine.mem32[_CLK_HSTX_CTRL]
+            machine.mem32[_CLK_HSTX_CTRL] = clock_ctrl & ~_CLK_HSTX_ENABLE
+            while machine.mem32[_CLK_HSTX_CTRL] & _CLK_HSTX_ENABLED:
+                pass
+            machine.mem32[_CLK_HSTX_DIV] = state["clock_div"]
+            machine.mem32[_CLK_HSTX_CTRL] = state["clock_ctrl"]
+            machine.mem32[_HSTX_CSR] = state["csr"]
+
+        original_sm0 = getattr(self, "_hstx_original_sm0", None)
+        if original_sm0 is not None:
+            self.sm0 = original_sm0
+        original_pio_base = getattr(self, "_hstx_original_pio_base", None)
+        if original_pio_base is not None:
+            self.pio_base = original_pio_base
+
+        self.hstx_active = False
+        self._hstx_saved_state = None
+        self._hstx_sm = None
+        self._hstx_program = None
+        self._hstx_original_sm0 = None
+        self._hstx_original_pio_base = None
 
     def __arm_common(self):
         self.sm1.active(0)
@@ -561,6 +710,7 @@ class PicoGlitcher():
             number_of_pulses: The number of pulses to emit. This can be used to emit bursts of crowbar glitches.
             delay_between: The delay between each pulse.
         """
+        self._disable_hstx()
         self.sm0.active(0)
         if number_of_pulses == 1:
             # state machine that emits the glitch if the trigger condition is met
@@ -582,6 +732,81 @@ class PicoGlitcher():
         # call common arm function
         self.__arm_common()
 
+    def arm_hstx(self, delay:float, length:float):
+        """
+        Arm an RP2350 HSTX-assisted crowbar glitch.
+
+        Delay and length are specified in nanoseconds and must be exact
+        multiples of half a system-clock period.  At the default 250 MHz this
+        is 2 ns.  The pulse must fit in the 32-half-cycle waveform window.
+        """
+        if self.config["hardware_version"][0] != 3:
+            raise Exception("HSTX glitching requires Pico Glitcher v3.")
+        if self.glitch_mode != "crowbar":
+            raise Exception("HSTX glitching is only available in crowbar mode.")
+        if self.trigger_mode != "tio":
+            raise Exception("HSTX glitching currently supports only the direct TIO trigger mode.")
+        if self.dead_time != 0:
+            raise Exception("HSTX glitching does not support a trigger dead zone.")
+        if self.pio_base == _HSTX_PIO_BASE:
+            raise Exception("HSTX reserves PIO1; call switch_pio(0) before arming it.")
+        if self.pin_glitch_number < _HSTX_FIRST_GPIO or self.pin_glitch_number > _HSTX_LAST_GPIO:
+            raise Exception("HSTX glitch output must be GPIO12 through GPIO19.")
+        if delay < 0:
+            raise Exception("HSTX delay must not be negative.")
+
+        ticks_per_ns = (2 * self.frequency) / 1_000_000_000
+        delay_ticks_float = float(delay) * ticks_per_ns
+        length_ticks_float = float(length) * ticks_per_ns
+        delay_ticks = int(delay_ticks_float + 0.5)
+        length_ticks = int(length_ticks_float + 0.5)
+        tolerance = 0.000001
+        if abs(delay_ticks_float - delay_ticks) > tolerance:
+            raise Exception("HSTX delay must be a multiple of half a system-clock period.")
+        if abs(length_ticks_float - length_ticks) > tolerance:
+            raise Exception("HSTX length must be a multiple of half a system-clock period.")
+        if length_ticks < 1:
+            raise Exception("HSTX length must be at least one half-cycle.")
+
+        start_half = delay_ticks & 1
+        if start_half + length_ticks > _HSTX_MAX_WAVEFORM_BITS:
+            raise Exception("HSTX pulse exceeds the 32-half-cycle waveform window.")
+        delay_cycles = delay_ticks >> 1
+        if delay_cycles > 0xffffffff:
+            raise Exception("HSTX delay exceeds the PIO counter range.")
+        waveform = ((1 << length_ticks) - 1) << start_half
+
+        self._disable_hstx()
+        self._hstx_completed = False
+        self.sm1.active(0)
+        self.sm2.active(0)
+        self._hstx_original_sm0 = self.sm0
+        self._hstx_original_pio_base = self.pio_base
+        self._hstx_sm = PIO(_HSTX_PIO_BASE).state_machine(0)
+        self.sm0 = self._hstx_sm
+        try:
+            self.sm0.active(0)
+            if self.trigger_inverting:
+                sm_func = Statemachines.glitch_hstx_falling_edge
+            else:
+                sm_func = Statemachines.glitch_hstx_rising_edge
+            self._hstx_program = sm_func
+            self.sm0.init(sm_func,
+                          freq=self.frequency,
+                          in_base=self.pin_trigger,
+                          out_base=Pin(_HSTX_PIO_SOURCE_BASE),
+                          sideset_base=self.pin_glitch_en)
+            if self.adc_armed:
+                self.sm0.irq(handler=self.__poll_fast_adc)
+            self._enable_hstx(self.pin_glitch_number)
+            self.sm0.put(delay_cycles)
+            self.sm0.put(waveform)
+            self.armed = True
+            self.sm0.active(1)
+        except Exception:
+            self._disable_hstx()
+            raise
+
     def arm_double(self, delay1:int, length1:int, delay2:int, length2:int):
         """
         Arm the Pico Glitcher and wait for the trigger condition. The trigger condition can either be when the reset on the target is released or when a certain pattern is observed in the serial communication. This functions emits two glitches after a given time, each measured separately from the trigger condition.
@@ -593,6 +818,7 @@ class PicoGlitcher():
             delay2: Second glitch is emitted after this time measured from the trigger condition.
             length2: Length of the second glitch in nano seconds.
         """
+        self._disable_hstx()
         if delay2 <= delay1 + length1:
             raise Exception("Second glitch collides with first one; delay2 too short.")
 
@@ -630,6 +856,7 @@ class PicoGlitcher():
             mul_config: The dictionary for the multiplexing profile with pairs of identifiers and values. For example, this could be `{"t1": 10, "v1": "GND", "t2": 20, "v2": "1.8", "t3": 30, "v3": "GND", "t4": 40, "v4": "1.8"}`. Meaning that when triggered, a GND-voltage pulse with duration of `10ns` is emitted, followed by a +1.8V step with duration of `20ns` and so on.
             vinit: The initial value of the multiplexer. If `"config"` is chosen, the initial value is read from the configuration file. Additionally, the user can choose between `"VI1"` or `"VI2"`.
         """
+        self._disable_hstx()
         if self.config["hardware_version"][0] < 2:
             raise Exception("Multiplexing not implemented in hardware version 1.")
 
@@ -746,6 +973,7 @@ class PicoGlitcher():
         self.__arm_pulseshaping(delay, pulse)
 
     def __arm_pulseshaping(self, delay:int, pulse:list[int]):
+        self._disable_hstx()
         if self.config["hardware_version"][0] < 2:
             raise Exception("Multiplexing not implemented in hardware version 1.")
 
@@ -774,15 +1002,23 @@ class PicoGlitcher():
         if self.sm0 is not None:
             timeout_ms = int(timeout * 1_000)
             start_time = time.ticks_ms()
+            completed = False
             while time.ticks_diff(time.ticks_ms(), start_time) < timeout_ms:
                 if self.sm0.rx_fifo() > 0:
+                    was_hstx = self.hstx_active
                     self.armed = False
+                    self._disable_hstx()
+                    if was_hstx:
+                        self._hstx_completed = True
+                    completed = True
                     break
-            if time.ticks_diff(time.ticks_ms(), start_time) >= timeout_ms:
+            if not completed:
                 self.sm0.active(0)
                 self.pin_glitch_en.low()
                 self.adc_samples_captured = True
+                self.adc_armed = False
                 self.armed = False
+                self._disable_hstx()
                 raise Exception("Function execution timed out!")
 
     def check_glitch(self) -> bool:
@@ -792,8 +1028,15 @@ class PicoGlitcher():
         Returns:
             Returns True if statemachine 0, that is used for glitch generation, was triggered.
         """
+        if self._hstx_completed:
+            self._hstx_completed = False
+            print(True)
+            return True
         if self.sm0 is not None:
             check = self.sm0.rx_fifo() > 0
+            if check:
+                self.armed = False
+                self._disable_hstx()
             print(check)
             return check
 
@@ -862,12 +1105,14 @@ class PicoGlitcher():
         # this code runs with ~2us per sample -> 450 ksps
         self.fastsamples = self.fastadc.read()
         self.adc_samples_captured = True
+        self.adc_armed = False
 
     def arm_adc(self):
         """
         Arm the ADC on pin 26 and capture ADC samples if the trigger condition is met. On Pico Glitcher hardware version 1, the separate SMA connector labeled `Analog` can be used to measure analog voltage traces. On revision 2, the analog input is directly connected to the `GLITCH` line.
         """
         self.adc_samples_captured = False
+        self.adc_armed = True
         self.sm0.irq(handler=self.__poll_fast_adc)
 
     def get_adc_samples(self, timeout:float = 1.0):

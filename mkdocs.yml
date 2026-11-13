@@ -7,6 +7,7 @@ nav:
   - Command line tools: cli.md
   - Customize your Pico Glitcher: customize.md
   - Comparing different glitching modes: glitches.md
+  - HSTX high-resolution glitching: hstx.md
   - Multiplexing with the Pico Glitcher v2 and v3: multiplexing.md
   - Pulse Shaping with the Pico Glitcher v2, v3 and extension board: pulse_shaping.md
   - Schmitt Trigger inputs of the Pico Glitcher v2 and v3: schmitt.md
