@@ -12,6 +12,8 @@ Findus is a Python library to perform fault-injection attacks on embedded device
 This is the documentation of the findus module and all its classes.
 """
 
+from __future__ import annotations
+
 import sqlite3
 import time
 import ast
